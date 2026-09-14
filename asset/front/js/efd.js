@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
             img.src = img.dataset.src;
         });
         // 🎯 CALL REWARD API
-        fetch('/zedville/award-poster-room', {
+        fetch('/award-poster-room', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

@@ -3,625 +3,900 @@
 @section('title', 'Supermarket')
 
 @section('content')
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('asset/front/css/efd.css') }}?ver={{ rand(111, 999) }}">
-    <link rel="stylesheet" href="{{ asset('asset/front/css/surveys.css') }}">
-    <style>
-        :root {
-            --primary-teal: #00A47D;
-            --primary-dark: #016950;
-            --accent-yellow: #FFF5D4;
-            --text-dark: #222222;
-            --text-muted: #5C5C5C;
-            --bg-body: #F7FCF7;
-            --bg-sidebar: #EEF9F5;
-            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            --border-color: #D2DDDB;
-        }
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('asset/front/css/efd.css') }}?ver={{ rand(111, 999) }}">
+        <link rel="stylesheet" href="{{ asset('asset/front/css/surveys.css') }}">
+        <style>
+            :root {
+                --primary-teal: #00A47D;
+                --primary-dark: #016950;
+                --accent-yellow: #FFF5D4;
+                --text-dark: #222222;
+                --text-muted: #5C5C5C;
+                --bg-body: #F7FCF7;
+                --bg-sidebar: #EEF9F5;
+                --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                --border-color: #D2DDDB;
+            }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Open Sans', sans-serif;
-        }
-        header h1, .brand, .section-title { font-family: 'Manrope', sans-serif; }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Open Sans', sans-serif;
+            }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-dark);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-        }
+            header h1,
+            .brand,
+            .section-title {
+                font-family: 'Manrope', sans-serif;
+            }
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 280px;
-            background-color: var(--bg-sidebar);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
-            padding: 24px;
-            flex-shrink: 0;
-            z-index: 100;
-        }
+            body {
+                background-color: var(--bg-body);
+                color: var(--text-dark);
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+            }
 
-        .brand {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+            /* --- SIDEBAR --- */
+            .sidebar {
+                width: 280px;
+                background-color: var(--bg-sidebar);
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                border-right: 1px solid var(--border-color);
+                padding: 24px;
+                flex-shrink: 0;
+                z-index: 100;
+            }
 
-        .brand span.zed { color: #000; }
-        .brand span.ville { color: var(--primary-teal); }
+            .brand {
+                font-size: 24px;
+                font-weight: 700;
+                margin-bottom: 30px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
 
-        .user-widget {
-            background: #EEF9F5;
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 30px;
-            border: 1px solid #B7E3D6;
-        }
+            .brand span.zed {
+                color: #000;
+            }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: #00A47D;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-        }
+            .brand span.ville {
+                color: var(--primary-teal);
+            }
 
-        .user-info h4 { font-size: 14px; font-weight: 600; }
-        .user-info p { font-size: 12px; color: var(--text-muted); }
+            .user-widget {
+                background: #EEF9F5;
+                padding: 12px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 30px;
+                border: 1px solid #B7E3D6;
+            }
 
-        .nav-menu { list-style: none; flex-grow: 1; }
-        .nav-item { margin-bottom: 8px; }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                background: #00A47D;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 20px;
+            }
 
-        .nav-link:hover, .nav-link.active {
-            background-color: #E7FBF3;
-            color: var(--primary-dark);
-            font-weight: 600;
-        }
+            .user-info h4 {
+                font-size: 14px;
+                font-weight: 600;
+            }
 
-        .balance-card {
-            background: var(--accent-yellow);
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: auto;
-            border: 1px solid #FFE48D;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
+            .user-info p {
+                font-size: 12px;
+                color: var(--text-muted);
+            }
 
-        .balance-label { font-size: 12px; color: #8a6d1d; font-weight: 600; margin-bottom: 4px; }
-        .balance-amount { font-size: 24px; font-weight: 800; color: #222222; }
+            .nav-menu {
+                list-style: none;
+                flex-grow: 1;
+            }
 
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 30px 40px;
-            position: relative;
-        }
+            .nav-item {
+                margin-bottom: 8px;
+            }
 
-        header h1 { font-size: 28px; font-weight: 700; color: #222222; }
+            .nav-link {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 16px;
+                border-radius: 8px;
+                text-decoration: none;
+                color: var(--text-muted);
+                font-weight: 500;
+                font-size: 14px;
+                transition: all 0.2s;
+            }
 
-        .app-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            align-items: start;
-        }
+            .nav-link:hover,
+            .nav-link.active {
+                background-color: #E7FBF3;
+                color: var(--primary-dark);
+                font-weight: 600;
+            }
 
-        /* --- STORE SECTION --- */
-        .section-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-color);
-        }
+            .balance-card {
+                background: var(--accent-yellow);
+                padding: 20px;
+                border-radius: 12px;
+                margin-top: auto;
+                border: 1px solid #FFE48D;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            }
 
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+            .balance-label {
+                font-size: 12px;
+                color: #8a6d1d;
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
 
-        .section-title { font-size: 18px; font-weight: 700; color: #222222; }
+            .balance-amount {
+                font-size: 24px;
+                font-weight: 800;
+                color: #222222;
+            }
 
-        /* View Toggles */
-        .view-controls { display: flex; gap: 5px; background: #EEF9F5; padding: 4px; border-radius: 30px; border: 1px solid #D2DDDB; }
+            /* --- MAIN CONTENT --- */
+            .main-content {
+                flex-grow: 1;
+                overflow-y: auto;
+                padding: 30px 40px;
+                position: relative;
+            }
 
-        .view-btn {
-            border: none;
-            background: transparent;
-            padding: 6px 14px;
-            cursor: pointer;
-            border-radius: 30px;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 600;
-        }
+            header h1 {
+                font-size: 28px;
+                font-weight: 700;
+                color: #222222;
+            }
 
-        .view-btn.active { background: #00A47D; color: #fff; box-shadow: none; font-weight: 600; }
+            .app-grid {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 30px;
+                align-items: start;
+            }
 
-        /* Items Container - Handles Layout */
-        .items-container {
-            display: grid;
-            gap: 15px;
-        }
+            /* --- STORE SECTION --- */
+            .section-card {
+                background: white;
+                border-radius: 12px;
+                padding: 25px;
+                box-shadow: var(--card-shadow);
+                border: 1px solid var(--border-color);
+            }
 
-        /* GRID VIEW Styles */
-        .items-container.grid-view {
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        }
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid var(--border-color);
+            }
 
-        .items-container.grid-view .item-card {
-            flex-direction: column;
-            text-align: center;
-            padding: 20px;
-        }
+            .section-title {
+                font-size: 18px;
+                font-weight: 700;
+                color: #222222;
+            }
 
-        .items-container.grid-view .item-emoji { font-size: 48px; margin-bottom: 10px; }
-        .items-container.grid-view .item-name { margin-bottom: 5px; }
+            /* View Toggles */
+            .view-controls {
+                display: flex;
+                gap: 5px;
+                background: #EEF9F5;
+                padding: 4px;
+                border-radius: 30px;
+                border: 1px solid #D2DDDB;
+            }
 
-        /* LIST VIEW Styles (Compact) */
-        .items-container.list-view {
-            grid-template-columns: 1fr;
-        }
+            .view-btn {
+                border: none;
+                background: transparent;
+                padding: 6px 14px;
+                cursor: pointer;
+                border-radius: 30px;
+                color: var(--text-muted);
+                font-size: 14px;
+                font-weight: 600;
+            }
 
-        .items-container.list-view .item-card {
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px; /* Reduced padding for compact height */
-            height: 65px; /* Fixed compact height */
-        }
+            .view-btn.active {
+                background: #00A47D;
+                color: #fff;
+                box-shadow: none;
+                font-weight: 600;
+            }
 
-        .items-container.list-view .item-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+            /* Items Container - Handles Layout */
+            .items-container {
+                display: grid;
+                gap: 15px;
+            }
 
-        .items-container.list-view .item-emoji { font-size: 24px; margin-bottom: 0; }
-        .items-container.list-view .item-name { margin-bottom: 0; font-size: 15px; }
-        .items-container.list-view .item-price { margin-right: 15px; }
+            /* GRID VIEW Styles */
+            .items-container.grid-view {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
 
-        .item-card {
-            border: 1px solid #D2DDDB;
-            border-radius: 12px;
-            background: #fff;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            display: flex;
-        }
+            .items-container.grid-view .item-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
 
-        .item-card:hover { border-color: var(--primary-teal); background: #EEF9F5; box-shadow: 0 2px 8px rgba(0,164,125,.12); }
+            .items-container.grid-view .item-emoji {
+                font-size: 48px;
+                margin-bottom: 10px;
+            }
 
-        .item-name { font-weight: 600; color: #222222; }
-        .item-price {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #EEF9F5;
-            border: 1px solid #B7E3D6;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 13px;
-            color: #016950;
-        }
+            .items-container.grid-view .item-name {
+                margin-bottom: 5px;
+            }
 
-        .item-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+            /* LIST VIEW Styles (Compact) */
+            .items-container.list-view {
+                grid-template-columns: 1fr;
+            }
 
-        .btn-mini {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
+            .items-container.list-view .item-card {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 20px;
+                /* Reduced padding for compact height */
+                height: 65px;
+                /* Fixed compact height */
+            }
 
-        .btn-minus { background: #fee2e2; color: #ef4444; }
-        .btn-plus { background: #d1fae5; color: #10b981; }
-        .qty-badge { font-weight: 700; font-size: 14px; min-width: 15px; text-align: center; }
+            .items-container.list-view .item-left {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
 
-        /* --- CART SECTION --- */
-        .tracker-section { position: sticky; top: 20px; }
-        
-        .cart-list { min-height: 150px; margin-bottom: 20px; }
-        
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #D2DDDB; border-radius: 10px; margin-bottom: 8px; background: #F7FCF7; }
+            .items-container.list-view .item-emoji {
+                font-size: 24px;
+                margin-bottom: 0;
+            }
 
-        .cart-item-info { display: flex; align-items: center; gap: 10px; }
-        .cart-item-emoji { font-size: 18px; }
-        .cart-item-text { display: flex; flex-direction: column; }
-        .cart-item-name { font-weight: 600; font-size: 13px; }
-        .cart-item-sub { font-size: 11px; color: var(--text-muted); }
-        
-        .cart-item-actions { display: flex; align-items: center; gap: 10px; }
-        .cart-item-price { font-weight: 700; font-size: 14px; color: var(--primary-teal); }
-        
-        .btn-remove-cart {
-            background: none;
-            border: none;
-            color: #fab1a0;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 2px;
-            line-height: 1;
-        }
-        .btn-remove-cart:hover { color: #d63031; }
+            .items-container.list-view .item-name {
+                margin-bottom: 0;
+                font-size: 15px;
+            }
 
-        .empty-cart {
-            text-align: center; color: #b2bec3; font-style: italic; padding: 30px 0;
-            border: 2px dashed #e2e8f0; border-radius: 12px;
-        }
+            .items-container.list-view .item-price {
+                margin-right: 15px;
+            }
 
-        .budget-row.total {
-            border-top: 2px dashed #e2e8f0; padding-top: 15px; margin-top: 15px;
-            font-weight: 700; font-size: 18px; color: #2d3436;
-            display: flex; justify-content: space-between;
-        }
+            .item-card {
+                border: 1px solid #D2DDDB;
+                border-radius: 12px;
+                background: #fff;
+                transition: all 0.2s ease;
+                cursor: pointer;
+                display: flex;
+            }
 
-        /* --- CHECKOUT FORM --- */
-        .checkout-box { margin-top: 20px; background: #EEF9F5; padding: 20px; border-radius: 12px; border: 1px solid #B7E3D6; }
+            .item-card:hover {
+                border-color: var(--primary-teal);
+                background: #EEF9F5;
+                box-shadow: 0 2px 8px rgba(0, 164, 125, .12);
+            }
 
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: #546e7a; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .form-control { width: 100%; padding: 10px 12px; border: 1px solid #D2DDDB; border-radius: 8px; font-size: 13px; transition: 0.15s; background:#fff; }
-        .form-control:focus { outline: none; border-color: var(--primary-teal); background: white; box-shadow: 0 0 0 3px rgba(0,164,125,.15); }
+            .item-name {
+                font-weight: 600;
+                color: #222222;
+            }
 
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .item-price {
+                display: inline-block;
+                padding: 4px 12px;
+                background: #EEF9F5;
+                border: 1px solid #B7E3D6;
+                border-radius: 20px;
+                font-weight: 700;
+                font-size: 13px;
+                color: #016950;
+            }
 
-        .btn-pay { width: 100%; padding: 14px; background: var(--primary-teal); color: white; border: 1px solid var(--primary-dark); border-radius: 30px; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 3px 0 var(--primary-dark); transition: 0.2s; margin-top: 10px; }
-        .btn-pay:hover { background: var(--primary-dark); transform: translateY(3px); box-shadow: 0 1px 0 var(--primary-dark); }
-        .btn-pay:disabled { background: #b2bec3; cursor: not-allowed; transform: none; box-shadow: none; }
+            .item-controls {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
 
-        /* OVERLAY */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
-            z-index: 1000; display: none; justify-content: center; align-items: center;
-        }
-        .overlay.show { display: flex; animation: fadeIn 0.3s; }
-        .success-modal {
-            background: white; padding: 40px; border-radius: 20px; text-align: center;
-            max-width: 450px; width: 90%;
-            border-top: 8px solid var(--primary-teal);
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            .btn-mini {
+                width: 28px;
+                height: 28px;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: 0.2s;
+            }
 
-        @media (max-width: 900px) {
-            .app-grid { grid-template-columns: 1fr; }
-            .sidebar { display: none; } /* Simplified for mobile demo */
-        }
-         .survey-info-box {
-    position: relative;
-    z-index: 1000; /* higher than .store */
-    pointer-events: auto;
-}
-/* Survey Modal Styles */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
+            .btn-minus {
+                background: #fee2e2;
+                color: #ef4444;
+            }
 
-    .modal-overlay.show {
-        display: flex;
-    }
+            .btn-plus {
+                background: #d1fae5;
+                color: #10b981;
+            }
 
-    .modal-content-wrapper {
-        background: #fff;
-        border-radius: 12px;
-        width: 100%;
-        max-width: 800px;
-        max-height: 90vh;
-        overflow-y: auto;
-        position: relative;
-    }
+            .qty-badge {
+                font-weight: 700;
+                font-size: 14px;
+                min-width: 15px;
+                text-align: center;
+            }
 
-    .modal-close-btn {
-        position: sticky;
-        top: 10px;
-        right: 10px;
-        float: right;
-        z-index: 10;
-        background: white;
-        border: none;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 50%;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
+            /* --- CART SECTION --- */
+            .tracker-section {
+                position: sticky;
+                top: 20px;
+            }
 
-    .btn {
-        padding: 12px 30px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 16px;
-        text-decoration: none;
-        display: inline-block;
-        margin: 5px;
-    }
+            .cart-list {
+                min-height: 150px;
+                margin-bottom: 20px;
+            }
 
-    .btn-primary {
-        background: #6b7280;
-        color: #fff;
-    }
+            .cart-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 12px;
+                border: 1px solid #D2DDDB;
+                border-radius: 10px;
+                margin-bottom: 8px;
+                background: #F7FCF7;
+            }
 
-    .btn-primary:hover {
-        background: #4b5563;
-    }
+            .cart-item-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
 
-    .btn-secondary {
-        background: #e5e7eb;
-        color: #333;
-    }
+            .cart-item-emoji {
+                font-size: 18px;
+            }
 
-    .btn-secondary:hover {
-        background: #d1d5db;
-    }
+            .cart-item-text {
+                display: flex;
+                flex-direction: column;
+            }
 
-    .survey-placeholder {
-        padding: 40px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        max-width: 500px;
-        width: 90%;
-        margin: 80px auto;
-        background: rgba(255, 255, 255, 0.95);
-    }
+            .cart-item-name {
+                font-weight: 600;
+                font-size: 13px;
+            }
 
-    .survey-placeholder h3 {
-        margin: 0 0 15px;
-        font-size: 22px;
-        color: #333;
-    }
+            .cart-item-sub {
+                font-size: 11px;
+                color: var(--text-muted);
+            }
 
-    .survey-placeholder p {
-        margin: 0 0 20px;
-        color: #666;
-        font-size: 16px;
-    }
+            .cart-item-actions {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
 
-    .category-overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+            .cart-item-price {
+                font-weight: 700;
+                font-size: 14px;
+                color: var(--primary-teal);
+            }
 
-    .survey-info-box {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-}
+            .btn-remove-cart {
+                background: none;
+                border: none;
+                color: #fab1a0;
+                font-size: 18px;
+                cursor: pointer;
+                padding: 2px;
+                line-height: 1;
+            }
 
-.survey-info-box h2 {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
+            .btn-remove-cart:hover {
+                color: #d63031;
+            }
 
-.survey-info-box p {
-    color: #555;
-    font-size: 15px;
-    margin-bottom: 15px;
-}
-.centered-box {
-    max-width: 400px;       /* smaller width */
-    margin: 60px auto 0;    /* top margin + center */
-    text-align: center;     /* center align text */
-    padding: 20px;
-    border-radius: 10px;
-    background: #f8f9fa;    /* light background */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+            .empty-cart {
+                text-align: center;
+                color: #b2bec3;
+                font-style: italic;
+                padding: 30px 0;
+                border: 2px dashed #e2e8f0;
+                border-radius: 12px;
+            }
 
-.centered-box h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
+            .budget-row.total {
+                border-top: 2px dashed #e2e8f0;
+                padding-top: 15px;
+                margin-top: 15px;
+                font-weight: 700;
+                font-size: 18px;
+                color: #2d3436;
+                display: flex;
+                justify-content: space-between;
+            }
 
-.centered-box p {
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-    </style>
-  @endpush
-  <div class="flex items-start justify-between pb-6">
-    <!-- Left text -->
-     @php
-    $titles = [
-            'omnivore'     => 'Omnivore',
-            'vegetarian'     => 'Vegetarian',
-            'pescatarian'     => 'Pescatarian',
-            'vegan'     => 'Vegan',
-        ];
-    @endphp
+            /* --- CHECKOUT FORM --- */
+            .checkout-box {
+                margin-top: 20px;
+                background: #EEF9F5;
+                padding: 20px;
+                border-radius: 12px;
+                border: 1px solid #B7E3D6;
+            }
 
-    <div>
-        <!-- <h1 class="text-xl font-bold whitespace-nowrap">The Basics Co.</h1> -->
-         <h1 class="text-xl font-bold whitespace-nowrap">
-            {{ $titles[$type] ?? 'Supermarket' }}
-        </h1>
-        <p class="text-gray-500 mb-5">Secure Student Supermarket</p>
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .form-group label {
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                margin-bottom: 4px;
+                color: #546e7a;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #D2DDDB;
+                border-radius: 8px;
+                font-size: 13px;
+                transition: 0.15s;
+                background: #fff;
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--primary-teal);
+                background: white;
+                box-shadow: 0 0 0 3px rgba(0, 164, 125, .15);
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .btn-pay {
+                width: 100%;
+                padding: 14px;
+                background: var(--primary-teal);
+                color: white;
+                border: 1px solid var(--primary-dark);
+                border-radius: 30px;
+                font-weight: 700;
+                font-size: 15px;
+                cursor: pointer;
+                box-shadow: 0 3px 0 var(--primary-dark);
+                transition: 0.2s;
+                margin-top: 10px;
+            }
+
+            .btn-pay:hover {
+                background: var(--primary-dark);
+                transform: translateY(3px);
+                box-shadow: 0 1px 0 var(--primary-dark);
+            }
+
+            .btn-pay:disabled {
+                background: #b2bec3;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            /* OVERLAY */
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(5px);
+                z-index: 1000;
+                display: none;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .overlay.show {
+                display: flex;
+                animation: fadeIn 0.3s;
+            }
+
+            .success-modal {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                text-align: center;
+                max-width: 450px;
+                width: 90%;
+                border-top: 8px solid var(--primary-teal);
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @media (max-width: 900px) {
+                .app-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .sidebar {
+                    display: none;
+                }
+
+                /* Simplified for mobile demo */
+            }
+
+            .survey-info-box {
+                position: relative;
+                z-index: 1000;
+                /* higher than .store */
+                pointer-events: auto;
+            }
+
+            /* Survey Modal Styles */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+
+            .modal-overlay.show {
+                display: flex;
+            }
+
+            .modal-content-wrapper {
+                background: #fff;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 800px;
+                max-height: 90vh;
+                overflow-y: auto;
+                position: relative;
+            }
+
+            .modal-close-btn {
+                position: sticky;
+                top: 10px;
+                right: 10px;
+                float: right;
+                z-index: 10;
+                background: white;
+                border: none;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 50%;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn {
+                padding: 12px 30px;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 16px;
+                text-decoration: none;
+                display: inline-block;
+                margin: 5px;
+            }
+
+            .btn-primary {
+                background: #6b7280;
+                color: #fff;
+            }
+
+            .btn-primary:hover {
+                background: #4b5563;
+            }
+
+            .btn-secondary {
+                background: #e5e7eb;
+                color: #333;
+            }
+
+            .btn-secondary:hover {
+                background: #d1d5db;
+            }
+
+            .survey-placeholder {
+                padding: 40px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                max-width: 500px;
+                width: 90%;
+                margin: 80px auto;
+                background: rgba(255, 255, 255, 0.95);
+            }
+
+            .survey-placeholder h3 {
+                margin: 0 0 15px;
+                font-size: 22px;
+                color: #333;
+            }
+
+            .survey-placeholder p {
+                margin: 0 0 20px;
+                color: #666;
+                font-size: 16px;
+            }
+
+            .category-overlay {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .survey-info-box {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 15px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            }
+
+            .survey-info-box h2 {
+                font-size: 22px;
+                font-weight: bold;
+                margin-bottom: 8px;
+            }
+
+            .survey-info-box p {
+                color: #555;
+                font-size: 15px;
+                margin-bottom: 15px;
+            }
+
+            .centered-box {
+                max-width: 400px;
+                /* smaller width */
+                margin: 60px auto 0;
+                /* top margin + center */
+                text-align: center;
+                /* center align text */
+                padding: 20px;
+                border-radius: 10px;
+                background: #f8f9fa;
+                /* light background */
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .centered-box h3 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .centered-box p {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+        </style>
+    @endpush
+    <div class="flex items-start justify-between pb-6">
+        <!-- Left text -->
+        @php
+            $titles = [
+                'omnivore' => 'Omnivore',
+                'vegetarian' => 'Vegetarian',
+                'pescatarian' => 'Pescatarian',
+                'vegan' => 'Vegan',
+            ];
+        @endphp
+
+        <div>
+            <!-- <h1 class="text-xl font-bold whitespace-nowrap">The Basics Co.</h1> -->
+            <h1 class="text-xl font-bold whitespace-nowrap">
+                {{ $titles[$type] ?? 'Supermarket' }}
+            </h1>
+            <p class="text-gray-500 mb-5">Secure Student Supermarket</p>
+        </div>
+
+        <!-- Right Back button -->
+        <button onclick="history.back()" class="zvBackBtn px-4 py-2 text-sm font-semibold rounded">
+            ← Back
+        </button>
     </div>
+    <div class="grid grid-cols-1 gap-5 " x-data="{viewPin: false  }">
+        <div class="themeTabspills">
+            <div class="w-full">
 
-    <!-- Right Back button -->
-    <button
-        onclick="history.back()"
-        class="zvBackBtn px-4 py-2 text-sm font-semibold rounded">
-        ← Back
-    </button>
-</div>
-<div class="grid grid-cols-1 gap-5 " x-data="{viewPin: false  }">
-    <div class="themeTabspills">
-        <div class="w-full">
-            
-            <!-- Tabs Header -->
-            <!-- Tabs Content -->
-            <div class="tailCard   w-full  rounded-lg" x-data="{ changeImageModal: false, moodMeater: false }">
-                <div class="overlay" id="overlay">
-                    <div class="success-modal">
-                        <h1 style="font-size: 50px; margin-bottom: 10px;">✔</h1>
-                        <h2 style="color: var(--primary-dark); margin-bottom: 10px;">Payment Successful!</h2>
-                        <p id="deliveryMessage" style="color: #636e72; margin-bottom: 25px; line-height: 1.6;">Transaction complete.</p>
-                        <button class="btn-pay" onclick="closeSuccessMessage()" style="background: var(--text-dark);">Close</button>
-                    </div>
-                </div>
-                <div class="sidebar" style="display: none;">
-                    <div class="brand"><span class="zed">Zed</span><span class="ville">Ville</span></div>
-                    <div class="user-widget">
-                        <div class="user-avatar">DG</div>
-                        <div class="user-info"><h4>Daniel G.</h4><p>Grade 8 Student</p></div>
-                    </div>
-                    <ul class="nav-menu">
-                        <li class="nav-item"><a href="#" class="nav-link"><span class="nav-icon">🏠</span> Home</a></li>
-                        <li class="nav-item"><a href="#" class="nav-link active"><span class="nav-icon">🛍️</span> The Basics Co.</a></li>
-                        <li class="nav-item"><a href="#" class="nav-link"><span class="nav-icon">📊</span> Bank Account</a></li>
-                    </ul>
-                    <div class="balance-card">
-                        <div class="balance-label">ACCOUNT BALANCE</div>
-                        <div class="balance-amount"><span id="sidebarBalance">{{ number_format($lastBalance, 2) }}</span> ZED</div>
-                    </div>
-                </div>
-                <div >
-                    <div class="app-grid">
-                        <div class="store-section section-card">
-                            <div class="section-header">
-                                <span class="section-title">Products</span>
-                                
-                                <div class="view-controls">
-                                    <button class="view-btn active" id="btnList" onclick="switchView('list')">☰ List</button>
-                                    <button class="view-btn" id="btnGrid" onclick="switchView('grid')">⸬ Grid</button>
-                                </div>
-                            </div>
-                            
-                            <div class="items-container list-view" id="itemsContainer">
-                                </div>
-                        </div>
-
-                        <div class="tracker-section section-card">
-                            <div class="section-header">
-                                <span class="section-title">Your Cart</span>
-                                <span id="itemCounter" style="background: #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; display:none;">0/10</span>
-                            </div>
-
-                            <div class="cart-list" id="selectedItemsList">
-                                <div class="empty-cart">Cart is empty</div>
-                            </div>
-
-                            <div class="budget-row total">
-                                <span>Total</span>
-                                <span id="checkoutTotal">0 Z</span>
-                            </div>
-
-                            <div class="checkout-box">
-                                <h4 style="margin-bottom: 15px; color: var(--primary-dark); font-weight:700;">Secure Checkout</h4>
-                                
-                                <div class="form-group">
-                                    <label>Shipping Method</label>
-                                    <select id="shippingType" class="form-control" onchange="updateShippingAddress()">
-                                        <option value="self">My Own Address (Default)</option>
-                                        <option value="discretionary">Current Discretionary “Month”</option>
-                                        <option value="classmate">Gift to Classmate</option>
-                                        <option value="npo">Donate to NPO</option>
-                                        
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label id="addressLabel">Delivery Address</label>
-                                    <div id="addressDisplay" style="font-size: 13px; color: #555; padding: 10px; background: #fff; border-radius: 8px; border: 1px dashed #ccc;">
-                                        123 Main Dorm, Room 456
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Student Name</label>
-                                    <input type="text" class="form-control" placeholder="Daniel Goldstein" value="{{$user->name}}">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Card Number</label>
-                                    <input type="text" class="form-control" placeholder="xxxx xxxx xxxx xxxx" value="{{ trim(chunk_split($bankAccount->card_number, 4, ' ')) }}">
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Expiry</label>
-                                        <input type="text" class="form-control" placeholder="MM/YY" value="{{ \Carbon\Carbon::parse($bankAccount->card_valid)->format('m/y') }}">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>CVV</label>
-                                        <input type="text" class="form-control" placeholder="123" value="{{ $bankAccount->card_cvv }}">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Enter 4-Digit PIN</label>
-                                    <input type="password" id="pinInput" class="form-control" maxlength="4" placeholder="• • • •">
-                                </div>
-                                <!-- Forgot PIN Link -->
-                                <div class="text-center pt-1">
-                                    <p class="text-sm text-gray-500">
-                                        Forgot your PIN? <!--href="#my-accounts" id="forgotPinLink" -->
-                                        <a href="javascript:void(0)"  @click="viewPin = true" class="text-warm-500 hover:text-warm-600 font-semibold inline-flex items-center gap-1 hover:underline transition-colors">
-                                            Click here to view your PIN
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                            </svg>
-                                        </a>
-                                    </p>
-                                </div>
-                                <button id="payButton" class="btn-pay" onclick="processPayment()" disabled>PAY NOW</button>
-                            </div>
+                <!-- Tabs Header -->
+                <!-- Tabs Content -->
+                <div class="tailCard   w-full  rounded-lg" x-data="{ changeImageModal: false, moodMeater: false }">
+                    <div class="overlay" id="overlay">
+                        <div class="success-modal">
+                            <h1 style="font-size: 50px; margin-bottom: 10px;">✔</h1>
+                            <h2 style="color: var(--primary-dark); margin-bottom: 10px;">Payment Successful!</h2>
+                            <p id="deliveryMessage" style="color: #636e72; margin-bottom: 25px; line-height: 1.6;">
+                                Transaction complete.</p>
+                            <button class="btn-pay" onclick="closeSuccessMessage()"
+                                style="background: var(--text-dark);">Close</button>
                         </div>
                     </div>
+                    <div class="sidebar" style="display: none;">
+                        <div class="brand"><span class="zed">Zed</span><span class="ville">Ville</span></div>
+                        <div class="user-widget">
+                            <div class="user-avatar">DG</div>
+                            <div class="user-info">
+                                <h4>Daniel G.</h4>
+                                <p>Grade 8 Student</p>
+                            </div>
+                        </div>
+                        <ul class="nav-menu">
+                            <li class="nav-item"><a href="#" class="nav-link"><span class="nav-icon">🏠</span> Home</a></li>
+                            <li class="nav-item"><a href="#" class="nav-link active"><span class="nav-icon">🛍️</span> The
+                                    Basics Co.</a></li>
+                            <li class="nav-item"><a href="#" class="nav-link"><span class="nav-icon">📊</span> Bank
+                                    Account</a></li>
+                        </ul>
+                        <div class="balance-card">
+                            <div class="balance-label">ACCOUNT BALANCE</div>
+                            <div class="balance-amount"><span
+                                    id="sidebarBalance">{{ number_format($lastBalance, 2) }}</span> ZED</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="app-grid">
+                            <div class="store-section section-card">
+                                <div class="section-header">
+                                    <span class="section-title">Products</span>
+
+                                    <div class="view-controls">
+                                        <button class="view-btn active" id="btnList" onclick="switchView('list')">☰
+                                            List</button>
+                                        <button class="view-btn" id="btnGrid" onclick="switchView('grid')">⸬ Grid</button>
+                                    </div>
+                                </div>
+
+                                <div class="items-container list-view" id="itemsContainer">
+                                </div>
+                            </div>
+
+                            <div class="tracker-section section-card">
+                                <div class="section-header">
+                                    <span class="section-title">Your Cart</span>
+                                    <span id="itemCounter"
+                                        style="background: #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; display:none;">0/10</span>
+                                </div>
+
+                                <div class="cart-list" id="selectedItemsList">
+                                    <div class="empty-cart">Cart is empty</div>
+                                </div>
+
+                                <div class="budget-row total">
+                                    <span>Total</span>
+                                    <span id="checkoutTotal">0 Z</span>
+                                </div>
+
+                                <div class="checkout-box">
+                                    <h4 style="margin-bottom: 15px; color: var(--primary-dark); font-weight:700;">Secure
+                                        Checkout</h4>
+
+                                    <div class="form-group">
+                                        <label>Shipping Method</label>
+                                        <select id="shippingType" class="form-control" onchange="updateShippingAddress()">
+                                            <option value="self">My Own Address (Default)</option>
+                                            <option value="discretionary">Current Discretionary “Month”</option>
+                                            <option value="classmate">Gift to Classmate</option>
+                                            <option value="npo">Donate to NPO</option>
+
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label id="addressLabel">Delivery Address</label>
+                                        <div id="addressDisplay"
+                                            style="font-size: 13px; color: #555; padding: 10px; background: #fff; border-radius: 8px; border: 1px dashed #ccc;">
+                                            123 Main Dorm, Room 456
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Student Name</label>
+                                        <input type="text" class="form-control" placeholder="Daniel Goldstein"
+                                            value="{{$user->name}}">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Card Number</label>
+                                        <input type="text" class="form-control" placeholder="xxxx xxxx xxxx xxxx"
+                                            value="{{ trim(chunk_split($bankAccount->card_number, 4, ' ')) }}">
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Expiry</label>
+                                            <input type="text" class="form-control" placeholder="MM/YY"
+                                                value="{{ \Carbon\Carbon::parse($bankAccount->card_valid)->format('m/y') }}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CVV</label>
+                                            <input type="text" class="form-control" placeholder="123"
+                                                value="{{ $bankAccount->card_cvv }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Enter 4-Digit PIN</label>
+                                        <input type="password" id="pinInput" class="form-control" maxlength="4"
+                                            placeholder="• • • •">
+                                    </div>
+                                    <!-- Forgot PIN Link -->
+                                    <div class="text-center pt-1">
+                                        <p class="text-sm text-gray-500">
+                                            Forgot your PIN? <!--href="#my-accounts" id="forgotPinLink" -->
+                                            <a href="javascript:void(0)" @click="viewPin = true"
+                                                class="text-warm-500 hover:text-warm-600 font-semibold inline-flex items-center gap-1 hover:underline transition-colors">
+                                                Click here to view your PIN
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                                    </path>
+                                                </svg>
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <button id="payButton" class="btn-pay" onclick="processPayment()" disabled>PAY
+                                        NOW</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="survey-info-box centered-box">
+                <div class="survey-info-box centered-box">
                     <h3>Monthly Groceries</h3>
                     <p>
                         <strong>11 Products Compulsory.</strong><br>
@@ -633,132 +908,137 @@
                         View Survey Result
                     </button>
                 </div>
-        </div>
-    </div>
-    <!-- For Model -->
-  <!-- View Pin Modal -->
-<div
-    x-show="viewPin"
-    x-transition.opacity
-    class="fixed w-full h-full z-100 overflow-y-auto top-0 left-0 overflow-x-hidden themeModal"
-    @keydown.escape.window="viewPin = false" style="display: none;">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-black bg-opacity-50" @click="viewPin = false"></div>
-    <!-- Modal Box -->
-    <div class="modalDilog max-w-[450px]">
-        <div class="modalContent bg-white py-12 px-6 rounded-lg z-100 border border-color-[#D2DDDB]">
-            <div class="flex justify-between items-center mb-4">
-                <button @click="viewPin = false" class="absolute top-4 right-4 text-gray-500 hover:opacity-80 focus:outline-none transition">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="9" fill="#E7FBF3" />
-                        <path d="M16 8L8 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M8 8L16 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
-            </div>
-            <div class="bodyContent">
-                <div class="flex items-center space-x-3 mb-4">
-                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye text-green-600">
-                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900">Your PIN</h3>
-                        <p class="text-sm text-gray-600">Debit Card PIN</p>
-                    </div>
-                </div>
-                <div class="bg-green-50 p-3 rounded border border-green-200">
-                    <div class="text-xl text-center text-green-800 font-bold mb-3">{{$bankAccount->card_pin}}</div>
-                    <div class="text-md text-center text-green-800 font-semibold mb-2">📌 Important PIN Security Information:</div>
-                    <ul class="text-left space-y-1">
-                        <li>• Never share your PIN with anyone</li>
-                        <li>• Use your PIN for ATM withdrawals and card purchases</li>
-                        <li>• Cover the keypad when entering your PIN</li>
-                        <li>• Change your PIN regularly for security</li>
-                        <li>• Contact us immediately if compromised</li>
-                    </ul>
-                </div>
-                <div class="text-center mt-8">
-                    <button @click="viewPin = false" class="themeBtn w-full">Close</button>
-                </div>
             </div>
         </div>
+        <!-- For Model -->
+        <!-- View Pin Modal -->
+        <div x-show="viewPin" x-transition.opacity
+            class="fixed w-full h-full z-100 overflow-y-auto top-0 left-0 overflow-x-hidden themeModal"
+            @keydown.escape.window="viewPin = false" style="display: none;">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-black bg-opacity-50" @click="viewPin = false"></div>
+            <!-- Modal Box -->
+            <div class="modalDilog max-w-[450px]">
+                <div class="modalContent bg-white py-12 px-6 rounded-lg z-100 border border-color-[#D2DDDB]">
+                    <div class="flex justify-between items-center mb-4">
+                        <button @click="viewPin = false"
+                            class="absolute top-4 right-4 text-gray-500 hover:opacity-80 focus:outline-none transition">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="9" fill="#E7FBF3" />
+                                <path d="M16 8L8 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M8 8L16 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="bodyContent">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-eye text-green-600">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Your PIN</h3>
+                                <p class="text-sm text-gray-600">Debit Card PIN</p>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded border border-green-200">
+                            <div class="text-xl text-center text-green-800 font-bold mb-3">{{$bankAccount->card_pin}}</div>
+                            <div class="text-md text-center text-green-800 font-semibold mb-2">📌 Important PIN Security
+                                Information:</div>
+                            <ul class="text-left space-y-1">
+                                <li>• Never share your PIN with anyone</li>
+                                <li>• Use your PIN for ATM withdrawals and card purchases</li>
+                                <li>• Cover the keypad when entering your PIN</li>
+                                <li>• Change your PIN regularly for security</li>
+                                <li>• Contact us immediately if compromised</li>
+                            </ul>
+                        </div>
+                        <div class="text-center mt-8">
+                            <button @click="viewPin = false" class="themeBtn w-full">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-</div>
-<!-- Survey Result Modal -->
-<div class="modal-overlay" id="resultModal">
-    <div class="modal-content-wrapper">
-        <button class="modal-close-btn" onclick="closeResultModal()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        @include('profile.partials.surveys-results')
+    <!-- Survey Result Modal -->
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal-content-wrapper">
+            <button class="modal-close-btn" onclick="closeResultModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+            @include('profile.partials.surveys-results')
+        </div>
     </div>
-</div>
-<select id="classmateSelect" class="form-control" style="display:none;">
-    <option value="">Select Classmate</option>
-    @foreach($classmates as $classmate)
-        <option value="{{ $classmate->id }}">
-            {{ $classmate->name }}
-        </option>
-    @endforeach
-</select>
-@php
-    $storeItems = [];
+    <select id="classmateSelect" class="form-control" style="display:none;">
+        <option value="">Select Classmate</option>
+        @foreach($classmates as $classmate)
+            <option value="{{ $classmate->id }}">
+                {{ $classmate->name }}
+            </option>
+        @endforeach
+    </select>
+    @php
+        $storeItems = [];
 
-    foreach ($products as $p) {
-        $storeItems[] = [
-            'id' => $p->id,
-            'name' => $p->product_name,
-            'price' => $p->price,
-            'image' => url('public/uploads/supermarket/' . $p->image),
-            'quantity' => 0,
-            'type' => 'debit',           // extra data
-            'category' => $p->category,   // extra data
-        ];
-    }
-@endphp
+        foreach ($products as $p) {
+            $storeItems[] = [
+                'id' => $p->id,
+                'name' => $p->product_name,
+                'price' => $p->price,
+                'image' => url('public/uploads/supermarket/' . $p->image),
+                'quantity' => 0,
+                'type' => 'debit',           // extra data
+                'category' => $p->category,   // extra data
+            ];
+        }
+    @endphp
 @endsection
 @push('scripts')
-<script>
-    const GROCERIES_FROM_SURVEY = @json($groceries);
-    const STORE_TYPE = 'supermarket';
-    function loadGroceriesFromSurvey(groceries) {
-    if (!groceries || groceries.length === 0) return;
+    <script>
+        const GROCERIES_FROM_SURVEY = @json($groceries);
+        const STORE_TYPE = 'supermarket';
+        function loadGroceriesFromSurvey(groceries) {
+            if (!groceries || groceries.length === 0) return;
 
-    cart = [];
+            cart = [];
 
-    groceries.forEach(g => {
-        const id = parseInt(g.id);
+            groceries.forEach(g => {
+                const id = parseInt(g.id);
 
-        // match with storeItems
-        const storeItem = storeItems.find(i => i.id === id);
-        if (!storeItem) return;
+                // match with storeItems
+                const storeItem = storeItems.find(i => i.id === id);
+                if (!storeItem) return;
 
-        // sync quantity in store
-        storeItem.quantity = g.quantity;
+                // sync quantity in store
+                storeItem.quantity = g.quantity;
 
-        cart.push({
-            id: storeItem.id,
-            name: storeItem.name,
-            price: parseFloat(g.unit_price),
-            quantity: g.quantity,
-            image: storeItem.image,
-            type: storeItem.type,
-            category: storeItem.category
-        });
-    });
+                cart.push({
+                    id: storeItem.id,
+                    name: storeItem.name,
+                    price: parseFloat(g.unit_price),
+                    quantity: g.quantity,
+                    image: storeItem.image,
+                    type: storeItem.type,
+                    category: storeItem.category
+                });
+            });
 
-    updateDisplay();
-    renderItems();
-}
-function formatZed(amount) {
-    return Number(amount).toFixed(2);
-}
+            updateDisplay();
+            renderItems();
+        }
+        function formatZed(amount) {
+            return Number(amount).toFixed(2);
+        }
 
         const INITIAL_BALANCE = {{ $lastBalance }};
         //const INITIAL_BALANCE = 4250;
@@ -781,22 +1061,22 @@ function formatZed(amount) {
 
         //Save Cart
         function saveCartToServer() {
-                fetch('/zedville/cart/save', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ cart, store_type: STORE_TYPE })
-                });
-            }
+            fetch('/cart/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ cart, store_type: STORE_TYPE })
+            });
+        }
 
         //Save Cart
         // --- VIEW TOGGLE LOGIC ---
         function switchView(view) {
             currentView = view;
             const container = document.getElementById('itemsContainer');
-            
+
             // Toggle container classes
             if (view === 'grid') {
                 container.classList.remove('list-view');
@@ -815,44 +1095,44 @@ function formatZed(amount) {
         function renderItems() {
             const container = document.getElementById('itemsContainer');
             container.innerHTML = '';
-            
+
             storeItems.forEach(item => {
                 const itemCard = document.createElement('div');
                 itemCard.className = 'item-card';
-                
+
                 // Different HTML structure based on view to optimize density
                 if (currentView === 'list') {
                     // Feature 1: Compact List View <span class="item-emoji">${item.emoji}</span>
                     itemCard.innerHTML = `
-                        <div class="item-left">
+                            <div class="item-left">
+                                <img src="${item.image}"
+                                    alt="${item.name}"
+                                    style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
+                                <span class="item-name">${item.name}</span>
+                            </div>
+                            <div class="item-right" style="display:flex; align-items:center;">
+                                <span class="item-price">${item.price} Z</span>
+                                <div class="item-controls">
+                                    <button class="btn-mini btn-minus" onclick="removeltem(${item.id})">-</button>
+                                    <span class="qty-badge" id="qty-${item.id}">${item.quantity}</span>
+                                    <button class="btn-mini btn-plus" onclick="addItem(${item.id})">+</button>
+                                </div>
+                            </div>
+                        `;
+                } else {
+                    // Standard Grid View <span class="item-emoji">${item.emoji}</span>
+                    itemCard.innerHTML = `
                             <img src="${item.image}"
-                                alt="${item.name}"
-                                style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
-                            <span class="item-name">${item.name}</span>
-                        </div>
-                        <div class="item-right" style="display:flex; align-items:center;">
-                            <span class="item-price">${item.price} Z</span>
-                            <div class="item-controls">
+                            alt="${item.name}"
+                            style="width:100%;height:auto;object-fit:cover;border-radius:6px;">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-price">${item.price} Z</div>
+                            <div class="item-controls" style="justify-content:center; margin-top:10px;">
                                 <button class="btn-mini btn-minus" onclick="removeltem(${item.id})">-</button>
                                 <span class="qty-badge" id="qty-${item.id}">${item.quantity}</span>
                                 <button class="btn-mini btn-plus" onclick="addItem(${item.id})">+</button>
                             </div>
-                        </div>
-                    `;
-                } else {
-                    // Standard Grid View <span class="item-emoji">${item.emoji}</span>
-                    itemCard.innerHTML = `
-                        <img src="${item.image}"
-                        alt="${item.name}"
-                        style="width:100%;height:auto;object-fit:cover;border-radius:6px;">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-price">${item.price} Z</div>
-                        <div class="item-controls" style="justify-content:center; margin-top:10px;">
-                            <button class="btn-mini btn-minus" onclick="removeltem(${item.id})">-</button>
-                            <span class="qty-badge" id="qty-${item.id}">${item.quantity}</span>
-                            <button class="btn-mini btn-plus" onclick="addItem(${item.id})">+</button>
-                        </div>
-                    `;
+                        `;
                 }
                 container.appendChild(itemCard);
             });
@@ -904,7 +1184,7 @@ function formatZed(amount) {
             // Update quantity badges in store
             storeItems.forEach(item => {
                 const el = document.getElementById(`qty-${item.id}`);
-                if(el) el.textContent = item.quantity;
+                if (el) el.textContent = item.quantity;
             });
 
             totalSpent = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -920,23 +1200,23 @@ function formatZed(amount) {
                 cartList.innerHTML = `<div class="empty-cart">Cart is empty</div>`;
             } else {
                 cartList.innerHTML = cart.map(item => `
-                    <div class="cart-item">
-                        <div class="cart-item-info">
-                            <img src="${item.image}"
-                                alt="${item.name}"
-                                style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
+                        <div class="cart-item">
+                            <div class="cart-item-info">
+                                <img src="${item.image}"
+                                    alt="${item.name}"
+                                    style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
 
-                            <div class="cart-item-text">
-                                <span class="cart-item-name">${item.name}</span>
-                                <span class="cart-item-sub">Qty: ${item.quantity}</span>
+                                <div class="cart-item-text">
+                                    <span class="cart-item-name">${item.name}</span>
+                                    <span class="cart-item-sub">Qty: ${item.quantity}</span>
+                                </div>
+                            </div>
+                            <div class="cart-item-actions">
+                                <div class="cart-item-price">${formatZed(item.price * item.quantity)} Z</div>
+                                <button class="btn-remove-cart" onclick="removeCartItemCompletely(${item.id})" title="Remove Item">×</button>
                             </div>
                         </div>
-                        <div class="cart-item-actions">
-                            <div class="cart-item-price">${formatZed(item.price * item.quantity)} Z</div>
-                            <button class="btn-remove-cart" onclick="removeCartItemCompletely(${item.id})" title="Remove Item">×</button>
-                        </div>
-                    </div>
-                `).join('');
+                    `).join('');
             }
             if (cartLoadedFromServer) {
                 saveCartToServer();
@@ -947,7 +1227,7 @@ function formatZed(amount) {
         function updateShippingAddress() {
             const type = document.getElementById('shippingType').value;
             const display = document.getElementById('addressDisplay');
-            
+
             if (type === 'self') {
                 display.innerHTML = '123 Main Dorm, Room 456<br>Campus City, 12345';
             } else if (type === 'classmate') {
@@ -960,15 +1240,15 @@ function formatZed(amount) {
                 //display.innerHTML = '<select class="form-control"><option>Animal Shelter</option><option>Senior Care Home</option><option>Food Bank</option></select>';
                 let options = '<option value="">Select NPO</option>';
 
-            npos.forEach(npo => {
-                options += `<option value="${npo.id}">${npo.name}</option>`;
-            });
+                npos.forEach(npo => {
+                    options += `<option value="${npo.id}">${npo.name}</option>`;
+                });
 
-            display.innerHTML = `
-                <select class="form-control" id="npoSelect">
-                    ${options}
-                </select>
-            `;
+                display.innerHTML = `
+                    <select class="form-control" id="npoSelect">
+                        ${options}
+                    </select>
+                `;
             } else {
                 display.innerHTML = '<strong>Community Garden Project</strong><br><small>Discretionary Activity Month</small>';
             }
@@ -979,13 +1259,13 @@ function formatZed(amount) {
                 alert("Please enter a 4-digit PIN");
                 return;
             }
-            
+
             document.getElementById('deliveryMessage').innerHTML = `
                 Payment of <strong>${totalSpent} Z</strong> successful.<br>
                 Remaining Balance: <strong>${INITIAL_BALANCE - totalSpent} Z</strong>
             `;
             document.getElementById('overlay').classList.add('show');
-            
+
             setTimeout(() => {
                 closeSuccessMessage();
                 resetCart();
@@ -999,7 +1279,7 @@ function formatZed(amount) {
                 return;
             }
 
-            fetch('/zedville/order/place', {
+            fetch('/order/place', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1011,25 +1291,25 @@ function formatZed(amount) {
                     total: totalSpent
                 })
             })
-            .then(res => res.json())
-            .then(res => {
-                if (!res.status) {
-                    alert(res.message);
-                    return;
-                }
+                .then(res => res.json())
+                .then(res => {
+                    if (!res.status) {
+                        alert(res.message);
+                        return;
+                    }
 
-                document.getElementById('deliveryMessage').innerHTML = `
-                    Payment of <strong>${totalSpent} Z</strong> successful.<br>
-                    Remaining Balance: <strong>${res.balance} Z</strong>
-                `;
+                    document.getElementById('deliveryMessage').innerHTML = `
+                        Payment of <strong>${totalSpent} Z</strong> successful.<br>
+                        Remaining Balance: <strong>${res.balance} Z</strong>
+                    `;
 
-                document.getElementById('overlay').classList.add('show');
+                    document.getElementById('overlay').classList.add('show');
 
-                resetCart(); // your existing function
-            })
-            .catch(() => {
-                alert('Payment error');
-            });
+                    resetCart(); // your existing function
+                })
+                .catch(() => {
+                    alert('Payment error');
+                });
         }
 
         function closeSuccessMessage() {
@@ -1042,7 +1322,7 @@ function formatZed(amount) {
             document.getElementById('pinInput').value = '';
             updateDisplay();
             renderItems(); // Re-render store to clear qty badges
-            fetch('/zedville/cart/clear?store_type=supermarket', {
+            fetch('/cart/clear?store_type=supermarket', {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
             });
@@ -1054,13 +1334,13 @@ function formatZed(amount) {
         updateDisplay();
 
         document.addEventListener('DOMContentLoaded', () => {
-             // ✅ LOAD FROM consumer_surveys FIRST
+            // ✅ LOAD FROM consumer_surveys FIRST
             /*if (typeof GROCERIES_FROM_SURVEY !== 'undefined' && GROCERIES_FROM_SURVEY.length > 0) {
                 loadGroceriesFromSurvey(GROCERIES_FROM_SURVEY);
                 cartLoadedFromServer = true;
                 return; // stop server cart override
             }*/
-            fetch('/zedville/cart/get?store_type=supermarket')
+            fetch('/cart/get?store_type=supermarket')
                 .then(res => res.json())
                 .then(data => {
                     if (!data.cart || data.cart.length === 0) {
@@ -1081,16 +1361,16 @@ function formatZed(amount) {
                 });
         });
 
-function openResultModal() {
-    document.getElementById('resultModal').classList.add('show');
-}
+        function openResultModal() {
+            document.getElementById('resultModal').classList.add('show');
+        }
 
-function closeResultModal() {
-    document.getElementById('resultModal').classList.remove('show');
-    // Optional: reset survey if needed
-    // if (typeof restartSurvey === 'function') {
-    //     restartSurvey();
-    // }
-}
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('show');
+            // Optional: reset survey if needed
+            // if (typeof restartSurvey === 'function') {
+            //     restartSurvey();
+            // }
+        }
     </script>
 @endpush

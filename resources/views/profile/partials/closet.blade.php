@@ -189,7 +189,7 @@
     // ── Detect tutor view (?student=<id>) ───────────────────
     const params = new URLSearchParams(window.location.search);
     const studentId = params.get('student');
-    const endpoint = studentId ? `/zedville/closet/student/${studentId}` : '/zedville/closet/mine';
+    const endpoint = studentId ? `/closet/student/${studentId}` : '/closet/mine';
     if (studentId) $title.textContent = 'Student Closet';
 
     // ── Fetch ───────────────────────────────────────────────
@@ -297,7 +297,7 @@
           <div class="flex items-start justify-between mb-2">
             <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0" style="${iconStyle}">
               <img
-                  src="/zedville/public/uploads/products/${item.icon}"
+                  src="/public/uploads/products/${item.icon}"
                   alt="${item.name}"
                   class="w-full h-full object-cover">
              </div>

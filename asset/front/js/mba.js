@@ -82,7 +82,7 @@ const BudgetingActivity = () => {
         console.log(budget)
     }*/
     /*const saveData = () => {
-        fetch('/zedville/education/store-mba', {
+        fetch('/education/store-mba', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const BudgetingActivity = () => {
         console.log(budget)
     };*/
     const saveData = () => {
-    fetch('/zedville/education/store-mba', {
+    fetch('/education/store-mba', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ const BudgetingActivity = () => {
 };
     useEffect(() => {
         const getData = () => {
-            fetch('/zedville/education/mba-data', {
+            fetch('/education/mba-data', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

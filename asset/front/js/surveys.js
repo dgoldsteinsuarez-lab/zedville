@@ -220,7 +220,7 @@ function populateGroceries() {
     const groceryList = document.getElementById('groceryList');
     groceryList.innerHTML = '';
 
-    fetch(`/zedville/api/groceries/${diet}`)
+    fetch(`/api/groceries/${diet}`)
         .then(response => response.json())
         .then(items => {
 
@@ -413,7 +413,7 @@ function showResults() {
     // Here you would typically send the data to your server
     console.log('Survey Data:', surveyData);
     //Store survey data in local storage
-    fetch('/zedville/profile/storesurvey', {
+    fetch('/profile/storesurvey', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
