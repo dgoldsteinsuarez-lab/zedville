@@ -432,9 +432,12 @@ class FinheroAdminController extends Controller
             ->where('id', $id)
             ->first();
 
+        if (!$activity) {
+            return redirect()->back()->with('error', 'Activity not found.');
+        }
+
         $validated = $request->validate([
             'activity_name' => 'sometimes|string|max:255',
-            'cid' => $request->classId ?: null,
             'max_points' => 'sometimes|integer|min:1|max:100',
             'position' => 'sometimes|in:required,optional,free',
 

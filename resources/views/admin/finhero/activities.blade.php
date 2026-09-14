@@ -53,7 +53,7 @@
                                         <td>{{ $a->max_points }}</td>
                                         {{-- Show salary only for task --}}
 
-                                        <td>{{ number_format($a->salary, 2) }} zeds</td>
+                                        <td>{{ number_format($a->salary ?? 0, 2) }} zeds</td>
                                     @endif
 
                                     <td>{{ ucfirst($a->position) }}</td>
@@ -69,7 +69,7 @@
                                             <a href="#" class="tableActionBtn me-3 editBtn" data-id="{{ $a->id }}"
                                                 data-key="{{ $a->activity_key }}" data-name="{{ $a->activity_name }}"
                                                 data-points="{{ $a->max_points }}" data-position="{{ $a->position }}"
-                                                data-salary="{{ $a->salary }}" data-active="{{ $a->is_active }}"
+                                                data-salary="{{ $a->salary !== null ? (float)$a->salary : '' }}" data-active="{{ $a->is_active }}"
                                                 data-class="{{ $a->cid }}" data-bs-toggle="modal"
                                                 data-bs-target="#activityModal">
                                                 ✏️
@@ -162,7 +162,15 @@
 
                             <div class="form-group  mb-3">
                                 <label>Salary</label>
-                                <input type="number" step="0.01" name="salary" id="salary" class="form-control">
+                                <select name="salary" id="salary" class="form-control">
+                                    <option value="">Select Salary</option>
+                                    <option value="2000">2,000</option>
+                                    <option value="3200">3,200</option>
+                                    <option value="4000">4,000</option>
+                                    <option value="6000">6,000</option>
+                                    <option value="9000">9,000</option>
+                                </select>
+                                <!-- <input type="number" step="0.01" name="salary" id="salary" class="form-control"> -->
                             </div>
                         @endif
 
@@ -218,6 +226,10 @@
             document.getElementById('form_method').value = 'POST';
 
             document.getElementById('activityForm').reset();
+            @if($type == 'task')
+                let salaryEl = document.getElementById('salary');
+                if (salaryEl) salaryEl.value = '';
+            @endif
         });
 
         // EDIT MODE
@@ -239,7 +251,14 @@
                 @if($type == 'task')
                     document.getElementById('max_points').value = this.dataset.points;
 
-                    document.getElementById('salary').value = this.dataset.salary;
+                    let salaryVal = this.dataset.salary;
+                    if (salaryVal !== undefined && salaryVal !== null && salaryVal !== '') {
+                        salaryVal = parseFloat(salaryVal).toString();
+                    }
+                    let salaryEl = document.getElementById('salary');
+                    if (salaryEl) {
+                        salaryEl.value = salaryVal || '';
+                    }
                 @endif
                 document.getElementById('position').value = this.dataset.position;
                 document.getElementById('is_active').value = this.dataset.active;
@@ -262,12 +281,12 @@
                 Swal.fire({
                     title: 'Delete Activity?',
                     html: `
-                    <p>Please enter the following number:</p>
-                    <h3>${randomNumber}</h3>
-                    <input type="text" id="confirmCode"
-                           class="swal2-input"
-                           placeholder="Enter number">
-                `,
+                            <p>Please enter the following number:</p>
+                            <h3>${randomNumber}</h3>
+                            <input type="text" id="confirmCode"
+                                   class="swal2-input"
+                                   placeholder="Enter number">
+                        `,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Delete',
