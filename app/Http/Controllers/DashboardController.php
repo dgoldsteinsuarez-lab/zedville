@@ -11,14 +11,14 @@ use App\Models\StudentBadgeRecord;
 use App\Models\Transaction1;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * ZEDVILLE — Student home / dashboard.
  *
  * Server-rendered summary shown when a citizen clicks "Home" in the
  * left sidebar. Every widget degrades gracefully (empty state) when the
- * underlying data is missing, so this never fatals for a half-onboarded
- * student. No existing controller/service behaviour is changed here.
+ * underlying data is missing.
  */
 class DashboardController extends Controller
 {
@@ -78,58 +78,215 @@ class DashboardController extends Controller
 
         $savings = (float) ($account->emergency_fund_account_amount ?? 0);
 
+        $salaryamount = config('zedville.monthly_salary', 3952.40);
+        $emmsavingsPct = config('zedville.emargency_fund_persentage', 20);
+        $savings_goal = round($salaryamount * ($emmsavingsPct / 100), 2);
+
         return [
             'has_account'  => true,
             'balance'      => $balance,
             'savings'      => $savings,
-            // No monthly savings-goal figure is stored yet; the view hides
-            // the progress bar when this is null.
-            'savings_goal' => null,
+            'savings_goal' => $savings_goal,
         ];
     }
 
     private function badges($user): array
     {
-        $praise = [
-            'engagement' => 'You showed up for your city, week after week.',
-            'finhero'    => 'You kept your needs, wants and savings in balance.',
-        ];
-
         $out = [];
 
         try {
-            $eng = StudentBadgeRecord::where('student_id', $user->id)
-                ->orderBy('year')->orderBy('month')->get()->last();
-
-            if ($eng && $eng->monthly_badge && strtoupper($eng->monthly_badge) !== 'NONE') {
+            $engBadge = $this->calculateEngagementBadge($user->id);
+            if ($engBadge && $engBadge !== 'NONE') {
                 $out[] = [
                     'type'    => 'engagement',
-                    'name'    => 'Engagement',
+                    'name'    => 'Engagement (' . ucfirst(strtolower($engBadge)) . ')',
                     'icon'    => '🏅',
-                    'message' => $praise['engagement'],
+                    'message' => 'You showed up for your city every single week.',
                 ];
             }
-        } catch (\Throwable $e) {
-            // table not present yet — skip
-        }
 
-        try {
-            $fin = FinheroBadgeRecord::where('student_id', $user->id)
-                ->orderBy('year')->orderBy('month')->get()->last();
-
-            if ($fin && $fin->monthly_badge && strtoupper($fin->monthly_badge) !== 'NONE') {
+            $finBadge = $this->calculateFinHeroBadge($user->id);
+            if ($finBadge && $finBadge !== 'NONE') {
                 $out[] = [
                     'type'    => 'finhero',
-                    'name'    => 'FinHero',
+                    'name'    => 'FinHero (' . ucfirst(strtolower($finBadge)) . ')',
                     'icon'    => '🛡️',
-                    'message' => $praise['finhero'],
+                    'message' => 'You kept your needs, wants and savings in balance.',
                 ];
             }
         } catch (\Throwable $e) {
-            // skip
+            // fallback
+        }
+
+        // Table record fallback if empty
+        if (empty($out)) {
+            try {
+                $eng = StudentBadgeRecord::where('student_id', $user->id)
+                    ->orderBy('year')->orderBy('month')->get()->last();
+
+                if ($eng && $eng->monthly_badge && strtoupper($eng->monthly_badge) !== 'NONE') {
+                    $out[] = [
+                        'type'    => 'engagement',
+                        'name'    => 'Engagement (' . ucfirst(strtolower($eng->monthly_badge)) . ')',
+                        'icon'    => '🏅',
+                        'message' => 'You showed up for your city every single week.',
+                    ];
+                }
+            } catch (\Throwable $e) {}
+
+            try {
+                $fin = FinheroBadgeRecord::where('student_id', $user->id)
+                    ->orderBy('year')->orderBy('month')->get()->last();
+
+                if ($fin && $fin->monthly_badge && strtoupper($fin->monthly_badge) !== 'NONE') {
+                    $out[] = [
+                        'type'    => 'finhero',
+                        'name'    => 'FinHero (' . ucfirst(strtolower($fin->monthly_badge)) . ')',
+                        'icon'    => '🛡️',
+                        'message' => 'You kept your needs, wants and savings in balance.',
+                    ];
+                }
+            } catch (\Throwable $e) {}
         }
 
         return $out;
+    }
+
+    private function calculateEngagementBadge($studentId): string
+    {
+        $now = now();
+        $month = $now->month - 1;
+        $year = $now->year;
+
+        $assignedRequired = DB::table('calendar_events')
+            ->whereMonth('start', $month + 1)
+            ->whereYear('start', $year)
+            ->where('activityType', 'required')
+            ->count();
+
+        $completedRequired = DB::table('participation_logs')
+            ->where('student_id', $studentId)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->where('action_type', 'required')
+            ->count();
+
+        $requiredPct = $assignedRequired > 0
+            ? ($completedRequired / $assignedRequired) * 100
+            : 0;
+
+        $optionalCount = DB::table('participation_logs')
+            ->where('student_id', $studentId)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->where('action_type', 'optional')
+            ->count();
+
+        $participationPts = DB::table('participation_logs')
+            ->where('student_id', $studentId)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->sum('points_earned');
+
+        $participationPts = min($participationPts, 15);
+
+        if ($requiredPct == 100 && $optionalCount >= 4 && $participationPts >= 15) {
+            return 'PLATINUM';
+        } elseif ($requiredPct == 100 && $optionalCount >= 3 && $participationPts >= 10) {
+            return 'GOLD';
+        } elseif ($requiredPct == 100 && $optionalCount >= 2 && $participationPts >= 7) {
+            return 'SILVER';
+        } elseif ($requiredPct == 100 && $optionalCount >= 1 && $participationPts >= 5) {
+            return 'BRONZE';
+        }
+
+        return 'NONE';
+    }
+
+    private function calculateFinHeroBadge($studentId): string
+    {
+        $now = now();
+        $month = $now->month - 1;
+        $year = $now->year;
+
+        if ($now->day < 31) {
+            $month--;
+            if ($month < 0) {
+                $month = 11;
+                $year--;
+            }
+        }
+
+        $settings = DB::table('finhero_monthly_settings')
+            ->where('month', $month)
+            ->where('year', $year)
+            ->where('badge_active', 1)
+            ->first();
+
+        if (!$settings || !$settings->badge_active) {
+            return 'NONE';
+        }
+
+        $quizPts = DB::table('finhero_student_points')
+            ->where('student_id', $studentId)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->where('source_type', 'quiz')
+            ->sum('points_earned');
+        $quizPts = min($quizPts, 10);
+
+        $libraryPts = 0;
+        if ($settings->active_library_module_id) {
+            $libraryPts = DB::table('finhero_student_points')
+                ->where('student_id', $studentId)
+                ->where('month', $month)
+                ->where('year', $year)
+                ->where('source_type', 'library')
+                ->where('source_key', $settings->active_library_module_id)
+                ->sum('points_earned');
+            $libraryPts = min($libraryPts, 10);
+        }
+
+        $activeActivities = DB::table('finhero_activity_registry')
+            ->where('is_active', 1)
+            ->pluck('max_points', 'activity_key');
+
+        $activityPts = 0;
+        $totalActivityMax = 0;
+
+        foreach ($activeActivities as $key => $maxPoints) {
+            $earned = DB::table('finhero_student_points')
+                ->where('student_id', $studentId)
+                ->where('month', $month)
+                ->where('year', $year)
+                ->where('source_type', 'activity')
+                ->where('source_key', $key)
+                ->sum('points_earned');
+
+            $activityPts += min($earned, $maxPoints);
+            $totalActivityMax += $maxPoints;
+        }
+
+        $totalEarned = $quizPts + $libraryPts + $activityPts;
+        $totalAvailable = 10 + ($settings->active_library_module_id ? 10 : 0) + $totalActivityMax;
+
+        if ($totalAvailable == 0) {
+            return 'NONE';
+        }
+
+        $pct = ($totalEarned / $totalAvailable) * 100;
+
+        if ($pct >= $settings->threshold_legend) {
+            return 'LEGEND';
+        } elseif ($pct >= $settings->threshold_champion) {
+            return 'CHAMPION';
+        } elseif ($pct >= $settings->threshold_finhero) {
+            return 'FINHERO';
+        } elseif ($pct >= $settings->threshold_rookie) {
+            return 'ROOKIE';
+        }
+
+        return 'NONE';
     }
 
     private function moodSummary($user): ?array
@@ -145,17 +302,21 @@ class DashboardController extends Controller
                 return null;
             }
 
-            $classIds = $user->grade
-                ? \App\Models\User::where('grade', $user->grade)->pluck('id')
-                : collect([$user->id]);
+            $cityQuery = MoodLog::join('users', 'users.id', '=', 'mood_logs.user_id')
+                ->where('mood_logs.created_at', '>=', $start);
 
-            $city = MoodLog::whereIn('user_id', $classIds)
-                ->where('created_at', '>=', $start)
-                ->get();
+            if ($user->sid) {
+                $cityQuery->where('users.sid', $user->sid);
+            }
+            if ($user->grade) {
+                $cityQuery->where('users.grade', $user->grade);
+            }
+
+            $city = $cityQuery->select('mood_logs.*')->get();
 
             return [
                 'my_mood'   => $this->moodLabel($mine),
-                'city_mood' => $this->moodLabel($city),
+                'city_mood' => $this->moodLabel($city->isNotEmpty() ? $city : $mine),
             ];
         } catch (\Throwable $e) {
             return null;
@@ -164,8 +325,6 @@ class DashboardController extends Controller
 
     private function moodLabel($logs): array
     {
-        // Most frequently logged mood string wins; energy / pleasantness
-        // shown as the averaged quadrant beneath it.
         $label = $logs->groupBy('mood')->sortByDesc->count()->keys()->first() ?: '—';
 
         $energyAvg = $logs->avg('energy');
