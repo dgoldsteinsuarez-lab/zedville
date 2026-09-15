@@ -193,16 +193,64 @@
             <div class="zv-card px-5 py-4">
                 <h2 class="zv-section-label mb-3">Mood this month</h2>
                 @if($mood)
-                    <div class="flex">
-                        <div class="flex-1">
-                            <p class="text-xs text-gray-500 mb-0.5">My mood</p>
-                            <p class="text-xl font-bold">{{ $mood['my_mood']['label'] }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $mood['my_mood']['detail'] }}</p>
+                    @php
+                        $getMoodIcon = function($moodId, $size = 44) {
+                            $id = strtolower(str_replace([' ', '-'], '_', trim($moodId ?? '')));
+                            
+                            $moodQuadrantMap = [
+                                'furious' => 'HU', 'angry' => 'HU', 'nervous' => 'HU', 'worried' => 'HU',
+                                'excited' => 'HC', 'ecstatic' => 'HC', 'happy' => 'HC', 'joyful' => 'HC',
+                                'lonely' => 'LU', 'sad' => 'LU', 'hopeless' => 'LU', 'disappointed' => 'LU',
+                                'calm' => 'LC', 'serene' => 'LC', 'at_ease' => 'LC', 'content' => 'LC',
+                            ];
+                            $q = $moodQuadrantMap[$id] ?? 'LC';
+                            
+                            $qsMap = [
+                                'HU' => '#dc2626',
+                                'HC' => '#d97706',
+                                'LU' => '#2563eb',
+                                'LC' => '#1aaa8e',
+                            ];
+                            $color = $qsMap[$q] ?? '#1aaa8e';
+                            $s = 'stroke="' . $color . '"';
+                            
+                            if (in_array($id, ['furious', 'angry'])) {
+                                $eyes = '<line x1="20" y1="21" x2="26" y2="24" ' . $s . ' stroke-width="2" stroke-linecap="round"/><line x1="34" y1="24" x2="40" y2="21" ' . $s . ' stroke-width="2" stroke-linecap="round"/><circle cx="23" cy="25" r="2" fill="' . $color . '"/><circle cx="37" cy="25" r="2" fill="' . $color . '"/>';
+                            } elseif (in_array($id, ['ecstatic', 'excited'])) {
+                                $eyes = '<path d="M21 26 Q23 23 25 26" ' . $s . ' stroke-width="2" fill="none" stroke-linecap="round"/><path d="M35 26 Q37 23 39 26" ' . $s . ' stroke-width="2" fill="none" stroke-linecap="round"/>';
+                            } else {
+                                $eyes = '<circle cx="23" cy="26" r="2" fill="' . $color . '"/><circle cx="37" cy="26" r="2" fill="' . $color . '"/>';
+                            }
+
+                            if (in_array($id, ['happy', 'ecstatic', 'excited', 'joyful', 'calm', 'serene'])) {
+                                $mouth = '<path d="M21 35 Q30 43 39 35" ' . $s . ' stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+                            } elseif (in_array($id, ['furious', 'angry', 'hopeless', 'lonely'])) {
+                                $mouth = '<path d="M21 39 Q30 33 39 39" ' . $s . ' stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+                            } elseif ($id === 'worried') {
+                                $mouth = '<ellipse cx="30" cy="38" rx="5" ry="4" fill="none" ' . $s . ' stroke-width="2"/>';
+                            } else {
+                                $mouth = '<line x1="22" y1="38" x2="38" y2="38" ' . $s . ' stroke-width="2.2" stroke-linecap="round"/>';
+                            }
+
+                            return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="none" ' . $s . ' stroke-width="2.2"/>' . $eyes . $mouth . '</svg>';
+                        };
+                    @endphp
+                    <div class="flex items-center">
+                        <div class="flex-1 flex items-center gap-3">
+                            {!! $getMoodIcon($mood['my_mood']['mood'] ?? $mood['my_mood']['label'], 44) !!}
+                            <div>
+                                <p class="text-xs text-gray-500 mb-0.5">My mood</p>
+                                <p class="text-xl font-bold">{{ $mood['my_mood']['label'] }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $mood['my_mood']['detail'] }}</p>
+                            </div>
                         </div>
-                        <div class="flex-1 border-l border-gray-100 pl-6">
-                            <p class="text-xs text-gray-500 mb-0.5">City mood</p>
-                            <p class="text-xl font-bold">{{ $mood['city_mood']['label'] }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $mood['city_mood']['detail'] }}</p>
+                        <div class="flex-1 border-l border-gray-100 pl-6 flex items-center gap-3">
+                            {!! $getMoodIcon($mood['city_mood']['mood'] ?? $mood['city_mood']['label'], 44) !!}
+                            <div>
+                                <p class="text-xs text-gray-500 mb-0.5">City mood</p>
+                                <p class="text-xl font-bold">{{ $mood['city_mood']['label'] }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ $mood['city_mood']['detail'] }}</p>
+                            </div>
                         </div>
                     </div>
                 @else

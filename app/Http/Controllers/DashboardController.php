@@ -334,6 +334,7 @@ class DashboardController extends Controller
         $comfort = $pleasantAvg === null ? '' : ($pleasantAvg >= 3 ? 'comfortable' : 'uncomfortable');
 
         return [
+            'mood'   => strtolower((string) $label),
             'label'  => ucfirst((string) $label),
             'detail' => trim($energy . ($energy && $comfort ? ' · ' : '') . $comfort, ' ·'),
         ];
