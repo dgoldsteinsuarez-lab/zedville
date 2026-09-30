@@ -118,7 +118,7 @@ class RegisteredUserController extends Controller
         $content = view('mailbox_templates.welcome', ['user' => $user])->render();
         Mailbox::create([
             'student_id' => $user->id,
-            'subject' => 'Welcome to Zedville , ' . $user->name . '!',
+            'subject' => 'Welcome to Zedville , ' . $user->nickname . '!',
             'content' => $content,
             'type' => 'primary',
             'read' => 0,

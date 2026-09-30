@@ -76,7 +76,7 @@ class StatementGenerator
 
             $statement = [
                 'studentId' => $user->id,
-                'studentName' => $user->name,
+                'studentName' => $user->nickname,
                 'month' => $now->month,
                 'year' => $now->year,
                 'transactions' => [],

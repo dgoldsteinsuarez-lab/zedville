@@ -27,7 +27,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $data = [
-            'studentName' => $user->name,
+            'studentName' => $user->nickname,
             'className'   => optional($user->gradeRelation)->name ?? 'Citizen of Zedville',
             'activities'  => $this->activities($user),
             'bank'        => $this->bankSummary($user),

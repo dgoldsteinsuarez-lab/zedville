@@ -55,38 +55,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * Role-tier helpers. Matches the role set already assumed by
-     * AuthenticatedSessionController's post-login redirect:
-     * 0 = Legacy Admin, 1 = Super Admin, 2 = School Admin, 3 = Tutor, 4 = Student.
-     * Loose string/int comparison mirrors the existing checks elsewhere in the app.
-     */
-    public function isSuperAdmin(): bool
-    {
-        return in_array($this->role, [0, 1, '0', '1', 'admin'], false);
-    }
-
-    public function isSchoolAdmin(): bool
-    {
-        return in_array($this->role, [2, '2'], false);
-    }
-
-    public function isTutor(): bool
-    {
-        return in_array($this->role, [3, '3', 'tutor'], false);
-    }
-
-    public function isStudent(): bool
-    {
-        return in_array($this->role, [4, '4'], false);
-    }
-
-    /** Any role allowed through the admin area at all (the IsAdmin gate). */
-    public function isAdminTier(): bool
-    {
-        return $this->isSuperAdmin() || $this->isSchoolAdmin() || $this->isTutor();
-    }
-
-    /**
      * Classes this user tutors. Many-to-many — a Tutor may be assigned to more
      * than one class (school-configurable).
      */
@@ -194,6 +162,9 @@ class User extends Authenticatable
 
     /**
      * Pseudonym Accessor (Uses existing citizenId without extra DB fields)
+     * NOT CURRENTLY USED ANYWHERE (confirmed 2026-09-30). The 'nickname' column
+     * and User::$nickname is the adopted student-facing identity going forward —
+     * use that instead of this accessor in any new code.
      */
     public function getPseudonymAttribute(): string
     {

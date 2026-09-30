@@ -48,7 +48,7 @@ class SendMailboxEmail implements ShouldQueue
     $subject = $this->subject ?? '';
     $replacements = array_merge([
         'citizenId' => $user->citizenId,
-        'name'      => $user->name,
+        'name'      => $user->nickname,
     ], $this->extraData);
 
     foreach ($replacements as $key => $value) {
