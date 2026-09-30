@@ -96,7 +96,12 @@
 
                         <td>
 
-                            {{ $petition->created_by }}
+                            @if ($petition->creator)
+                                {{ $petition->creator->nickname }}
+                                <br><small class="text-muted">{{ $petition->creator->name }}</small>
+                            @else
+                                <span class="text-muted">Unknown</span>
+                            @endif
 
                         </td>
 

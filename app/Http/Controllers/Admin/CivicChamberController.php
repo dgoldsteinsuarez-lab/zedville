@@ -172,7 +172,7 @@ class CivicChamberController extends Controller
 
     public function petitionIndex()
     {
-        $petitions = Petition::with('signatures')
+        $petitions = Petition::with('signatures', 'creator')
         ->latest()
         ->paginate(15);
 
@@ -190,7 +190,7 @@ class CivicChamberController extends Controller
 
     public function petitionShow($id)
     {
-        $petition = Petition::with('signatures')->findOrFail($id);
+        $petition = Petition::with('signatures', 'creator')->findOrFail($id);
 
         return view(
             'admin.civic-chamber.petition.show',
