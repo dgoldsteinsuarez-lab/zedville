@@ -16,7 +16,9 @@ class IsAdmin
      */
     public function handle($request, \Closure $next)
 {
-    if (auth()->check() && auth()->user()->role == 0) {
+    // Legacy Admin (0), Super Admin (1), School Admin (2), Tutor (3) — matches the
+    // role set AuthenticatedSessionController already redirects to /admin/dashboard.
+    if (auth()->check() && in_array(auth()->user()->role, [0, 1, 2, 3, '0', '1', '2', '3', 'admin', 'tutor'])) {
         return $next($request);
     }
 

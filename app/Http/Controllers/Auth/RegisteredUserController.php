@@ -40,11 +40,16 @@ class RegisteredUserController extends Controller
         //dd($request->timezone);
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            // Single word only — keeps this from being used to enter a full name
+            // (first + family name). Public views show this, never 'name'.
+            'nickname' => ['required', 'string', 'max:50', 'regex:/^\S+$/'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
             //'reEnterEmail' => ['required', 'same:email'],
             'classCode' => ['required', 'exists:classes,classCode'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['nullable'],
+        ], [
+            'nickname.regex' => 'Nickname must be a single word (e.g. your first name) — no family name.',
         ]);
         // Extract domain from email
         $email = $request->email;
@@ -79,6 +84,7 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'sid' => $sid,
             'name' => $request->name,
+            'nickname' => $request->nickname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'citizenId' => $cityzenId, // Generate a unique citizen ID

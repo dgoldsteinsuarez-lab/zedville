@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\Auth;
 
 class WellbeingController extends Controller
 {
+    /**
+     * Wellbeing content is Super-Admin-only per the Admin Roles & Permissions
+     * document — School Admin and Tutor have no access to this controller at all.
+     */
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            abort_unless(Auth::user()?->isSuperAdmin(), 403, 'Only Super Admins can manage Wellbeing content.');
+            return $next($request);
+        });
+    }
 
     public function index()
     {

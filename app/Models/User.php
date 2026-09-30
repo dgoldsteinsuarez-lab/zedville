@@ -21,6 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'sid',
         'name',
+        'nickname',
         'email',
         'password',
         'citizenId',
@@ -52,6 +53,39 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Role-tier helpers. Matches the role set already assumed by
+     * AuthenticatedSessionController's post-login redirect:
+     * 0 = Legacy Admin, 1 = Super Admin, 2 = School Admin, 3 = Tutor, 4 = Student.
+     * Loose string/int comparison mirrors the existing checks elsewhere in the app.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return in_array($this->role, [0, 1, '0', '1', 'admin'], false);
+    }
+
+    public function isSchoolAdmin(): bool
+    {
+        return in_array($this->role, [2, '2'], false);
+    }
+
+    public function isTutor(): bool
+    {
+        return in_array($this->role, [3, '3', 'tutor'], false);
+    }
+
+    public function isStudent(): bool
+    {
+        return in_array($this->role, [4, '4'], false);
+    }
+
+    /** Any role allowed through the admin area at all (the IsAdmin gate). */
+    public function isAdminTier(): bool
+    {
+        return $this->isSuperAdmin() || $this->isSchoolAdmin() || $this->isTutor();
+    }
+
     public function avatar()
     {
     return $this->belongsTo(\App\Models\Avatar::class, 'avatar'); // avatar is the foreign key in users table

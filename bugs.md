@@ -29,11 +29,6 @@ Result: the salary the student receives never appears in the balance chain that 
 `ProfileController::storesurvey` reads `$availableBalance` at line 725, checks it at line 752, but doesn't open `DB::beginTransaction()` until line 766 — the check happens **outside** the transaction boundary, same race.
 **Fix:** wrap every balance-read-then-write sequence in `DB::transaction()` and add `->lockForUpdate()` on the balance query. Standardize this as one helper (`BalanceService::debit()`/`credit()`) — see `planning.md` Phase 1.
 
-### 6. Admin route group missing the `admin` middleware
-`RouteServiceProvider::boot()` (`app/Providers/RouteServiceProvider.php:39-43`) registers the `admin.php` route group with only `['web', 'auth']`, not the `admin` middleware that's registered in `Http/Kernel.php:66` as `IsAdmin::class`. The code has an unaddressed comment right next to it: `// Add 'admin' middleware if needed`.
-**Impact:** any authenticated (non-admin) user may be able to reach admin routes, unless `routes/admin.php` itself layers the `admin` middleware per-route or per-group (not confirmed — needs verification, out of scope for this controller-only pass).
-**Fix:** verify `routes/admin.php`; if it doesn't self-apply `admin` middleware, add `'admin'` to the group middleware array in `RouteServiceProvider`. Treat as a security bug, prioritize verification immediately.
-
 ### 7. `badges:calculate-monthly` scheduled on day 31 — skips 5 months a year
 `Console/Kernel.php:55-58` schedules the badge calculation command with `->monthlyOn(31, '23:59')`. Laravel's scheduler does not clamp day 31 to month-end; months with fewer than 31 days (Feb, Apr, Jun, Sep, Nov) simply never fire this job.
 **Fix:** use `->lastDayOfMonth('23:59')` instead.

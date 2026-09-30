@@ -37,6 +37,20 @@
                         </div>
                     </div>
                     <div class="relative form-group mb-5">
+                        <label for="" class="form-label mb-2">Nickname <span class="text-gray-800">*</span></label>
+                        <p class="text-xs leading-4 text-black mb-2">This is what other students and your teacher see — never your family name. Your first name is perfect.</p>
+                        <div class="relative haveIcon">
+                            <span class="absolute inset-y-3 left-3 flex items-center">
+                                <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.99934 2.16675C5.39698 2.16675 1.66602 5.89771 1.66602 10.5001C1.66602 15.1025 5.39698 18.8334 9.99934 18.8334C14.6017 18.8334 18.3327 15.1025 18.3327 10.5001C18.3327 5.89771 14.6017 2.16675 9.99934 2.16675Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M3.55859 15.7881C3.55859 15.7881 5.41612 13.4167 9.99945 13.4167C14.5828 13.4167 16.4403 15.7881 16.4403 15.7881" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M10 10.5003C11.3807 10.5003 12.5 9.38095 12.5 8.00024C12.5 6.61953 11.3807 5.50024 10 5.50024C8.61929 5.50024 7.5 6.61953 7.5 8.00024C7.5 9.38095 8.61929 10.5003 10 10.5003Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <input type="text" name="nickname" value="{{old('nickname')}}" required maxlength="50" pattern="\S+" title="One word only, no spaces — e.g. your first name" class="form-control" placeholder="e.g. your first name">
+                        </div>
+                    </div>
+                    <div class="relative form-group mb-5">
                         <label for="" class="form-label mb-2">Email <span class="text-gray-800">*</span></label>
                         <div class="relative haveIcon">
                             <span class="absolute inset-y-3 left-3 flex items-center">
