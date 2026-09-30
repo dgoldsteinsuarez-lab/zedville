@@ -189,7 +189,7 @@
                     <div class="relative" x-data="{ isOpen: false }">
                         <button @click="isOpen = !isOpen" class="flex items-center space-x-2 focus:outline-none hover:bg-themegreen/10 transition-colors px-3 py-1 rounded-md">
                             <div class="bg-gray-200 rounded-full focus:outline-none focus:ring">
-                                <img src="{{ asset('asset/front/images/' . $selectedAvatar->name) }}" class="w-8 h-8 rounded-full object-cover" alt="">
+                                <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png')) }}" class="w-8 h-8 rounded-full object-cover" alt="">
                             </div>
                             <span class="text-md font-semibold">{{ $user->nickname }}</span>
                         </button>
@@ -205,7 +205,7 @@
                             <div class="bg-[#56F4CF]/10 p-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                                        <img src="{{ asset('asset/front/images/' . $selectedAvatar->name) }}" class="w-12 h-12 rounded-full object-cover" alt="User">
+                                        <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png')) }}" class="w-12 h-12 rounded-full object-cover" alt="User">
                                     </div>
                                     <div>
                                         <h3 class="font-semibold">{{ $user->nickname }}</h3>

@@ -83,7 +83,7 @@
             @endphp
             <a href="{{ route('profile.edit') }}" class="sidebarUserSection flex items-center relative gap-x-2 w-full justify-between">
                 <div class="userImg relative">
-                    <img src="{{ asset('asset/front/images/' . $selectedAvatar->name)}}" class="w-12 h-12 rounded-full object-cover" :class="{'w-8 h-8': !isSidebarOpen}" alt="User Avatar">
+                    <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png'))}}" class="w-12 h-12 rounded-full object-cover" :class="{'w-8 h-8': !isSidebarOpen}" alt="User Avatar">
                     <span class="absolute bottom-[4px] 2xl:bottom-[-10px] xl:bottom-[-4px] right-[-6px] 2xl:right-[-10px] xl:right-[-6px]" :class="{'bottom-0 right-0 w-4': !isSidebarOpen}">
                         <img src="{{ asset('asset/front/images/label1.svg')}}" :class="[
                             {'w-4': !isSidebarOpen},

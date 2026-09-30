@@ -23,6 +23,15 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                $user = Auth::guard($guard)->user();
+                // Match the role-aware redirect used at fresh login
+                // (AuthenticatedSessionController) — otherwise a Tutor/
+                // Admin hitting /login while already authenticated lands
+                // on the student dashboard instead of /admin/dashboard.
+                if ($user && method_exists($user, 'isAdminOrTutor') && $user->isAdminOrTutor()) {
+                    return redirect('/admin/dashboard');
+                }
+
                 return redirect(RouteServiceProvider::HOME);
             }
         }
