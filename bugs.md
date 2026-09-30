@@ -31,9 +31,5 @@ Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-wo
 `emmengercyfundintrest` (`EFDController.php:166,188`, also present in `BankController.php`), `updatepassowrd` (`AdminDashboardController.php:62`), `backaccountnumber` used as an actual DB column name (misspelled "bank"), `aviableblance` (in `BankController.php`, per prior review).
 **Fix:** cosmetic-only, batch-rename during a dedicated pass with full regression test coverage (renaming DB columns needs a migration + all call sites, do NOT do this casually).
 
-### 18. Self-acknowledged dead triplicate code never removed
-`EFDController.php:307,378` — the code's own comments say "Remove Belo[w] 3 later and use this single function" / "Remove above 3 later," referring to `spending_tracker_basicco/stationary/citymall` being superseded by `spending_tracker`. Never acted on.
-**Fix:** low-risk deletion once confirmed unreferenced by any route/view.
-
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

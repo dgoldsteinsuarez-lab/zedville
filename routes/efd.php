@@ -11,10 +11,6 @@ Route::get('/budget-quiz-2', [EFDController::class, 'budgetQuiz2'])->name('budge
 Route::post('/store-mba', [EFDController::class, 'storemba'])->name('storemba');
 Route::get('/mba-data', [EFDController::class, 'getMbaData']);
 Route::get('/city-mall', [EFDController::class, 'city_mall'])->name('city-mall');
-//Route::get('/spending-tracker/basicco', [EFDController::class, 'spending_tracker_basicco'])->name('spending-tracker/basicco');
-//Route::get('/spending-tracker/stationary', [EFDController::class, 'spending_tracker_stationary'])->name('spending-tracker/stationary');
-//Route::get('/spending-tracker/citymall', [EFDController::class, 'spending_tracker_citymall'])->name('spending-tracker/citymall');
-//Route::get('/spending-tracker/basicco',  [EFDController::class, 'spending_tracker_basicco'] )->name('spending.tracker.basicco');
 Route::get('/spending-tracker/{type}', [EFDController::class, 'spending_tracker'])->name('spending-tracker');
 Route::get('/calendar', [EFDController::class, 'calendar'])->name('calendar');
 Route::get('/get-event-by-user', [EFDController::class, 'getEventsByUserClass'])->name('get-event-by-user');
