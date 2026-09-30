@@ -11,7 +11,7 @@
                 <div class="rightImgUpload flex flex-wrap md:flex-nowrap items-center gap-x-8 gap-y-6">
                     <div class="uploadImg">
                         <div class="userImg relative">
-                            <img src="{{ asset('asset/front/images/' . $selectedAvatar->name) }}" alt="User Image" class="w-24 h-24 rounded-full object-cover" id="previewImage">
+                            <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png')) }}" alt="User Image" class="w-24 h-24 rounded-full object-cover" id="previewImage">
                             <button type="button" @click="changeImageModal = true" class="changeImg w-6 h-6 absolute top-0 right-0 rounded-full bg-[#F9F9F9] border border-color-[#E9EBF0] text-black hover:text-themegreen focus:outline-none transition flex items-center justify-center">
                                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M8.66797 3.95605C9.10473 3.70046 9.64527 3.70046 10.082 3.95605C10.2487 4.05358 10.3992 4.20784 10.5957 4.4043C10.7922 4.60075 10.9464 4.75132 11.0439 4.91797C11.2995 5.35473 11.2995 5.89527 11.0439 6.33203C10.9493 6.49368 10.8004 6.63924 10.6123 6.82715L10.6113 6.83008L6.2998 11.1416C6.12025 11.3212 5.98009 11.4655 5.80371 11.5654C5.62725 11.6653 5.43103 11.7108 5.18457 11.7725L4.03027 12.0605L4.0166 12.0645L4.00195 12.0674C3.84377 12.107 3.68525 12.1473 3.55371 12.1602C3.40937 12.1743 3.18632 12.1687 3.00879 11.9912C2.83126 11.8137 2.82573 11.5906 2.83984 11.4463C2.85348 11.3069 2.89759 11.1372 2.93945 10.9697L3.22754 9.81543C3.28915 9.56897 3.33466 9.37275 3.43457 9.19629C3.53446 9.01991 3.67885 8.87975 3.8584 8.7002L8.1543 4.4043C8.35075 4.20784 8.50132 4.05358 8.66797 3.95605Z" stroke="currentColor" stroke-width="0.8" />
@@ -71,6 +71,31 @@
                                 <path d="M12.5 7.5L15.5 5.5L18.5 8.5L16.5 11.5L12.5 7.5Z" fill="currentColor" />
                             </svg>
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fieldsItems border-b border-[#D2DDDB] py-8">
+            <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
+                <div class="leftContent max-w-full lg:max-w-[300px] w-full">
+                    <h4 class="text-base font-medium text-black">Nickname <br/>(what others see — never your family name)</h4>
+                </div>
+                <div class="rightFields w-full">
+                    <div class="relative">
+                        <input type="text" name="nickname" id="editableNickname" class="form-control" placeholder="Nickname" value="{{ old('nickname', $user->nickname) }}" minlength="3" maxlength="15" pattern="\S+" readonly>
+                        <button type="button" class="bg-transparent text-black hover:text-themegreen focus:outline-none transition absolute inset-y-3 right-3 flex items-center" onclick="
+                                const input = document.getElementById('editableNickname');
+                                input.removeAttribute('readonly');
+                                this.setAttribute('disabled', true);
+                                input.focus();
+                            ">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 5.91406C15.3604 5.91406 15.6531 6.066 15.916 6.2666C16.1673 6.45837 16.4444 6.73733 16.7676 7.06055L16.9395 7.23242C17.2627 7.55564 17.5416 7.83268 17.7334 8.08398C17.934 8.3469 18.0859 8.63961 18.0859 9C18.0859 9.36038 17.934 9.6531 17.7334 9.91602C17.5416 10.1673 17.2627 10.4444 16.9395 10.7676L9.74512 17.9619C9.56928 18.1377 9.4185 18.2942 9.22754 18.4023C9.03664 18.5104 8.82512 18.5589 8.58398 18.6191L5.92969 19.2832C5.7655 19.3242 5.587 19.3702 5.43848 19.3848C5.28375 19.3999 5.02289 19.3959 4.81348 19.1865C4.60407 18.9771 4.6001 18.7163 4.61523 18.5615C4.62976 18.413 4.67575 18.2345 4.7168 18.0703L5.38086 15.416C5.44114 15.1749 5.48962 14.9634 5.59766 14.7725C5.70578 14.5815 5.86225 14.4307 6.03809 14.2549L13.2324 7.06055C13.5556 6.73733 13.8327 6.45837 14.084 6.2666C14.3469 6.066 14.6396 5.91406 15 5.91406Z" stroke="currentColor" />
+                                <path d="M12.5 7.5L15.5 5.5L18.5 8.5L16.5 11.5L12.5 7.5Z" fill="currentColor" />
+                            </svg>
+                        </button>
+                        @error('nickname')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
             </div>

@@ -17,6 +17,8 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => ['string', 'max:255'],
+            // Same rule as registration: single word, 3-15 chars, no family name.
+            'nickname' => ['nullable', 'string', 'min:3', 'max:15', 'regex:/^\S+$/'],
             'email' => ['email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
              'age' => ['nullable', 'string', 'min:0', 'max:255'],
              'grade' => ['nullable', 'string', 'min:0', 'max:255'],
