@@ -2,26 +2,7 @@
 
 Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-world incorrect behavior) · 🟡 Medium (correctness risk under load/edge case) · ⚪ Low (cleanliness/inconsistency)
 
-**Re-verified against live code 2026-09-30** (first time this list was checked against the actual codebase since it was written): #6, #8, #9, #12, #13, #15 were already fixed and have been removed. Remaining items below were re-confirmed still present. If you're reading this later and something here seems wrong, check the code directly rather than trusting this list blindly — that's exactly how it went stale the first time.
-
-## 🔴 Critical
-
-### 1. Salary credited to a ledger nothing else reads (`Transaction` vs `Transaction1` split)
-`BankController::creditMonthlySalary()` writes salary credits to the `Transaction` model. Every other balance-touching flow in the app — `OrderController`, `SupermarketController`, `SpendingActivitiesController`, `ProfileController::storesurvey`, `EFDController::storeDonation`, `CitizenActivationController`, `AuthenticatedSessionController::ensureMonthlyBills`, `StatementGenerator`, and the bank statement view — reads/writes `Transaction1`.
-Result: the salary the student receives never appears in the balance chain that expenses deduct from. This is the exact symptom originally reported ("expenses on the 7th aren't deducted from balance = last balance + salary").
-**Fix:** point `creditMonthlySalary()` at `Transaction1` with matching columns (`transaction_date`, `type`, `category`, `amount`, `balance`, `bank_account_id`). See `planning.md` Phase 1.
-
-### 2. Monthly salary/bills are login-gated with no backfill
-`StatementGenerator::generateForUser()` (salary + emergency-fund transfer + needs debits) and `AuthenticatedSessionController::ensureMonthlyBills()` (rent/electricity/water/internet/school fees) only run from `AuthenticatedSessionController::store()`, gated by day-of-month (`>=6`, `>=7` respectively). Nothing in `Console/Kernel.php` schedules either. A student who doesn't log in inside that window in a given month **never receives that month's salary or bills**, and there is no catch-up mechanism.
-**Fix:** move both to a scheduled command (cron-driven, idempotent, chunked over users) instead of triggering on login. See `planning.md` Phase 1.
-
-### 3. `Mailbox::create()` called with no import — likely fatal
-`CitizenActivationController.php:144` and `:566` call `Mailbox::create(...)`. The file's `use` block (lines 5-14) imports `BankAccount`, `StatementGenerator`, `BankStatement`, `ManagePayeeBiller`, `AutoDebitRequest`, `Transaction`, `Transaction1` — **no `use App\Models\Mailbox;`**. Unless a global class alias is configured elsewhere, this throws `Class "App\Http\Controllers\Mailbox" not found` at runtime whenever that code path executes.
-**Fix:** add `use App\Models\Mailbox;`. One-line fix, verify path executes in a test before merging.
-
-### 4. `MailboxScheduler::scheduleForEvent()` called with no import — likely fatal
-`AdminStudentController::add_student` (line 118) calls `MailboxScheduler::scheduleForEvent(...)`. The file's imports (lines 4-13) don't include `App\Helpers\MailboxScheduler`. Same class-not-found risk as #3, on the admin "add student" flow.
-**Fix:** add the missing `use` statement.
+**Re-verified against live code 2026-09-30** (first time this list was checked against the actual codebase since it was written): #1, #2, #3, #4, #6, #8, #9, #12, #13, #15 were already fixed, and #5 was fixed during this same pass (one remaining call site, `OrderController::placeOrder`) — all removed below. Remaining items were re-confirmed still present. If you're reading this later and something here seems wrong, check the code directly rather than trusting this list blindly — that's exactly how it went stale the first time.
 
 ## 🟠 High
 
