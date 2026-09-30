@@ -247,7 +247,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         $moodlog = MoodLog::create([
             'user_id' => $user->id,
-            'sid' => $user->sid ?? session()->get('sid'),
+            'sid' => $user->sid,
             'mood' => $request->mood,
             'energy' => $data['energy'],                // Add this
             'pleasantness' => $data['pleasantness'],    // Add this
@@ -273,7 +273,7 @@ class ProfileController extends Controller
         // Save mood in DB (assuming user is logged in)
         $moodlog = MoodLog::create([
             'user_id' => auth()->id(),
-            'sid' => session()->get('sid'),
+            'sid' => auth()->user()->sid,
             'mood' => $request->mood,
             'energy' => $data['energy'],                // Add this
             'pleasantness' => $data['pleasantness'],    // Add this

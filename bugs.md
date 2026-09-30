@@ -14,10 +14,6 @@ Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-wo
 "Engagement Badge" (`BadgeCalculatorService` + `BadgeAdminController` + `BadgeStudentController`) and "FinHero Badge" (`FinheroBadgeCalculatorService` + `FinheroAdminController` + `FinheroStudentController`) are structurally near-identical but maintained as two separate codebases. Any shared bugfix must be applied twice (and per #8, may already be inconsistently buggy in only one).
 **Fix:** long-term, evaluate whether both systems are still product-required; if so, extract a shared `BadgeEngine` service parameterized by badge-type config. See `planning.md` Phase 3.
 
-### 14. `sid` (school/session id) written from `session('sid')` instead of the authoritative record
-`CitizenActivationController.php:68,208,231,253,339`, `OrderController.php:107,120,252,266`, `ProfileController.php:242,775,838,870`, `StatementGenerator.php:124,164,193,240` all persist `session('sid')` onto transaction/order rows. Under concurrent tabs, an expired/regenerated session, or admin impersonation, this can silently mis-tag a row with the wrong school/session id, corrupting later per-school reporting.
-**Fix:** derive `sid` from `$user->sid` / `$bankAccount->sid` (the authoritative source) at write time instead of trusting session state. See `planning.md` Phase 2.
-
 ## ⚪ Low (cleanliness — not urgent, batch these during refactor passes)
 
 ### 16. Large blocks of commented-out dead code
