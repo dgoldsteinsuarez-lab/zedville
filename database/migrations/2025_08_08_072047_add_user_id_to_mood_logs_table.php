@@ -7,22 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
-     *
-     * @return void
+     * Redundant with the original create_mood_logs_table migration, which
+     * already defines user_id as a foreign key column. Left as a no-op
+     * rather than deleted so any environment where this is already recorded
+     * as run doesn't break on rollback.
      */
     public function up(): void
-{
-    Schema::table('mood_logs', function (Blueprint $table) {
-        $table->unsignedBigInteger('user_id')->after('id')->index();
-    });
-}
+    {
+        //
+    }
 
-public function down(): void
-{
-    Schema::table('mood_logs', function (Blueprint $table) {
-        $table->dropColumn('user_id');
-    });
-}
-
+    public function down(): void
+    {
+        //
+    }
 };
