@@ -2,13 +2,7 @@
 
 Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-world incorrect behavior) · 🟡 Medium (correctness risk under load/edge case) · ⚪ Low (cleanliness/inconsistency)
 
-**Re-verified against live code 2026-09-30** (first time this list was checked against the actual codebase since it was written): #1, #2, #3, #4, #6, #8, #9, #12, #13, #15 were already fixed, and #5 was fixed during this same pass (one remaining call site, `OrderController::placeOrder`) — all removed below. Remaining items were re-confirmed still present. If you're reading this later and something here seems wrong, check the code directly rather than trusting this list blindly — that's exactly how it went stale the first time.
-
-## 🟠 High
-
-### 7. `badges:calculate-monthly` scheduled on day 31 — skips 5 months a year
-`Console/Kernel.php:55-58` schedules the badge calculation command with `->monthlyOn(31, '23:59')`. Laravel's scheduler does not clamp day 31 to month-end; months with fewer than 31 days (Feb, Apr, Jun, Sep, Nov) simply never fire this job.
-**Fix:** use `->lastDayOfMonth('23:59')` instead.
+**Re-verified against live code 2026-09-30** (first time this list was checked against the actual codebase since it was written): #1, #2, #3, #4, #6, #7, #8, #9, #12, #13, #15 were already fixed, and #5 was fixed during this same pass (one remaining call site, `OrderController::placeOrder`) — all removed below. Every Critical and High severity item is now resolved; what's left is architectural/cosmetic. Remaining items were re-confirmed still present. If you're reading this later and something here seems wrong, check the code directly rather than trusting this list blindly — that's exactly how it went stale the first time.
 
 ## 🟡 Medium
 
