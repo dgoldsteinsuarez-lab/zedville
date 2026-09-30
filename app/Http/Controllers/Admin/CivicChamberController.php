@@ -13,6 +13,35 @@ use Illuminate\Support\Facades\DB;
 
 class CivicChamberController extends Controller
 {
+    /**
+     * Petitions have no school/class scoping enforced elsewhere, so every
+     * query that lists or shows them must go through this. Super Admin sees
+     * everything; School Admin is scoped to their own school; Tutor is
+     * scoped to only the classes they're actually assigned to (via
+     * User::tutoredClasses(), the same source used by the Tutor's student
+     * list).
+     */
+    private function scopePetitionsToViewer($query)
+    {
+        $user = Auth::user();
+
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
+
+        if ($user->isSchoolAdmin()) {
+            return $query->where('sid', $user->sid);
+        }
+
+        if ($user->isTutor()) {
+            $classIds = $user->tutoredClasses()->pluck('classes.id');
+            return $query->whereIn('class_id', $classIds);
+        }
+
+        // Unknown/other role reaching this point (shouldn't happen given the
+        // route middleware) — show nothing rather than everything.
+        return $query->whereRaw('1 = 0');
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -172,7 +201,9 @@ class CivicChamberController extends Controller
 
     public function petitionIndex()
     {
-        $petitions = Petition::with('signatures', 'creator')
+        $petitions = $this->scopePetitionsToViewer(
+            Petition::with('signatures', 'creator')
+        )
         ->latest()
         ->paginate(15);
 
@@ -190,7 +221,9 @@ class CivicChamberController extends Controller
 
     public function petitionShow($id)
     {
-        $petition = Petition::with('signatures', 'creator')->findOrFail($id);
+        $petition = $this->scopePetitionsToViewer(
+            Petition::with('signatures', 'creator')
+        )->findOrFail($id);
 
         return view(
             'admin.civic-chamber.petition.show',
@@ -207,7 +240,7 @@ class CivicChamberController extends Controller
     public function petitionApprove(Request $request, $id)
     {
 
-        $petition = Petition::with('signatures')->findOrFail($id);
+        $petition = $this->scopePetitionsToViewer(Petition::with('signatures'))->findOrFail($id);
 
         $petition->update([
 
@@ -233,7 +266,7 @@ class CivicChamberController extends Controller
     public function petitionReject(Request $request, $id)
     {
 
-        $petition = Petition::with('signatures')->findOrFail($id);
+        $petition = $this->scopePetitionsToViewer(Petition::with('signatures'))->findOrFail($id);
 
         $petition->update([
 
@@ -259,7 +292,7 @@ class CivicChamberController extends Controller
     public function petitionClose($id)
     {
 
-        $petition = Petition::with('signatures')->findOrFail($id);
+        $petition = $this->scopePetitionsToViewer(Petition::with('signatures'))->findOrFail($id);
 
         $petition->update([
 
@@ -289,7 +322,7 @@ class CivicChamberController extends Controller
 
         ]);
 
-        $petition = Petition::with('signatures')->findOrFail($id);
+        $petition = $this->scopePetitionsToViewer(Petition::with('signatures'))->findOrFail($id);
 
         $petition->update([
 
@@ -313,7 +346,7 @@ class CivicChamberController extends Controller
     public function petitionDestroy($id)
     {
 
-        $petition = Petition::with('signatures')->findOrFail($id);
+        $petition = $this->scopePetitionsToViewer(Petition::with('signatures'))->findOrFail($id);
 
         PetitionSignature::where('petition_id', $id)->delete();
 
@@ -430,7 +463,8 @@ class CivicChamberController extends Controller
 
     public function signPetition($id)
     {
-
+        // Student-facing action, not admin/tutor — scopePetitionsToViewer()
+        // assumes an admin-tier role and must not be applied here.
         $petition = Petition::with('signatures')->findOrFail($id);
 
         $studentId = Auth::id();

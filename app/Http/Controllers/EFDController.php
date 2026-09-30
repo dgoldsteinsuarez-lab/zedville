@@ -628,10 +628,14 @@ class EFDController extends Controller
             'description' => 'required',
         ]);
 
+        $student = Auth::user();
+
         Petition::create([
             'title' => $request->title,
             'description' => $request->description,
-            'created_by' => Auth::id(),
+            'created_by' => $student->id,
+            'sid' => $student->sid,
+            'class_id' => $student->grade,
             'status' => 'pending',
         ]);
 

@@ -16,6 +16,10 @@ class Petition extends Model
 
         'created_by',
 
+        'sid',
+
+        'class_id',
+
         'status',
 
         'tutor_feedback',
