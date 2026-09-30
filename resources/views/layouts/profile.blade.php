@@ -191,7 +191,7 @@
                             <div class="bg-gray-200 rounded-full focus:outline-none focus:ring">
                                 <img src="{{ asset('asset/front/images/' . $selectedAvatar->name) }}" class="w-8 h-8 rounded-full object-cover" alt="">
                             </div>
-                            <span class="text-md font-semibold">{{ $user->name }}</span>
+                            <span class="text-md font-semibold">{{ $user->nickname }}</span>
                         </button>
 
                         <!-- Dropdown card -->
@@ -208,7 +208,7 @@
                                         <img src="{{ asset('asset/front/images/' . $selectedAvatar->name) }}" class="w-12 h-12 rounded-full object-cover" alt="User">
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold">{{ $user->name }}</h3>
+                                        <h3 class="font-semibold">{{ $user->nickname }}</h3>
                                         <p class="text-sm">{{ $user->email }}</p>
                                         <p class="text-xs">{{ $bankAccounts->isNotEmpty() ? '****' . substr($bankAccounts->first()->primary_savings_account_amount, -4) : '' }}</p>
                                     </div>

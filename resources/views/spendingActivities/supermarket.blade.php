@@ -828,7 +828,7 @@
                                     <div class="form-group">
                                         <label>Student Name</label>
                                         <input type="text" class="form-control" placeholder="Daniel Goldstein"
-                                            value="{{ $user->name }}">
+                                            value="{{ $user->nickname }}">
                                     </div>
                                     <div class="form-group">
                                         <label>Card Number</label>

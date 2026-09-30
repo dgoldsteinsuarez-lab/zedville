@@ -15,7 +15,7 @@ $bankAccount = BankAccount::find($bank_account_id ?? null);
 </ul>
 <p>Your banking journey starts now!</p>
 <p><strong>Banco Nacional Joven - Online Banking</strong></p>
-<p><strong>Welcome, {{ $user->name }}</strong></p>
+<p><strong>Welcome, {{ $user->nickname }}</strong></p>
 <p><strong>Account:</strong> Student</p>
 <p><strong>Account Name:</strong></p>
 <p><strong>Account Summary</strong></p>

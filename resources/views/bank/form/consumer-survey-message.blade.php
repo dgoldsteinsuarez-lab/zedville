@@ -9,7 +9,7 @@
 
 <div class="grid grid-cols-1 gap-5 mt-6">
     <div class="w-full bg-white border border-color-[#D2DDDB] rounded p-10 userProfileDtls">
-        <p>Hello <strong>{{ $user->name }}</strong>,</p>
+        <p>Hello <strong>{{ $user->nickname }}</strong>,</p>
 
         <p class="mt-3">
             You have successfully completed all required setup steps.

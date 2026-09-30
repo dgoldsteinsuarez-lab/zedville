@@ -48,7 +48,7 @@
                 </div>
                 <div class="userName mr-auto {{ $sidebarOpen ? '' : 'hidden' }}" :class="{'hidden': !isSidebarOpen}">
                     <p class="text-sm text-[#5C5C5C] singlelineTxt">{{ $greeting }},</p>
-                    <h4 class="text-md xl:text-lg 2xl:text-xl font-semibold text-black singlelineTxt">{{ $user->name }}</h4>
+                    <h4 class="text-md xl:text-lg 2xl:text-xl font-semibold text-black singlelineTxt">{{ $user->nickname }}</h4>
                 </div>
 
             </a>

@@ -11,7 +11,7 @@
         '&to_date=' . $toDate;
 @endphp
 
-<p><strong>Dear {{ $user->name }},</strong></p>
+<p><strong>Dear {{ $user->nickname }},</strong></p>
 
 <p>
     Your <strong>{{ $prevMonth->format('F Y') }}</strong> bank statement is now ready.

@@ -1,4 +1,4 @@
-<p><strong>Hello {{ $user->name }}</strong></p>
+<p><strong>Hello {{ $user->nickname }}</strong></p>
 <p>Congratulations! You're officially <span style="color:#3c41fb">Zedville's newest citizen.</span></p>
 <p><strong>Your Citizen ID:</strong> {{ $user->citizenId }}</p>
 <p><strong>How it works:</strong> Every month, you'll <span style="color:#3c41fb">receive a salary in Zeds</span> (our virtual currency). Use it to practice budgeting, pay bills, and make money decisions—just like in real adult life!</p>

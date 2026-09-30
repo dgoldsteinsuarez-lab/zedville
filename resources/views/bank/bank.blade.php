@@ -19,7 +19,7 @@
                         <div class="w-full lg:w-[100%]">
                             <div class="mb-4 form-group">
                                 <label class="block mb-2 text-base font-medium text-black">Full Name</label>
-                                <input class="form-control" name="fullName" placeholder="Enter Full Name" type="text" value="{{ $user->name }}" />
+                                <input class="form-control" name="fullName" placeholder="Enter Full Name" type="text" value="{{ $user->nickname }}" />
                             </div>
                         </div>
                         <!-- <div class="w-full lg:w-[50%]">

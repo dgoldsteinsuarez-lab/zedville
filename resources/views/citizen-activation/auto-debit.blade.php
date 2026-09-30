@@ -189,7 +189,7 @@
                     respective company in writing."
 
                 </div>
-                <input type="hidden" name="fullname" value="{{ $user->name }}">
+                <input type="hidden" name="fullname" value="{{ $user->nickname }}">
                 <input type="hidden" name="email" value="{{ $user->email }}">
                 <input type="hidden" name="serviceaddress" value="{{ $user->student_address }}">
                 <input type="hidden" name="bankname" value="{{ $bankAccount->bank_name }}">

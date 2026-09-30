@@ -58,7 +58,7 @@
 
                 <div class="info-row">
                     <span class="info-label">Account Holder</span>
-                    <span>{{ $user->name }}</span>
+                    <span>{{ $user->nickname }}</span>
                 </div>
 
                 <div class="info-row">

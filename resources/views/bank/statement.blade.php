@@ -86,7 +86,7 @@
 
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
     <div class="leftheading">
-        <h1 class="text-xl font-bold whitespace-nowrap ">Bank Statement for {{ $user->name }}</h1>
+        <h1 class="text-xl font-bold whitespace-nowrap ">Bank Statement for {{ $user->nickname }}</h1>
         <p class="text-gray-600 text-sm mt-1">Month: {{ $statement['month'] }} / Year: {{ $statement['year'] }}</p>
     </div>
     <!-- <a href="{{ route('bank.bank_statement_show') }}" class="themeBtn py-2 px-4 inline-block flex gap-2 items-center"><span class="font-bold leading-none">← </span>Back to Statements</a> -->

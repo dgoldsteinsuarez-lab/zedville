@@ -99,7 +99,7 @@
 
             <div class="mt-8">
                 <p class="font-bold mb-2">Your Information:</p>
-                <p>Full Name: <span class="font-semibold">{{ $user->name }}</span></p>
+                <p>Full Name: <span class="font-semibold">{{ $user->nickname }}</span></p>
                 <p>Email Address: <span class="font-semibold">{{ $user->email }}</span></p>
                 <p>Home Address: <span class="font-semibold">{{ $user->student_address ?? 'N/A' }}</span></p>
             </div>
@@ -109,7 +109,7 @@
             <p>Bank Name: <span class="font-semibold">{{ $bankAccount->bank_name ?? '__________' }}</span></p>
             <p>Account Number: <span class="font-semibold">{{ $bankAccount->primary_savings_account_number ?? '__________' }}</span></p>
             <p>SWIFT/BIC Code: <span class="font-semibold">{{ $bankAccount->card_swift ?? '__________' }}</span></p>
-            <input type="hidden" name="fullname" value="{{ $user->name }}">
+            <input type="hidden" name="fullname" value="{{ $user->nickname }}">
             <input type="hidden" name="email" value="{{ $user->email }}">
             <input type="hidden" name="serviceaddress" value="{{ $user->student_address }}">
             <input type="hidden" name="bankname" value="{{ $bankAccount->bank_name }}">

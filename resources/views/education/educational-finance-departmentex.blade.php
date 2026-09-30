@@ -1114,7 +1114,7 @@
 @endsection
 @push('scripts')
   <script>
-    window.citizenName = "{{ auth()->user()->name }}";
+    window.citizenName = "{{ auth()->user()->nickname }}";
   </script>
   <script src="{{ asset('asset/front/js/efd.js') }}?ver={{ rand(111, 999) }}"></script>
   <script src="{{ asset('asset/front/js/modules.js') }}?ver={{ rand(111, 999) }}"></script>

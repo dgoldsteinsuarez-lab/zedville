@@ -17,7 +17,7 @@
                     <div class="flex flex-wrap lg:flex-nowrap gap-4">
                         <div class="w-full lg:w-[100%]">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-md font-medium text-black">Full Name: {{ $user->name }}</label>
+                                <label class="block mb-2 text-md font-medium text-black">Full Name: {{ $user->nickname }}</label>
                                 <label class="block mb-2 text-md font-medium text-black">Email Address: {{ $user->email }}</label>
                                 <label class="block mb-2 text-md font-medium text-black">Student ID: {{ $user->citizenId }}</label>
                             </div>
