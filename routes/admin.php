@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminEmailTemplateController;
 use App\Http\Controllers\Admin\AdminEducationController;
 use App\Http\Controllers\Admin\WellbeingController;
 use App\Http\Controllers\Admin\CivicChamberController;
+use App\Http\Controllers\Tutor\TutorStudentController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 // Dashboard Routes
@@ -35,6 +36,9 @@ Route::get('/school-domain', [AdminDashboardController::class, 'schoolDomain'])-
 Route::post('/school-domain/add', [AdminDashboardController::class, 'addschoolDomain'])->name('admin.school-domain.add');
 Route::put('/school-domain/edit/{id}', [AdminDashboardController::class, 'updateschoolDomain'])->name('admin.grade.update');
 Route::delete('/school-domain/delete/{id}', [AdminDashboardController::class, 'deleteschoolDomain'])->name('admin.school-domain.delete');
+
+// Tutor's own student list (their assigned classes only)
+Route::get('/my-students', [TutorStudentController::class, 'index'])->name('tutor.my-students');
 
 //For Student
 Route::get('/student', [AdminStudentController::class, 'index'])->name('admin.student.index');
