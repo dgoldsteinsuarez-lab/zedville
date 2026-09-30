@@ -2,6 +2,8 @@
 
 Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-world incorrect behavior) · 🟡 Medium (correctness risk under load/edge case) · ⚪ Low (cleanliness/inconsistency)
 
+**Re-verified against live code 2026-09-30** (first time this list was checked against the actual codebase since it was written): #6, #8, #9, #12, #13, #15 were already fixed and have been removed. Remaining items below were re-confirmed still present. If you're reading this later and something here seems wrong, check the code directly rather than trusting this list blindly — that's exactly how it went stale the first time.
+
 ## 🔴 Critical
 
 ### 1. Salary credited to a ledger nothing else reads (`Transaction` vs `Transaction1` split)
@@ -43,21 +45,9 @@ Result: the salary the student receives never appears in the balance chain that 
 "Engagement Badge" (`BadgeCalculatorService` + `BadgeAdminController` + `BadgeStudentController`) and "FinHero Badge" (`FinheroBadgeCalculatorService` + `FinheroAdminController` + `FinheroStudentController`) are structurally near-identical but maintained as two separate codebases. Any shared bugfix must be applied twice (and per #8, may already be inconsistently buggy in only one).
 **Fix:** long-term, evaluate whether both systems are still product-required; if so, extract a shared `BadgeEngine` service parameterized by badge-type config. See `planning.md` Phase 3.
 
-### 12. Academic-year start month is inconsistent across files
-`BadgeCalculatorService.php:211`, `FinheroBadgeCalculatorService.php:161`, `ParticipationService.php:122`, `ProfileController.php:1133` use month `9`; `ProfileController.php:1273` uses `8` (0-based, effectively also September but fragile); `FinheroPointService.php:21` uses month `4`. This isn't just duplication — it's a genuine behavioral inconsistency between the point/badge systems about when the "academic year" rolls over.
-**Fix:** centralize into one config value (`config('zedville.academic_year_start_month')`), audit which value is actually correct with the product owner, fix `FinheroPointService.php` to match.
-
-### 13. Hardcoded monthly salary value differs across files
-`3952.40` appears in `CitizenActivationController.php:132`, `EFDController.php:163`, `StatementGenerator.php:70` (as a fallback), while `BankController::creditMonthlySalary` uses `4250` — two different salary figures for the same concept in the same app.
-**Fix:** centralize into config, confirm the correct figure, fix the outlier.
-
 ### 14. `sid` (school/session id) written from `session('sid')` instead of the authoritative record
 `CitizenActivationController.php:68,208,231,253,339`, `OrderController.php:107,120,252,266`, `ProfileController.php:242,775,838,870`, `StatementGenerator.php:124,164,193,240` all persist `session('sid')` onto transaction/order rows. Under concurrent tabs, an expired/regenerated session, or admin impersonation, this can silently mis-tag a row with the wrong school/session id, corrupting later per-school reporting.
 **Fix:** derive `sid` from `$user->sid` / `$bankAccount->sid` (the authoritative source) at write time instead of trusting session state. See `planning.md` Phase 2.
-
-### 15. `LoginQuizController` computes "already answered" IDs but never uses them
-`LoginQuizController.php:28` computes `$answeredIds`, but the `whereNotIn` filter that would use it is commented out (line 33); the active query (lines 36-38) is plain `inRandomOrder()`. The dedup-questions feature is fully inert — the query runs and its result is discarded every call.
-**Fix:** either re-enable the `whereNotIn` filter (if "don't repeat questions" is still wanted) or remove the now-pointless `$answeredIds` computation.
 
 ## ⚪ Low (cleanliness — not urgent, batch these during refactor passes)
 
