@@ -25,12 +25,6 @@ Result: the salary the student receives never appears in the balance chain that 
 
 ## 🟠 High
 
-### 5. No transaction/locking around balance mutations — real overdraft race condition
-`EFDController::storeDonation` (lines 527-583) reads the latest balance, checks it against the donation amount, then creates a `Transaction1` row — with **no `DB::transaction()`, no `lockForUpdate()`**. Two concurrent donation requests for the same user can both read the same stale balance, both pass the check, both post — allowing the balance to go negative (or double-spend) under concurrent load.
-`OrderController::placeOrder` (lines 76-155) does wrap in `DB::beginTransaction()/commit()/rollBack()`, which is better, but the balance read (lines 41-44) still happens without `lockForUpdate()`, so two simultaneous orders can still race between read and transaction-open.
-`ProfileController::storesurvey` reads `$availableBalance` at line 725, checks it at line 752, but doesn't open `DB::beginTransaction()` until line 766 — the check happens **outside** the transaction boundary, same race.
-**Fix:** wrap every balance-read-then-write sequence in `DB::transaction()` and add `->lockForUpdate()` on the balance query. Standardize this as one helper (`BalanceService::debit()`/`credit()`) — see `planning.md` Phase 1.
-
 ### 7. `badges:calculate-monthly` scheduled on day 31 — skips 5 months a year
 `Console/Kernel.php:55-58` schedules the badge calculation command with `->monthlyOn(31, '23:59')`. Laravel's scheduler does not clamp day 31 to month-end; months with fewer than 31 days (Feb, Apr, Jun, Sep, Nov) simply never fire this job.
 **Fix:** use `->lastDayOfMonth('23:59')` instead.

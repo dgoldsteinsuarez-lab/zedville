@@ -213,27 +213,26 @@ class OrderController extends Controller
             ];
         }
 
-        // 4. Balance check from latest transaction
-        $latestTxn = Transaction1::where('user_id', $user->id)
-            ->latest('id')
-            ->first();
-
-        $lastBalance = $latestTxn ? (float) $latestTxn->balance : 0;
-
-        if ($lastBalance < $serverTotal) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Insufficient balance. Your available balance is '
-                    . number_format($lastBalance, 2)
-                    . ' Z. Required amount is '
-                    . number_format($serverTotal, 2)
-                    . ' Z.'
-            ], 422);
-        }
-
         DB::beginTransaction();
 
         try {
+            // 4. Balance check — under row lock, and inside the transaction,
+            // so two concurrent orders can't both read the same stale
+            // balance and both pass this check (see bugs.md #5).
+            $lastBalance = \App\Services\BalanceService::lockedBalance($user->id);
+
+            if ($lastBalance < $serverTotal) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Insufficient balance. Your available balance is '
+                        . number_format($lastBalance, 2)
+                        . ' Z. Required amount is '
+                        . number_format($serverTotal, 2)
+                        . ' Z.'
+                ], 422);
+            }
+
             // 5. Create order using server-calculated total
             $orderId = DB::table('orders')->insertGetId([
                 'user_id' => $user->id,
