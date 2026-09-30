@@ -33,14 +33,6 @@ Result: the salary the student receives never appears in the balance chain that 
 `Console/Kernel.php:55-58` schedules the badge calculation command with `->monthlyOn(31, '23:59')`. Laravel's scheduler does not clamp day 31 to month-end; months with fewer than 31 days (Feb, Apr, Jun, Sep, Nov) simply never fire this job.
 **Fix:** use `->lastDayOfMonth('23:59')` instead.
 
-### 8. `getAllActiveStudents()` may filter on the wrong role value, silently no-op-ing badge calculation
-`BadgeCalculatorService.php:234` and `FinheroBadgeCalculatorService.php:177` both filter `DB::table('users')->where('role', 'student')`. Every other controller in the codebase checks `$user->role == 4` (integer/numeric role code) — e.g. `ProfileController.php:315`, `AdminStudentController.php:22`, `AuthenticatedSessionController.php:163,171,175`. If `role` is stored numerically (which the rest of the codebase implies), this query returns **zero rows**, and the entire monthly badge calculation silently does nothing for the whole student body, every month, with no error.
-**Fix:** confirm the actual stored `role` value for students against the `users` table/migration, then align both badge services to match the rest of the codebase.
-
-### 9. Dead penalty trigger — last-day-of-month penalty never actually runs
-`AuthenticatedSessionController.php:95-96` — the call to apply the end-of-month penalty (`app(BankController::class)->banks_penalty(...)`) is commented out, but the surrounding date-math/existence-check block (lines 78-97, ~20 lines) still executes on every login and computes nothing useful.
-**Fix:** either re-enable the call (if penalties are intended) or delete the dead block. Needs a product decision — flag to whoever owns the penalty feature before changing behavior.
-
 ## 🟡 Medium
 
 ### 10. Two independent, divergent implementations of the same feature (Civic Chamber)

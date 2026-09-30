@@ -98,8 +98,7 @@ class AuthenticatedSessionController extends Controller
             !$penaltyExists &&
             $accountCreatedBeforeThisMonth
         ) {
-            //app(BankAccountController::class)
-            //app(BankController::class)->banks_penalty(app(StatementGenerator::class));
+            app(\App\Http\Controllers\BankController::class)->banks_penalty(app(StatementGenerator::class), $user);
         }
         // ✅ ADD PREVIOUS MONTH STATEMENT MAIL HERE 👇👇👇
         // ----------------------------------------------
