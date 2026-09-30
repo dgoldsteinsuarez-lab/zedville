@@ -27,4 +27,13 @@ class Grade extends Model
 
     // Optional: If you don't want timestamps, set this to false
     // public $timestamps = false;
+
+    /**
+     * Tutors assigned to this class. Many-to-many: a class may have more than
+     * one tutor, per the school's own configuration.
+     */
+    public function tutors()
+    {
+        return $this->belongsToMany(User::class, 'class_tutor', 'class_id', 'user_id');
+    }
 }

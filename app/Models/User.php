@@ -86,6 +86,15 @@ class User extends Authenticatable
         return $this->isSuperAdmin() || $this->isSchoolAdmin() || $this->isTutor();
     }
 
+    /**
+     * Classes this user tutors. Many-to-many — a Tutor may be assigned to more
+     * than one class (school-configurable).
+     */
+    public function tutoredClasses()
+    {
+        return $this->belongsToMany(Grade::class, 'class_tutor', 'user_id', 'class_id');
+    }
+
     public function avatar()
     {
     return $this->belongsTo(\App\Models\Avatar::class, 'avatar'); // avatar is the foreign key in users table

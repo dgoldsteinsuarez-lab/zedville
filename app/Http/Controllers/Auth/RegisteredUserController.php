@@ -42,7 +42,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             // Single word only — keeps this from being used to enter a full name
             // (first + family name). Public views show this, never 'name'.
-            'nickname' => ['required', 'string', 'max:50', 'regex:/^\S+$/'],
+            'nickname' => ['required', 'string', 'min:3', 'max:15', 'regex:/^\S+$/'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
             //'reEnterEmail' => ['required', 'same:email'],
             'classCode' => ['required', 'exists:classes,classCode'],
