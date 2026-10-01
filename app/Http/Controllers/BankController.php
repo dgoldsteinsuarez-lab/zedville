@@ -7,7 +7,7 @@ use App\Services\ParticipationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use App\Models\user;
+use App\Models\User;
 use App\Models\Mailbox;
 use App\Models\BankAccount;
 use App\Models\DirectDeposite;
