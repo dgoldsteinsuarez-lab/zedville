@@ -84,6 +84,7 @@
                           
                            
                                 <ul class="navbar-nav sidenavigation">
+                                    @php $navSuper = auth()->user()->isSuperAdmin(); $navOrg = $navSuper || auth()->user()->isSchoolAdmin(); @endphp
                                     <li class="nav-item {{ Route::is('admin.dashboard') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Dashboard">
                                         <a class="nav-link" href="{{ url('admin/dashboard') }}">
                                             <span class="navIcon">
@@ -92,6 +93,13 @@
                                             <span class="navTxt">Dashboard</span>
                                         </a>
                                     </li>
+                                    @if(auth()->user()->isTutor())
+                                    <li class="nav-item {{ request()->is('admin/my-students') ? 'active' : '' }}">
+                                        <a class="nav-link" href="{{ url('admin/my-students') }}">
+                                            <span class="navTxt">My Students</span>
+                                        </a>
+                                    </li>
+                                    @endif
                                     @php
                                         $usersMenuActive = request()->is(
                                             'admin/student*',
@@ -101,6 +109,7 @@
                                             'admin/school-user*'
                                         );
                                     @endphp
+                                    @if($navOrg)
                                     <li class="nav-item {{ $usersMenuActive ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Users">
                                         <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#usernav"  aria-expanded="{{ $usersMenuActive ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
@@ -132,6 +141,7 @@
                                                         <span class="navTxt">School User</span>
                                                     </a>
                                                 </li>
+                                                @if($navSuper)
                                                 <li class="nav-item {{ request()->is('admin/role') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/role') }}">
                                                         <span class="navTxt">Role</span>
@@ -142,6 +152,7 @@
                                                         <span class="navTxt">School Domain</span>
                                                     </a>
                                                 </li>
+                                                @endif
                                                 <li class="nav-item {{ request()->is('admin/grade') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/grade') }}">
                                                         <span class="navTxt">Grade / Class</span>
@@ -150,12 +161,14 @@
                                             </ul>
                                         </div>
                                     </li>
+                                    @endif
                                     @php
                                         $usersMenuActive1 = request()->is(
                                             'admin/email/communication*',
                                             'admin/email-template*',
                                         );
                                     @endphp
+                                    @if($navSuper)
                                     <li class="nav-item {{ $usersMenuActive1 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Mail Box">
                                         <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#mailbox" aria-expanded="{{ $usersMenuActive1 ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
@@ -187,11 +200,13 @@
                                             </ul>
                                         </div>
                                     </li>
+                                    @endif
                                     @php
                                         $usersMenuActive2 = request()->is(
                                             'admin/accounts*',
                                         );
                                     @endphp
+                                    @if($navOrg)
                                     <li class="nav-item {{ $usersMenuActive2 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="City Bank">
                                         <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#citybank" aria-expanded="{{ $usersMenuActive2 ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
@@ -265,6 +280,7 @@
                                             </ul>
                                         </div>
                                     </li>
+                                    @endif
                                     @php
                                         $usersMenuActive3 = request()->is(
                                             'admin/education/monthly-budget-activity*',
@@ -276,6 +292,7 @@
                                             'admin/finhero/task-activities',
                                         );
                                     @endphp
+                                    @if($navOrg)
                                      <li class="nav-item {{ $usersMenuActive3 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Education">
                                         <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#education" aria-expanded="{{ $usersMenuActive3 ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
@@ -387,6 +404,7 @@
                                             </ul>
                                         </div>
                                     </li>
+                                    @endif
                                     @php
                                         $usersMenuActive4 = request()->is(
                                             'admin/wellbeing*',
@@ -410,11 +428,13 @@
                                         </a>
                                         <div id="cityHall" class="collapse {{ $usersMenuActive4 ? 'show' : '' }} collapseNavItems" data-bs-parent="#toggleNavsubnav">
                                             <ul class="subnav">
+                                                @if($navSuper)
                                                 <li class="nav-item {{ request()->is('admin/wellbeing') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/wellbeing') }}">
                                                         <span class="navTxt">Wellbeing Room</span>
                                                     </a>
                                                 </li>
+                                                @endif
                                                 <li class="nav-item {{ request()->is('admin/referendum') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/referendum') }}">
                                                         <span class="navTxt">Civic Chamber Referendums</span>
