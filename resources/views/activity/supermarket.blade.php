@@ -858,7 +858,7 @@
     <select id="classmateSelect" class="form-control" style="display:none;">
         <option value="">Select Classmate</option>
         @foreach($classmates as $classmate)
-            <option value="{{ $classmate->id }}">{{ $classmate->name }}</option>
+            <option value="{{ $classmate->id }}">{{ $classmate->nickname }}</option>
         @endforeach
     </select>
 

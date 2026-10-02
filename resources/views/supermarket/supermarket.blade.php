@@ -983,7 +983,7 @@
         <option value="">Select Classmate</option>
         @foreach($classmates as $classmate)
             <option value="{{ $classmate->id }}">
-                {{ $classmate->name }}
+                {{ $classmate->nickname }}
             </option>
         @endforeach
     </select>

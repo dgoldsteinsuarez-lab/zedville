@@ -101,7 +101,7 @@ public function supermarket(Request $request)
         ->where('sid', $user->sid)
         ->where('grade', $user->grade)
         ->orderBy('citizenId')
-        ->get(['id', 'citizenId', 'name']);
+        ->get(['id', 'citizenId', 'nickname']);
 
     // 🔹 URL type (omnivore / veg / etc.)
     $type = request()->segment(count(request()->segments()));
@@ -209,7 +209,7 @@ public function spending_tracker($type, Request $request)
         ->where('sid', $user->sid)
         ->where('grade', $user->grade)
         ->orderBy('citizenId')
-        ->get(['id', 'citizenId', 'name']);
+        ->get(['id', 'citizenId', 'nickname']);
 
     // URL → DB mapping
     $storeMap = [

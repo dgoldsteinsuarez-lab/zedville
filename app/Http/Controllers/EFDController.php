@@ -324,7 +324,7 @@ class EFDController extends Controller
             ->where('sid', $user->sid)
             ->where('grade', $user->grade)
             ->orderBy('citizenId')
-            ->get(['id', 'citizenId', 'name']);
+            ->get(['id', 'citizenId', 'nickname']);
 
         // URL → DB mapping
         $storeMap = [

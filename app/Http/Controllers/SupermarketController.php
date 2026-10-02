@@ -101,7 +101,7 @@ public function supermarket()
         ->where('sid', $user->sid)
         ->where('grade', $user->grade)
         ->orderBy('citizenId')
-        ->get(['id', 'citizenId', 'name']);
+        ->get(['id', 'citizenId', 'nickname']);
 
     // 🔹 URL type (omnivore / veg / etc.)
     $type = request()->segment(count(request()->segments()));
