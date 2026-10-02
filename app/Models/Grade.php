@@ -19,7 +19,7 @@ class Grade extends Model
         'classCode',
         'section',
         'description',
-        'status',
+        'grade_level_id',
         'status',
         'created_at',
         'updated_at',
@@ -32,6 +32,17 @@ class Grade extends Model
      * Tutors assigned to this class. Many-to-many: a class may have more than
      * one tutor, per the school's own configuration.
      */
+    /** Students of this class (they point at it through users.grade). */
+    public function students()
+    {
+        return $this->hasMany(User::class, 'grade')->where('role', 4);
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(GradeLevel::class, 'grade_level_id');
+    }
+
     public function tutors()
     {
         return $this->belongsToMany(User::class, 'class_tutor', 'class_id', 'user_id');

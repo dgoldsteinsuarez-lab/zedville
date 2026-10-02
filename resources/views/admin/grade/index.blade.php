@@ -9,6 +9,12 @@
     <div class="row">
         <div class="themeCard card card-custom card-stretch gutter-b mab-15">
             <div class="card-body pall-30">
+                @if(session('error'))
+                    <div class="alert alert-danger" style="margin-bottom: 20px;">{{ session('error') }}</div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger" style="margin-bottom: 20px;">{{ $errors->first() }}</div>
+                @endif
                 @if(session('success'))
                     <div id="success-message" class="alert alert-success" style="margin-bottom: 20px;">
                         {{ session('success') }}
@@ -28,7 +34,7 @@
                                                     <i class="fas fa-search"></i>
                                                 </span>
                                                 <input type="text" class="form-control fs-14" name="search"
-                                                    value="{{ request('search') }}" placeholder="Search Grade" />
+                                                    value="{{ request('search') }}" placeholder="Search class" />
                                             </div>
                                             <button type="submit" class="themeBtn text-white">Search</button>
 
@@ -36,7 +42,7 @@
                                     </form>
                                     <div class="rightpanel d-flex gap-2">
                                         <button class="themeBtnGray theme-text-dark" data-bs-toggle="modal"
-                                            data-bs-target="#addmodel">Add Grade</button>
+                                            data-bs-target="#addmodel">Add Class</button>
                                     </div>
                                 </div>
                             </div>
@@ -52,7 +58,10 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Grade / Class</th>
+                                    <th>Grade level</th>
+                                    <th>Class</th>
+                                    <th>Tutor(s)</th>
+                                    <th>Students</th>
                                     <th>Class Code</th>
                                     <th class="rightText">Action</th>
                                 </tr>
@@ -67,11 +76,14 @@
                                 @endphp
                                 <tr>
                                     <td valign="middle"><a class="theme-text-dark">{{$i}}</a></td>
+                                    <td valign="middle">{{ $gradelist->level->name ?? '— not assigned —' }}</td>
                                     <td valign="middle">{{ $gradelist->name }}</td>
+                                    <td valign="middle">{{ $gradelist->tutors->pluck('nickname')->filter()->implode(', ') ?: '—' }}</td>
+                                    <td valign="middle">{{ $gradelist->students_count }}</td>
                                     <td valign="middle">{{ $gradelist->classCode }}</td>
                                     <td valign="middle">
                                         <div class="actionBtns d-flex align-items-center justify-content-end">
-                                            <a href="#" class="tableActionBtn me-3 edit-role-btn" data-bs-toggle="modal" data-bs-target="#gradeEditModal" data-id="{{ $gradelist->id }}" data-name="{{ $gradelist->name }}" data-classCode="{{ $gradelist->classCode }}">
+                                            <a href="#" class="tableActionBtn me-3 edit-role-btn" data-bs-toggle="modal" data-bs-target="#gradeEditModal" data-id="{{ $gradelist->id }}" data-name="{{ $gradelist->name }}" data-classCode="{{ $gradelist->classCode }}" data-level="{{ $gradelist->grade_level_id }}">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit">
                                                     <path d="M16 4.99994L19 7.99994" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
                                                     <path d="M4.50001 16.4994L18.4999 2.49994L21.5004 5.49994L7.50041 19.4999L3 20.9995L4.50001 16.4994Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -98,6 +110,31 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="themeCard card card-custom card-stretch gutter-b mab-15">
+            <div class="card-body pall-30">
+                <h2 class="fs-16 fw-500 mab-15">Grade levels</h2>
+                <p class="text-muted">Group your classes by grade (for example Grade 7, Grade 8). Then pick the grade level when you add or edit a class.</p>
+                <form action="{{ url('admin/grade-level/add') }}" method="post" class="d-flex gap-2 mab-15">
+                    @csrf
+                    <input class="form-control w-300px" type="text" name="name" placeholder="New grade level, e.g. Grade 8" required maxlength="100">
+                    <button type="submit" class="themeBtn text-white">Add grade level</button>
+                </form>
+                @forelse ($levels as $level)
+                    <form action="{{ url('admin/grade-level/edit', $level->id) }}" method="post" class="d-flex gap-2 mab-10 align-items-center">
+                        @csrf @method('PUT')
+                        <input class="form-control w-300px" type="text" name="name" value="{{ $level->name }}" required maxlength="100">
+                        <button type="submit" class="themeBtnGray theme-text-dark">Rename</button>
+                        <button type="submit" form="del-level-{{ $level->id }}" class="secondaryBtn theme-text-mute"
+                            onclick="return confirm('Remove this grade level? Its classes stay, but become unassigned.')">Remove</button>
+                    </form>
+                    <form id="del-level-{{ $level->id }}" action="{{ url('admin/grade-level/delete', $level->id) }}" method="post">@csrf @method('DELETE')</form>
+                @empty
+                    <p class="text-muted mb-0">No grade levels yet.</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
     <!-- Add Grade / Class -->
 <section class="themeModal">
     <form action="{{ url('admin/grade/add') }}" method="post">
@@ -106,7 +143,7 @@
             <div class="modal-dialog modal-dialog-centered mw-460px">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title fs-16 fw-700 theme-text-dark" id="exampleModalLabel">Add Grade / Class</h4>
+                        <h4 class="modal-title fs-16 fw-700 theme-text-dark" id="exampleModalLabel">Add Class</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body pall-30">
@@ -114,6 +151,15 @@
                             <div class="form-group mab-20">
                                 <label for="" class="form-label">Grade / Class Name</label>
                                 <input class="form-control" type="text" name="name" placeholder="Please Grade / Class Name">
+                            </div>
+                            <div class="form-group mab-20">
+                                <label for="" class="form-label">Grade level</label>
+                                <select class="form-control" name="grade_level_id" >
+                                    <option value="">— none —</option>
+                                    @foreach ($levels as $level)
+                                        <option value="{{ $level->id }}">{{ $level->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -135,7 +181,7 @@
             <div class="modal-dialog modal-dialog-centered mw-460px">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title fs-16 fw-700 theme-text-dark" id="exampleModalLabel">Edit Grade / Class</h4>
+                        <h4 class="modal-title fs-16 fw-700 theme-text-dark" id="exampleModalLabel">Edit Class</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body pall-30">
@@ -144,6 +190,15 @@
                             <div class="form-group mab-20">
                                 <label for="" class="form-label">Grade / Class Name</label>
                                 <input class="form-control" type="text" name="name" id="grade_name" placeholder="Please Grade / Class Name">
+                            </div>
+                            <div class="form-group mab-20">
+                                <label for="" class="form-label">Grade level</label>
+                                <select class="form-control" name="grade_level_id" id="grade_level_id_edit">
+                                    <option value="">— none —</option>
+                                    @foreach ($levels as $level)
+                                        <option value="{{ $level->id }}">{{ $level->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="form-group mab-20">
                                 <label for="" class="form-label">Class Code</label>
@@ -208,6 +263,7 @@ $(document).ready(function() {
         $('#grade_id').val(gradeId);
         $('#grade_name').val(gradeName);
         $('#classCode').val(classCode);
+        $('#grade_level_id_edit').val($(this).data('level') || '');
     });
 
     // AJAX form submit
@@ -219,7 +275,8 @@ $(document).ready(function() {
             _token: $('input[name="_token"]').val(),
             _method: 'PUT',
             name: $('#grade_name').val(),
-            classCode: $('#classCode').val()
+            classCode: $('#classCode').val(),
+            grade_level_id: $('#grade_level_id_edit').val()
         };
         var baseUrl = "{{ url('admin/grade/edit') }}/";
         $.ajax({
@@ -233,7 +290,8 @@ $(document).ready(function() {
                 location.reload(); // Or update the row dynamically
             },
             error: function(xhr) {
-                alert('Failed to update role.');
+                var msg = (xhr.responseJSON && xhr.responseJSON.errors) ? Object.values(xhr.responseJSON.errors)[0][0] : 'Failed to update class.';
+                alert(msg);
                 console.log(xhr.responseText);
             }
         });

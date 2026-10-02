@@ -6,7 +6,9 @@
 <div class="container-fluid">
     <h2 class="mb-4">My Students</h2>
 
-    @forelse ($classes as $class)
+    @forelse ($levels as $levelName => $classes)
+        <h4 class="mt-4 mb-3">{{ $levelName !== '' ? $levelName : 'Classes without a grade level' }}</h4>
+        @foreach ($classes as $class)
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>{{ $class->name }}</strong>
@@ -42,6 +44,7 @@
                 @endif
             </div>
         </div>
+        @endforeach
     @empty
         <p class="text-muted">You haven't been assigned to any classes yet.</p>
     @endforelse

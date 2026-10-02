@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Models\Role;
 use App\Models\Grade;
+use App\Models\GradeLevel;
+use App\Models\User;
 use App\Models\SchoolDomain;
 use App\Models\LoginQuestion;
 use App\Models\LoginOption;
@@ -170,111 +172,153 @@ public function updateRole(Request $request, $id)
     return redirect()->back()->with('success', 'Role updated successfully!');
 }
 //For Grade / Class
-public function grade(Request $request)
-    {
-        //$query = Role::orderByDesc('id');
-        $query = Grade::orderBy('id', 'asc');
-
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-        // ✅ Apply SID filter (only if selected)
+/**
+ * Classes / grade levels visible to the current admin: everything for a
+ * Super Admin who has not picked a school, otherwise one school only
+ * (IsAdmin pins School Admins to their own school).
+ */
+private function schoolScoped($query)
+{
     if (session()->has('selected_school')) {
         $query->where('sid', session('selected_school'));
     }
-        $grade = $query->get();
+    return $query;
+}
 
-        return view('admin.grade.index', compact('grade'));
-        
-    }
-    public function addGrade(Request $request)
+public function grade(Request $request)
 {
+    $query = $this->schoolScoped(Grade::with(['level', 'tutors:users.id,users.nickname']))
+        ->withCount(['students']);
+
+    if ($request->filled('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    $grade = $query->orderBy('grade_level_id')->orderBy('name')->get();
+    $levels = $this->schoolScoped(GradeLevel::orderBy('sort_order')->orderBy('name'))->get();
+
+    return view('admin.grade.index', compact('grade', 'levels'));
+}
+
+/** The grade level must belong to the same school as the class. */
+private function validLevelId($levelId, $sid)
+{
+    if (empty($levelId)) {
+        return null;
+    }
+    $level = GradeLevel::where('id', $levelId)->where('sid', (string) $sid)->first();
+    abort_unless($level, 422, 'Grade level does not belong to this school.');
+    return $level->id;
+}
+
+public function addGrade(Request $request)
+{
+    $sid = session('selected_school');
+    abort_if($sid === null, 422, 'Select a school first.');
+
     $request->validate([
-        'name' => 'required|string|max:255|unique:roles,name',
+        'name' => ['required', 'string', 'max:255',
+            \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $sid)],
+        'grade_level_id' => 'nullable|integer',
     ]);
+
     // Generate unique 6-digit class code
     do {
         $classCode = mt_rand(100000, 999999);
     } while (Grade::where('classCode', $classCode)->exists());
 
     $grade = new Grade();
-    $grade->sid  = session('selected_school'); // ✅ sid or NULL
-    $grade->classCode = $classCode; // Save generated code
+    $grade->sid = $sid;
+    $grade->classCode = $classCode;
     $grade->name = $request->name;
+    $grade->grade_level_id = $this->validLevelId($request->grade_level_id, $sid);
     $grade->save();
 
-    return redirect()->back()->with('success', 'Grade / Class added successfully!');
+    return redirect()->back()->with('success', 'Class added successfully!');
 }
-/*public function updateGrade(Request $request, $id)
-{
-    // Validate incoming request
-    $request->validate([
-        'name' => 'required|string|max:255',  // Ensure 'name' is required and valid
-    ]);
 
-    // Get role by ID or fail with 404
-    $grade = Grade::findOrFail($id);
-
-    // Update the role's name
-    $grade->name = $request->name;
-
-    // Generate class code only if it doesn't exist
-    if (empty($grade->classCode)) {
-
-        do {
-            $classCode = mt_rand(100000, 999999);
-        } while (Grade::where('classCode', $classCode)->exists());
-
-        $grade->classCode = $classCode;
-    }
-
-
-    // Save changes to database
-    $grade->save();
-
-    // Redirect back with success message
-    return redirect()->back()->with('success', 'Grade / Class updated successfully!');
-}*/
 public function updateGrade(Request $request, $id)
 {
+    $grade = $this->schoolScoped(Grade::query())->findOrFail($id);
+
     $request->validate([
-        'name' => 'required|string|max:255',
-        'classCode' => 'nullable|numeric|digits:6|unique:classes,classCode,' . $id,
+        'name' => ['required', 'string', 'max:255',
+            \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $grade->sid)->ignore($grade->id)],
+        'classCode' => 'nullable|numeric|digits:6|unique:classes,classCode,' . $grade->id,
+        'grade_level_id' => 'nullable|integer',
     ]);
 
-    $grade = Grade::findOrFail($id);
-
     $grade->name = $request->name;
+    $grade->grade_level_id = $this->validLevelId($request->grade_level_id, $grade->sid);
 
-    // Admin entered a class code
     if ($request->filled('classCode')) {
-
         $grade->classCode = $request->classCode;
-
-    }
-    // No class code exists yet, generate one
-    elseif (empty($grade->classCode)) {
-
+    } elseif (empty($grade->classCode)) {
         do {
             $classCode = mt_rand(100000, 999999);
         } while (Grade::where('classCode', $classCode)->exists());
-
         $grade->classCode = $classCode;
     }
 
     $grade->save();
 
-    return redirect()->back()->with(
-        'success',
-        'Grade / Class updated successfully!'
-    );
+    return redirect()->back()->with('success', 'Class updated successfully!');
 }
+
 public function deleteGrade($id)
 {
-    $role = Grade::findOrFail($id);
-    $role->delete();
+    $grade = $this->schoolScoped(Grade::query())->findOrFail($id);
 
-    return redirect()->back()->with('success', 'Grade / Class deleted successfully!');
+    // Never orphan students: they are linked to their class through users.grade.
+    if (User::where('role', 4)->where('grade', $grade->id)->exists()) {
+        return redirect()->back()->with('error', 'This class still has students. Move them to another class first.');
+    }
+
+    $grade->tutors()->detach();
+    $grade->delete();
+
+    return redirect()->back()->with('success', 'Class deleted successfully!');
+}
+
+// ---- Grade levels (Grade 7, Grade 8 ...) that group classes ----
+public function addGradeLevel(Request $request)
+{
+    $sid = session('selected_school');
+    abort_if($sid === null, 422, 'Select a school first.');
+
+    $request->validate([
+        'name' => ['required', 'string', 'max:100',
+            \Illuminate\Validation\Rule::unique('grade_levels', 'name')->where('sid', (string) $sid)],
+    ]);
+
+    GradeLevel::create(['sid' => (string) $sid, 'name' => $request->name, 'sort_order' => (int) GradeLevel::where('sid', (string) $sid)->max('sort_order') + 1]);
+
+    return redirect()->back()->with('success', 'Grade level added.');
+}
+
+public function updateGradeLevel(Request $request, $id)
+{
+    $level = $this->schoolScoped(GradeLevel::query())->findOrFail($id);
+
+    $request->validate([
+        'name' => ['required', 'string', 'max:100',
+            \Illuminate\Validation\Rule::unique('grade_levels', 'name')->where('sid', (string) $level->sid)->ignore($level->id)],
+    ]);
+
+    $level->update(['name' => $request->name]);
+
+    return redirect()->back()->with('success', 'Grade level renamed.');
+}
+
+public function deleteGradeLevel($id)
+{
+    $level = $this->schoolScoped(GradeLevel::query())->findOrFail($id);
+
+    // Classes just become "unassigned"; nothing else is lost.
+    Grade::where('grade_level_id', $level->id)->update(['grade_level_id' => null]);
+    $level->delete();
+
+    return redirect()->back()->with('success', 'Grade level removed. Its classes are now unassigned.');
 }
 // School Domain
 public function schoolDomain(Request $request)

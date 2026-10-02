@@ -91,6 +91,9 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/grade/add', [AdminDashboardController::class, 'addGrade'])->name('admin.grade.add');
     Route::put('/grade/edit/{id}', [AdminDashboardController::class, 'updateGrade'])->name('admin.grade.update');
     Route::delete('/grade/delete/{id}', [AdminDashboardController::class, 'deleteGrade'])->name('admin.grade.delete');
+    Route::post('/grade-level/add', [AdminDashboardController::class, 'addGradeLevel'])->name('admin.grade-level.add');
+    Route::put('/grade-level/edit/{id}', [AdminDashboardController::class, 'updateGradeLevel'])->name('admin.grade-level.update');
+    Route::delete('/grade-level/delete/{id}', [AdminDashboardController::class, 'deleteGradeLevel'])->name('admin.grade-level.delete');
 
     //For Student (school-wide admin list — a Tutor's own class is /my-students instead)
     Route::get('/student', [AdminStudentController::class, 'index'])->name('admin.student.index');

@@ -83,7 +83,9 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Age</th>
-                                <th>Grade</th>
+                                <th>Grade level</th>
+                                <th>Class</th>
+                                <th>Tutor(s)</th>
                                 <th>Mascot</th>
                                 <th class="rightText">Action</th>
                             </tr>
@@ -95,7 +97,9 @@
                                     <td>{{ $student->name }}</td>
                                     <td>{{ $student->email }}</td>
                                     <td>{{ $student->age }}</td>
+                                    <td>{{ optional(optional($student->gradeRelation)->level)->name ?? '—' }}</td>
                                     <td>{{ optional($student->gradeRelation)->name ?? ' ' }}</td>
+                                    <td>{{ $student->gradeRelation ? ($student->gradeRelation->tutors->pluck('nickname')->filter()->implode(', ') ?: '—') : '—' }}</td>
                                     <td>{{ optional($student->mascotRelation)->name ?? ' ' }}</td>
                                     <td valign="middle">
                                         <div class="actionBtns d-flex align-items-center justify-content-end">

@@ -22,7 +22,7 @@ class TutorStudentController extends Controller
         abort_unless($tutor->isTutor(), 403);
 
         $classes = $tutor->tutoredClasses()
-            ->with(['tutors' => function ($q) {
+            ->with(['level', 'tutors' => function ($q) {
                 $q->select('users.id', 'users.name', 'users.nickname');
             }])
             ->get();
@@ -37,6 +37,10 @@ class TutorStudentController extends Controller
             );
         }
 
-        return view('tutor.students.index', compact('classes'));
+        // Grade level first, then class (classes with no level go last).
+        $levels = $classes->sortBy('name')->groupBy(fn ($c) => $c->level->name ?? '')
+            ->sortBy(fn ($group, $name) => $name === '' ? 'zzz' : $name);
+
+        return view('tutor.students.index', compact('levels'));
     }
 }

@@ -19,7 +19,7 @@ class AdminStudentController extends Controller
         /*$students = User::with(['gradeRelation', 'mascotRelation'])
         ->where('role', 4) // role = 4 means student
         ->get();*/
-        $query = User::with(['gradeRelation', 'mascotRelation'])
+        $query = User::with(['gradeRelation.level', 'gradeRelation.tutors:users.id,users.nickname', 'mascotRelation'])
             ->where('role', 4); // role = 4 means student
 
         // ✅ Apply SID filter (only if selected)
@@ -37,9 +37,14 @@ class AdminStudentController extends Controller
         }
 
         //$students = $query->get();
+        // Grade level first, then class, then name (students without a class last).
         $students = $query
-            ->orderBy('id', 'desc')
-            ->get();
+            ->orderBy('name')
+            ->get()
+            ->sortBy(fn ($st) => [
+                optional(optional($st->gradeRelation)->level)->name ?? 'zzz',
+                optional($st->gradeRelation)->name ?? 'zzz',
+            ])->values();
         $sid = session('selected_school');
 
         $grades = $sid
