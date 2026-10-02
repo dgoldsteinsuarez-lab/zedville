@@ -81,6 +81,11 @@ Route::middleware('role:super_admin')->group(function () {
 // referendums, or Wellbeing content.
 // ================================================================
 Route::middleware('role:super_admin,school_admin')->group(function () {
+    // School Users: create School Admins/Tutors, assign Tutors to classes
+    Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->name('staff.index');
+    Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->name('staff.store');
+    Route::post('/staff/{id}/classes', [\App\Http\Controllers\Admin\StaffController::class, 'updateClasses'])->name('staff.classes');
+
     //Grade / Class
     Route::get('/grade', [AdminDashboardController::class, 'grade'])->name('grade');
     Route::post('/grade/add', [AdminDashboardController::class, 'addGrade'])->name('admin.grade.add');

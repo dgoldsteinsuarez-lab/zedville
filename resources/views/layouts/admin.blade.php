@@ -128,7 +128,7 @@
                                                     </a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link" href="#">
+                                                    <a class="nav-link" href="{{ url('admin/staff') }}">
                                                         <span class="navTxt">School User</span>
                                                     </a>
                                                 </li>
