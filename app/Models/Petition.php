@@ -26,6 +26,18 @@ class Petition extends Model
 
     ];
 
+    /**
+     * Petitions a student's own school/class may see: same school, and either
+     * school-wide/legacy (class_id null) or the student's own class.
+     */
+    public function scopeInStudentScope($query, $student)
+    {
+        return $query->where('sid', $student->sid)
+            ->where(function ($q) use ($student) {
+                $q->whereNull('class_id')->orWhere('class_id', $student->grade);
+            });
+    }
+
     public function signatures()
     {
         return $this->hasMany(PetitionSignature::class);

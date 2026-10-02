@@ -592,21 +592,37 @@ class EFDController extends Controller
         // Only show approved petitions within 3 months (and student's own pending petitions)
         $threeMonthsAgo = now()->subMonths(3);
 
-        $activePetitions = Petition::where('status', 'approved')
+        // Everything is limited to the student's own school/class. Pending and
+        // rejected petitions are only ever visible to the student who wrote
+        // them (a rejected one may be exactly the content the Tutor blocked).
+        $viewer = auth()->user();
+
+        $activePetitions = Petition::inStudentScope($viewer)
             ->where('created_at', '>=', $threeMonthsAgo)
-            ->orWhere(function ($query) use ($studentId, $threeMonthsAgo) {
-                $query->where('status', 'pending')
-                    ->where('created_by', $studentId)
-                    ->where('created_at', '>=', $threeMonthsAgo);
+            ->where(function ($query) use ($studentId) {
+                $query->where('status', 'approved')
+                    ->orWhere(function ($q) use ($studentId) {
+                        $q->where('status', 'pending')->where('created_by', $studentId);
+                    });
             })
             ->orderBy('id', 'DESC')
             ->get();
 
-        $pastPetitions = Petition::whereIn('status', [
-            'rejected',
-            'closed'
-        ])
-            ->orWhere('created_at', '<', $threeMonthsAgo)
+        $pastPetitions = Petition::inStudentScope($viewer)
+            ->where(function ($query) use ($studentId, $threeMonthsAgo) {
+                $query->where('status', 'closed')
+                    ->orWhere(function ($q) use ($threeMonthsAgo) {
+                        $q->where('status', 'approved')->where('created_at', '<', $threeMonthsAgo);
+                    })
+                    ->orWhere(function ($q) use ($studentId) {
+                        $q->where('status', 'rejected')->where('created_by', $studentId);
+                    })
+                    ->orWhere(function ($q) use ($studentId, $threeMonthsAgo) {
+                        $q->where('status', 'pending')
+                          ->where('created_by', $studentId)
+                          ->where('created_at', '<', $threeMonthsAgo);
+                    });
+            })
             ->orderBy('id', 'DESC')
             ->get();
 
@@ -699,9 +715,29 @@ class EFDController extends Controller
 
     public function signPetition($id)
     {
-        $petition = Petition::findOrFail($id);
+        $student = Auth::user();
 
-        $studentId = Auth::id();
+        if ($student->role != 4 && $student->role != '4') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only students can sign petitions.'
+            ], 403);
+        }
+
+        // Only approved petitions inside this student's own school/class can
+        // be signed - pending ones are invisible to other students by design.
+        $petition = Petition::inStudentScope($student)
+            ->where('status', 'approved')
+            ->find($id);
+
+        if (!$petition) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This petition is not available to sign.'
+            ], 404);
+        }
+
+        $studentId = $student->id;
 
         if ($petition->created_by == $studentId) {
 
