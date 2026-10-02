@@ -119,7 +119,6 @@ Route::post('/login-quiz/submit', [LoginQuizController::class, 'submit'])->name(
 
 //City Mood & Profile Mood
 Route::get('/city-mood',   [ProfileController::class, 'city_mood'])->name('city-mood');
-Route::get('/my-mood',   [ProfileController::class, 'my_mood'])->name('my-mood');
 Route::post('/award-poster-room', function () {
     app(\App\Services\ParticipationService::class)
         ->award(auth()->id(), 'poster_room_enter');
