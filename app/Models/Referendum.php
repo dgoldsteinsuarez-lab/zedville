@@ -22,6 +22,10 @@ class Referendum extends Model
 
         'created_by',
 
+        'sid',
+
+        'class_id',
+
     ];
 
     protected $casts = [
@@ -31,6 +35,18 @@ class Referendum extends Model
         'end_date' => 'date',
 
     ];
+
+    /**
+     * Referendums a given student may see/vote on: same school, and either
+     * school-wide (class_id null) or attached to the student's own class.
+     */
+    public function scopeVisibleToStudent($query, $student)
+    {
+        return $query->where('sid', $student->sid)
+            ->where(function ($q) use ($student) {
+                $q->whereNull('class_id')->orWhere('class_id', $student->grade);
+            });
+    }
 
     public function votes()
     {

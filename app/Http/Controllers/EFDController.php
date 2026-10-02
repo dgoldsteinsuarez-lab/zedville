@@ -575,11 +575,11 @@ class EFDController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $openReferendums = Referendum::where('status', 'open')
+        $openReferendums = Referendum::visibleToStudent(auth()->user())->where('status', 'open')
             ->orderBy('id', 'DESC')
             ->get();
 
-        $closedReferendums = Referendum::where('status', 'closed')
+        $closedReferendums = Referendum::visibleToStudent(auth()->user())->where('status', 'closed')
             ->orderBy('id', 'DESC')
             ->get();
 
@@ -662,6 +662,18 @@ class EFDController extends Controller
         }
 
         $studentId = $user->id;
+
+        // Must exist, be open, and be visible to this student's school/class.
+        $referendum = Referendum::visibleToStudent($user)
+            ->where('status', 'open')
+            ->find($id);
+
+        if (!$referendum) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This referendum is not available for voting.'
+            ], 404);
+        }
 
         $exists = ReferendumVote::where('referendum_id', $id)
             ->where('student_id', $studentId)

@@ -21,6 +21,29 @@ class CivicChamberController extends Controller
      * User::tutoredClasses(), the same source used by the Tutor's student
      * list).
      */
+    /**
+     * Same idea for referendums: Super Admin everything, School Admin their
+     * school, Tutor only referendums attached to their own classes.
+     */
+    private function scopeReferendumsToViewer($query)
+    {
+        $user = Auth::user();
+
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
+
+        if ($user->isSchoolAdmin()) {
+            return $query->where('sid', $user->sid);
+        }
+
+        if ($user->isTutor()) {
+            return $query->whereIn('class_id', $user->tutoredClasses()->pluck('classes.id'));
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
+
     private function scopePetitionsToViewer($query)
     {
         $user = Auth::user();
@@ -51,7 +74,7 @@ class CivicChamberController extends Controller
 
     public function referendumIndex()
     {
-        $referendums = Referendum::latest()->paginate(15);
+        $referendums = $this->scopeReferendumsToViewer(Referendum::query())->latest()->paginate(15);
 
         return view('admin.civic-chamber.referendum.index', compact('referendums'));
     }
@@ -104,6 +127,13 @@ class CivicChamberController extends Controller
 
             'created_by'  => Auth::id(),
 
+            'sid'         => Auth::user()->sid,
+
+            // Tutor: scoped to their (first) assigned class. Admins: null = school-wide.
+            'class_id'    => Auth::user()->isTutor()
+                ? Auth::user()->tutoredClasses()->value('classes.id')
+                : null,
+
         ]);
 
         return redirect()
@@ -121,7 +151,7 @@ class CivicChamberController extends Controller
     public function referendumEdit($id)
     {
 
-        $referendum = Referendum::findOrFail($id);
+        $referendum = $this->scopeReferendumsToViewer(Referendum::query())->findOrFail($id);
 
         return view(
             'admin.civic-chamber.referendum.edit',
@@ -153,7 +183,7 @@ class CivicChamberController extends Controller
 
         ]);
 
-        $referendum = Referendum::findOrFail($id);
+        $referendum = $this->scopeReferendumsToViewer(Referendum::query())->findOrFail($id);
 
         $referendum->update([
 
@@ -184,7 +214,7 @@ class CivicChamberController extends Controller
     public function referendumDestroy($id)
     {
 
-        $referendum = Referendum::findOrFail($id);
+        $referendum = $this->scopeReferendumsToViewer(Referendum::query())->findOrFail($id);
 
         ReferendumVote::where('referendum_id', $id)->delete();
 
