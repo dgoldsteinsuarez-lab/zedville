@@ -42,10 +42,12 @@ class BadgeAdminController extends Controller
      */
     public function studentView($studentId)
     {
+        abort_unless(auth()->user()->canManageStudent($studentId), 403);
         return view('admin.badges.index', compact('studentId'));
     }
     public function studentBadgeHistory(int $studentId): JsonResponse
     {
+        abort_unless(auth()->user()->canManageStudent($studentId), 403);
         $currentAcademicYear = $this->calculator->getAcademicYear(
             now()->month,
             now()->year
@@ -98,7 +100,8 @@ class BadgeAdminController extends Controller
         $month = $request->input('month', now()->month);
         $year  = $request->input('year', now()->year);
 
-        $summary = StudentBadgeRecord::where('month', $month)
+        $summary = StudentBadgeRecord::when(auth()->user()->manageableStudentIds() !== null, fn ($q) => $q->whereIn('student_id', auth()->user()->manageableStudentIds()))
+            ->where('month', $month)
             ->where('year', $year)
             ->selectRaw('monthly_badge, COUNT(*) as count')
             ->groupBy('monthly_badge')
@@ -142,6 +145,8 @@ class BadgeAdminController extends Controller
             'year'       => 'required|integer|min:2020|max:2100',
             'badge'      => 'required|in:PLATINUM,GOLD,SILVER,BRONZE,NONE',
         ]);
+
+        if (!empty($validated['student_id'])) { abort_unless(auth()->user()->canManageStudent($validated['student_id']), 403); }
 
         $record = StudentBadgeRecord::where('student_id', $validated['student_id'])
             ->where('month', $validated['month'])
@@ -188,6 +193,8 @@ class BadgeAdminController extends Controller
             'month'      => 'required|integer|min:1|max:12',
             'year'       => 'required|integer|min:2020|max:2100',
         ]);
+
+        if (!empty($validated['student_id'])) { abort_unless(auth()->user()->canManageStudent($validated['student_id']), 403); }
 
         $record = StudentBadgeRecord::where('student_id', $validated['student_id'])
             ->where('month', $validated['month'])
@@ -271,6 +278,8 @@ class BadgeAdminController extends Controller
             'year'       => 'required|integer|min:2020|max:2100',
             'student_id' => 'nullable|integer|exists:users,id',
         ]);
+
+        if (!empty($validated['student_id'])) { abort_unless(auth()->user()->canManageStudent($validated['student_id']), 403); }
 
         $month = $validated['month'];
         $year  = $validated['year'];

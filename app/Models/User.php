@@ -63,6 +63,31 @@ class User extends Authenticatable
         return $this->belongsToMany(Grade::class, 'class_tutor', 'user_id', 'class_id');
     }
 
+    /**
+     * Ids of the students this admin-tier user may look at / act on:
+     * Super Admin = all, School Admin = own school, Tutor = own classes.
+     * Returns null for "no restriction" (Super Admin).
+     */
+    public function manageableStudentIds()
+    {
+        if ($this->isSuperAdmin()) {
+            return null;
+        }
+        $students = User::where('role', 4);
+        if ($this->isSchoolAdmin()) {
+            return $students->where('sid', $this->sid)->pluck('id');
+        }
+        return $students->where('sid', $this->sid)
+            ->whereIn('grade', $this->tutoredClasses()->pluck('classes.id'))
+            ->pluck('id');
+    }
+
+    public function canManageStudent($studentId): bool
+    {
+        $ids = $this->manageableStudentIds();
+        return $ids === null || $ids->contains((int) $studentId);
+    }
+
     public function avatar()
     {
     return $this->belongsTo(\App\Models\Avatar::class, 'avatar'); // avatar is the foreign key in users table

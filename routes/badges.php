@@ -57,18 +57,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin/badges')->group(function () 
 
     // Override a student's monthly badge
     Route::post('/override', [BadgeAdminController::class, 'override'])
-        ->name('admin.badges.override');
+        ->name('admin.badges.override')->middleware('role:super_admin,school_admin');
 
     // Remove an override and revert to calculated badge
     Route::post('/override/remove', [BadgeAdminController::class, 'removeOverride'])
-        ->name('admin.badges.override.remove');
+        ->name('admin.badges.override.remove')->middleware('role:super_admin,school_admin');
 
     // Manually trigger recalculation (single student or all)
     Route::post('/recalculate', [BadgeAdminController::class, 'recalculate'])
-        ->name('admin.badges.recalculate');
+        ->name('admin.badges.recalculate')->middleware('role:super_admin,school_admin');
 
     // Academic year reset
     Route::post('/reset-year', [BadgeAdminController::class, 'resetAcademicYear'])
-        ->name('admin.badges.reset-year');
+        ->name('admin.badges.reset-year')->middleware('role:super_admin');
 
 });

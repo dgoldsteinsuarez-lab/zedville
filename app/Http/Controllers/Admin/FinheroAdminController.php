@@ -581,6 +581,7 @@ class FinheroAdminController extends Controller
     /** GET /admin/finhero/student/{studentId} — full badge history for a student */
     public function studentBadgeHistory(int $studentId): JsonResponse
     {
+        abort_unless(auth()->user()->canManageStudent($studentId), 403);
         $academicYear = $this->calculator->getAcademicYear(now()->month, now()->year);
 
         $records = FinheroBadgeRecord::where('student_id', $studentId)
@@ -622,7 +623,8 @@ class FinheroAdminController extends Controller
         $month = $request->input('month', now()->month);
         $year = $request->input('year', now()->year);
 
-        $summary = FinheroBadgeRecord::where('month', $month)->where('year', $year)
+        $summary = FinheroBadgeRecord::when(auth()->user()->manageableStudentIds() !== null, fn ($q) => $q->whereIn('student_id', auth()->user()->manageableStudentIds()))
+            ->where('month', $month)->where('year', $year)
             ->selectRaw('monthly_badge, COUNT(*) as count')
             ->groupBy('monthly_badge')
             ->pluck('count', 'monthly_badge');
@@ -657,6 +659,8 @@ class FinheroAdminController extends Controller
             'badge' => 'required|in:LEGEND,CHAMPION,FINHERO,ROOKIE,NONE',
         ]);
 
+        if (!empty($v['student_id'])) { abort_unless(auth()->user()->canManageStudent($v['student_id']), 403); }
+
         $record = FinheroBadgeRecord::where('student_id', $v['student_id'])
             ->where('month', $v['month'])->where('year', $v['year'])->first();
 
@@ -677,6 +681,8 @@ class FinheroAdminController extends Controller
             'year' => 'required|integer',
         ]);
 
+        if (!empty($v['student_id'])) { abort_unless(auth()->user()->canManageStudent($v['student_id']), 403); }
+
         FinheroBadgeRecord::where('student_id', $v['student_id'])
             ->where('month', $v['month'])->where('year', $v['year'])
             ->update(['is_overridden' => false, 'override_badge' => null, 'overridden_at' => null]);
@@ -692,6 +698,8 @@ class FinheroAdminController extends Controller
             'year' => 'required|integer',
             'student_id' => 'nullable|integer|exists:users,id',
         ]);
+
+        if (!empty($v['student_id'])) { abort_unless(auth()->user()->canManageStudent($v['student_id']), 403); }
 
         if (!empty($v['student_id'])) {
             $this->calculator->calculateForStudent($v['student_id'], $v['month'], $v['year']);

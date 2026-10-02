@@ -148,6 +148,9 @@ Route::middleware(['auth'])->group(function () {
 // ── Admin / Tutor routes ───────────────────────────────────
 // TODO: replace 'admin' with your actual admin/tutor middleware
 Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function () {
+  // Reports (student history, class summary) stay open to the admin tier;
+  // everything that changes data is limited by role below.
+  Route::middleware('role:super_admin,school_admin')->group(function () {
 
     // Activity Manager
     Route::get   ('/activities',       [FinheroAdminController::class, 'listActivities']);
@@ -160,15 +163,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function ()
     Route::get ('/settings',           [FinheroAdminController::class, 'getSettings']);
     Route::post('/settings',           [FinheroAdminController::class, 'saveSettings']);
 
+  });
     // Reports
     Route::get ('/student/{studentId}',[FinheroAdminController::class, 'studentBadgeHistory']);
     Route::get ('/class-summary',      [FinheroAdminController::class, 'classSummary']);
-
+  Route::middleware('role:super_admin,school_admin')->group(function () {
     // Override
     Route::post('/override',           [FinheroAdminController::class, 'override']);
     Route::post('/override/remove',    [FinheroAdminController::class, 'removeOverride']);
 
     // Tools
     Route::post('/recalculate',        [FinheroAdminController::class, 'recalculate']);
-    Route::post('/reset-year',         [FinheroAdminController::class, 'resetAcademicYear']);
+  });
+    Route::post('/reset-year',         [FinheroAdminController::class, 'resetAcademicYear'])->middleware('role:super_admin');
 });
