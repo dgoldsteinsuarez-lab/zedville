@@ -157,6 +157,11 @@
                                                         <span class="navTxt">School Domain</span>
                                                     </a>
                                                 </li>
+                                                <li class="nav-item {{ request()->is('admin/ledger') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/ledger') }}">
+                                                        <span class="navTxt">Reverse / Adjust</span>
+                                                    </a>
+                                                </li>
                                                 @endif
                                                 <li class="nav-item {{ request()->is('admin/grade') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/grade') }}">

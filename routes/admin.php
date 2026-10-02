@@ -57,6 +57,11 @@ Route::delete('/wellbeing/delete/{id}', [WellbeingController::class, 'destroy'])
 // Super-Admin-exclusive.
 // ================================================================
 Route::middleware('role:super_admin')->group(function () {
+    // Reverse a transaction / reset a balance (append-only, reason required)
+    Route::get('/ledger', [\App\Http\Controllers\Admin\LedgerController::class, 'index'])->name('ledger.index');
+    Route::post('/ledger/reverse/{id}', [\App\Http\Controllers\Admin\LedgerController::class, 'reverse'])->name('ledger.reverse');
+    Route::post('/ledger/reset', [\App\Http\Controllers\Admin\LedgerController::class, 'reset'])->name('ledger.reset');
+
     // Role Routes
     Route::get('/role', [AdminDashboardController::class, 'role'])->name('role');
     Route::post('/role/add', [AdminDashboardController::class, 'addRole'])->name('admin.role.add');
