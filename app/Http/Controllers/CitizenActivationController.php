@@ -81,7 +81,7 @@ class CitizenActivationController extends Controller
             // column (varchar(10)), so no student could ever open a bank
             // account. Matches the same 10-digit pattern the emergency
             // fund / money market account numbers already use correctly.
-            'primary_savings_account_number' => str_pad(mt_rand(0, 9999999999), 10, '0', STR_PAD_LEFT),
+            'primary_savings_account_number' => '123000-' . str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT),
             'primary_savings_account_amount' => $salary,
 
             'emergency_fund_account' => 'Emergency Fund Account',

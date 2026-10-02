@@ -133,7 +133,7 @@ class BankController extends Controller
             // Same overflow bug as CitizenActivationController - was 13
             // chars against a varchar(10) column. Matches the 10-digit
             // pattern the sibling account-number fields already use.
-            'primary_savings_account_number' => str_pad(mt_rand(0, 9999999999), 10, '0', STR_PAD_LEFT),
+            'primary_savings_account_number' => '123000-' . str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT),
             'primary_savings_account_amount' => $salary,
 
             'emergency_fund_account' => 'Emergency Fund Account',
