@@ -1,0 +1,349 @@
+/*********For Survey*************/
+.survey-container {
+    background: white;
+    border-radius: 20px;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.survey-header {
+    /* background: linear-gradient(135deg, #00a47d 0%, #00a47d 100%); */
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.survey-header h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.survey-header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.progress-bar {
+    background: rgba(199, 199, 199, 0.3);
+    height: 6px;
+    border-radius: 3px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: #00a47d;
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.survey-content {
+    padding: 40px;
+}
+
+.step {
+    display: none;
+}
+
+.step.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.step-description {
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.agreement-box {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.checkbox-container label {
+    cursor: pointer;
+    line-height: 1.6;
+    color: #333;
+}
+
+.option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.option-card {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.option-card:hover {
+    border-color: #00a47d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px #00a47d;
+}
+
+.option-card.selected {
+    border-color: #00a47d;
+    background: #d7fff6;
+}
+
+.option-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.option-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.option-description {
+    color: #666;
+    font-size: 14px;
+}
+
+.option-cost {
+    color: #00a47d;
+    font-weight: 600;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.grocery-note {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    color: #856404;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: space-between;
+}
+
+.btn {
+    padding: 14px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00a47d 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #e9ecef;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #dee2e6;
+}
+
+.results-container {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 20px;
+}
+
+.results-title {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.category-section {
+    margin-bottom: 25px;
+}
+
+.category-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #00a47d;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #00a47d;
+    padding-bottom: 8px;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    color: #555;
+}
+
+.total-section {
+    background: linear-gradient(135deg, #00a47d 0%, #02785c 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.total-label {
+    font-size: 16px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.total-amount {
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.info-note {
+    background: #e7f3ff;
+    border-left: 4px solid #02785c;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #0c5460;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: none;
+}
+
+.checkbox-grid {
+    display: grid;
+   grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.checkbox-option {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox-option:hover {
+    border-color: #00a47d;
+}
+
+.checkbox-option.selected {
+    border-color: #00a47d;
+    background: #f0f4ff;
+}
+
+.checkbox-option input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+@media (max-width: 600px) {
+    .survey-content {
+        padding: 20px;
+    }
+
+    .step-title {
+        font-size: 20px;
+    }
+
+    .option-title {
+        font-size: 16px;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+}
+
+/*********For Survey*************/
+/* ── Settings-tab context ──────────────────────────────────────
+   Inside the Account Settings page, .survey-container/.survey-content
+   sit nested inside .tailCard, which already supplies the standard
+   card padding (px-6/8 py-6/10 — same as Bank, My Closet, etc). The
+   survey's own 40px padding was stacking on top of that, making the
+   Consumer Profile tab noticeably more inset than every other page.
+   Zero it out here so .tailCard is the only source of the gutter. */
+.tailCard .survey-container {
+    border-radius: 0;
+}
+.tailCard .survey-content {
+    padding: 0;
+}
+@media (max-width: 600px) {
+    .tailCard .survey-content {
+        padding: 0;
+    }
+}

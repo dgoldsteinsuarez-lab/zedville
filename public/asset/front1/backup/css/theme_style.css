@@ -1,0 +1,352 @@
+/*!
+ * Theme Main Style
+ */
+/****/
+html, body {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  background-color: #F7FCF7;
+  color: #222;
+  font-size: 14px;
+  font-family: "Open Sans", sans-serif;
+  line-height: 1;
+  font-weight: 400;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: "Manrope", sans-serif;
+  color: #222;
+}
+
+a {
+  text-decoration: none;
+  color: #00A47D;
+}
+a:not([href]) {
+  color: #222;
+}
+a:hover {
+  color: #00A47D;
+}
+a:hover, a:focus {
+  outline: none;
+  text-decoration: none;
+}
+a.underline-text:hover {
+  text-decoration: underline;
+  color: #00A47D;
+}
+
+ul, ol {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+ul li, ol li {
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+}
+button:focus, button:hover {
+  outline: none;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+svg:focus {
+  outline: none;
+}
+
+/*****/
+/** Import Styles **/
+/** Color Class **/
+.theme-text-color {
+  color: #00A47D !important;
+}
+
+.theme-text-dark {
+  color: #222;
+}
+
+.theme-text-mute {
+  color: #999999;
+}
+
+.theme-text-dark-light {
+  color: #777777;
+}
+
+.theme-text-blue-dark {
+  color: #202738;
+}
+
+.theme-text-light {
+  color: #f0f0f0;
+}
+
+.theme-text-gray-color {
+  color: #C3C7D0;
+}
+
+.theme-text-warning {
+  color: #E8813B;
+}
+
+.theme-hover-text-color {
+  -webkit-transition: all 0.6s;
+  transition: all 0.6s;
+}
+.theme-hover-text-color:hover {
+  color: #00A47D;
+}
+
+.theme-bg-color {
+  background-color: #00A47D !important;
+}
+
+.theme-bg-dark {
+  background-color: #222 !important;
+}
+
+.theme-bg-mute {
+  background-color: #999999 !important;
+}
+
+.theme-bg-dark-light {
+  background-color: #777777 !important;
+}
+
+.theme-bg-blue-dark {
+  background-color: #202738 !important;
+}
+
+.theme-bg-light {
+  background-color: #f0f0f0 !important;
+}
+
+.theme-bg-gray-color {
+  background-color: #C3C7D0 !important;
+}
+
+.theme-bg-white {
+  background-color: #fff;
+}
+
+.theme-bg-sidebar {
+  background-color: #F7F8F9;
+}
+
+.border-color {
+  border-color: #C9CDD5 !important;
+}
+
+.border-color2 {
+  border-color: #E9EBF0 !important;
+}
+
+.theme-text-success {
+  color: #54A712 !important;
+}
+
+.theme-text-warning {
+  color: #ffa031 !important;
+}
+
+.theme-text-danger {
+  color: #E41009 !important;
+}
+
+.theme-text-info {
+  color: #2869CB !important;
+}
+
+.theme-bg-success {
+  background-color: #54A712 !important;
+}
+
+.theme-bg-warning {
+  background-color: #ffa031 !important;
+}
+
+.theme-bg-danger {
+  background-color: #E41009 !important;
+}
+
+.theme-bg-info {
+  background-color: #2869CB !important;
+}
+
+.themeBtn {
+  padding: 0.75rem 1.5rem;
+  background-color: #00A47D;
+  border: 1px solid #016950;
+  -webkit-box-shadow: 0 3px 0 #016950;
+          box-shadow: 0 3px 0 #016950;
+  border-radius: 30px;
+  color: #fff;
+  -webkit-transition: 0.2s;
+  transition: 0.2s;
+}
+.themeBtn:hover {
+  -webkit-transform: translateY(3px);
+          transform: translateY(3px);
+  color: #fff;
+  -webkit-box-shadow: 0 2px 0 #016950;
+          box-shadow: 0 2px 0 #016950;
+}
+
+.secondaryBtn {
+  padding: 0.75rem 1.5rem;
+  background-color: #FFF5D4;
+  border: 1px solid #FFF5D4;
+  -webkit-box-shadow: 0 3px 0 #E6D28C;
+          box-shadow: 0 3px 0 #E6D28C;
+  border-radius: 30px;
+  color: #000;
+  -webkit-transition: 0.2s;
+  transition: 0.2s;
+}
+.secondaryBtn:hover {
+  -webkit-transform: translateY(3px);
+          transform: translateY(3px);
+  color: #000;
+  -webkit-box-shadow: 0 2px 0 #E6D28C;
+          box-shadow: 0 2px 0 #E6D28C;
+}
+
+/** Color Class End **/
+.themeHeader nav {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+.themeHeader .themenav li a {
+  color: #000;
+  font-weight: 600;
+  font-family: "Open Sans", sans-serif;
+  -webkit-transition: 0.3s ease-in-out;
+  transition: 0.3s ease-in-out;
+}
+.themeHeader .themenav li a:hover {
+  color: #00A47D;
+}
+
+.themeFooter {
+  background-color: #00A47D;
+}
+.themeFooter .fwlocation {
+  border-color: #CFCFCF;
+}
+.themeFooter .fwlocLists a:hover {
+  color: #016950;
+}
+.themeFooter .footerBottom {
+  border-top: 1px solid rgba(16, 16, 16, 0.2);
+  color: #fff;
+}
+.themeFooter .footerBottom a {
+  color: #fff;
+}
+.themeFooter .footerBottom a:hover {
+  color: #016950;
+}
+
+.footerNavWidget .fnavlists li {
+  font-size: 14px;
+  line-height: 24px;
+  padding: 0;
+}
+.footerNavWidget .fnavlists li a {
+  -webkit-transition: all 0.6s;
+  transition: all 0.6s;
+  color: #fff;
+}
+.footerNavWidget .fnavlists li a:hover {
+  color: #016950;
+}
+
+.accountFormSection {
+  border-radius: 0px;
+  background-color: #FFF5D4;
+  padding: 50px;
+}
+
+.themeForm .form-group .form-control {
+  width: 100%;
+  padding: 0.75rem 0.65rem;
+  border: 1px solid #000;
+  border-radius: 0.65rem;
+  font-size: 14px;
+  font-weight: 400;
+  color: #000;
+  height: 40px;
+  background-color: #fff;
+}
+.themeForm .form-group .form-control:focus {
+  outline: none;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  border-color: #016950;
+}
+.themeForm .form-group .form-control::-webkit-input-placeholder {
+  color: #000;
+}
+.themeForm .form-group .form-control::-moz-placeholder {
+  color: #000;
+}
+.themeForm .form-group .form-control:-ms-input-placeholder {
+  color: #000;
+}
+.themeForm .form-group .form-control::-ms-input-placeholder {
+  color: #000;
+}
+.themeForm .form-group .form-control::placeholder {
+  color: #000;
+}
+.themeForm .form-group .form-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+}
+.themeForm .form-group .togglePsw {
+  cursor: pointer;
+  z-index: 2;
+}
+.themeForm .form-group .togglePsw .hidePsw {
+  display: none;
+}
+.themeForm .form-group .togglePsw.active .showPsw {
+  display: none;
+}
+.themeForm .form-group .togglePsw.active .hidePsw {
+  display: block;
+}
+.themeForm.iconForm .form-group .form-control {
+  padding: 0rem 2.5rem;
+}
+
+/**** Container Size ***/
+.container {
+  max-width: 1290px;
+  width: 100%;
+  margin: 0 auto;
+}
