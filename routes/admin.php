@@ -28,6 +28,11 @@ Route::post('/profile/password', [AdminDashboardController::class, 'updatePasswo
 // Tutor's own student list (self-scoped to their assigned classes inside the controller)
 Route::get('/my-students', [TutorStudentController::class, 'index'])->name('tutor.my-students');
 
+// Autopilot for students (approved absence) - every action is scope-checked inside the controller
+Route::get('/autopilot', [\App\Http\Controllers\Admin\AutopilotController::class, 'index'])->name('autopilot.index');
+Route::post('/autopilot', [\App\Http\Controllers\Admin\AutopilotController::class, 'store'])->name('autopilot.store');
+Route::post('/autopilot/{id}/cancel', [\App\Http\Controllers\Admin\AutopilotController::class, 'cancel'])->name('autopilot.cancel');
+
 //For Calender
 Route::get('/calendar', [AdminDashboardController::class, 'calendar'])->name('admin.calendar');
 

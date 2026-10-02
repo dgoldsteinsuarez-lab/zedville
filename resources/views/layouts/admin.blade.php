@@ -100,6 +100,11 @@
                                         </a>
                                     </li>
                                     @endif
+                                    <li class="nav-item {{ request()->is('admin/autopilot*') ? 'active' : '' }}">
+                                        <a class="nav-link" href="{{ url('admin/autopilot') }}">
+                                            <span class="navTxt">Autopilot</span>
+                                        </a>
+                                    </li>
                                     @php
                                         $usersMenuActive = request()->is(
                                             'admin/student*',
