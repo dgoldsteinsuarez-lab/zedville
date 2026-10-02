@@ -775,6 +775,13 @@ class EFDController extends Controller
 
     public function referendumResult($id)
     {
+        // Results are only readable by people who may see the referendum itself.
+        $viewer = auth()->user();
+        $visible = $viewer->isStudent()
+            ? Referendum::visibleToStudent($viewer)
+            : ($viewer->isSuperAdmin() ? Referendum::query() : Referendum::where('sid', $viewer->sid));
+        abort_unless($visible->where('id', $id)->exists(), 404);
+
         $yes = ReferendumVote::where('referendum_id', $id)
             ->where('vote', 'yes')
             ->count();

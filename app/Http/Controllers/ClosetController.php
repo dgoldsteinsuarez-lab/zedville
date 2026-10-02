@@ -103,6 +103,8 @@ class ClosetController extends Controller
     {
         $this->requireAuth();
         $this->requireAdminOrTutor();
+        // Staff only see students in their own scope (Tutor = own classes, School Admin = own school).
+        abort_unless(auth()->user()->canManageStudent($studentId), 403);
 
         $rows = $this->fetchCloset($studentId);
         $items = $rows->map(fn($r) => $this->formatClosetItem($r));

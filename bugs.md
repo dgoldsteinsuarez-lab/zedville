@@ -31,5 +31,16 @@ Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-wo
 `emmengercyfundintrest` (`EFDController.php:166,188`, also present in `BankController.php`), `updatepassowrd` (`AdminDashboardController.php:62`), `backaccountnumber` used as an actual DB column name (misspelled "bank"), `aviableblance` (in `BankController.php`, per prior review).
 **Fix:** cosmetic-only, batch-rename during a dedicated pass with full regression test coverage (renaming DB columns needs a migration + all call sites, do NOT do this casually).
 
+### Added/fixed 2026-10-03 (verified against the real live schema export)
+- FIXED: scheduler crash - `withoutOverlapping('name')` (a string where minutes are expected) in `app/Console/Kernel.php` made `schedule:list/run` throw; can stop every scheduled job. Ask IT whether the live cron has been running.
+- FIXED: School Admins/Tutors saw every school's data (nothing set the school at login) and could switch school via `/admin/school`; now pinned in `IsAdmin`.
+- FIXED: Admin password change route pointed to a method that did not exist.
+- FIXED: Grade/Class edit/delete not school-scoped; delete orphaned students; name checked against `roles`.
+- FIXED: staff could open any student's closet; any student could read any referendum's results.
+- RETRACTED: "13-char account number overflows varchar(10)" - false on live (`varchar(13)`); the original `123000-xxxxxx` format is restored.
+- DEPLOY NOTE: `2026_10_03_000007_backfill_civic_chamber_school` must run, or old referendums/petitions (sid NULL) vanish for students.
+- OPEN: `finhero/award-points` lets a student claim any activity's points (capped per month) without proof of completion.
+- OPEN: live web root is the project root (`vendor/autoload.php`, `composer.json` reachable); `.env` and `.git` are blocked (403) but this is fragile.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
