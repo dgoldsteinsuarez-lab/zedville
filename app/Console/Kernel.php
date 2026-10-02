@@ -54,14 +54,16 @@ class Kernel extends ConsoleKernel
         // ✅ ADD THIS (Badge Calculation)
         $schedule->command('badges:calculate-monthly')
             ->lastDayOfMonth('23:59')
-            ->withoutOverlapping('badges-calculate-monthly')
+            ->name('badges-calculate-monthly')
+            ->withoutOverlapping()
             ->runInBackground();
 
         // Autopilot month-end: records "Autopilot - [Month]" in the history of
         // accounts on Autopilot (no money moves).
         $schedule->command('autopilot:apply --write')
             ->lastDayOfMonth('23:55')
-            ->withoutOverlapping('autopilot-apply');
+            ->name('autopilot-apply')
+            ->withoutOverlapping();
 
         // ----- Monthly Salary & Bills Backfill -----
         // Salary is credited on/after the 6th, fixed bills (rent/school/electricity/
