@@ -57,6 +57,12 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping('badges-calculate-monthly')
             ->runInBackground();
 
+        // Autopilot month-end: records "Autopilot - [Month]" in the history of
+        // accounts on Autopilot (no money moves).
+        $schedule->command('autopilot:apply --write')
+            ->lastDayOfMonth('23:55')
+            ->withoutOverlapping('autopilot-apply');
+
         // ----- Monthly Salary & Bills Backfill -----
         // Salary is credited on/after the 6th, fixed bills (rent/school/electricity/
         // water/internet) on/after the 7th of every month. Previously this only ran

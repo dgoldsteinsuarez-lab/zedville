@@ -39,6 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/autopilot', [\App\Http\Controllers\StudentAutopilotController::class, 'store'])->name('profile.autopilot.store');
+    Route::post('/profile/autopilot/{id}/cancel', [\App\Http\Controllers\StudentAutopilotController::class, 'cancel'])->name('profile.autopilot.cancel');
     Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.updateAvatar');
     Route::post('/profile/save-mood', [ProfileController::class, 'saveMode'])->name('profile.saveMode');
     Route::get('/profile/mailbox', [ProfileController::class, 'mailbox'])->name('profile.mailbox');

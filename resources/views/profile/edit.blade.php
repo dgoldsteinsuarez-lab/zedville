@@ -32,6 +32,11 @@
                 <button class="tabitems tab-button" data-tab="tab7">
                     Notifications
                 </button>
+                @if(auth()->user()->isStudent())
+                <button class="tabitems tab-button" data-tab="tab8">
+                    Autopilot
+                </button>
+                @endif
             </div>
 
             <!-- Tabs Content -->
@@ -61,6 +66,11 @@
                 <div id="tab7" class="tab-content">
                     @include('profile.partials.notification-settings')
                 </div>
+                @if(auth()->user()->isStudent())
+                <div id="tab8" class="tab-content">
+                    @include('profile.partials.autopilot')
+                </div>
+                @endif
 
             </div>
         </div>
