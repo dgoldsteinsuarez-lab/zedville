@@ -47,7 +47,7 @@ class AdminStudentController extends Controller
             : Grade::all();
 
         $mascots = $sid
-            ? Mascot::where('sid', $sid)->get()
+            ? Mascot::where(fn ($q) => $q->where('sid', $sid)->orWhereNull('sid'))->get() // shared mascots have no sid
             : Mascot::all();
         $schools = DB::table('school_domains')
             ->orderBy('id', 'asc')

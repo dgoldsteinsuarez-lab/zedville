@@ -19,6 +19,13 @@ class IsAdmin
     // Legacy Admin (0), Super Admin (1), School Admin (2), Tutor (3) — matches the
     // role set AuthenticatedSessionController already redirects to /admin/dashboard.
     if (auth()->check() && auth()->user()->isAdminOrTutor()) {
+        // Only a Super Admin may switch between schools. School Admins and
+        // Tutors are pinned to their own school on every request; the model
+        // global scopes read this session value, so this is what keeps one
+        // school's data away from another school's staff.
+        if (!auth()->user()->isSuperAdmin()) {
+            session(['selected_school' => auth()->user()->sid]);
+        }
         return $next($request);
     }
 

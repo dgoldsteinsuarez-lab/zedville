@@ -30,6 +30,11 @@ class AdminDashboardController extends Controller
         'school_id' => 'nullable|exists:school_domains,id',
     ]);
 
+    // Only a Super Admin may switch school (IsAdmin pins everyone else).
+    if (!Auth::user()->isSuperAdmin()) {
+        abort(403);
+    }
+
     // Store selected school in session
     session(['selected_school' => $request->school_id]);
 
