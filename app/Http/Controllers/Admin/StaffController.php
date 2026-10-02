@@ -94,6 +94,7 @@ class StaffController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($temporaryPassword),
             'role' => (int) $data['role'],
+            'must_change_password' => true,
         ]);
 
         if ((int) $data['role'] === self::ROLE_TUTOR && $classIds->isNotEmpty()) {

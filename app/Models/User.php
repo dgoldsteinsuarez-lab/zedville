@@ -22,6 +22,7 @@ class User extends Authenticatable
         'sid',
         'name',
         'nickname',
+        'must_change_password',
         'email',
         'password',
         'citizenId',

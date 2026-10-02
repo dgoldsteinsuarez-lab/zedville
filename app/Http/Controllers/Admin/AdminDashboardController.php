@@ -44,6 +44,23 @@ class AdminDashboardController extends Controller
 }
 
 
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'password' => 'required|string|min:8|different:current_password',
+            'confirm_password' => 'required|same:password',
+        ]);
+
+        $user = Auth::user();
+        $user->forceFill([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'must_change_password' => false,
+        ])->save();
+
+        return redirect('admin/profile')->with('success', 'Password changed.');
+    }
+
     public function profile()
     {
         return view('admin.profile');

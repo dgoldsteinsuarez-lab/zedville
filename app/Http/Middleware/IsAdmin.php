@@ -26,6 +26,11 @@ class IsAdmin
         if (!auth()->user()->isSuperAdmin()) {
             session(['selected_school' => auth()->user()->sid]);
         }
+        // Accounts created with a temporary password must set their own first.
+        if (auth()->user()->must_change_password
+            && !$request->is('admin/profile', 'admin/profile/password', 'logout')) {
+            return redirect('admin/profile')->with('error', 'Please change your temporary password to continue.');
+        }
         return $next($request);
     }
 
