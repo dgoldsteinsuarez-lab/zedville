@@ -17,8 +17,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('classes', function (Blueprint $table) {
-            $table->unsignedBigInteger('sid')->nullable()->after('id');
-            $table->string('classCode', 6)->nullable()->unique()->after('sid');
+            if (!Schema::hasColumn('classes', 'sid')) { $table->unsignedBigInteger('sid')->nullable()->after('id'); }
+            if (!Schema::hasColumn('classes', 'classCode')) { $table->string('classCode', 6)->nullable()->unique()->after('sid'); }
         });
     }
 

@@ -9,7 +9,8 @@ return new class extends Migration
     /** No tracked migration existed — discovered testing badges:calculate-monthly. */
     public function up()
     {
-        Schema::create('student_badge_records', function (Blueprint $table) {
+        if (!Schema::hasTable('student_badge_records')) {
+            Schema::create('student_badge_records', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedTinyInteger('month');
@@ -29,7 +30,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['student_id', 'month', 'year']);
-        });
+            });
+        }
     }
 
     public function down()

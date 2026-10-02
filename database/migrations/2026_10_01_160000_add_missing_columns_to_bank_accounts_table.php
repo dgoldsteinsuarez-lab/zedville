@@ -18,10 +18,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('bank_accounts', function (Blueprint $table) {
-            $table->string('card_pin', 4)->nullable()->after('card_cvv');
-            $table->decimal('primary_savings_account_amount', 12, 2)->default(0)->after('primary_savings_account_number');
-            $table->decimal('emergency_fund_account_amount', 12, 2)->default(0)->after('emergency_fund_account_number');
-            $table->decimal('money_market_account_amount', 12, 2)->default(0)->after('money_market_account_number');
+            if (!Schema::hasColumn('bank_accounts', 'card_pin')) { $table->string('card_pin', 4)->nullable()->after('card_cvv'); }
+            if (!Schema::hasColumn('bank_accounts', 'primary_savings_account_amount')) { $table->decimal('primary_savings_account_amount', 12, 2)->default(0)->after('primary_savings_account_number'); }
+            if (!Schema::hasColumn('bank_accounts', 'emergency_fund_account_amount')) { $table->decimal('emergency_fund_account_amount', 12, 2)->default(0)->after('emergency_fund_account_number'); }
+            if (!Schema::hasColumn('bank_accounts', 'money_market_account_amount')) { $table->decimal('money_market_account_amount', 12, 2)->default(0)->after('money_market_account_number'); }
         });
     }
 

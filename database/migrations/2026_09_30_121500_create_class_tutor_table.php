@@ -13,14 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('class_tutor', function (Blueprint $table) {
+        if (!Schema::hasTable('class_tutor')) {
+            Schema::create('class_tutor', function (Blueprint $table) {
             $table->id();
             $table->foreignId('class_id')->constrained('classes')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
 
             $table->unique(['class_id', 'user_id']);
-        });
+            });
+        }
     }
 
     public function down()

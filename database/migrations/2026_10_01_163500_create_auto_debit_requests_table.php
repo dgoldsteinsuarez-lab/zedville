@@ -9,7 +9,8 @@ return new class extends Migration
     /** No tracked migration existed — discovered walking the real Citizen Activation flow. */
     public function up()
     {
-        Schema::create('auto_debit_requests', function (Blueprint $table) {
+        if (!Schema::hasTable('auto_debit_requests')) {
+            Schema::create('auto_debit_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('sid')->nullable();
@@ -29,7 +30,8 @@ return new class extends Migration
             $table->string('signature')->nullable();
             $table->date('date')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     public function down()

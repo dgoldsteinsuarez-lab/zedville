@@ -22,14 +22,14 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('sid')->nullable()->after('id');
-            $table->string('citizenId')->nullable()->unique()->after('nickname');
-            $table->unsignedBigInteger('avatar')->nullable()->after('role');
-            $table->unsignedBigInteger('grade')->nullable()->after('avatar');
-            $table->unsignedBigInteger('mascot')->nullable()->after('grade');
-            $table->unsignedTinyInteger('age')->nullable()->after('mascot');
-            $table->string('address')->nullable()->after('age');
-            $table->timestamp('loginTime')->nullable()->after('address');
+            if (!Schema::hasColumn('users', 'sid')) { $table->unsignedBigInteger('sid')->nullable()->after('id'); }
+            if (!Schema::hasColumn('users', 'citizenId')) { $table->string('citizenId')->nullable()->unique()->after('nickname'); }
+            if (!Schema::hasColumn('users', 'avatar')) { $table->unsignedBigInteger('avatar')->nullable()->after('role'); }
+            if (!Schema::hasColumn('users', 'grade')) { $table->unsignedBigInteger('grade')->nullable()->after('avatar'); }
+            if (!Schema::hasColumn('users', 'mascot')) { $table->unsignedBigInteger('mascot')->nullable()->after('grade'); }
+            if (!Schema::hasColumn('users', 'age')) { $table->unsignedTinyInteger('age')->nullable()->after('mascot'); }
+            if (!Schema::hasColumn('users', 'address')) { $table->string('address')->nullable()->after('age'); }
+            if (!Schema::hasColumn('users', 'loginTime')) { $table->timestamp('loginTime')->nullable()->after('address'); }
         });
     }
 

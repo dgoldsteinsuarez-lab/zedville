@@ -9,7 +9,8 @@ return new class extends Migration
     /** No tracked migration existed — discovered walking the real Citizen Activation flow. */
     public function up()
     {
-        Schema::create('bank_statements', function (Blueprint $table) {
+        if (!Schema::hasTable('bank_statements')) {
+            Schema::create('bank_statements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('sid')->nullable();
@@ -18,7 +19,8 @@ return new class extends Migration
             $table->json('statement_data')->nullable();
             $table->boolean('penalty_applied')->default(false);
             $table->timestamps();
-        });
+            });
+        }
     }
 
     public function down()

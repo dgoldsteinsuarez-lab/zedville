@@ -10,7 +10,8 @@ return new class extends Migration
     /** No tracked migration existed — discovered testing the Supermarket flow. */
     public function up()
     {
-        Schema::create('supermarkets', function (Blueprint $table) {
+        if (!Schema::hasTable('supermarkets')) {
+            Schema::create('supermarkets', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('sid')->nullable();
             $table->string('product_name');
@@ -20,7 +21,8 @@ return new class extends Migration
             $table->unsignedInteger('quantity')->default(0);
             $table->string('image')->nullable();
             $table->timestamps();
-        });
+            });
+        }
 
         DB::table('supermarkets')->insert([
             ['product_name' => 'Bread', 'type' => 'groceries', 'category' => 'Needs', 'price' => 3.50, 'quantity' => 100, 'created_at' => now(), 'updated_at' => now()],

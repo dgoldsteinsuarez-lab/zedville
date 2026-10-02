@@ -9,7 +9,8 @@ return new class extends Migration
     /** No tracked migration existed — discovered by actually running the app. */
     public function up()
     {
-        Schema::create('transfers', function (Blueprint $table) {
+        if (!Schema::hasTable('transfers')) {
+            Schema::create('transfers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('sid')->nullable();
@@ -25,7 +26,8 @@ return new class extends Migration
             $table->dateTime('end_date')->nullable();
             $table->string('frequency')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     public function down()

@@ -9,7 +9,8 @@ return new class extends Migration
     /** No tracked migration existed — discovered by actually running the app. */
     public function up()
     {
-        Schema::create('calendar_events', function (Blueprint $table) {
+        if (!Schema::hasTable('calendar_events')) {
+            Schema::create('calendar_events', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('sid')->nullable();
             $table->string('title')->nullable();
@@ -24,7 +25,8 @@ return new class extends Migration
             $table->string('backgroundColor')->nullable();
             $table->string('borderColor')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     public function down()

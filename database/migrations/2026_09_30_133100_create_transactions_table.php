@@ -15,7 +15,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        if (!Schema::hasTable('transactions')) {
+            Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedBigInteger('sid')->nullable();
@@ -30,7 +31,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['user_id', 'txn_date']);
-        });
+            });
+        }
     }
 
     public function down()

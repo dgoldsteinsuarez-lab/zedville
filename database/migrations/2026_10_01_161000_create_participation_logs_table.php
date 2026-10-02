@@ -14,7 +14,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('participation_logs', function (Blueprint $table) {
+        if (!Schema::hasTable('participation_logs')) {
+            Schema::create('participation_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->string('action_type')->nullable();
@@ -27,7 +28,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['student_id', 'month', 'year']);
-        });
+            });
+        }
     }
 
     public function down()

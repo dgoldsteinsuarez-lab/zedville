@@ -9,7 +9,8 @@ return new class extends Migration
     /** No tracked migration existed — discovered by actually running the app. */
     public function up()
     {
-        Schema::create('petitions', function (Blueprint $table) {
+        if (!Schema::hasTable('petitions')) {
+            Schema::create('petitions', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
@@ -17,14 +18,17 @@ return new class extends Migration
             $table->string('status')->default('pending');
             $table->text('tutor_feedback')->nullable();
             $table->timestamps();
-        });
+            });
+        }
 
-        Schema::create('petition_signatures', function (Blueprint $table) {
+        if (!Schema::hasTable('petition_signatures')) {
+            Schema::create('petition_signatures', function (Blueprint $table) {
             $table->id();
             $table->foreignId('petition_id')->constrained('petitions')->cascadeOnDelete();
             $table->foreignId('student_id')->constrained('users')->cascadeOnDelete();
             $table->timestamp('created_at')->nullable();
-        });
+            });
+        }
     }
 
     public function down()

@@ -9,11 +9,13 @@ return new class extends Migration
     /** No tracked migration existed — discovered by actually running the app. */
     public function up()
     {
-        Schema::create('months', function (Blueprint $table) {
+        if (!Schema::hasTable('months')) {
+            Schema::create('months', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->timestamps();
-        });
+            });
+        }
     }
 
     public function down()

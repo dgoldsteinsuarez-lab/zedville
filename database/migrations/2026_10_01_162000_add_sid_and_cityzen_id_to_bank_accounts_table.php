@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('bank_accounts', function (Blueprint $table) {
-            $table->unsignedBigInteger('sid')->nullable()->after('student_id');
-            $table->string('student_cityzen_id')->nullable()->after('student_name');
+            if (!Schema::hasColumn('bank_accounts', 'sid')) { $table->unsignedBigInteger('sid')->nullable()->after('student_id'); }
+            if (!Schema::hasColumn('bank_accounts', 'student_cityzen_id')) { $table->string('student_cityzen_id')->nullable()->after('student_name'); }
         });
     }
 

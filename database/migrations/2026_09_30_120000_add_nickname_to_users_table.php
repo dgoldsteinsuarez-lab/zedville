@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // Public display identity, separate from the real 'name' column.
             // Nullable for existing rows; new registrations require it at the form level.
-            $table->string('nickname')->nullable()->after('name');
+            if (!Schema::hasColumn('users', 'nickname')) { $table->string('nickname')->nullable()->after('name'); }
         });
     }
 

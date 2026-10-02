@@ -13,7 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('activity_completions', function (Blueprint $table) {
+        if (!Schema::hasTable('activity_completions')) {
+            Schema::create('activity_completions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('activity_id')->nullable();
@@ -23,7 +24,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['student_id', 'completed_at']);
-        });
+            });
+        }
     }
 
     public function down()

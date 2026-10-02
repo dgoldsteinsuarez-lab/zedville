@@ -15,7 +15,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('manage_payees_biller', function (Blueprint $table) {
+        if (!Schema::hasTable('manage_payees_biller')) {
+            Schema::create('manage_payees_biller', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('sid')->nullable();
             $table->string('name');
@@ -23,7 +24,8 @@ return new class extends Migration
             $table->decimal('amount', 12, 2)->nullable();
             $table->unsignedTinyInteger('status')->default(1);
             $table->timestamps();
-        });
+            });
+        }
 
         DB::table('manage_payees_biller')->insert([
             ['name' => 'City School', 'account_number' => 'SCHOOL-AUTO', 'amount' => 1000, 'status' => 1, 'created_at' => now(), 'updated_at' => now()],
