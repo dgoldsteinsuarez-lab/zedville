@@ -42,6 +42,15 @@ Then clear caches:
 ## 4. Nicknames (automatic)
 Existing accounts get their first name (max 15 chars) as nickname automatically (migration `2026_10_03_000008`).
 
+## 4b. Ask IT to check the live users table (read-only query in phpMyAdmin)
+The live `users` table has NO database-level uniqueness on `email` or `citizenId` (only the form checks it).
+Run these two; both should return zero rows. Do not "fix" anything without a backup:
+
+    SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) > 1;
+    SELECT citizenId, COUNT(*) FROM users WHERE citizenId IS NOT NULL GROUP BY citizenId HAVING COUNT(*) > 1;
+
+If both are empty, adding unique indexes later is safe. If not, tell me and we plan the cleanup first.
+
 ## 5. Smoke test (10 minutes)
 Log in as each role and check:
 - [ ] Super Admin: dashboard, School Domain, School Users (create a Tutor, note the one-time password), Reverse / Adjust page opens.

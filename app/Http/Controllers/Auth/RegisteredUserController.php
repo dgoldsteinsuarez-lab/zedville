@@ -64,8 +64,10 @@ class RegisteredUserController extends Controller
         $school = \App\Models\SchoolDomain::where('school_domain', $emailDomain)->first();
         $sid = $school->id;
         // Find Grade/Class by class code
+        // The class must belong to the same school as the email domain; otherwise a
+        // student of school A could join (or probe) a class of school B.
         $grade = Grade::where('classCode', $request->classCode)
-            //->where('sid', $sid) // optional but recommended
+            ->where('sid', (string) $sid)
             ->first();
 
         if (!$grade) {
@@ -75,10 +77,12 @@ class RegisteredUserController extends Controller
         }
         //Generate Cityzen ID
         $year = now()->year;
+        // Next free number: counting students breaks as soon as one is deleted, which
+        // would hand out an existing ID again, so keep going until the ID is unused.
         $userCount = User::where('role', '4')->count() + 1;
-        //$userCount = User::count() + 1;
-        $formattedNumber = str_pad($userCount, 4, '0', STR_PAD_LEFT);
-        $cityzenId = "ZV-{$year}-{$formattedNumber}";
+        do {
+            $cityzenId = 'ZV-' . $year . '-' . str_pad($userCount++, 4, '0', STR_PAD_LEFT);
+        } while (User::where('citizenId', $cityzenId)->exists());
         //Generate Cityzen ID
 
         $user = User::create([
