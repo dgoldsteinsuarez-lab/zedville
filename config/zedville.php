@@ -32,4 +32,20 @@ return [
     */
     'monthly_salary' => 3952.40,
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Automatic month-end penalty for ALL students
+    |--------------------------------------------------------------------------
+    |
+    | The penalty (expenses under 91% of the monthly salary) is currently only
+    | applied when a student happens to log in on the last day of the month.
+    | When this is true, a scheduled job applies it to every student instead,
+    | as the Admin Roles & Permissions doc describes ("system event, no admin
+    | action"). OFF by default because it changes real balances: switch it on
+    | with ZEDVILLE_AUTO_PENALTY=true in .env only after the owner agrees.
+    |
+    */
+    'auto_penalty' => (bool) env('ZEDVILLE_AUTO_PENALTY', false),
+
 ];

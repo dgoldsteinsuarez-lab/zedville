@@ -94,6 +94,8 @@ class AuthenticatedSessionController extends Controller
             ->exists();
 
         if (
+            $user->isStudent() &&
+            !config('zedville.auto_penalty') &&   // when the scheduled job is on, it does this for everyone
             $isLastDayOfMonth &&
             !$penaltyExists &&
             $accountCreatedBeforeThisMonth

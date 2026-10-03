@@ -62,6 +62,10 @@ Log in as each role and check:
 ## 6. Scheduled jobs (cron)
 - [ ] hPanel -> Advanced -> Cron Jobs must have: `* * * * * php /home/<user>/public_html/artisan schedule:run`
 - [ ] Ask whoever set it up whether it has been running (the old code had a bug that could stop it - fixed in this branch).
+- [ ] **Monthly penalty:** today it is only applied when a student logs in on the last day of the month, so students who do not log in that day escape it.
+      The new scheduled job `penalty:apply` fixes that but is OFF by default. To switch it on, add `ZEDVILLE_AUTO_PENALTY=true` to the server `.env`
+      (then `php artisan config:clear`). Do it only after the owner agrees: it will start charging students who never log in on the last day.
+      Preview first (on the last day of a month): `php artisan penalty:apply` (writes nothing). Students on approved Autopilot are skipped.
 - [ ] Autopilot month-end job (`autopilot:apply --write`) only writes a zero-amount history line. No money moves.
 
 ## 7. Rollback (if something is badly wrong)

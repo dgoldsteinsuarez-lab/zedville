@@ -65,6 +65,15 @@ class Kernel extends ConsoleKernel
             ->name('autopilot-apply')
             ->withoutOverlapping();
 
+        // Month-end penalty for every student (not only those who log in that day).
+        // OFF unless ZEDVILLE_AUTO_PENALTY=true - it changes real balances.
+        if (config('zedville.auto_penalty')) {
+            $schedule->command('penalty:apply --write')
+                ->lastDayOfMonth('23:50')
+                ->name('monthly-penalty')
+                ->withoutOverlapping();
+        }
+
         // ----- Monthly Salary & Bills Backfill -----
         // Salary is credited on/after the 6th, fixed bills (rent/school/electricity/
         // water/internet) on/after the 7th of every month. Previously this only ran
