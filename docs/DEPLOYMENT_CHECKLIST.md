@@ -39,9 +39,8 @@ Then clear caches:
 
     php artisan config:clear && php artisan route:clear && php artisan view:clear
 
-## 4. Set nicknames (needed once)
-Existing students have no nickname yet (the column is new). Until a nickname is set, other students see a
-blank name for them. Decide how to fill them (the spec suggests first name) and set them before announcing.
+## 4. Nicknames (automatic)
+Existing accounts get their first name (max 15 chars) as nickname automatically (migration `2026_10_03_000008`).
 
 ## 5. Smoke test (10 minutes)
 Log in as each role and check:
