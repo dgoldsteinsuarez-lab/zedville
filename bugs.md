@@ -39,7 +39,7 @@ Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-wo
 - FIXED: staff could open any student's closet; any student could read any referendum's results.
 - RETRACTED: "13-char account number overflows varchar(10)" - false on live (`varchar(13)`); the original `123000-xxxxxx` format is restored.
 - DEPLOY NOTE: `2026_10_03_000007_backfill_civic_chamber_school` must run, or old referendums/petitions (sid NULL) vanish for students.
-- OPEN: `finhero/award-points` lets a student claim any activity's points (capped per month) without proof of completion.
+- OPEN (mitigated): `finhero/award-points` and `save-points` let a student claim an activity's points (capped per month, now rate-limited 20/min) without proof - game logic runs in the browser; real fix = server-side validation.
 - OPEN: live web root is the project root (`vendor/autoload.php`, `composer.json` reachable); `.env` and `.git` are blocked (403) but this is fragile.
 
 ---

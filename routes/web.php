@@ -135,14 +135,14 @@ Route::middleware(['auth'])->group(function () {
 
     // Called by IT when a student earns activity points
     // e.g. after Task 1 completion: POST /finhero/award-points { activity_key: 'task_1', points: 1 }
-    Route::post('/finhero/award-points', [FinheroStudentController::class, 'awardPoints'])->name('finhero.award');
+    Route::post('/finhero/award-points', [FinheroStudentController::class, 'awardPoints'])->name('finhero.award')->middleware('throttle:20,1');
      // Dynamic task page route
     Route::get('/finhero/{task}', [FinheroStudentController::class, 'taskPage'])
         ->where('task', 'task-[0-9]+')
         ->name('task.page');
         // Save task points
     Route::post('/finhero/save-points', [FinheroStudentController::class, 'savePoints'])
-        ->name('finhero.save-points');
+        ->name('finhero.save-points')->middleware('throttle:20,1');
 
 });
 
