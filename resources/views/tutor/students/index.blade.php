@@ -21,22 +21,43 @@
                 @if ($class->students->isEmpty())
                     <p class="text-muted p-3 mb-0">No students in this class yet.</p>
                 @else
-                    <table class="table mb-0">
+                    <table class="table mb-0 align-middle">
                         <thead>
                             <tr>
                                 <th>Nickname</th>
                                 <th>Real name</th>
                                 <th>Citizen ID</th>
-                                <th>Joined</th>
+                                <th>Balance</th>
+                                <th>Activities this month</th>
+                                <th>Engagement</th>
+                                <th>FinHero</th>
+                                <th>Mood</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($class->students as $student)
+                                @php $s = $student->summary; @endphp
                                 <tr>
                                     <td>{{ $student->nickname }}</td>
                                     <td>{{ $student->name }}</td>
                                     <td>{{ $student->citizenId }}</td>
-                                    <td>{{ $student->created_at?->format('Y-m-d') }}</td>
+                                    <td>{{ number_format($s['balance'], 2) }} zeds</td>
+                                    <td>{{ $s['activities_this_month'] }}</td>
+                                    <td>
+                                        <span class="badge" style="background:{{ $s['engagement_meta']['color'] }}; color:{{ $s['engagement_meta']['text'] }};">
+                                            {{ $s['engagement_meta']['emoji'] }} {{ $s['engagement_meta']['label'] }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" style="background:{{ $s['finhero_meta']['color'] }}; color:{{ $s['finhero_meta']['text'] }};">
+                                            {{ $s['finhero_meta']['emoji'] }} {{ $s['finhero_meta']['label_en'] }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $s['mood'] ?? '—' }}</td>
+                                    <td>
+                                        <a href="{{ url('admin/my-students/' . $student->id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

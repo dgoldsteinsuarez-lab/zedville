@@ -180,8 +180,12 @@ class AuthenticatedSessionController extends Controller
             return redirect('/admin/dashboard');
         }
 
-        // 3. Tutor (Role 3)
+        // 3. Tutor (Role 3) - silently give them the same citizen account a
+        // student gets through onboarding (bank account, mandatory bills,
+        // first statement) since a Tutor never sees that wizard. Safe to
+        // call on every login - no-ops once already provisioned.
         if ($user->role == 3 || $user->role == '3' || $user->role === 'tutor') {
+            $activationService->provisionForTutor($user);
             return redirect('/admin/dashboard');
         }
 

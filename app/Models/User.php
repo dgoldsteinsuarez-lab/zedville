@@ -34,6 +34,8 @@ class User extends Authenticatable
         'role',
         'loginTime',
         'password_changed_at',
+        'autopilot_enabled',
+        'anonymized_at',
     ];
 
     /**
@@ -53,6 +55,8 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'autopilot_enabled' => 'boolean',
+        'anonymized_at' => 'datetime',
     ];
 
     /**
@@ -61,7 +65,7 @@ class User extends Authenticatable
      */
     public function tutoredClasses()
     {
-        return $this->belongsToMany(Grade::class, 'class_tutor', 'user_id', 'class_id');
+        return $this->belongsToMany(SchoolClass::class, 'class_tutor', 'user_id', 'class_id');
     }
 
     /**
@@ -93,9 +97,10 @@ class User extends Authenticatable
     {
     return $this->belongsTo(\App\Models\Avatar::class, 'avatar'); // avatar is the foreign key in users table
     }
+    /** The student's Class (legacy column name `grade` — it has always pointed at a Class, not a Grade). */
     public function gradeRelation()
     {
-        return $this->belongsTo(\App\Models\Grade::class, 'grade', 'id');
+        return $this->belongsTo(\App\Models\SchoolClass::class, 'grade', 'id');
     }
 
     public function mascotRelation()

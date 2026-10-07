@@ -87,7 +87,11 @@ class CivicChamberController extends Controller
 
     public function referendumCreate()
     {
-        return view('admin.civic-chamber.referendum.create');
+        $tutoredClasses = Auth::user()->isTutor()
+            ? Auth::user()->tutoredClasses()->with('grade')->get()
+            : collect();
+
+        return view('admin.civic-chamber.referendum.create', compact('tutoredClasses'));
     }
 
     /*
@@ -111,7 +115,31 @@ class CivicChamberController extends Controller
 
             'end_date' => 'nullable|date|after_or_equal:start_date',
 
+            // 'school' = school-wide (admins only), 'grade' = the picked Grade,
+            // 'class' = one specific Class the Tutor is assigned to.
+            'scope'       => 'nullable|in:school,grade,class',
+
+            'scope_id'    => 'nullable|integer',
+
         ]);
+
+        $user = Auth::user();
+        $classId = null;
+        $gradeId = null;
+
+        if ($user->isTutor()) {
+            // scope_id is always one of the Tutor's own Class ids, chosen from
+            // the picker - never trust it blindly. "grade" scope resolves that
+            // Class's parent Grade instead of using the Class itself.
+            $class = $user->tutoredClasses()->with('grade')->where('classes.id', $request->scope_id)->first()
+                ?? $user->tutoredClasses()->with('grade')->first();
+
+            if ($request->input('scope', 'class') === 'grade') {
+                $gradeId = $class?->grade_id;
+            } else {
+                $classId = $class?->id;
+            }
+        }
 
         Referendum::create([
 
@@ -127,12 +155,11 @@ class CivicChamberController extends Controller
 
             'created_by'  => Auth::id(),
 
-            'sid'         => Auth::user()->sid,
+            'sid'         => $user->sid,
 
-            // Tutor: scoped to their (first) assigned class. Admins: null = school-wide.
-            'class_id'    => Auth::user()->isTutor()
-                ? Auth::user()->tutoredClasses()->value('classes.id')
-                : null,
+            'class_id'    => $classId,
+
+            'grade_id'    => $gradeId,
 
         ]);
 
@@ -633,5 +660,69 @@ class CivicChamberController extends Controller
 
         ]);
 
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CITY NAME / QUOTE PROPOSALS (Admin Roles & Permissions doc §2.4/§3)
+    |--------------------------------------------------------------------------
+    | Scoped by Grade (never class, never whole-school) - changing the city
+    | name/quote is always Grade-wide. A Tutor may approve for any Grade
+    | they have at least one Class in, not just their own sid.
+    */
+
+    private function scopeCityProposalsToViewer($query)
+    {
+        $user = Auth::user();
+
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
+
+        if ($user->isSchoolAdmin()) {
+            return $query->where('sid', $user->sid);
+        }
+
+        if ($user->isTutor()) {
+            $gradeIds = $user->tutoredClasses()->pluck('classes.grade_id')->filter()->unique();
+            return $query->whereIn('grade_id', $gradeIds);
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
+
+    public function cityProposalsIndex()
+    {
+        $proposals = $this->scopeCityProposalsToViewer(
+            \App\Models\CityProposal::with(['proposer:id,name,nickname', 'grade:id,name'])->orderByDesc('id')
+        )->paginate(20);
+
+        return view('admin.civic-chamber.city-proposals.index', compact('proposals'));
+    }
+
+    public function cityProposalApprove($id)
+    {
+        $proposal = $this->scopeCityProposalsToViewer(\App\Models\CityProposal::query())->findOrFail($id);
+
+        $proposal->update([
+            'status' => 'approved',
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Proposal approved - it is now live in City Hall.');
+    }
+
+    public function cityProposalReject($id)
+    {
+        $proposal = $this->scopeCityProposalsToViewer(\App\Models\CityProposal::query())->findOrFail($id);
+
+        $proposal->update([
+            'status' => 'rejected',
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Proposal rejected.');
     }
 }

@@ -152,6 +152,33 @@
 
                     </div>
 
+                    @if ($tutoredClasses->isNotEmpty())
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">Visible to</label>
+
+                        <select name="scope" id="refScope" class="form-control" onchange="document.getElementById('refScopeId').style.display = this.value === 'school' ? 'none' : ''">
+                            <option value="class">One of my Classes</option>
+                            <option value="grade">My whole Grade</option>
+                        </select>
+
+                    </div>
+                    <div class="col-md-6 mb-3" id="refScopeId">
+
+                        <label class="form-label">Which Class / Grade</label>
+
+                        <select name="scope_id" class="form-control">
+                            @foreach ($tutoredClasses as $class)
+                                <option value="{{ $class->id }}" data-grade="{{ $class->grade_id }}">
+                                    {{ $class->name }} @if($class->grade)({{ $class->grade->name }})@endif
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">For "My whole Grade," pick any Class in that Grade — the whole Grade is used.</small>
+
+                    </div>
+                    @endif
+
                 </div>
 
                 <hr>

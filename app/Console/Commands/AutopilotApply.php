@@ -42,8 +42,13 @@ class AutopilotApply extends Command
         // 1) Students with an active approved period overlapping the month.
         $targets = AutopilotPeriod::overlappingMonth($year, $month)->pluck('student_id')->unique()->all();
 
-        // 2) Tutors who completed no activities themselves that month.
-        $tutorIds = DB::table('class_tutor')->pluck('user_id')->unique();
+        // 2) Tutors who completed no activities themselves that month and
+        // have not switched their own Autopilot off (default on).
+        $tutorIds = DB::table('class_tutor')
+            ->join('users', 'users.id', '=', 'class_tutor.user_id')
+            ->where('users.autopilot_enabled', true)
+            ->pluck('class_tutor.user_id')
+            ->unique();
         foreach ($tutorIds as $tid) {
             $done = DB::table('activity_completions')->where('student_id', $tid)->whereBetween('completed_at', [$from, $to])->count();
             if ($done === 0) {

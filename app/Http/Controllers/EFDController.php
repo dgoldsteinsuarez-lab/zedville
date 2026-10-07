@@ -22,6 +22,7 @@ use App\Models\Referendum;
 use App\Models\Petition;
 use App\Models\ReferendumVote;
 use App\Models\PetitionSignature;
+use App\Models\CityProposal;
 
 
 class EFDController extends Controller
@@ -563,7 +564,13 @@ class EFDController extends Controller
     }
     public function main_hall()
     {
-        return view('education.city-hall.main-hall');
+        $user = Auth::user();
+        $gradeId = optional($user->gradeRelation)->grade_id;
+
+        $cityName = CityProposal::current('name', $gradeId) ?? 'Zedville';
+        $cityQuote = CityProposal::current('quote', $gradeId);
+
+        return view('education.city-hall.main-hall', compact('cityName', 'cityQuote'));
     }
     public function civic_chamber()
     {
@@ -626,6 +633,13 @@ class EFDController extends Controller
             ->orderBy('id', 'DESC')
             ->get();
 
+        $topic = request('topic'); // 'city-name' | 'city-quote' - deep-linked from main-hall.blade.php
+
+        $myCityProposals = CityProposal::where('proposed_by', $studentId)
+            ->where('status', 'pending')
+            ->get()
+            ->keyBy('type');
+
         return view(
             'education.city-hall.civic-chamber',
             compact(
@@ -633,25 +647,77 @@ class EFDController extends Controller
                 'openReferendums',
                 'closedReferendums',
                 'activePetitions',
-                'pastPetitions'
+                'pastPetitions',
+                'topic',
+                'myCityProposals'
             )
         );
+    }
+
+    /**
+     * Admin Roles & Permissions doc §2.4: students "Propose a city name and
+     * city quote." One pending proposal per type per student at a time -
+     * the Tutor approves/rejects via Admin\CivicChamberController, matching
+     * the same submit-as-student / approve-as-staff split petitions use.
+     */
+    public function submitCityProposal(Request $request)
+    {
+        $data = $request->validate([
+            'type' => 'required|in:name,quote',
+            'value' => 'required|string|max:255',
+        ]);
+
+        $student = Auth::user();
+        $gradeId = optional($student->gradeRelation)->grade_id;
+        abort_unless($gradeId, 422, 'You must be assigned to a Class before proposing a city name or quote.');
+
+        $alreadyPending = CityProposal::where('proposed_by', $student->id)
+            ->where('type', $data['type'])
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($alreadyPending) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already have a pending proposal of this type.',
+            ]);
+        }
+
+        CityProposal::create([
+            'sid' => $student->sid,
+            'grade_id' => $gradeId,
+            'type' => $data['type'],
+            'value' => $data['value'],
+            'proposed_by' => $student->id,
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Proposal submitted - your Tutor will review it.',
+        ]);
     }
     public function submitPetition(Request $request)
     {
         $request->validate([
             'title' => 'required|max:255',
             'description' => 'required',
+            'scope' => 'nullable|in:class,grade',
         ]);
 
         $student = Auth::user();
+        $wholeGrade = $request->input('scope') === 'grade';
+        $gradeId = optional($student->gradeRelation)->grade_id;
 
         Petition::create([
             'title' => $request->title,
             'description' => $request->description,
             'created_by' => $student->id,
             'sid' => $student->sid,
-            'class_id' => $student->grade,
+            // "My class only" sets class_id; "whole Grade" leaves class_id
+            // null and sets grade_id instead - see Petition::scopeInStudentScope.
+            'class_id' => $wholeGrade ? null : $student->grade,
+            'grade_id' => $gradeId,
             'status' => 'pending',
         ]);
 

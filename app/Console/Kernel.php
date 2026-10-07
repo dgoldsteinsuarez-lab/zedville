@@ -146,6 +146,35 @@ class Kernel extends ConsoleKernel
             ->name('monthly-finance-backfill')
             ->withoutOverlapping();
 
+        // Petitions left pending 3+ months auto-close (Admin Roles & Permissions doc §6).
+        $schedule->command('petitions:expire-stale --write')
+            ->dailyAt('02:00')
+            ->name('petitions-expire-stale')
+            ->withoutOverlapping();
+
+        // Alerts a Tutor when one of their students has gone quiet (doc §2.3 "Receive
+        // automatic alerts for inactive students"). Reuses NotificationService - no
+        // new UI, the bell/drawer already exists on every authenticated page.
+        $schedule->command('students:alert-inactive')
+            ->dailyAt('07:00')
+            ->name('students-alert-inactive')
+            ->withoutOverlapping();
+
+        // Applies one-time and recurring salary bonuses a Tutor/Super Admin granted
+        // (doc §2.3, §4.2). One idempotent daily sweep keyed off `last_applied_at` -
+        // deliberately not modeled on ProcessScheduledTransfer's self-dispatch, which
+        // double-fires alongside this same Kernel's own polling loop above.
+        $schedule->command('bonuses:apply --write')
+            ->dailyAt('00:30')
+            ->name('bonuses-apply')
+            ->withoutOverlapping();
+
+        // 12-month data retention (doc §7). Anonymizes, never deletes ledger/badge
+        // history - see AnonymizeInactiveStudents for exactly what's overwritten.
+        $schedule->command('students:anonymize-inactive --write')
+            ->monthlyOn(1, '03:00')
+            ->name('students-anonymize-inactive')
+            ->withoutOverlapping();
     }
 
     /**

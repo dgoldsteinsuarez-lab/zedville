@@ -48,4 +48,15 @@ return [
     */
     'auto_penalty' => (bool) env('ZEDVILLE_AUTO_PENALTY', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Inactive Student Alert Threshold
+    |--------------------------------------------------------------------------
+    |
+    | Days with no login and no activity_completions row before a Tutor gets
+    | an "inactive student" alert (Admin Roles & Permissions doc §2.3).
+    |
+    */
+    'inactive_days_threshold' => 14,
+
 ];

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\View\View;
 use Carbon\Carbon;
 use App\Models\Mascot;
-use App\Models\Grade;
+use App\Models\SchoolClass;
 use App\Models\Avatar;
 use App\Models\MoodLog;
 use App\Models\Mailbox;
@@ -38,7 +38,7 @@ class ProfileController extends Controller
 
 
         // 🔹 Grades
-        $grades = Grade::where('status', 1)->get();
+        $grades = SchoolClass::where('status', 1)->get();
 
         // 🔹 CURRENT MONTH consumer survey ONLY
         $Consumersurvey = ConsumerSurvey::where('user_id', $user->id)
@@ -500,7 +500,7 @@ public function findClosestMood($energy, $pleasantness)
 
         $avatar = Avatar::where('status', 1)->get();
         $mascots = Mascot::where('status', 1)->get();
-        $grades = Grade::where('status', 1)->get();
+        $grades = SchoolClass::where('status', 1)->get();
 
         // Get latest consumer survey
         $Consumersurvey = ConsumerSurvey::where('user_id', $user->id)

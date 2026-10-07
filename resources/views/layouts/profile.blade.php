@@ -628,6 +628,19 @@
                 @endif
             <!-- </div> -->
             <!-- Toast Message End  -->
+
+            @if (auth()->check() && auth()->user()->isTutor())
+                <div class="flex justify-between items-center flex-wrap gap-2 mb-6 p-3 rounded-lg" style="background:#E8F5EE; border:1px solid #A7E3C3;">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-white px-3 py-1 rounded-full" style="background:#1B6B3A;">STUDENT MODE</span>
+                        <span class="text-sm text-gray-600">You're viewing this as a Tutor — this is your own citizen account.</span>
+                    </div>
+                    <a href="{{ url('admin/my-students') }}" class="text-sm font-medium px-3 py-1.5 rounded-md bg-white border" style="border-color:#1B6B3A; color:#1B6B3A;">
+                        &larr; Switch to Tutor Mode
+                    </a>
+                </div>
+            @endif
+
             @yield('content')
 
         </main> <!-- Main End -->

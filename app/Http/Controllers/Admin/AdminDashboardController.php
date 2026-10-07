@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Models\Role;
 use App\Models\Grade;
+use App\Models\SchoolClass;
 use App\Models\GradeLevel;
 use App\Models\User;
 use App\Models\SchoolDomain;
@@ -24,7 +25,27 @@ class AdminDashboardController extends Controller
         ->orderBy('id', 'asc')
         ->get();
 
-    return view('admin.dashboard', compact('schools'));
+        // Admin Structure Proposal doc §2: Dashboard is a School -> Grade
+        // drill-down. $selectedSchool is always set for non-Super-Admin
+        // (IsAdmin pins it); for Super Admin it's null until they pick one.
+        $selectedSchool = null;
+        $grades = collect();
+
+        if (session()->has('selected_school')) {
+            $selectedSchool = SchoolDomain::find(session('selected_school'));
+
+            $grades = Grade::with(['level', 'classes.tutors:id,name,nickname', 'classes' => fn ($q) => $q->withCount('students')])
+                ->where('sid', session('selected_school'))
+                ->get()
+                ->map(function ($grade) {
+                    $grade->tutor_names = $grade->classes->flatMap(fn ($c) => $c->tutors)->pluck('nickname')->filter()->unique()->values();
+                    $grade->students_count = $grade->classes->sum('students_count');
+                    return $grade;
+                })
+                ->sortBy(fn ($g) => sprintf('%03d-%s', $g->level->sort_order ?? 999, $g->name));
+        }
+
+    return view('admin.dashboard', compact('schools', 'selectedSchool', 'grades'));
     }
     public function setSchool(Request $request)
 {
@@ -185,30 +206,36 @@ private function schoolScoped($query)
     return $query;
 }
 
+/**
+ * Classes screen (formerly called "Grade" before the real Grade/Class
+ * split — this now manages SchoolClass rows: class code, Tutor(s), and
+ * which Grade the class belongs to).
+ */
 public function grade(Request $request)
 {
-    $query = $this->schoolScoped(Grade::with(['level', 'tutors:users.id,users.nickname']))
+    $query = $this->schoolScoped(SchoolClass::with(['grade.level', 'tutors:users.id,users.nickname']))
         ->withCount(['students']);
 
     if ($request->filled('search')) {
         $query->where('name', 'like', '%' . $request->search . '%');
     }
 
-    $grade = $query->orderBy('grade_level_id')->orderBy('name')->get();
+    $grade = $query->orderBy('grade_id')->orderBy('name')->get();
+    $grades = $this->schoolScoped(Grade::orderBy('name'))->get();
     $levels = $this->schoolScoped(GradeLevel::orderBy('sort_order')->orderBy('name'))->get();
 
-    return view('admin.grade.index', compact('grade', 'levels'));
+    return view('admin.grade.index', compact('grade', 'grades', 'levels'));
 }
 
-/** The grade level must belong to the same school as the class. */
-private function validLevelId($levelId, $sid)
+/** The Grade must belong to the same school as the class. */
+private function validGradeId($gradeId, $sid)
 {
-    if (empty($levelId)) {
+    if (empty($gradeId)) {
         return null;
     }
-    $level = GradeLevel::where('id', $levelId)->where('sid', (string) $sid)->first();
-    abort_unless($level, 422, 'Grade level does not belong to this school.');
-    return $level->id;
+    $grade = Grade::where('id', $gradeId)->where('sid', (string) $sid)->first();
+    abort_unless($grade, 422, 'Grade does not belong to this school.');
+    return $grade->id;
 }
 
 public function addGrade(Request $request)
@@ -219,63 +246,63 @@ public function addGrade(Request $request)
     $request->validate([
         'name' => ['required', 'string', 'max:255',
             \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $sid)],
-        'grade_level_id' => 'nullable|integer',
+        'grade_id' => 'nullable|integer',
     ]);
 
     // Generate unique 6-digit class code
     do {
         $classCode = mt_rand(100000, 999999);
-    } while (Grade::where('classCode', $classCode)->exists());
+    } while (SchoolClass::where('classCode', $classCode)->exists());
 
-    $grade = new Grade();
-    $grade->sid = $sid;
-    $grade->classCode = $classCode;
-    $grade->name = $request->name;
-    $grade->grade_level_id = $this->validLevelId($request->grade_level_id, $sid);
-    $grade->save();
+    $class = new SchoolClass();
+    $class->sid = $sid;
+    $class->classCode = $classCode;
+    $class->name = $request->name;
+    $class->grade_id = $this->validGradeId($request->grade_id, $sid);
+    $class->save();
 
     return redirect()->back()->with('success', 'Class added successfully!');
 }
 
 public function updateGrade(Request $request, $id)
 {
-    $grade = $this->schoolScoped(Grade::query())->findOrFail($id);
+    $class = $this->schoolScoped(SchoolClass::query())->findOrFail($id);
 
     $request->validate([
         'name' => ['required', 'string', 'max:255',
-            \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $grade->sid)->ignore($grade->id)],
-        'classCode' => 'nullable|numeric|digits:6|unique:classes,classCode,' . $grade->id,
-        'grade_level_id' => 'nullable|integer',
+            \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $class->sid)->ignore($class->id)],
+        'classCode' => 'nullable|numeric|digits:6|unique:classes,classCode,' . $class->id,
+        'grade_id' => 'nullable|integer',
     ]);
 
-    $grade->name = $request->name;
-    $grade->grade_level_id = $this->validLevelId($request->grade_level_id, $grade->sid);
+    $class->name = $request->name;
+    $class->grade_id = $this->validGradeId($request->grade_id, $class->sid);
 
     if ($request->filled('classCode')) {
-        $grade->classCode = $request->classCode;
-    } elseif (empty($grade->classCode)) {
+        $class->classCode = $request->classCode;
+    } elseif (empty($class->classCode)) {
         do {
             $classCode = mt_rand(100000, 999999);
-        } while (Grade::where('classCode', $classCode)->exists());
-        $grade->classCode = $classCode;
+        } while (SchoolClass::where('classCode', $classCode)->exists());
+        $class->classCode = $classCode;
     }
 
-    $grade->save();
+    $class->save();
 
     return redirect()->back()->with('success', 'Class updated successfully!');
 }
 
 public function deleteGrade($id)
 {
-    $grade = $this->schoolScoped(Grade::query())->findOrFail($id);
+    $class = $this->schoolScoped(SchoolClass::query())->findOrFail($id);
 
     // Never orphan students: they are linked to their class through users.grade.
-    if (User::where('role', 4)->where('grade', $grade->id)->exists()) {
+    if (User::where('role', 4)->where('grade', $class->id)->exists()) {
         return redirect()->back()->with('error', 'This class still has students. Move them to another class first.');
     }
 
-    $grade->tutors()->detach();
-    $grade->delete();
+    $class->tutors()->detach();
+    $class->delete();
 
     return redirect()->back()->with('success', 'Class deleted successfully!');
 }
@@ -449,7 +476,7 @@ public function calendar()
 }*/
 public function class_list()
 {
-    $query = Grade::select('id', 'name');
+    $query = SchoolClass::select('id', 'name');
 
     if (session()->has('selected_school')) {
         $query->where('sid', session('selected_school'));

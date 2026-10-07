@@ -67,4 +67,19 @@ class AutopilotController extends Controller
 
         return redirect()->route('admin.autopilot.index')->with('success', 'Autopilot period cancelled.');
     }
+
+    /**
+     * A Tutor switching their own citizen account's Autopilot on/off (default
+     * on). Distinct from AutopilotPeriod, which models a dated absence for a
+     * student — this is a standing preference for the Tutor themself.
+     */
+    public function toggleSelf(Request $request)
+    {
+        $user = Auth::user();
+        abort_unless($user->isTutor(), 403);
+
+        $user->update(['autopilot_enabled' => $request->boolean('autopilot_enabled')]);
+
+        return back()->with('success', 'Autopilot is now ' . ($user->autopilot_enabled ? 'on' : 'off') . '.');
+    }
 }

@@ -734,6 +734,71 @@
             </a>
         </div>
 
+        <!-- CITY NAME / QUOTE PROPOSAL -->
+        <div class="cc-header" id="city-proposal-card" style="flex-direction:column; align-items:stretch; gap:10px; {{ $topic ? '' : 'opacity:.9;' }}">
+            <div class="cc-title" style="font-size:15px;">Propose a city name or quote</div>
+            <div class="cc-subtitle">Your Tutor reviews it before it goes live in City Hall. One pending proposal of each type at a time.</div>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                <form id="city-name-form" style="flex:1; min-width:220px;">
+                    @csrf
+                    <label class="text-sm" style="display:block; margin-bottom:4px;">City name</label>
+                    @if ($myCityProposals->has('name'))
+                        <div class="text-sm" style="color:#7A5C00;">Pending: "{{ $myCityProposals['name']->value }}"</div>
+                    @else
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" name="value" maxlength="255" required class="form-control" placeholder="New city name">
+                            <button type="submit" class="btn btn-sm btn-primary">Propose</button>
+                        </div>
+                    @endif
+                </form>
+                <form id="city-quote-form" style="flex:1; min-width:220px;">
+                    @csrf
+                    <label class="text-sm" style="display:block; margin-bottom:4px;">City quote</label>
+                    @if ($myCityProposals->has('quote'))
+                        <div class="text-sm" style="color:#7A5C00;">Pending: "{{ $myCityProposals['quote']->value }}"</div>
+                    @else
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" name="value" maxlength="255" required class="form-control" placeholder="New city quote">
+                            <button type="submit" class="btn btn-sm btn-primary">Propose</button>
+                        </div>
+                    @endif
+                </form>
+            </div>
+            <div id="city-proposal-feedback" class="text-sm"></div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const topic = @json($topic);
+                if (topic === 'city-name' || topic === 'city-quote') {
+                    document.getElementById('city-proposal-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                function wireForm(formId, type) {
+                    const form = document.getElementById(formId);
+                    if (!form) return;
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        const value = form.querySelector('input[name="value"]').value;
+                        fetch('{{ route("education.city-proposal.create") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({ type: type, value: value })
+                        })
+                            .then(r => r.json())
+                            .then(data => {
+                                document.getElementById('city-proposal-feedback').textContent = data.message;
+                                if (data.success) setTimeout(() => location.reload(), 900);
+                            });
+                    });
+                }
+                wireForm('city-name-form', 'name');
+                wireForm('city-quote-form', 'quote');
+            });
+        </script>
+
         <!-- TABS -->
         <div class="cc-tabs" role="tablist">
             <button class="cc-tab active-ref" id="tab-ref" onclick="switchTab('referendum')" role="tab"
@@ -1075,6 +1140,15 @@
 
                 </div>
 
+                <div class="form-group">
+
+                    <label class="form-label">Visible to</label>
+
+                    <label><input type="radio" name="petScope" value="class" checked> Just my class</label>
+                    <label><input type="radio" name="petScope" value="grade"> My whole Grade</label>
+
+                </div>
+
                 <div class="form-actions">
 
                     <button class="btn-submit" onclick="submitPetition()">
@@ -1407,6 +1481,7 @@
             const desc = document.getElementById('petDesc').value.trim();
             if (!title) { alert('Please write a title for your petition.'); return; }
             if (!desc) { alert('Please write a description for your petition.'); return; }
+            const scope = document.querySelector('input[name="petScope"]:checked').value;
 
             // IT TEAM: replace URL with Laravel route
             fetch('/education/petition/create', {
@@ -1415,7 +1490,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({ title: title, description: desc })
+                body: JSON.stringify({ title: title, description: desc, scope: scope })
             })
                 .then(r => r.json())
                 .then(data => {

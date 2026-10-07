@@ -26,6 +26,8 @@ class Referendum extends Model
 
         'class_id',
 
+        'grade_id',
+
     ];
 
     protected $casts = [
@@ -37,14 +39,22 @@ class Referendum extends Model
     ];
 
     /**
-     * Referendums a given student may see/vote on: same school, and either
-     * school-wide (class_id null) or attached to the student's own class.
+     * Referendums a given student may see/vote on: same school, and one of —
+     * their own Class, their whole Grade, or school-wide (all null).
      */
     public function scopeVisibleToStudent($query, $student)
     {
+        $gradeId = optional($student->gradeRelation)->grade_id;
+
         return $query->where('sid', $student->sid)
-            ->where(function ($q) use ($student) {
-                $q->whereNull('class_id')->orWhere('class_id', $student->grade);
+            ->where(function ($q) use ($student, $gradeId) {
+                $q->where('class_id', $student->grade)
+                    ->orWhere(function ($q2) use ($gradeId) {
+                        $q2->whereNull('class_id')->where('grade_id', $gradeId);
+                    })
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('class_id')->whereNull('grade_id');
+                    });
             });
     }
 

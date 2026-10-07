@@ -99,6 +99,25 @@
                                             <span class="navTxt">My Students</span>
                                         </a>
                                     </li>
+                                    <li class="nav-item {{ request()->is('admin/extensions*') ? 'active' : '' }}">
+                                        <a class="nav-link" href="{{ url('admin/extensions') }}">
+                                            <span class="navTxt">Extensions</span>
+                                        </a>
+                                    </li>
+                                    @endif
+                                    @if(auth()->user()->isAdminOrTutor())
+                                    <li class="nav-item {{ request()->is('admin/salary-bonuses*') ? 'active' : '' }}">
+                                        <a class="nav-link" href="{{ url('admin/salary-bonuses') }}">
+                                            <span class="navTxt">Salary Bonuses</span>
+                                        </a>
+                                    </li>
+                                    @endif
+                                    @if(auth()->user()->isSuperAdmin() || auth()->user()->isTutor())
+                                    <li class="nav-item {{ request()->is('admin/city-proposals*') ? 'active' : '' }}">
+                                        <a class="nav-link" href="{{ url('admin/city-proposals') }}">
+                                            <span class="navTxt">City Proposals</span>
+                                        </a>
+                                    </li>
                                     @endif
                                     <li class="nav-item {{ request()->is('admin/autopilot*') ? 'active' : '' }}">
                                         <a class="nav-link" href="{{ url('admin/autopilot') }}">
@@ -163,9 +182,14 @@
                                                     </a>
                                                 </li>
                                                 @endif
+                                                <li class="nav-item {{ request()->is('admin/grades') && !request()->is('admin/grade') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/grades') }}">
+                                                        <span class="navTxt">Grades</span>
+                                                    </a>
+                                                </li>
                                                 <li class="nav-item {{ request()->is('admin/grade') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/grade') }}">
-                                                        <span class="navTxt">Grade / Class</span>
+                                                        <span class="navTxt">Classes</span>
                                                     </a>
                                                 </li>
                                             </ul>
@@ -505,6 +529,17 @@
                     <div class="d-flex flex-column-fluid">
                         <div class="container-fluid p-0">
 
+@if (auth()->check() && auth()->user()->isTutor())
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3" style="background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px;">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge" style="background:#4F46E5; color:#fff; font-size:.8rem; padding:.45em .8em;">TUTOR MODE</span>
+            <span class="text-muted" style="font-size:.9rem;">You're managing your students and classes.</span>
+        </div>
+        <a href="{{ url('/dashboard') }}" class="btn btn-sm" style="background:#fff; border:1px solid #4F46E5; color:#4F46E5;">
+            Switch to Student View &rarr;
+        </a>
+    </div>
+@endif
 
      @yield('content')
 

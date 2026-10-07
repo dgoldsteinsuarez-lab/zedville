@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Grade;
+use App\Models\SchoolClass;
 use App\Models\SchoolDomain;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -41,7 +41,7 @@ class StaffController extends Controller
     private function classesForViewer()
     {
         $viewer = Auth::user();
-        $query = Grade::query();
+        $query = SchoolClass::query();
 
         if (!$viewer->isSuperAdmin()) {
             $query->where('sid', $viewer->sid);
@@ -82,7 +82,7 @@ class StaffController extends Controller
 
         // Classes must belong to that school (blocks assigning across schools).
         $classIds = collect($data['class_ids'] ?? [])
-            ->filter(fn ($id) => Grade::where('id', $id)->where('sid', $sid)->exists())
+            ->filter(fn ($id) => SchoolClass::where('id', $id)->where('sid', $sid)->exists())
             ->values();
 
         $temporaryPassword = Str::random(10) . random_int(10, 99) . '!';
@@ -120,7 +120,7 @@ class StaffController extends Controller
         ]);
 
         $classIds = collect($request->input('class_ids', []))
-            ->filter(fn ($cid) => Grade::where('id', $cid)->where('sid', $tutor->sid)->exists())
+            ->filter(fn ($cid) => SchoolClass::where('id', $cid)->where('sid', $tutor->sid)->exists())
             ->values();
 
         $tutor->tutoredClasses()->sync($classIds);

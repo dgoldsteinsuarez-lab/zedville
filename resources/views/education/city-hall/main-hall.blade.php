@@ -323,7 +323,7 @@
         <div class="ch-seal">🏛️</div>
         <div>
           <div style="display:flex;align-items:center;gap:8px;">
-            <span class="ch-city-name">Zedville</span>
+            <span class="ch-city-name">{{ $cityName }}</span>
             <button class="rename-btn" onclick="location.href='{{ route('education.civic-chamber') }}?topic=city-name'">
               <i class="ti ti-pencil" style="font-size:11px;" aria-hidden="true"></i> propose rename
             </button>
@@ -338,7 +338,7 @@
       </div>
     </div>
     <div class="ch-quote-strip">
-      <span class="ch-quote-txt">"A budget is telling your money where to go instead of wondering where it went."</span>
+      <span class="ch-quote-txt">"{{ $cityQuote ?? 'A budget is telling your money where to go instead of wondering where it went.' }}"</span>
       <a href="{{ route('education.civic-chamber') }}?topic=city-quote" class="ch-quote-btn">
         <i class="ti ti-pencil" style="font-size:11px;" aria-hidden="true"></i> Change quote
       </a>

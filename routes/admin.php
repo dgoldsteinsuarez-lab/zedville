@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\AdminEducationController;
 use App\Http\Controllers\Admin\WellbeingController;
 use App\Http\Controllers\Admin\CivicChamberController;
 use App\Http\Controllers\Tutor\TutorStudentController;
+use App\Http\Controllers\Tutor\AssignmentExtensionController;
+use App\Http\Controllers\Admin\SalaryBonusController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -27,11 +29,33 @@ Route::post('/profile/password', [AdminDashboardController::class, 'updatePasswo
 
 // Tutor's own student list (self-scoped to their assigned classes inside the controller)
 Route::get('/my-students', [TutorStudentController::class, 'index'])->name('tutor.my-students');
+Route::get('/my-students/{studentId}', [TutorStudentController::class, 'show'])->name('tutor.my-students.show');
 
 // Autopilot for students (approved absence) - every action is scope-checked inside the controller
 Route::get('/autopilot', [\App\Http\Controllers\Admin\AutopilotController::class, 'index'])->name('autopilot.index');
 Route::post('/autopilot', [\App\Http\Controllers\Admin\AutopilotController::class, 'store'])->name('autopilot.store');
 Route::post('/autopilot/{id}/cancel', [\App\Http\Controllers\Admin\AutopilotController::class, 'cancel'])->name('autopilot.cancel');
+
+// A Tutor switching Autopilot on/off for their own citizen account
+Route::post('/autopilot/toggle-self', [\App\Http\Controllers\Admin\AutopilotController::class, 'toggleSelf'])->name('autopilot.toggle-self');
+
+// Assignment due-date extensions - scope-checked inside the controller
+Route::get('/extensions', [AssignmentExtensionController::class, 'index'])->name('tutor.extensions.index');
+Route::post('/extensions', [AssignmentExtensionController::class, 'store'])->name('tutor.extensions.store');
+
+// Salary bonuses (one-time or recurring) - scope-checked inside the controller
+Route::get('/salary-bonuses', [SalaryBonusController::class, 'index'])->name('salary-bonuses.index');
+Route::post('/salary-bonuses', [SalaryBonusController::class, 'store'])->name('salary-bonuses.store');
+Route::post('/salary-bonuses/{id}/pause', [SalaryBonusController::class, 'pause'])->name('salary-bonuses.pause');
+Route::post('/salary-bonuses/{id}/resume', [SalaryBonusController::class, 'resume'])->name('salary-bonuses.resume');
+Route::post('/salary-bonuses/{id}/cancel', [SalaryBonusController::class, 'cancel'])->name('salary-bonuses.cancel');
+
+// City name & quote proposals - staff review (Super Admin + Tutor only, per doc)
+Route::middleware('role:super_admin,tutor')->group(function () {
+    Route::get('/city-proposals', [CivicChamberController::class, 'cityProposalsIndex'])->name('city-proposals.index');
+    Route::post('/city-proposals/{id}/approve', [CivicChamberController::class, 'cityProposalApprove'])->name('city-proposals.approve');
+    Route::post('/city-proposals/{id}/reject', [CivicChamberController::class, 'cityProposalReject'])->name('city-proposals.reject');
+});
 
 //For Calender
 Route::get('/calendar', [AdminDashboardController::class, 'calendar'])->name('admin.calendar');
@@ -104,6 +128,15 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/grade-level/add', [AdminDashboardController::class, 'addGradeLevel'])->name('admin.grade-level.add');
     Route::put('/grade-level/edit/{id}', [AdminDashboardController::class, 'updateGradeLevel'])->name('admin.grade-level.update');
     Route::delete('/grade-level/delete/{id}', [AdminDashboardController::class, 'deleteGradeLevel'])->name('admin.grade-level.delete');
+
+    // Grades (the real curriculum container - "Grade 8") - Classes stay at /grade above
+    Route::get('/grades', [\App\Http\Controllers\Admin\GradeController::class, 'index'])->name('grades.index');
+    Route::post('/grades', [\App\Http\Controllers\Admin\GradeController::class, 'store'])->name('grades.store');
+    Route::put('/grades/{id}', [\App\Http\Controllers\Admin\GradeController::class, 'update'])->name('grades.update');
+    Route::delete('/grades/{id}', [\App\Http\Controllers\Admin\GradeController::class, 'destroy'])->name('grades.delete');
+
+    // General Information page for one Grade (Admin Structure Proposal doc §3)
+    Route::get('/grades/{id}/general-information', [\App\Http\Controllers\Admin\GradeGeneralInformationController::class, 'show'])->name('grades.general-information');
 
     //For Student (school-wide admin list — a Tutor's own class is /my-students instead)
     Route::get('/student', [AdminStudentController::class, 'index'])->name('admin.student.index');

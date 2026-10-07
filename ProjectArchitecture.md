@@ -64,6 +64,7 @@ There's no middleware or global scope for "which school." Instead, ~40+ individu
 - `AuthServiceProvider::$policies` is empty. No Laravel policies/gates are used anywhere.
 - Role checks are done ad hoc per-controller: `$user->role == 4`, `ClosetController::requireAdmin()`, a custom `IsAdmin` route middleware registered in `Http/Kernel.php:66` as `'admin'`.
 - **`RouteServiceProvider::boot()` (lines 39-43) applies only `['web','auth']` to the `admin.php` route group — the `admin` middleware is never attached.** The code literally has the comment `// Add 'admin' middleware if needed` next to it, unaddressed. Any authenticated user may be able to reach admin routes unless `routes/admin.php` itself adds the middleware per-route (not reviewed — out of scope, flagged for verification).
+  - **Update, Oct 2026 (`fix/admin-access-control` branch):** fixed — `RouteServiceProvider::boot()` now applies `['web','auth','admin']`. `IsAdmin` also grew real role awareness (`User::isSuperAdmin()/isSchoolAdmin()/isTutor()/isAdminOrTutor()`, `User::ROLE_*` constants) and pins non-Super-Admins to their own school via `session('selected_school')` on every request. See §13.
 
 ## 8. Scheduling — what's actually cron-driven vs login-driven
 
@@ -87,6 +88,7 @@ There's no middleware or global scope for "which school." Instead, ~40+ individu
 
 These are hardcoded independently in multiple files instead of one config file (`config/zedville.php` or similar does not exist for this):
 
+- **Update, Oct 2026:** `config/zedville.php` now exists and centralizes `academic_year_start_month`, `monthly_salary`, `auto_penalty`, and `inactive_days_threshold` (§13). The duplication below predates it; new code should read from this file, not re-hardcode.
 - Monthly salary `3952.40` / `4250` — `CitizenActivationController.php:132`, `EFDController.php:163`, `StatementGenerator.php:70`, `BankController.php` (multiple, differing values — see `bugs.md`).
 - Emergency fund % (`20`) — `CitizenActivationController.php:52`, `EFDController.php:164`, `StatementGenerator.php:138`.
 - Rent (`300`) / School Fees (`1000`) — `CitizenActivationController.php:239,261,278-279`, `AuthenticatedSessionController.php:186,189-190`, and again in `BankController.php`.
@@ -154,3 +156,33 @@ These are hardcoded independently in multiple files instead of one config file (
 - `ClosetController` — has consistent `requireAuth`/`requireAdmin`/`requireAdminOrTutor` guards and private formatter methods for JSON shaping, despite bypassing Eloquent.
 
 See `bugs.md` for the full defect list and `planning.md` for the fix sequencing.
+
+## 13. Tutor-power subsystems added October 2026
+
+Built against `1. Zedville_Admin_Roles_Permissions_v1 (2).docx` (the canonical Admin Roles & Permissions reference — see §0 context in that doc for the full role hierarchy). Two phases: first the Tutor dual-mode UI, then six specific Tutor/staff powers the doc described but the code didn't have yet. Everything here deliberately reuses the patterns above rather than inventing new ones — see the cross-references.
+
+**Tutor dual-mode UI** (`fix/admin-access-control` branch):
+- `users.autopilot_enabled` (boolean, default true) — a Tutor's own citizen account runs on Autopilot by default (per §5.2 of the doc); `AutopilotController::toggleSelf()` lets them switch to manual. `AutopilotApply` (the existing month-end command) now excludes tutors who opted out.
+- `CitizenActivationService::provisionForTutor()` — silently gives a Tutor the same `BankAccount`/mandatory-bills/first-statement a student gets through the onboarding wizard, called on every Tutor login (idempotent). A Tutor never sees the wizard, so this fills the same records directly from their profile.
+- Every page in both `layouts.admin` (Tutor Mode) and `layouts.profile` (Student Mode) now shows a persistent colored banner naming which mode you're in, with a one-click switch — the closest practical equivalent of the doc's §8 "Tutor Dual-View Toggle," without a shared single-toggle widget (the two modes are structurally different layouts, not components of one page).
+- `components/school-badge.blade.php` — one reusable partial for "which school am I looking at," used in the admin header and on the Autopilot/City Proposals pages. Only Super Admin sees the switch-school affordance (§6 multi-tenancy — everyone else is pinned via `IsAdmin`).
+- `TutorStudentController` (`routes/admin.php` → `/admin/my-students`) batch-loads a one-glance summary per student (this month's `activity_completions` count, Engagement badge, FinHero badge, latest `MoodLog`, current balance from `Transaction1`) in a fixed number of queries regardless of class size, plus a per-student snapshot page (`/admin/my-students/{id}`) composing badge history + budget (from `BankStatement.statement_data`) + mood trend in one place.
+
+**Six specific powers from the doc's permission matrix, not previously built:**
+
+| Power (doc §) | What was added | Reuses |
+|---|---|---|
+| Petition 3-month auto-expiry (§6, §7) | `petitions:expire-stale` command, scheduled daily | Existing `petitions.status`/`created_at` columns — no new table |
+| Tutor inactive-student alerts (§2.3) | `students:alert-inactive` command, scheduled daily | `NotificationService` (§ below) entirely — zero new UI |
+| Assignment due-date extensions (§2.3) | `assignment_extensions` table, `Tutor\AssignmentExtensionController`, `/admin/extensions` | `User::canManageStudent()` (§6 scoping pattern) |
+| Salary bonuses, one-time/recurring (§2.3, §4.2) | `salary_bonuses` table, `Admin\SalaryBonusController`, `bonuses:apply` command (scheduled daily) | `BalanceService::lockedBalance()` + `Transaction1` ledger (§3-4) and `LedgerController`'s mandatory-reason/append-only pattern exactly |
+| City name & quote proposal/approval (§2.4, §3) | `city_proposals` table; student submit in `EFDController` (matches where petitions submit), staff approve in `Admin\CivicChamberController` (matches where petitions approve) | The existing split-brain Civic Chamber pattern (§5) — deliberately extended rather than resolved, so as not to silently change the architecture of an unrelated feature while building a new one |
+| 12-month data retention (§7) | `users.anonymized_at`, `students:anonymize-inactive` command, scheduled monthly | Nothing deleted — anonymizes PII fields only, ledger/badge/petition history untouched, same append-only philosophy as everything above |
+
+**A new scheduling principle, stated once here because it applies to all three money/notification commands above:** `ProcessScheduledTransfer` (§8) self-dispatches its own next occurrence via a queued `->delay()` *and* is independently re-polled every minute by `Console/Kernel.php` — two triggers for one event. `bonuses:apply`, `students:alert-inactive`, `petitions:expire-stale`, and `students:anonymize-inactive` are all instead a single daily/monthly `$schedule->command(...)` entry with one idempotency check each (`last_applied_at`, a 7-day notification lookback, `status`, `anonymized_at` respectively) — one trigger, one source of truth, matching the safer shape already used by `monthly-finance-backfill` (§8), not the Transfer precedent.
+
+**Known v1 scope cut:** assignment extensions are recorded and listed for the Tutor but not yet surfaced inside the student-facing FullCalendar widget (that JS is shared and complex — a deliberate fast-follow, not a silent gap).
+
+**Known compliance caveat:** the 12-month anonymization job implements a reasonable technical default (plain login-inactivity). The doc's actual trigger ("does not continue to the next level or becomes inactive") may need to be tied to academic-year rollover instead — confirm with the school before treating this as GDPR/BDSG sign-off.
+
+**Notification system** (referenced above, exists independently of this work but is new since the original snapshot): `App\Services\NotificationService` writes to `app_notifications` (not Laravel's built-in `notifications` table — `users` already uses `Notifiable` for something else). Delivered via a bell/drawer injected into every page extending `layouts.profile` by a global view composer in `AppServiceProvider::boot()`. Most events are logged via Eloquent Observers (`app/Observers/*`), not inline controller code — the new inactive-student alert is the first consumer that calls `NotificationService::log()`/`logForUsers()` directly from a scheduled command instead, since inactivity isn't a model-write event an Observer could hook.

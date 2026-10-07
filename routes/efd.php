@@ -30,6 +30,9 @@ Route::get('/well-being-room', [EFDController::class, 'well_being_room'])->name(
 Route::post('/petition/create', [EFDController::class, 'submitPetition'])
     ->name('petition.create');
 
+Route::post('/city-proposal/create', [EFDController::class, 'submitCityProposal'])
+    ->name('city-proposal.create');
+
 //Route::post('/referendum/vote', [EFDController::class, 'castVote'])
     //->name('referendum.vote');
 Route::post('/referendum/{id}/vote', [EFDController::class, 'castVote'])

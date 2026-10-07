@@ -59,7 +59,7 @@ class RegisteredUserController extends Controller
         $school = \App\Models\SchoolDomain::where('school_domain', $emailDomain)->first();
         $sid = $school->id;
         // Find Grade/Class by class code
-        $grade = Grade::where('classCode', $request->classCode)
+        $grade = SchoolClass::where('classCode', $request->classCode)
             //->where('sid', $sid) // optional but recommended
             ->first();
 

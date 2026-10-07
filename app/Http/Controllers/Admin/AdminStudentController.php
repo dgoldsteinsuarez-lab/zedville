@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Role;
-use App\Models\Grade;
+use App\Models\SchoolClass;
 use App\Models\Mascot;
 use App\Models\SchoolDomain;
 use App\Helpers\MailboxScheduler;
@@ -19,7 +19,7 @@ class AdminStudentController extends Controller
         /*$students = User::with(['gradeRelation', 'mascotRelation'])
         ->where('role', 4) // role = 4 means student
         ->get();*/
-        $query = User::with(['gradeRelation.level', 'gradeRelation.tutors:users.id,users.nickname', 'mascotRelation'])
+        $query = User::with(['gradeRelation.grade.level', 'gradeRelation.tutors:users.id,users.nickname', 'mascotRelation'])
             ->where('role', 4); // role = 4 means student
 
         // ✅ Apply SID filter (only if selected)
@@ -42,14 +42,14 @@ class AdminStudentController extends Controller
             ->orderBy('name')
             ->get()
             ->sortBy(fn ($st) => [
-                optional(optional($st->gradeRelation)->level)->name ?? 'zzz',
+                optional(optional(optional($st->gradeRelation)->grade)->level)->name ?? 'zzz',
                 optional($st->gradeRelation)->name ?? 'zzz',
             ])->values();
         $sid = session('selected_school');
 
         $grades = $sid
-            ? Grade::where('sid', $sid)->get()
-            : Grade::all();
+            ? SchoolClass::where('sid', $sid)->get()
+            : SchoolClass::all();
 
         $mascots = $sid
             ? Mascot::where(fn ($q) => $q->where('sid', $sid)->orWhereNull('sid'))->get() // shared mascots have no sid
@@ -65,7 +65,7 @@ class AdminStudentController extends Controller
             ->where('role', 4) // role = 4 means student
             ->findOrFail($id);
 
-        $grades = Grade::all();
+        $grades = SchoolClass::all();
         $mascots = Mascot::all();
         $schools = DB::table('school_domains')
             ->orderBy('id', 'asc')

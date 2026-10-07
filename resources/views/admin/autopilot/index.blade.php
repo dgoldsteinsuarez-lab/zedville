@@ -4,7 +4,10 @@
 
 @section('content')
 <div class="container-fluid">
-    <h2 class="mb-2">Autopilot</h2>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+        <h2 class="mb-0">Autopilot for Students</h2>
+        @include('components.school-badge')
+    </div>
     <p class="text-muted">
         Autopilot keeps a student's account going while they are away (for example an approved absence).
         At month-end the class-average activity is applied to their account for the approved period.

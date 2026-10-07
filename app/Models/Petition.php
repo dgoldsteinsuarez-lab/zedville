@@ -20,6 +20,8 @@ class Petition extends Model
 
         'class_id',
 
+        'grade_id',
+
         'status',
 
         'tutor_feedback',
@@ -27,14 +29,23 @@ class Petition extends Model
     ];
 
     /**
-     * Petitions a student's own school/class may see: same school, and either
-     * school-wide/legacy (class_id null) or the student's own class.
+     * Petitions a student may see: same school, and one of —
+     * their own Class (class_id match), their whole Grade (class_id null,
+     * grade_id matches their Class's Grade), or school-wide/legacy (both null).
      */
     public function scopeInStudentScope($query, $student)
     {
+        $gradeId = optional($student->gradeRelation)->grade_id;
+
         return $query->where('sid', $student->sid)
-            ->where(function ($q) use ($student) {
-                $q->whereNull('class_id')->orWhere('class_id', $student->grade);
+            ->where(function ($q) use ($student, $gradeId) {
+                $q->where('class_id', $student->grade)
+                    ->orWhere(function ($q2) use ($gradeId) {
+                        $q2->whereNull('class_id')->where('grade_id', $gradeId);
+                    })
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('class_id')->whereNull('grade_id');
+                    });
             });
     }
 

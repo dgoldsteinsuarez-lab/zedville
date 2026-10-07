@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * A grade level ("Grade 8") that groups classes. Note the confusing legacy
- * naming: the `Grade` model is a single CLASS (table `classes`).
+ * A curriculum stage ("Rookie", "Intermediate", "Advance", "Advance
+ * Economist") assigned to a Grade.
  */
 class GradeLevel extends Model
 {
     protected $fillable = ['sid', 'name', 'sort_order'];
 
-    public function classes()
+    public function grades()
     {
         return $this->hasMany(Grade::class, 'grade_level_id');
     }

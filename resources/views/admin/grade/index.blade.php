@@ -1,11 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Grade / Class')
+@section('title', 'Classes')
 
 @section('content')
     <div class="adminHeading">
-        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Grade / Class</h1>
+        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Classes</h1>
     </div>
+    <p class="text-muted">
+        Each Class has its own Tutor(s) and its own student roster. Pick which Grade it belongs to — every
+        Class under the same Grade shares that Grade's curriculum and Level.
+        Manage Grades themselves on the <a href="{{ url('admin/grades') }}">Grades</a> screen.
+    </p>
     <div class="row">
         <div class="themeCard card card-custom card-stretch gutter-b mab-15">
             <div class="card-body pall-30">
@@ -58,7 +63,7 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Grade level</th>
+                                    <th>Grade</th>
                                     <th>Class</th>
                                     <th>Tutor(s)</th>
                                     <th>Students</th>
@@ -76,14 +81,14 @@
                                 @endphp
                                 <tr>
                                     <td valign="middle"><a class="theme-text-dark">{{$i}}</a></td>
-                                    <td valign="middle">{{ $gradelist->level->name ?? '— not assigned —' }}</td>
+                                    <td valign="middle">{{ $gradelist->grade->name ?? '— not assigned —' }}</td>
                                     <td valign="middle">{{ $gradelist->name }}</td>
                                     <td valign="middle">{{ $gradelist->tutors->pluck('nickname')->filter()->implode(', ') ?: '—' }}</td>
                                     <td valign="middle">{{ $gradelist->students_count }}</td>
                                     <td valign="middle">{{ $gradelist->classCode }}</td>
                                     <td valign="middle">
                                         <div class="actionBtns d-flex align-items-center justify-content-end">
-                                            <a href="#" class="tableActionBtn me-3 edit-role-btn" data-bs-toggle="modal" data-bs-target="#gradeEditModal" data-id="{{ $gradelist->id }}" data-name="{{ $gradelist->name }}" data-classCode="{{ $gradelist->classCode }}" data-level="{{ $gradelist->grade_level_id }}">
+                                            <a href="#" class="tableActionBtn me-3 edit-role-btn" data-bs-toggle="modal" data-bs-target="#gradeEditModal" data-id="{{ $gradelist->id }}" data-name="{{ $gradelist->name }}" data-classCode="{{ $gradelist->classCode }}" data-grade-id="{{ $gradelist->grade_id }}">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit">
                                                     <path d="M16 4.99994L19 7.99994" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
                                                     <path d="M4.50001 16.4994L18.4999 2.49994L21.5004 5.49994L7.50041 19.4999L3 20.9995L4.50001 16.4994Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -153,11 +158,11 @@
                                 <input class="form-control" type="text" name="name" placeholder="Please Grade / Class Name">
                             </div>
                             <div class="form-group mab-20">
-                                <label for="" class="form-label">Grade level</label>
-                                <select class="form-control" name="grade_level_id" >
+                                <label for="" class="form-label">Grade</label>
+                                <select class="form-control" name="grade_id" id="add_grade_id">
                                     <option value="">— none —</option>
-                                    @foreach ($levels as $level)
-                                        <option value="{{ $level->id }}">{{ $level->name }}</option>
+                                    @foreach ($grades as $g)
+                                        <option value="{{ $g->id }}">{{ $g->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -186,17 +191,17 @@
                     </div>
                     <div class="modal-body pall-30">
                         <div class="themeForm">
-                            <input type="hidden" name="grade_id" id="grade_id" />
+                            <input type="hidden" id="class_row_id" />
                             <div class="form-group mab-20">
                                 <label for="" class="form-label">Grade / Class Name</label>
                                 <input class="form-control" type="text" name="name" id="grade_name" placeholder="Please Grade / Class Name">
                             </div>
                             <div class="form-group mab-20">
-                                <label for="" class="form-label">Grade level</label>
-                                <select class="form-control" name="grade_level_id" id="grade_level_id_edit">
+                                <label for="" class="form-label">Grade</label>
+                                <select class="form-control" name="grade_id" id="grade_id_edit">
                                     <option value="">— none —</option>
-                                    @foreach ($levels as $level)
-                                        <option value="{{ $level->id }}">{{ $level->name }}</option>
+                                    @foreach ($grades as $g)
+                                        <option value="{{ $g->id }}">{{ $g->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -254,34 +259,41 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
+    // Deep-link from a Grade's General Information page: pre-select the Grade and open the Add Class modal.
+    var addToGrade = new URLSearchParams(window.location.search).get('add_to_grade');
+    if (addToGrade) {
+        $('#add_grade_id').val(addToGrade);
+        $('#addmodel').modal('show');
+    }
+
     // Populate modal when edit button is clicked
     $('.edit-role-btn').on('click', function() {
         
-        var gradeId = $(this).data('id');
+        var classRowId = $(this).data('id');
         var gradeName = $(this).data('name');
         var classCode = $(this).data('classcode');
-        $('#grade_id').val(gradeId);
+        $('#class_row_id').val(classRowId);
         $('#grade_name').val(gradeName);
         $('#classCode').val(classCode);
-        $('#grade_level_id_edit').val($(this).data('level') || '');
+        $('#grade_id_edit').val($(this).data('grade-id') || '');
     });
 
     // AJAX form submit
     $('#editRoleForm').on('submit', function(e) {
         e.preventDefault();
-        
-        var gradeId = $('#grade_id').val();
+
+        var classRowId = $('#class_row_id').val();
         var formData = {
             _token: $('input[name="_token"]').val(),
             _method: 'PUT',
             name: $('#grade_name').val(),
             classCode: $('#classCode').val(),
-            grade_level_id: $('#grade_level_id_edit').val()
+            grade_id: $('#grade_id_edit').val()
         };
         var baseUrl = "{{ url('admin/grade/edit') }}/";
         $.ajax({
             //url: '/admin/role/edit/' + roleId,
-            url: baseUrl + gradeId,
+            url: baseUrl + classRowId,
             type: 'POST',
             data: formData,
             success: function(response) {

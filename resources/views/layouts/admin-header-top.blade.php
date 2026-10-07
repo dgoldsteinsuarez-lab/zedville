@@ -8,21 +8,9 @@
                             <path d="M6.34961 1.07117L1.42057 6.00021L6.34961 10.9293" stroke="#222222" stroke-width="1.4" stroke-linecap="square"/>
                         </svg>
                     </button>
-                    @if (session()->has('selected_school'))
-                        @php
-                            $school = \App\Models\SchoolDomain::find(session('selected_school'));
-                        @endphp
-                        <!-- data-bs-toggle="modal" data-bs-target="#editmodel" -->
-                        @if ($school)
-                            <h5 class="ps-2 fw-500 fs-16 m-0">Current School: {{ $school->school_name }}  <a href="https://zedville.nexovah.in/admin/dashboard" class="tableActionBtn me-3 edit-role-btn"  >
-                                                <svg style="margin-top:-8px" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit">
-                                                    <path d="M16 4.99994L19 7.99994" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M4.50001 16.4994L18.4999 2.49994L21.5004 5.49994L7.50041 19.4999L3 20.9995L4.50001 16.4994Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    <path d="M5 16.9999L7 18.9999" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                </svg>
-                                            </a> </h5>
-                        @endif
-                    @endif
+                    <div class="ps-2">
+                        @include('components.school-badge')
+                    </div>
 
 
 

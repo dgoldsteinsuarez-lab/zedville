@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\AutopilotPeriod;
-use App\Models\Grade;
+use App\Models\SchoolClass;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +36,7 @@ class AutopilotReport extends Command
 
         $this->info("Autopilot preview for {$year}-" . sprintf('%02d', $month) . ' (nothing is written)');
 
-        foreach (Grade::with('tutors')->orderBy('sid')->orderBy('name')->get() as $class) {
+        foreach (SchoolClass::with('tutors')->orderBy('sid')->orderBy('name')->get() as $class) {
             $students = User::where('role', 4)->where('grade', $class->id)->pluck('id');
             if ($students->isEmpty()) {
                 continue;

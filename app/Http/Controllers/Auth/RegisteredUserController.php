@@ -6,7 +6,7 @@ use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Mailbox;
-use App\Models\Grade;
+use App\Models\SchoolClass;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -66,7 +66,7 @@ class RegisteredUserController extends Controller
         // Find Grade/Class by class code
         // The class must belong to the same school as the email domain; otherwise a
         // student of school A could join (or probe) a class of school B.
-        $grade = Grade::where('classCode', $request->classCode)
+        $grade = SchoolClass::where('classCode', $request->classCode)
             ->where('sid', (string) $sid)
             ->first();
 
