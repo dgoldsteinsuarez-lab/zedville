@@ -430,10 +430,6 @@ class AdminEducationController extends Controller
     {
         $sid = session('selected_school');
 
-        /*$posters = $sid
-            ? DB::table('room_poster')->where('sid', $sid)->orderByDesc('id')->get()
-            : DB::table('room_poster')->orderByDesc('id')->get();*/
-
         $posters = DB::table('room_poster')->orderByDesc('id')->get();
 
         return view('admin.education.poster.index', compact('posters'));
@@ -522,10 +518,6 @@ class AdminEducationController extends Controller
         // Get SID from session (null if not selected)
         $sid = session('selected_school');
 
-        // Apply SID condition only if session exists
-        /*$stores = $sid
-            ? Store::where('sid', $sid)->orderBy('id', 'ASC')->get()
-            : Store::orderBy('id', 'ASC')->get();*/
         $stores = Store::orderBy('id', 'ASC')->get();
 
         return view('admin.education.spand-budget', compact('stores'));
@@ -590,9 +582,6 @@ class AdminEducationController extends Controller
     {
         $sid = session('selected_school');
 
-        /*$products = $sid
-            ? Product::where('sid', $sid)->latest()->get()
-            : Product::latest()->get();*/
         $products = Product::latest()->get();
 
         return response()->json($products);
@@ -647,9 +636,6 @@ class AdminEducationController extends Controller
     {
         $sid = session('selected_school');
 
-        /*$stores = $sid
-            ? Store::where('sid', $sid)->orderBy('id', 'ASC')->get()
-            : Store::orderBy('id', 'ASC')->get();*/
         $stores = Store::orderBy('id', 'ASC')->get();
 
         return response()->json($stores);
@@ -751,10 +737,6 @@ class AdminEducationController extends Controller
         //$stores = Supermarketname::orderBy('id', 'ASC')->get();
         $sid = session('selected_school');
 
-        /*$stores = $sid
-            ? Supermarketname::where('sid', $sid)->orderBy('id', 'ASC')->get()
-            : Supermarketname::orderBy('id', 'ASC')->get();*/
-
         $stores = Supermarketname::orderBy('id', 'ASC')->get();
 
         return view('admin.supermarket.supermarket', compact('stores'));
@@ -819,9 +801,6 @@ class AdminEducationController extends Controller
         //return response()->json(Supermarket::latest()->get());
         $sid = session('selected_school');
 
-        /*$products = $sid
-            ? Supermarket::where('sid', $sid)->latest()->get()
-            : Supermarket::latest()->get();*/
         $products = Supermarket::latest()->get();
 
         return response()->json($products);
@@ -867,9 +846,6 @@ class AdminEducationController extends Controller
         //$stores = Supermarketname::orderBy('id', 'ASC')->get();
         $sid = session('selected_school');
 
-        /*$stores = $sid
-            ? Supermarketname::where('sid', $sid)->orderBy('id', 'ASC')->get()
-            : Supermarketname::orderBy('id', 'ASC')->get();*/
         $stores = Supermarketname::orderBy('id', 'ASC')->get();
 
         return view('admin.supermarket.wants-iteams', compact('stores'));
@@ -935,9 +911,6 @@ class AdminEducationController extends Controller
     );*/
         $sid = session('selected_school');
 
-        /*$items = $sid
-            ? DB::table('penalty_wants_items')->where('sid', $sid)->orderBy('id','ASC')->get()
-            : DB::table('penalty_wants_items')->orderBy('id','ASC')->get();*/
         $items = DB::table('penalty_wants_items')->orderBy('id', 'ASC')->get();
 
         return response()->json($items);
@@ -1280,9 +1253,6 @@ class AdminEducationController extends Controller
         $position = DB::table('mba_position')
             ->where('user_id', $userId)
             ->where('id', 4)
-            /*->when($sid, function ($q) use ($sid) {
-                $q->where('sid', $sid);
-            })*/
             ->first();
 
         return view('admin.education.low-budget-activity', compact('position'));
@@ -1307,7 +1277,6 @@ class AdminEducationController extends Controller
                 'activity_key' => 'lba_position',
                 'required' => $required,
                 'optional' => $optional,
-                //'sid'        => $sid,
                 'updated_at' => now(),
                 'created_at' => now()
             ]

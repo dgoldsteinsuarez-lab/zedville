@@ -860,7 +860,7 @@
                         <div>
                           <h4 class="font-semibold text-md text-gray-900">This Month (Estimated)</h4>
                           <p class="text-2xl font-bold text-themegreen">
-                            {{ number_format($emmengercyfundintrest['estimated_interest'], 2) }} ZEDS</p>
+                            {{ number_format($emergencyFundInterest['estimated_interest'], 2) }} ZEDS</p>
                           <div class="flex items-center justify-start space-x-1">
                             <span class="text-xs font-medium text-gray-700">Based on current balance</span>
                           </div>
@@ -875,10 +875,10 @@
                         <div>
                           <h4 class="font-semibold text-md text-gray-700">Annual Projection</h4>
                           <p class="text-2xl font-bold text-blue-500">
-                            {{ number_format($emmengercyfundintrest['annual_projection'], 2) }} ZEDS</p>
+                            {{ number_format($emergencyFundInterest['annual_projection'], 2) }} ZEDS</p>
                           <div class="flex items-center justify-start space-x-1">
                             <span class="text-xs font-medium text-gray-700">At
-                              {{ $emmengercyfundintrest['annual_rate'] }}% rate</span>
+                              {{ $emergencyFundInterest['annual_rate'] }}% rate</span>
                           </div>
                         </div>
                       </div>
@@ -890,7 +890,7 @@
                       <div class="flex items-center space-x-3">
                         <div>
                           <h4 class="font-semibold text-md text-gray-700">Next Payment</h4>
-                          <p class="text-2xl font-bold text-yellow-500">{{ $emmengercyfundintrest['next_payment_date'] }}
+                          <p class="text-2xl font-bold text-yellow-500">{{ $emergencyFundInterest['next_payment_date'] }}
                           </p>
                           <div class="flex items-center justify-start space-x-1">
                             <span class="text-xs font-medium text-gray-700">Interest credit date</span>

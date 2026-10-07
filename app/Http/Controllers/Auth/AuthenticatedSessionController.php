@@ -51,18 +51,6 @@ class AuthenticatedSessionController extends Controller
             'user_id' => $user->id,     // optional but useful
         ]);
 
-        /*if (is_null($user->loginTime)) {
-            // Insert welcome message into mailbox
-            $content = MailboxHelper::renderMailboxTemplate('cityzenid', ['user' => $user]);
-            $mailbox =Mailbox::create([
-                'student_id' => $user->id,
-                'subject' => $user->citizenId,
-                'content' => $content,
-                'type' => 'primary',
-                'read' => 0, // mark as unread
-            ]);
-        }*/
-        //MailboxScheduler::scheduleForEvent('login', $user->id);
         $now = now();
         $accountCreatedAt = Carbon::parse($user->created_at);
 

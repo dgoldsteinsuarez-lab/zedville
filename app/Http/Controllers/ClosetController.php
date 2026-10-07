@@ -216,25 +216,6 @@ class ClosetController extends Controller
 
     // ── PRIVATE HELPERS ───────────────────────────────────────
 
-    /*private function fetchCloset(string $studentId)
-    {
-        return DB::table('student_closet as sc')
-            ->join('durable_goods_catalog as dgc', 'dgc.id', '=', 'sc.catalog_item_id')
-            ->where('sc.student_id', $studentId)
-            ->orderByDesc('sc.purchase_date')
-            ->select([
-                'sc.id',
-                'sc.purchase_date',
-                'sc.price_paid_zeds',
-                'dgc.name',
-                'dgc.category',
-                'dgc.icon',
-                'dgc.lifespan_years',
-                'dgc.description',
-                DB::raw('ROUND(TIMESTAMPDIFF(MONTH, sc.purchase_date, CURDATE()) / 12.0, 1) AS age_years'),
-            ])
-            ->get();
-    }*/
     private function fetchCloset($studentId)
     {
         return DB::table('orders')
@@ -255,57 +236,6 @@ class ClosetController extends Controller
             ])
             ->get();
     }
-    /*private function fetchCloset($studentId)
-{
-    return DB::table('orders')
-        ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-        ->join('products', 'products.product_name', '=', 'order_items.name')
-        ->where('orders.user_id', $studentId)
-        ->where('products.goods_type', 'Durable Goods')
-        ->select(
-            'products.product_name as name',
-            'products.category',
-            'products.icon',
-            'orders.created_at as purchase_date',
-            'order_items.price as price_paid_zeds'
-        )
-        ->get();
-} */
-    /*private function formatClosetItem(object $row): array
-    {
-        $ageYears = (float) $row->age_years;
-        $lifespanYears = (int) $row->lifespan_years;
-        $lifeUsedPct = min(100, (int) round(($ageYears / $lifespanYears) * 100));
-        $costPerYear = (int) round($row->price_paid_zeds / $lifespanYears);
-
-        return [
-            'id' => $row->id,
-            'purchaseDate' => $row->purchase_date,
-            'pricePaidZeds' => (int) $row->price_paid_zeds,
-            'ageYears' => $ageYears,
-            'name' => $row->name,
-            'category' => $row->category,
-            'icon' => $row->icon,
-            'lifespanYears' => $lifespanYears,
-            'description' => $row->description,
-            'lifeUsedPct' => $lifeUsedPct,
-            'costPerYear' => $costPerYear,
-        ];
-    }
-
-    private function formatCatalogItem(object $row): array
-    {
-        return [
-            'id' => $row->id,
-            'name' => $row->name,
-            'category' => $row->category,
-            'icon' => $row->icon,
-            'priceZeds' => (int) $row->price_zeds,
-            'lifespanYears' => (int) $row->lifespan_years,
-            'description' => $row->description,
-            'isActive' => (bool) $row->is_active,
-        ];
-    }*/
     private function formatClosetItem(object $row): array
     {
         $ageYears = (float) ($row->age_years ?? 0);

@@ -74,62 +74,6 @@ class FinheroStudentController extends Controller
      * When a student completes an activity, IT calls this endpoint.
      * The badge calculator picks it up on the next monthly run.
      */
-    /*public function awardPoints(Request $request): JsonResponse
-    {
-        $v = $request->validate([
-            'activity_key' => 'required|string|exists:finhero_activity_registry,activity_key',
-            'points'       => 'required|integer|min:1',
-        ]);
-
-        $studentId    = Auth::id();
-        $now          = now();
-        $academicYear = $this->calculator->getAcademicYear($now->month, $now->year);
-
-        // Get max points for this activity
-        $activity = DB::table('finhero_activity_registry')
-            ->where('activity_key', $v['activity_key'])
-            ->where('is_active', true)
-            ->first();
-
-        if (!$activity) {
-            return response()->json(['error' => 'Activity not active this month.'], 422);
-        }
-
-        // Check if student already earned max points for this activity this month
-        $alreadyEarned = DB::table('finhero_student_points')
-            ->where('student_id', $studentId)
-            ->where('source_type', 'activity')
-            ->where('source_key', $v['activity_key'])
-            ->whereMonth('earned_at', $now->month)
-            ->whereYear('earned_at', $now->year)
-            ->sum('points_earned');
-
-        if ($alreadyEarned >= $activity->max_points) {
-            return response()->json(['success' => false, 'message' => 'Max points already earned for this activity.']);
-        }
-
-        // Award points (capped at max)
-        $toAward = min($v['points'], $activity->max_points - $alreadyEarned);
-
-        DB::table('finhero_student_points')->insert([
-            'student_id'    => $studentId,
-            'month'         => $now->month,
-            'year'          => $now->year,
-            'academic_year' => $academicYear,
-            'source_type'   => 'activity',
-            'source_key'    => $v['activity_key'],
-            'points_earned' => $toAward,
-            'earned_at'     => $now,
-            'created_at'    => $now,   // ✅ add this
-            'updated_at'    => $now,   // ✅ add this
-        ]);
-
-        return response()->json([
-            'success'      => true,
-            'points_awarded' => $toAward,
-            'message'      => "{$toAward} FinHero point(s) awarded for {$v['activity_key']}.",
-        ]);
-    }*/
     public function awardPoints(Request $request): JsonResponse
     {
         $v = $request->validate([
@@ -216,20 +160,6 @@ class FinheroStudentController extends Controller
             'message' => "{$toAward} FinHero point(s) awarded.",
         ]);
     }
-    /*public function taskPage($task)
-{
-    // Load:
-    // resources/views/finhero/task-1.blade.php
-    // resources/views/finhero/task-2.blade.php
-
-    $viewPath = 'finhero.' . $task;
-
-    if (view()->exists($viewPath)) {
-        return view($viewPath);
-    }
-
-    abort(404);
-}*/
     public function taskPage($task)
     {
         $viewPath = 'finhero.' . $task;
@@ -251,44 +181,6 @@ class FinheroStudentController extends Controller
 
         return view($viewPath, compact('salary', 'activityKey'));
     }
-    /*public function savePoints(Request $request)
-    {
-        $studentId = auth()->id();
-
-        $sourceKey = $request->source_key;
-
-        // Check already earned or not
-        $exists = DB::table('finhero_student_points')
-            ->where('student_id', $studentId)
-            ->where('source_type', 'task')
-            ->where('source_key', $sourceKey)
-            ->exists();
-
-        if ($exists) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Points already earned.'
-            ]);
-        }
-
-        DB::table('finhero_student_points')->insert([
-            'student_id' => $studentId,
-            'month' => now()->month,
-            'year' => now()->year,
-            'academic_year' => now()->year . '-' . (now()->year + 1),
-            'source_type' => 'task',
-            'source_key' => $sourceKey,
-            'points_earned' => 1,
-            'earned_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'status' => 'saved'
-        ]);
-    }*/
     public function savePoints(Request $request)
     {
         $request->validate([

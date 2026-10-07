@@ -29,10 +29,6 @@ class LoginQuizController extends Controller
         ->pluck('question_id');
 
     // Get ONE random question with its options
-    //$question = LoginQuestion::with('options')
-        //->whereNotIn('id', $answeredIds)
-        //->inRandomOrder()
-        //->first();
     $question = LoginQuestion::with('options')
         ->whereNotIn('id', $answeredIds)
         ->inRandomOrder()
@@ -42,8 +38,6 @@ class LoginQuizController extends Controller
         return response()->json(['show' => false]);
     }
 
-    // Shuffle options in PHP (safe & consistent)
-    //$options = $question->options->shuffle()->values();
     $options = $question->options;
 
     return response()->json([
@@ -59,73 +53,6 @@ class LoginQuizController extends Controller
         }),
     ]);
 }
-
-
-/*public function getTodayQuestion()
-{
-    $user = Auth::user();
-    $userId = $user->id;
-
-    // ✅ Step 1: Already answered today?
-    $alreadyAnswered = LoginQuizAttempt::where('user_id', $userId)
-        ->whereDate('created_at', now()->toDateString())
-        ->exists();
-
-    if ($alreadyAnswered) {
-        return response()->json(['show' => false]);
-    }
-
-    // ✅ Step 2: Get user's school_id
-    $schoolId = $user->grade;
-    // ✅ If no school → always Month 1
-    if (!$schoolId) {
-        $programMonth = 1;
-    } else {
-    // ✅ Step 3: Get school start month
-    $startMonth = \App\Models\SchoolMonthSetting::where('school_id', $schoolId)
-        ->value('start_month');
-
-    // fallback safety
-    if (!$startMonth) {
-        $startMonth = 1; // default January
-    }
-
-    // ✅ Step 4: Current month
-    $currentMonth = now()->month; // 1–12
-
-    // ✅ Step 5: Convert to PROGRAM MONTH (🔥 main logic)
-    $programMonth = ($currentMonth - $startMonth + 12) % 12 + 1;
-    }
-    // ✅ Step 6: Get answered question IDs (optional)
-    $answeredIds = LoginQuizAttempt::where('user_id', $userId)
-        ->pluck('question_id');
-
-    // ✅ Step 7: Get question for THAT month
-    $question = LoginQuestion::with('options')
-        ->where('month_id', $programMonth)
-        //->whereNotIn('id', $answeredIds) // optional
-        ->inRandomOrder()
-        ->first();
-
-    if (!$question) {
-        return response()->json(['show' => false]);
-    }
-
-    // ✅ Step 8: Return response
-    return response()->json([
-        'show'          => true,
-        'program_month' => $programMonth, // 🔥 useful for debug
-        'id'            => $question->id,
-        'question'      => $question->question,
-        'type'          => $question->type,
-        'options'       => $question->options->map(function ($opt) {
-            return [
-                'id'   => $opt->id,
-                'text' => $opt->option_text,
-            ];
-        }),
-    ]);
-}*/
     public function submit(Request $request)
     {
         $request->validate([

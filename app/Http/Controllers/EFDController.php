@@ -27,35 +27,6 @@ use App\Models\CityProposal;
 
 class EFDController extends Controller
 {
-    /*public function index()
- {
-     $user = auth()->user();
-     // Fetch all transactions
-     $transactions = Transaction1::where('user_id', $user->id)
-     ->whereMonth('created_at', date('m'))
-     ->whereYear('created_at', date('Y'))
-     ->orderBy('id')
-     ->get();
-
-     // Convert DB fields → your JSON template format
-     $template = $transactions->map(function($t) {
-        return [
-                 'id'       => (string) $t->id,
-                 'name'     => $t->description,
-                 'amount'   => $t->type === 'debit'
-                 ? - (float) $t->amount
-                 : (float) $t->amount,
-                 'category' => strtolower($t->category),
-                 'type'     => $t->type === 'credit' ? 'income' : 'expense'
-             ];
-     });
-     $templateJson = $template->toJson(JSON_PRETTY_PRINT);
-     //return view('education.index', compact('user', 'templateJson'));
-     return view('education.index', [
-         'user' => $user,
-         'template' => $template   // SEND ARRAY, NOT JSON STRING
-     ]);
- }*/
     public function index()
     {
         $user = auth()->user();
@@ -173,7 +144,7 @@ class EFDController extends Controller
         $salaryamount = config('zedville.monthly_salary', 3952.40);
         $emmsavingsPct = 20;
         $emmsavingsAmount = round($salaryamount * ($emmsavingsPct / 100), 2);
-        $emmengercyfundintrest = $this->emmengercyfundintrest($user->id);
+        $emergencyFundInterest = $this->emergencyFundInterest($user->id);
         $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
             ->where('description', 'Auto Transfer to Savings Account')
             //->orderBy('transaction_date', 'desc') // latest first
@@ -193,9 +164,9 @@ class EFDController extends Controller
             ->whereMonth('completed_at', now()->month)
             ->pluck('activity_type')
             ->toArray();
-        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'bankAccount', 'emmsavingsAmount', 'emmengercyfundintrest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'lbaPosition', 'taskActivities', 'completedActivities'));
+        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'bankAccount', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'lbaPosition', 'taskActivities', 'completedActivities'));
     }
-    public function emmengercyfundintrest($userId)
+    public function emergencyFundInterest($userId)
     {
         // 1️⃣ Get previous month info
         $previousMonth = Carbon::now()->subMonth();

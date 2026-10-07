@@ -104,27 +104,6 @@ class AdminDashboardController extends Controller
 
         return redirect('admin/profile')->with('success', 'Profile updated successfully!');
     }
-    public function updatepassowrd(Request $request)
-    {
-        
-         $user = Auth::user();
-
-    $request->validate([
-        'current_password' => 'required',
-        'password' => 'required|min:8',
-        'confirm_password' => 'required|same:password',
-    ]);
-
-    if (!Hash::check($request->current_password, $user->password)) {
-        return back()->withErrors(['current_password' => 'Current password is incorrect']);
-    }
-
-    $user->update([
-        'password' => Hash::make($request->password),
-    ]);
-
-    return redirect('admin/profile')->with('success', 'Password updated successfully!');
-    }
     //For Role
     public function role(Request $request)
     {

@@ -69,7 +69,7 @@ class BankController extends Controller
         $salaryamount = config('zedville.monthly_salary', 3952.40);
         $emmsavingsPct = config('zedville.emargency_fund_persentage', 20);
         $emmsavingsAmount = round($salaryamount * ($emmsavingsPct / 100), 2);
-        $emmengercyfundintrest = $this->emmengercyfundintrest($user->id);
+        $emergencyFundInterest = $this->emergencyFundInterest($user->id);
         $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
             ->where(function ($q) {
                 $q->where('description', 'Auto Transfer to Savings Account')
@@ -87,7 +87,7 @@ class BankController extends Controller
             $this->creditMonthlySalary($user->id);
             $this->ensureMonthlyBills($user);
             // If bank account exists → load welcome view
-            return view('bank.bank-account', compact('user', 'bankAccount', 'transactions', 'lastBalance', 'emmsavingsAmount', 'emmengercyfundintrest', 'emmengercyfundtransactions', 'moneymarketintrest', 'moneymarkettransactions', 'bankUserName'));
+            return view('bank.bank-account', compact('user', 'bankAccount', 'transactions', 'lastBalance', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'moneymarketintrest', 'moneymarkettransactions', 'bankUserName'));
         }
         return view('bank.bank', compact('user'));
     }
@@ -188,7 +188,7 @@ class BankController extends Controller
             ->latest('id') // or latest('created_at') if you track timestamps
             ->first();
         $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-        $emmengercyfundintrest = $this->emmengercyfundintrest($user->id);
+        $emergencyFundInterest = $this->emergencyFundInterest($user->id);
         $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
             ->where(function ($q) {
                 $q->where('description', 'Auto Transfer to Savings Account')
@@ -207,7 +207,7 @@ class BankController extends Controller
         ;
         $emmsavingsAmount = round($salaryamount * ($emmsavingsPct / 100), 2);
         $bankUserName = $user->nickname;
-        return view('bank.bank-my-account', compact('user', 'bankAccount', 'transactions', 'lastBalance', 'moneymarketintrest', 'emmengercyfundintrest', 'emmengercyfundtransactions', 'moneymarkettransactions', 'emmsavingsAmount', 'bankUserName'));
+        return view('bank.bank-my-account', compact('user', 'bankAccount', 'transactions', 'lastBalance', 'moneymarketintrest', 'emergencyFundInterest', 'emmengercyfundtransactions', 'moneymarkettransactions', 'emmsavingsAmount', 'bankUserName'));
     }
     public function transfer()
     {
@@ -2475,7 +2475,7 @@ class BankController extends Controller
             return redirect()->back()->with('error', 'Failed to Open Money Market amount.');
         }
     }
-    public function emmengercyfundintrest($userId)
+    public function emergencyFundInterest($userId)
     {
         // 1️⃣ Get previous month info
         $previousMonth = Carbon::now()->subMonth();
