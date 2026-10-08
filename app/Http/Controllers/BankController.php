@@ -757,7 +757,7 @@ class BankController extends Controller
             if ($transfer->from_account === 'Primary Savings Account') {
                 Transaction1::create([
                     'user_id' => $sender->id,
-                    'sid' => session()->get('sid'),
+                    'sid' => $sender->sid,
                     'bank_account_id' => $senderBank?->id,
                     'transaction_date' => $transactionDate,
                     'description' => "Transfer to {$transfer->beneficiary_name} ({$transfer->account_number})",
@@ -829,7 +829,7 @@ class BankController extends Controller
             if ($recipientAccountType === 'primary') {
                 Transaction1::create([
                     'user_id' => $recipient->id,
-                    'sid' => session()->get('sid'),
+                    'sid' => $recipient->sid,
                     'bank_account_id' => $recipientBank->id,
                     'transaction_date' => $transactionDate,
                     //'description' => "Received from {$sender->name} ({$senderBank?->primary_savings_account_number})",
