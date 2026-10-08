@@ -87,3 +87,29 @@ C:\xampp\apache_start.bat
 ```
 
 (`httpd.exe -k restart` won't work here since Apache isn't running as a Windows service in this setup.)
+
+## Running the test suite
+
+Feature tests use `RefreshDatabase`, which runs `migrate:fresh` against whatever
+database `DB_DATABASE` resolves to. Without an override, that's the real `laravel`
+dev database (manual-testing data, the 10 seeded accounts above) — running tests
+would wipe it. A `.env.testing` file (gitignored, not committed — recreate it
+locally if missing) points tests at a separate `laravel_testing` database instead:
+
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel_testing
+DB_USERNAME=root
+DB_PASSWORD=
+```
+(plus the same `APP_KEY` as `.env`, `CACHE_DRIVER=array`, `SESSION_DRIVER=array`, `MAIL_MAILER=array`.)
+
+Create the database once with:
+```
+C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS laravel_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Then run tests with `php artisan test` — Laravel automatically loads `.env.testing`
+over `.env` when `APP_ENV=testing` (set in `phpunit.xml`).

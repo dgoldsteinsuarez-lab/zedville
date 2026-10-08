@@ -1874,7 +1874,7 @@ class BankController extends Controller
 
         $transaction = Transaction1::create([
             'user_id' => $userId,
-            'sid' => session()->get('sid'),
+            'sid' => $account->sid,
             'bank_account_id' => $account->id,
             'transaction_date' => $salaryDate,
             'description' => 'Monthly Salary Credit - ' . $businessNow->format('F Y'),
@@ -1951,11 +1951,8 @@ class BankController extends Controller
 
                     Transaction1::create([
                         'user_id' => $userId,
-                        'sid' => session()->get('sid'),
+                        'sid' => $account->sid,
                         'bank_account_id' => $account->id,
-                        //'transaction_date' => $businessNow->copy()
-                        //->startOfDay()
-                        //->setTime(8, 5, 0),
                         'transaction_date' => $salaryDate->copy()->addMinutes(5),
                         'description' => 'Auto Transfer to Emergency Fund',
                         'type' => 'debit',
@@ -2155,7 +2152,7 @@ class BankController extends Controller
             $category = in_array($item['description'], $needsItems) ? 'Needs' : 'Wants';
             Transaction1::create([
                 'user_id' => $user->id,
-                'sid' => session()->get('sid'),
+                'sid' => $user->sid,
                 'bank_account_id' => $bankAccount->id ?? null,
                 'transaction_date' => $txnDate,
                 'description' => $item['description'],
@@ -2761,7 +2758,7 @@ class BankController extends Controller
 
             Transaction1::create([
                 'user_id' => $user->id,
-                'sid' => session()->get('sid'),
+                'sid' => $user->sid,
                 'bank_account_id' => $bankAccount->id ?? null,
                 'transaction_date' => now(),
                 'description' => 'Penalty Item: ' . $item['name'],
