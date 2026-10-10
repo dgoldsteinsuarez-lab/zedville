@@ -93,10 +93,6 @@ class User extends Authenticatable
         return $ids === null || $ids->contains((int) $studentId);
     }
 
-    public function avatar()
-    {
-    return $this->belongsTo(\App\Models\Avatar::class, 'avatar'); // avatar is the foreign key in users table
-    }
     /** The student's Class (legacy column name `grade` — it has always pointed at a Class, not a Grade). */
     public function gradeRelation()
     {
