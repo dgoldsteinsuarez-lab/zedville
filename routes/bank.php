@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\AutoDebitController;
+use App\Http\Controllers\SavingsAccountController;
 
 Route::get('/', [BankController::class, 'index'])->name('index');
 Route::post('/', [BankController::class, 'store'])->name('store');
@@ -41,8 +42,8 @@ Route::post('/store-direct-deposite', [BankController::class, 'store_direct_depo
 Route::post('/store-auto-debit', [AutoDebitController::class, 'store_auto_debit'])->name('store_auto_debit');
 
 Route::get('/banks-statement', [BankController::class, 'bank_statement_show'])->name('bank_statement_show');
-Route::post('/emengercy-fund-account', [BankController::class, 'emengercyfundaccount'])->name('emengercyfundaccount');
-Route::post('/money-market-amount', [BankController::class, 'moneymarketamount'])->name('moneymarketamount');
+Route::post('/emengercy-fund-account', [SavingsAccountController::class, 'emengercyfundaccount'])->name('emengercyfundaccount');
+Route::post('/money-market-amount', [SavingsAccountController::class, 'moneymarketamount'])->name('moneymarketamount');
 Route::get('/banks-penalty', [BankController::class, 'banks_penalty'])->name('banks_penalty');
 Route::post('/update-pin', [BankController::class, 'updatePin'])->name('updatePin');
 

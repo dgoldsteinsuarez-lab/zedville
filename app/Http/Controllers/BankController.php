@@ -69,7 +69,7 @@ class BankController extends Controller
         $salaryamount = config('zedville.monthly_salary', 3952.40);
         $emmsavingsPct = config('zedville.emargency_fund_persentage', 20);
         $emmsavingsAmount = round($salaryamount * ($emmsavingsPct / 100), 2);
-        $emergencyFundInterest = $this->emergencyFundInterest($user->id);
+        $emergencyFundInterest = app(\App\Http\Controllers\SavingsAccountController::class)->emergencyFundInterest($user->id);
         $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
             ->where(function ($q) {
                 $q->where('description', 'Auto Transfer to Savings Account')
@@ -77,7 +77,7 @@ class BankController extends Controller
             })
             //->orderBy('transaction_date', 'desc') // latest first
             ->get();
-        $moneymarketintrest = $this->moneymarketintrest($user->id);
+        $moneymarketintrest = app(\App\Http\Controllers\SavingsAccountController::class)->moneymarketintrest($user->id);
         $moneymarkettransactions = \App\Models\Transaction1::where('user_id', $user->id)
             ->where('description', 'Auto Transfer to Money Market Account')
             //->orderBy('transaction_date', 'desc') // latest first
@@ -188,7 +188,7 @@ class BankController extends Controller
             ->latest('id') // or latest('created_at') if you track timestamps
             ->first();
         $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-        $emergencyFundInterest = $this->emergencyFundInterest($user->id);
+        $emergencyFundInterest = app(\App\Http\Controllers\SavingsAccountController::class)->emergencyFundInterest($user->id);
         $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
             ->where(function ($q) {
                 $q->where('description', 'Auto Transfer to Savings Account')
@@ -196,7 +196,7 @@ class BankController extends Controller
             })
             //->orderBy('transaction_date', 'desc') // latest first
             ->get();
-        $moneymarketintrest = $this->moneymarketintrest($user->id);
+        $moneymarketintrest = app(\App\Http\Controllers\SavingsAccountController::class)->moneymarketintrest($user->id);
         $moneymarkettransactions = \App\Models\Transaction1::where('user_id', $user->id)
             ->where('description', 'Auto Transfer to Money Market Account')
             //->orderBy('transaction_date', 'desc') // latest first
@@ -1581,271 +1581,6 @@ class BankController extends Controller
         ]);
     }
 
-    public function emengercyfundaccount()
-    {
-        $user = Auth::user();
-        // Example: Get the new amount from request
-        //$newAmount = $request->input('amount', 0); // default 0 if not provided
-
-
-        $salaryamount = config('zedville.monthly_salary', 3952.40);
-        $savingsPct = config('zedville.emargency_fund_persentage', 20);
-        $savingsAmount = round($salaryamount * ($savingsPct / 100), 2);
-        $lastBalance = Transaction1::where('user_id', $user->id)
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;
-        //Check balance after savings deduction
-        if ($lastBalance < $savingsAmount) {
-            return redirect()->back()->with('error', "<strong>Insufficient funds</strong><br>
-                The payment will automatically be deducted next month on the same day, after your monthly statement is sent (1st–5th).");
-        }
-        //Check balance after savings deduction
-
-        // Update the bank account for this user
-        $updated = BankAccount::where('student_id', $user->id)
-            ->update([
-                'emergency_fund_account_amount' => $savingsAmount,
-                'is_open_emergency_account' => '1',
-            ]);
-        $bankAccount = BankAccount::where('student_id', $user->id)->first();
-        \App\Services\LedgerService::post(
-            $user->id,
-            'debit',
-            'Savings',
-            (float) $savingsAmount,
-            'Auto Transfer to Savings Account',
-            [
-                'sid' => $user->sid,
-                'bank_account_id' => $bankAccount->id ?? null,
-                'transaction_date' => Carbon::now(),
-            ]
-        );
-
-        app(ParticipationService::class)->award($user->id, 'emergency_fund_open');
-
-        if ($updated) {
-            return redirect()->back()->with('success', '
-        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
-        <p class="font-semibold">Emergency fund updated successfully.</p>
-
-        <p class="mt-2"><strong>Thank you for opening your Emergency Fund Account with Universal Bank.</strong></p>
-        <p>Your account is now active with:</p>
-
-        <ul class="list-disc ml-6 mt-2">
-            <li><strong>Account number:</strong> ' . $bankAccount->emergency_fund_account_number . '</li>
-            <li><strong>Initial deposit:</strong> $' . $savingsAmount . '</li>
-            <li><strong>Auto-debit:</strong> 20% of monthly salary</li>
-        </ul>
-
-        <p class="mt-2">Your automatic transfers have been set up as requested.</p>
-
-        <p class="font-semibold mt-2">Universal Bank</p>
-    </div>');
-        } else {
-            return redirect()->back()->with('error', 'Failed to update emergency fund.');
-        }
-
-    }
-
-    public function moneymarketamount()
-    {
-        $user = Auth::user();
-        $savingsAmount = 0;
-        $updated = BankAccount::where('student_id', $user->id)
-            ->update([
-                'money_market_account_amount' => $savingsAmount,
-                'is_open_money_market_account' => '1',
-            ]);
-
-        app(ParticipationService::class)->award($user->id, 'money_market_open');
-
-
-        if ($updated) {
-            return redirect()->back()->with('success', 'Money Market Account Open successfully.');
-        } else {
-            return redirect()->back()->with('error', 'Failed to Open Money Market amount.');
-        }
-    }
-    public function emergencyFundInterest($userId)
-    {
-        // 1️⃣ Get previous month info
-        $previousMonth = Carbon::now()->subMonth();
-        $monthName = $previousMonth->format('F');
-        $year = $previousMonth->year;
-
-        // 2️⃣ Interest config
-        $annualInterestRate = 0.02; // 2% per annum
-        $daysInMonth = $previousMonth->daysInMonth;
-        $daysInYear = $previousMonth->isLeapYear() ? 366 : 365;
-        $dailyRate = $annualInterestRate / $daysInYear;
-
-        // 3️⃣ Get ending balance (latest txn before end of month)
-        $endingBalance = Transaction1::where('user_id', $userId)
-            ->where(function ($q) {
-                $q->where('description', 'Auto Transfer to Savings Account')
-                    ->orWhere('description', 'Auto Transfer to Emergency Fund');
-            })
-            ->where('transaction_date', '<=', $previousMonth->endOfMonth())
-            ->orderBy('transaction_date', 'desc')
-            ->value('balance');
-
-
-        if (is_null($endingBalance)) {
-            $endingBalance = 0;
-        }
-
-        // 4️⃣ Calculate monthly estimated interest
-        $grossMonthlyInterest = $endingBalance * $dailyRate * $daysInMonth;
-
-        // 5️⃣ Annual projection (approx)
-        $annualProjection = $endingBalance * $annualInterestRate;
-        $nextPaymentDate = Carbon::now()->addMonth()->setDay(1)->format('F j, Y');
-        // 6️⃣ Return for dashboard or API
-        return [
-            'month' => $monthName,
-            'year' => $year,
-            'ending_balance' => round($endingBalance, 2),
-            'estimated_interest' => round($grossMonthlyInterest, 2),
-            'annual_projection' => round($annualProjection, 2),
-            'annual_rate' => $annualInterestRate * 100,
-            'next_payment_date' => $nextPaymentDate,
-        ];
-    }
-    public function moneymarketintrest($userId)
-    {
-        // 1️⃣ Get previous month info
-        $previousMonth = Carbon::now()->subMonth();
-        $monthName = $previousMonth->format('F');
-        $year = $previousMonth->year;
-
-        // 2️⃣ Interest config
-        $annualInterestRate = 0.04; // 4% per annum
-        $daysInMonth = $previousMonth->daysInMonth;
-        $daysInYear = $previousMonth->isLeapYear() ? 366 : 365;
-        $dailyRate = $annualInterestRate / $daysInYear;
-
-        // 3️⃣ Get ending balance (latest txn before end of month)
-        $endingBalance = Transaction1::where('user_id', $userId)
-            ->where('description', 'Auto Transfer to Money Market Account')
-            ->where('transaction_date', '<=', $previousMonth->endOfMonth())
-            ->orderBy('transaction_date', 'desc')
-            ->value('balance');
-
-
-        if (is_null($endingBalance)) {
-            $endingBalance = 0;
-        }
-
-        // 4️⃣ Calculate monthly estimated interest
-        $grossMonthlyInterest = $endingBalance * $dailyRate * $daysInMonth;
-
-        // 5️⃣ Annual projection (approx)
-        $annualProjection = $endingBalance * $annualInterestRate;
-        $nextPaymentDate = Carbon::now()->addMonth()->setDay(1)->format('F j, Y');
-        // 6️⃣ Return for dashboard or API
-        return [
-            'month' => $monthName,
-            'year' => $year,
-            'ending_balance' => round($endingBalance, 2),
-            'estimated_interest' => round($grossMonthlyInterest, 2),
-            'annual_projection' => round($annualProjection, 2),
-            'annual_rate' => $annualInterestRate * 100,
-            'next_payment_date' => $nextPaymentDate,
-        ];
-    }
-    /*public function banks_penalty(StatementGenerator $generator){
-        $user = Auth::user();
-         $latestTxn = Transaction1::where('user_id', $user->id)
-            ->latest('id') // or latest('created_at') if you track timestamps
-            ->first();
-            $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-
-         $bankAccount = BankAccount::where('student_id', $user->id)->first();
-        $monthlySalary = $generator->getActiveBudgetConfig()->monthly_salary ?? 3952.40;
-        $wantsThreshold = $monthlySalary * 0.21;
-
-        // Total Wants spent this month
-        $totalWants = Transaction1::where('user_id', $user->id)
-            ->where('category', 'Wants')
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
-            ->sum('amount');
-
-          // Check if a penalty transaction exists
-        $existingPenalty = Transaction1::where('user_id', $user->id)
-            ->where('category', 'Penalty')
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
-            ->first();
-
-            if ($totalWants < $wantsThreshold) {
-            // Needs penalty
-            if (!$existingPenalty) {
-                $penalty = $wantsThreshold - $totalWants;
-                $lastBalance -= $penalty;
-
-                $penaltyTxn = Transaction1::create([
-                    'user_id' => $user->id,
-                    'bank_account_id' => $bankAccount->id ?? null,
-                    'transaction_date' => Carbon::now()->toDateTimeString(),
-                    'description' => 'Penalty Applied (Wants < 21% of Salary)',
-                    'type' => 'debit',
-                    'category' => 'Penalty',
-                    'amount' => $penalty,
-                    'balance' => $lastBalance,
-                    'is_penalty' => true
-                ]);
-
-                $data['transactions'][] = [
-                    'date' => $penaltyTxn->transaction_date,
-                    'description' => $penaltyTxn->description,
-                    'type' => $penaltyTxn->type,
-                    'category' => $penaltyTxn->category,
-                    'amount' => $penaltyTxn->amount,
-                    'balance' => $penaltyTxn->balance
-                ];
-            }
-        } else {
-            // Reverse penalty if exists
-            if ($existingPenalty) {
-                // Remove penalty from running balance
-                 // ✅ Get the latest recorded balance
-            $latestTxn = Transaction1::where('user_id', $user->id)
-                ->latest('transaction_date')
-                ->first();
-
-            $currentBalance = $latestTxn ? $latestTxn->balance : 0;
-
-            // Add penalty back
-            $newBalance = $currentBalance + $existingPenalty->amount;
-
-                // Create a reversal transaction
-                $reversalTxn = Transaction1::create([
-                    'user_id' => $user->id,
-                    'bank_account_id' => $bankAccount->id ?? null,
-                    'transaction_date' => Carbon::now()->toDateTimeString(),
-                    'description' => 'Penalty Reversed (Wants >= 21% of Salary)',
-                    'type' => 'credit',
-                    'category' => 'Penalty',
-                    'amount' => $existingPenalty->amount,
-                    'balance' => $newBalance,
-                    'is_penalty' => true
-                ]);
-
-                // Append reversal to statement
-                $data['transactions'][] = [
-                    'date' => $reversalTxn->transaction_date,
-                    'description' => $reversalTxn->description,
-                    'type' => $reversalTxn->type,
-                    'category' => $reversalTxn->category,
-                    'amount' => $reversalTxn->amount,
-                    'balance' => $reversalTxn->balance
-                ];
-            }
-        }
-
-        return redirect()->route('bank.bank_statement_show');
-    }*/
     public function banks_penalty(StatementGenerator $generator, $user = null)
     {
         // 🔒 STEP 0: DATE & SECURITY GUARDS
