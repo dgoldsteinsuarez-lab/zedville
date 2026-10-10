@@ -2133,13 +2133,6 @@ class BankController extends Controller
 
             $txnDate = Carbon::create($today->year, $today->month, $billDay, 9, 0, 0);
 
-            $latestTxn = Transaction1::where('user_id', $user->id)
-                ->latest('id')
-                ->first();
-
-            $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-            $newBalance = max(0, $lastBalance - $item['amount']);
-
             // ✅ CATEGORY RULE
             $needsItems = [
                 'Utility - Electricity',
@@ -2150,18 +2143,22 @@ class BankController extends Controller
             ];
 
             $category = in_array($item['description'], $needsItems) ? 'Needs' : 'Wants';
-            Transaction1::create([
-                'user_id' => $user->id,
-                'sid' => $user->sid,
-                'bank_account_id' => $bankAccount->id ?? null,
-                'transaction_date' => $txnDate,
-                'description' => $item['description'],
-                'type' => 'debit',
-                'category' => $category,
-                'amount' => $item['amount'],
-                'balance' => $newBalance,
-                'is_penalty' => false,
-            ]);
+
+            DB::transaction(function () use ($user, $bankAccount, $txnDate, $item, $category) {
+                \App\Services\LedgerService::post(
+                    $user->id,
+                    'debit',
+                    $category,
+                    (float) $item['amount'],
+                    $item['description'],
+                    [
+                        'sid' => $user->sid,
+                        'bank_account_id' => $bankAccount->id ?? null,
+                        'transaction_date' => $txnDate,
+                        'floor_at_zero' => true,
+                    ]
+                );
+            });
         }
     }
 
@@ -2750,24 +2747,23 @@ class BankController extends Controller
         }
 
         // STEP 4C: APPLY PENALTY TRANSACTIONS
-        $latestTxn = Transaction1::where('user_id', $user->id)->latest('id')->first();
-        $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-
         foreach ($selectedItems as $item) {
-            $lastBalance = max(0, $lastBalance - $item['price']);
-
-            Transaction1::create([
-                'user_id' => $user->id,
-                'sid' => $user->sid,
-                'bank_account_id' => $bankAccount->id ?? null,
-                'transaction_date' => now(),
-                'description' => 'Penalty Item: ' . $item['name'],
-                'type' => 'debit',
-                'category' => 'Penalty',
-                'amount' => $item['price'],
-                'balance' => $lastBalance,
-                'is_penalty' => true,
-            ]);
+            DB::transaction(function () use ($user, $bankAccount, $item) {
+                \App\Services\LedgerService::post(
+                    $user->id,
+                    'debit',
+                    'Penalty',
+                    (float) $item['price'],
+                    'Penalty Item: ' . $item['name'],
+                    [
+                        'sid' => $user->sid,
+                        'bank_account_id' => $bankAccount->id ?? null,
+                        'transaction_date' => now(),
+                        'is_penalty' => true,
+                        'floor_at_zero' => true,
+                    ]
+                );
+            });
         }
 
         // STEP 5: REDIRECT TO STATEMENT IF DIRECT WEB REQUEST
