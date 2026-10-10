@@ -1554,12 +1554,16 @@ class BankController extends Controller
         $validated['user_id'] = $user->id;
         $validated['sid'] = session()->get('sid');
 
-        // ✅ Get available balance from transactions
-        $availableBalance = Transaction::where('user_id', $user->id)
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;
+        // Get the user's bank account
+        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        if (!$bankAccount) {
+            return redirect()->back()->with('error', 'Bank account not found for this user.');
+        }
 
-        // ✅ Check sufficient balance
+        // ✅ Check sufficient balance against the real ledger (transactions1),
+        // not the legacy, always-empty `transactions` table.
+        $availableBalance = \App\Services\LedgerService::currentBalance($user->id);
+
         if ($availableBalance < $validated['amount']) {
             return redirect()->back()->with('error', 'Insufficient balance for this auto-debit request.');
         }
@@ -1567,44 +1571,20 @@ class BankController extends Controller
         // ✅ Store auto debit request
         AutoDebitRequest::create($validated);
 
-        // ✅ Calculate new balance
-        /*$newBalance = $availableBalance - $validated['amount'];
+        \App\Services\LedgerService::post(
+            $user->id,
+            'debit',
+            $validated['type'] ?? 'Auto Debit',
+            (float) $validated['amount'],
+            'Transfer to ' . ($validated['type'] ?? '') . ' ' . $validated['accountno'],
+            [
+                'sid' => $user->sid,
+                'bank_account_id' => $bankAccount->id,
+                'transaction_date' => now(),
+                'floor_at_zero' => true,
+            ]
+        );
 
-        // ✅ Store debit transaction
-        $transaction = Transaction::create([
-            'user_id'    => $user->id,
-            'type'       => $validated['type'] ?? 'Auto Debit',
-            'txn_date'   => now()->toDateString(),
-            'value_date' => now()->toDateString(),
-            'description'=> 'TO TRANSFER ' . ($validated['type'] ?? '') . ' ' . $validated['accountno'],
-            'ref_no'     => 'TRANSFER TO ' . $validated['accountno'],
-            'debit'      => $validated['amount'],
-            'credit'     => 0,
-            'balance'    => $newBalance,
-        ]);*/
-        // Get the user's bank account
-        $bankAccount = BankAccount::where('student_id', $user->id)->first();
-        if (!$bankAccount) {
-            return redirect()->back()->with('error', 'Bank account not found for this user.');
-        }
-        $latestTxn = Transaction1::where('user_id', $user->id)
-            ->where('bank_account_id', $bankAccount->id)
-            ->latest('transaction_date')
-            ->first();
-        $previousBalance = $latestTxn ? $latestTxn->balance : 0;
-        $newBalance = max(0, $previousBalance - $validated['amount']);
-        Transaction1::create([
-            'user_id' => $user->id,
-            'sid' => session()->get('sid'),
-            'bank_account_id' => $bankAccount->id,
-            'transaction_date' => now(),
-            'description' => 'Transfer to ' . ($validated['type'] ?? '') . ' ' . $validated['accountno'],
-            'type' => 'debit',
-            'category' => $validated['type'] ?? 'Auto Debit',
-            'amount' => $validated['amount'],
-            'balance' => $newBalance,
-            'is_penalty' => 0,
-        ]);
         return redirect()->back()->with('success', 'Form submitted and auto-debit transaction created successfully.');
     }
 
