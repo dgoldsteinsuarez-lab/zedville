@@ -2210,7 +2210,6 @@ class BankController extends Controller
         }
         //Check balance after savings deduction
 
-        $newAmount = $lastBalance - $savingsAmount;
         // Update the bank account for this user
         $updated = BankAccount::where('student_id', $user->id)
             ->update([
@@ -2218,19 +2217,18 @@ class BankController extends Controller
                 'is_open_emergency_account' => '1',
             ]);
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
-        $now = Carbon::now();
-        Transaction1::create([
-            'user_id' => $user->id,
-            'sid' => session()->get('sid'),
-            'bank_account_id' => $bankAccount->id ?? null,
-            'transaction_date' => $now,
-            'description' => 'Auto Transfer to Savings Account',
-            'type' => 'debit',
-            'category' => 'Savings',
-            'amount' => $savingsAmount,
-            'balance' => $newAmount,
-            'is_penalty' => false
-        ]);
+        \App\Services\LedgerService::post(
+            $user->id,
+            'debit',
+            'Savings',
+            (float) $savingsAmount,
+            'Auto Transfer to Savings Account',
+            [
+                'sid' => $user->sid,
+                'bank_account_id' => $bankAccount->id ?? null,
+                'transaction_date' => Carbon::now(),
+            ]
+        );
 
         app(ParticipationService::class)->award($user->id, 'emergency_fund_open');
 
@@ -2260,40 +2258,6 @@ class BankController extends Controller
 
     public function moneymarketamount()
     {
-        /*$user = Auth::user();
-        $salaryamount=3952.40;
-        $savingsPct=30;
-       $savingsAmount = round($salaryamount * ($savingsPct/100), 2);
-       $lastBalance = Transaction1::where('user_id', $user->id)
-           ->orderBy('id', 'desc')
-           ->value('balance') ?? 0;
-       if ($lastBalance < $savingsAmount) {
-           return redirect()->back()->with('error', 'Insufficient balance.');
-       }
-       $newAmount = $lastBalance-$savingsAmount;
-       // Update the bank account for this user
-       $updated = BankAccount::where('student_id', $user->id)
-           ->update(['money_market_account_amount' => $savingsAmount,
-                   'is_open_money_market_account' => '1',
-                   ]);
-        $bankAccount = BankAccount::where('student_id', $user->id)->first();
-       $now = Carbon::now();   
-        Transaction1::create([
-           'user_id' => $user->id,
-           'bank_account_id' => $bankAccount->id ?? null,
-           'transaction_date' =>  $now ,
-           'description' => 'Auto Transfer to Money Market Account',
-           'type' => 'debit',
-           'category' => 'Savings',
-           'amount' => $savingsAmount,
-           'balance' => $newAmount,
-           'is_penalty' => false
-       ]);
-       if ($updated) {
-           return redirect()->back()->with('success', 'Money Market amount updated successfully.');
-       } else {
-           return redirect()->back()->with('error', 'Failed to update Money Market amount.');
-       }*/
         $user = Auth::user();
         $savingsAmount = 0;
         $updated = BankAccount::where('student_id', $user->id)
