@@ -475,6 +475,7 @@ class EFDController extends Controller
                 // Optionally, create a transaction record
                 Transaction1::create([
                     'user_id' => $user->id,
+                    'sid' => $user->sid,
                     'bank_account_id' => $bank->id,
                     'transaction_date' => now(), // ✅ current timestamp
                     'description' => 'Donation to ' . $request->npo_name, // optional descriptive text
