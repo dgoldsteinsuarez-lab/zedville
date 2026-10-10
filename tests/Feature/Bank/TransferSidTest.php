@@ -80,5 +80,7 @@ class TransferSidTest extends TestCase
 
         $this->assertEquals(2002, $recipientTxn->sid, "Recipient's transaction must carry the recipient's own sid.");
         $this->assertEquals(2001, $senderTxn->sid, "Sender's transaction must carry the sender's own sid.");
+        $this->assertEquals(75.0, (float) $senderTxn->balance);
+        $this->assertEquals(25.0, (float) $recipientTxn->balance);
     }
 }

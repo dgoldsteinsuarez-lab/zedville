@@ -694,31 +694,11 @@ class BankController extends Controller
 
             $recipient = User::find($recipientBank->student_id);
 
-            /* $senderBank = BankAccount::where('student_id', $sender->id)->first();
-
-
-
-             $latestSenderTxn = Transaction1::where('user_id', $sender->id)
-                         ->latest('id') // or latest('created_at') if you track timestamps
-                         ->first();
-
-
-             $senderBalance = $latestSenderTxn?->balance ?? 0;
-
-             $newSenderBalance = $senderBalance - $transfer->amount;*/
             $senderBank = BankAccount::where('student_id', $sender->id)->first();
 
             switch ($transfer->from_account) {
 
                 case 'Primary Savings Account':
-
-                    $latestSenderTxn = Transaction1::where('user_id', $sender->id)
-                        ->latest('id')
-                        ->first();
-
-                    $senderBalance = $latestSenderTxn?->balance ?? 0;
-
-                    $newSenderBalance = $senderBalance - $transfer->amount;
 
                     $senderAccountNumber = $senderBank->primary_savings_account_number;
 
@@ -755,49 +735,26 @@ class BankController extends Controller
                     break;
             }
             if ($transfer->from_account === 'Primary Savings Account') {
-                Transaction1::create([
-                    'user_id' => $sender->id,
-                    'sid' => $sender->sid,
-                    'bank_account_id' => $senderBank?->id,
-                    'transaction_date' => $transactionDate,
-                    'description' => "Transfer to {$transfer->beneficiary_name} ({$transfer->account_number})",
-                    'type' => 'debit',
-                    'category' => 'Fund Transfer',
-                    'amount' => $transfer->amount,
-                    'balance' => $newSenderBalance,
-                    'is_penalty' => 0,
-                ]);
+                \App\Services\LedgerService::post(
+                    $sender->id,
+                    'debit',
+                    'Fund Transfer',
+                    (float) $transfer->amount,
+                    "Transfer to {$transfer->beneficiary_name} ({$transfer->account_number})",
+                    [
+                        'sid' => $sender->sid,
+                        'bank_account_id' => $senderBank?->id,
+                        'transaction_date' => $transactionDate,
+                    ]
+                );
             }
-            $latestRecipientTxn = Transaction1::where('user_id', $recipient->id)
-                ->latest('transaction_date')->first();
-            $recipientBalance = $latestRecipientTxn?->balance ?? 0;
-            /*if ($recipientAccountType === 'primary') {
-            $newRecipientBalance = $recipientBalance + $transfer->amount;
-            $recivedbankkAccount=$senderBank?->primary_savings_account_number;
-            }elseif($recipientAccountType === 'emergency'){
-            $newRecipientBalance = $recipientBalance ;
-            $recipientBank->emergency_fund_account_amount = $recipientBank->emergency_fund_account_amount + $transfer->amount;
-            $recipientBank->save();
-            $recivedbankkAccount=$senderBank?->emergency_fund_account_amount;
-            //dd($recipientBank->emergency_fund_account_amount);
-            }elseif($recipientAccountType === 'money_market'){
-            $newRecipientBalance = $recipientBalance ;
-            $recipientBank->money_market_account_amount = $recipientBank->money_market_account_amount + $transfer->amount;
-            $recipientBank->save();
-            $recivedbankkAccount=$senderBank?->money_market_account_number;
-            }*/
+
             switch ($recipientAccountType) {
 
                 case 'primary':
-
-                    $latestRecipientTxn = Transaction1::where('user_id', $recipient->id)
-                        ->latest('id')
-                        ->first();
-
-                    $recipientBalance = $latestRecipientTxn?->balance ?? 0;
-
-                    $newRecipientBalance = $recipientBalance + $transfer->amount;
-
+                    // Handled below via LedgerService, which re-reads the
+                    // balance itself rather than trusting a value computed
+                    // here - no $newRecipientBalance needed in this branch.
                     break;
 
 
@@ -827,20 +784,18 @@ class BankController extends Controller
                     break;
             }
             if ($recipientAccountType === 'primary') {
-                Transaction1::create([
-                    'user_id' => $recipient->id,
-                    'sid' => $recipient->sid,
-                    'bank_account_id' => $recipientBank->id,
-                    'transaction_date' => $transactionDate,
-                    //'description' => "Received from {$sender->name} ({$senderBank?->primary_savings_account_number})",
-                    //'description' => "Received from {$sender->name} ({$recivedbankkAccount})",
-                    'description' => "Received from {$sender->nickname} ({$senderAccountNumber})",
-                    'type' => 'credit',
-                    'category' => 'Fund Transfer',
-                    'amount' => $transfer->amount,
-                    'balance' => $newRecipientBalance,
-                    'is_penalty' => 0,
-                ]);
+                \App\Services\LedgerService::post(
+                    $recipient->id,
+                    'credit',
+                    'Fund Transfer',
+                    (float) $transfer->amount,
+                    "Received from {$sender->nickname} ({$senderAccountNumber})",
+                    [
+                        'sid' => $recipient->sid,
+                        'bank_account_id' => $recipientBank->id,
+                        'transaction_date' => $transactionDate,
+                    ]
+                );
             }
             app(ParticipationService::class)->award($sender->id, 'transfer');
         });
@@ -901,28 +856,6 @@ class BankController extends Controller
             ->get();
         return view('bank.bank-pay-bills', compact('getAllbiller', 'transactions', 'scheduledTransfers'));
     }
-    /*public function store_pay_bill(Request $request)
-        {
-            $validated = $request->validate([
-                'account_id'     => 'required|string|max:191',
-                'biller_id'      => 'required|string|max:191',
-                'account_number' => 'required|string|max:100',
-                'amount'         => 'required|numeric|min:0.01',
-                'payment_type'   => 'required|in:now,schedule,recurring',
-                'schedule_date'  => 'nullable|date',
-                'frequency'      => 'nullable|in:weekly,monthly,yearly',
-                'start_date'     => 'nullable|date',
-                'end_date'       => 'nullable|date|after_or_equal:start_date',
-            ]);
-
-            $validated['user_id'] = auth()->id();
-
-            PayBill::create($validated);
-
-            return redirect()
-                ->route('bank.pay_bills')
-                ->with('success', 'Bill payment scheduled successfully!');
-        }*/
     public function store_pay_bill(Request $request)
     {
 
