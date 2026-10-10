@@ -1005,28 +1005,20 @@ class BankController extends Controller
             if (!$senderBank)
                 return;
 
-            /*$latestTxn = Transaction1::where('user_id', $userId)
-                ->latest('transaction_date')->first();*/
-            $latestTxn = Transaction1::where('user_id', $userId)
-                ->latest('id') // or latest('created_at') if you track timestamps
-                ->first();
-            $balance = $latestTxn?->balance ?? 0;
-            //$newBalance = $balance - $amount;
-            $newBalance = max(0, $balance - $amount);
-
             // Record debit for sender (no recipient)
-            Transaction1::create([
-                'user_id' => $userId,
-                'sid' => session()->get('sid'),
-                'bank_account_id' => $senderBank->id,
-                'transaction_date' => now(),
-                'description' => "Bill payment to {$beneficiaryName} ({$accountNumber})",
-                'type' => 'debit',
-                'category' => 'Bill Payment',
-                'amount' => $amount,
-                'balance' => $newBalance,
-                'is_penalty' => 0,
-            ]);
+            \App\Services\LedgerService::post(
+                $userId,
+                'debit',
+                'Bill Payment',
+                (float) $amount,
+                "Bill payment to {$beneficiaryName} ({$accountNumber})",
+                [
+                    'sid' => $senderBank->sid,
+                    'bank_account_id' => $senderBank->id,
+                    'transaction_date' => now(),
+                    'floor_at_zero' => true,
+                ]
+            );
         });
     }
 
