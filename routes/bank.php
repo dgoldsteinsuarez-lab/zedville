@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\AutoDebitController;
 
 Route::get('/', [BankController::class, 'index'])->name('index');
 Route::post('/', [BankController::class, 'store'])->name('store');
@@ -26,18 +27,18 @@ Route::get('/payment-history', [BankController::class, 'payment_history'])->name
 Route::get('/direct-deposite', [BankController::class, 'direct_deposite'])->name('direct_deposite');
 Route::get('/direct-deposite-message', [BankController::class, 'direct_deposite_message'])->name('direct_deposite_message');
 Route::post('/authorize-direct-deposit', [BankController::class, 'authorize_direct_deposit'])->name('authorize_direct_deposit');
-Route::get('/auto-debit-authorization-form', [BankController::class, 'auto_debit_authorization_form'])->name('auto_debit_authorization_form');
-Route::get('/auto-debit-authorization-message', [BankController::class, 'auto_debit_authorization_message'])->name('auto_debit_authorization_message');
-Route::post('/store-auto-debit-authorization-form', [BankController::class, 'store_auto_debit_authorization_form'])->name('store_auto_debit_authorization_form');
+Route::get('/auto-debit-authorization-form', [AutoDebitController::class, 'auto_debit_authorization_form'])->name('auto_debit_authorization_form');
+Route::get('/auto-debit-authorization-message', [AutoDebitController::class, 'auto_debit_authorization_message'])->name('auto_debit_authorization_message');
+Route::post('/store-auto-debit-authorization-form', [AutoDebitController::class, 'store_auto_debit_authorization_form'])->name('store_auto_debit_authorization_form');
 Route::get('/consumer-survey-message', [BankController::class, 'consumer_survey_message'])->name('consumer_survey_message');
 
 
-Route::get('/eletricity-auto-debit', [BankController::class, 'eletricity_auto_debit'])->name('eletricity_auto_debit');
-Route::get('/internet-auto-debit', [BankController::class, 'internet_auto_debit'])->name('internet_auto_debit');
-Route::get('/school-auto-debit', [BankController::class, 'school_auto_debit'])->name('school_auto_debit');
-Route::get('/water-auto-debit', [BankController::class, 'water_auto_debit'])->name('water_auto_debit');
+Route::get('/eletricity-auto-debit', [AutoDebitController::class, 'eletricity_auto_debit'])->name('eletricity_auto_debit');
+Route::get('/internet-auto-debit', [AutoDebitController::class, 'internet_auto_debit'])->name('internet_auto_debit');
+Route::get('/school-auto-debit', [AutoDebitController::class, 'school_auto_debit'])->name('school_auto_debit');
+Route::get('/water-auto-debit', [AutoDebitController::class, 'water_auto_debit'])->name('water_auto_debit');
 Route::post('/store-direct-deposite', [BankController::class, 'store_direct_deposite'])->name('store_direct_deposite');
-Route::post('/store-auto-debit', [BankController::class, 'store_auto_debit'])->name('store_auto_debit');
+Route::post('/store-auto-debit', [AutoDebitController::class, 'store_auto_debit'])->name('store_auto_debit');
 
 Route::get('/banks-statement', [BankController::class, 'bank_statement_show'])->name('bank_statement_show');
 Route::post('/emengercy-fund-account', [BankController::class, 'emengercyfundaccount'])->name('emengercyfundaccount');
