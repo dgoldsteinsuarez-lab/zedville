@@ -73,8 +73,8 @@ Route::middleware('auth')->group(function () {
 //Route::get('/profile/mailbox/show/{encryptedId}', [ProfileController::class, 'showMail'])->name('profile.showMail');
 require __DIR__.'/auth.php';
 require __DIR__.'/closet_routes.php';
-Route::get('/profile/consumer-profile-survey', [ProfileController::class, 'consumerProfileSurvey'])->name('consumer-profile-survey');
-Route::post('/profile/storesurvey', [ProfileController::class, 'storesurvey'])->name('storesurvey');
+Route::get('/profile/consumer-profile-survey', [ProfileController::class, 'consumerProfileSurvey'])->name('consumer-profile-survey')->middleware('auth');
+Route::post('/profile/storesurvey', [ProfileController::class, 'storesurvey'])->name('storesurvey')->middleware('auth');
 
 //Cms Routes
 Route::get('/how-it-work', [\App\Http\Controllers\CMSController::class, 'howItWork'])->name('how-it-work');
@@ -116,11 +116,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/api/admin/calendar-events/{id}', [\App\Http\Controllers\Admin\CalendarEventController::class, 'deleteEvent'])->name('admin.calendar-events.delete');
 });
 //For Login Quiz
-Route::get('/login-quiz/today',   [LoginQuizController::class, 'getTodayQuestion'])->name('login.quiz.today');
-Route::post('/login-quiz/submit', [LoginQuizController::class, 'submit'])->name('login.quiz.submit');
+Route::get('/login-quiz/today',   [LoginQuizController::class, 'getTodayQuestion'])->name('login.quiz.today')->middleware('auth');
+Route::post('/login-quiz/submit', [LoginQuizController::class, 'submit'])->name('login.quiz.submit')->middleware('auth');
 
 //City Mood & Profile Mood
-Route::get('/city-mood',   [ProfileController::class, 'city_mood'])->name('city-mood');
+Route::get('/city-mood',   [ProfileController::class, 'city_mood'])->name('city-mood')->middleware('auth');
 Route::post('/award-poster-room', function () {
     app(\App\Services\ParticipationService::class)
         ->award(auth()->id(), 'poster_room_enter');

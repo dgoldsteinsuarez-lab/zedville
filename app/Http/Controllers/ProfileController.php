@@ -535,33 +535,6 @@ class ProfileController extends Controller
             $now = Carbon::now();
 
             /* ============================
-               8️⃣ Store GROCERIES transactions
-            ============================ */
-            /*if (is_array($request->groceries)) {
-                foreach ($request->groceries as $item) {
-
-                    $itemName  = $item['name'] ?? null;
-                    $itemPrice = $item['total_price'] ?? 0;
-
-                    if ($itemName && $itemPrice > 0) {
-
-                        $balance -= $itemPrice;
-
-                        Transaction1::create([
-                            'user_id'          => $userId,
-                            'bank_account_id'  => $bankAccount->id ?? null,
-                            'transaction_date' => $now,
-                            'description'      => $itemName,
-                            'type'             => 'debit',
-                            'category'         => 'Needs',
-                            'amount'           => $itemPrice,
-                            'balance'          => $balance,
-                            'is_penalty'       => false,
-                        ]);
-                    }
-                }
-            }*/
-            /* ============================
             8️⃣ Store GROCERIES (SINGLE ENTRY)
             ============================ */
             $groceryTotal = 0;
