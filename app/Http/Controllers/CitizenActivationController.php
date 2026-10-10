@@ -242,7 +242,7 @@ class CitizenActivationController extends Controller
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
                 'backaccountnumber' => $request->bankaccountnumber,
-                'amount' => 300, // fixed rent
+                'amount' => config('zedville.rent', 300), // fixed rent
                 'startDate' => now(),
                 'signature' => $user->nickname,
                 'date' => now(),
@@ -264,7 +264,7 @@ class CitizenActivationController extends Controller
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
                 'backaccountnumber' => $request->bankaccountnumber,
-                'amount' => 1000,
+                'amount' => config('zedville.school_fees', 1000),
                 'startDate' => now(),
                 'signature' => $user->nickname,
                 'date' => now(),
@@ -281,8 +281,8 @@ class CitizenActivationController extends Controller
             'Utility - Electricity' => rand(60, 90),
             'Utility - Water' => rand(30, 60),
             'Internet' => 20,
-            'Rent' => 300,
-            'School Fees' => 1000,
+            'Rent' => config('zedville.rent', 300),
+            'School Fees' => config('zedville.school_fees', 1000),
         ];
 
         /*

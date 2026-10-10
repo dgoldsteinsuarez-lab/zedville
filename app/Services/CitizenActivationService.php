@@ -105,7 +105,7 @@ class CitizenActivationService
                 'serviceaddress' => $bankAccount->student_address,
                 'bankname' => $bankAccount->bank_name,
                 'backaccountnumber' => $bankAccount->primary_savings_account_number,
-                'amount' => 300,
+                'amount' => config('zedville.rent', 300),
                 'startDate' => now(),
                 'signature' => $user->nickname,
                 'date' => now(),
@@ -126,7 +126,7 @@ class CitizenActivationService
                 'serviceaddress' => $bankAccount->student_address,
                 'bankname' => $bankAccount->bank_name,
                 'backaccountnumber' => $bankAccount->primary_savings_account_number,
-                'amount' => 1000,
+                'amount' => config('zedville.school_fees', 1000),
                 'startDate' => now(),
                 'signature' => $user->nickname,
                 'date' => now(),
@@ -134,7 +134,7 @@ class CitizenActivationService
             ]);
         }
 
-        foreach (['Rent' => 300, 'School Fees' => 1000] as $description => $amount) {
+        foreach (['Rent' => config('zedville.rent', 300), 'School Fees' => config('zedville.school_fees', 1000)] as $description => $amount) {
             $alreadyPosted = Transaction1::where('user_id', $user->id)
                 ->where('description', $description)
                 ->whereDate('transaction_date', now()->toDateString())

@@ -1192,8 +1192,8 @@ class BankController extends Controller
         ['description' => 'Utility - Electricity', 'amount' => rand(60, 90)],
         ['description' => 'Utility - Water', 'amount' => rand(30, 60)],
         ['description' => 'Internet', 'amount' => 20],
-        ['description' => 'Rent', 'amount' => 300],
-        ['description' => 'School Fees', 'amount' => 1000],
+        ['description' => 'Rent', 'amount' => config('zedville.rent', 300)],
+        ['description' => 'School Fees', 'amount' => config('zedville.school_fees', 1000)],
     ];
 
     $bankAccount = BankAccount::where('student_id', $user->id)->first();
@@ -1301,7 +1301,7 @@ class BankController extends Controller
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
                 'backaccountnumber' => $request->bankaccountnumber,
-                'amount' => 300, // fixed rent
+                'amount' => config('zedville.rent', 300), // fixed rent
                 'startDate' => now(),
                 'signature' => $user->nickname,
                 'date' => now(),
@@ -1323,7 +1323,7 @@ class BankController extends Controller
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
                 'backaccountnumber' => $request->bankaccountnumber,
-                'amount' => 1000,
+                'amount' => config('zedville.school_fees', 1000),
                 'startDate' => now(),
                 'signature' => $user->nickname,
                 'date' => now(),
@@ -1340,8 +1340,8 @@ class BankController extends Controller
             'Utility - Electricity' => rand(60, 90),
             'Utility - Water' => rand(30, 60),
             'Internet' => 20,
-            'Rent' => 300,
-            'School Fees' => 1000,
+            'Rent' => config('zedville.rent', 300),
+            'School Fees' => config('zedville.school_fees', 1000),
         ];
 
         /*
@@ -1724,8 +1724,8 @@ class BankController extends Controller
             ['day' => 7, 'description' => 'Utility - Electricity', 'amount' => rand(60, 90)],
             ['day' => 7, 'description' => 'Utility - Water', 'amount' => rand(30, 60)],
             ['day' => 7, 'description' => 'Internet', 'amount' => 20],
-            ['day' => 7, 'description' => 'Rent', 'amount' => 300],
-            ['day' => 7, 'description' => 'School Fees', 'amount' => 1000],
+            ['day' => 7, 'description' => 'Rent', 'amount' => config('zedville.rent', 300)],
+            ['day' => 7, 'description' => 'School Fees', 'amount' => config('zedville.school_fees', 1000)],
         ];
 
         $today = now();

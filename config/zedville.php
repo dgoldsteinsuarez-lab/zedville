@@ -59,4 +59,33 @@ return [
     */
     'inactive_days_threshold' => 14,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Emergency Fund Auto-Transfer Percentage
+    |--------------------------------------------------------------------------
+    |
+    | Previously hardcoded only as a fallback default on each individual
+    | config('zedville.emargency_fund_persentage', 20) call site - the key
+    | itself was never actually defined here, so there was nothing to
+    | centrally change. Confirmed canonical value: 20 (the fallback every
+    | call site already agreed on).
+    |
+    */
+    'emargency_fund_persentage' => 20,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fixed Monthly Bills
+    |--------------------------------------------------------------------------
+    |
+    | Rent and School Fees amounts, previously hardcoded independently
+    | across BankController, CitizenActivationController, and
+    | CitizenActivationService (11 separate literals across the three
+    | files, all agreeing on the same values). Confirmed canonical values:
+    | Rent 300, School Fees 1000.
+    |
+    */
+    'rent' => 300,
+    'school_fees' => 1000,
+
 ];
