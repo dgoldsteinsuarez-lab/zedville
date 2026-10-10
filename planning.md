@@ -44,7 +44,7 @@ Before starting Phase 2, get baseline test coverage (feature tests) around: logi
 
 1. ~~Delete all dead/commented-out code blocks listed in `bugs.md` #16~~ — DONE 2026-10-07.
 2. ~~Delete the self-acknowledged dead triplicate methods in `EFDController` (`bugs.md` #18)~~ — already gone; the triplicated `spending_tracker_*` methods no longer exist in the codebase.
-3. ~~Batch-fix naming typos (`bugs.md` #17)~~ — DONE for the pure PHP identifiers (`emmengercyfundintrest` → `emergencyFundInterest`, dead `updatepassowrd` removed). `backaccountnumber` (DB column) still needs its own migration + call-site audit pass — not done casually.
+3. ~~Batch-fix naming typos (`bugs.md` #17)~~ — DONE, including the DB column rename: `emmengercyfundintrest` → `emergencyFundInterest`, dead `updatepassowrd` removed, `backaccountnumber` → `bankaccountnumber` (2026-10-10, full migration + call-site audit, see `bugs.md` #17).
 4. Re-enable or remove the inert "don't repeat quiz questions" logic in `LoginQuizController` (`bugs.md` #15) — turned out to be live, not inert (the real `getTodayQuestion()` already does `whereNotIn($answeredIds)`); only a dead alternate draft existed, now removed. Nothing left to decide here.
 
 ## Ground rules for whoever executes this plan

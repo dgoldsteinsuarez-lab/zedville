@@ -53,7 +53,7 @@
                     <div class="w-full lg:w-[50%]">
                         <div class="mb-4 form-group">
                             <label class="block mb-2 text-md font-medium text-black">Account Number</label>
-                            <input class="form-control" placeholder="Account Number" type="number" name="backaccountnumber" value="{{ $bankAccount->primary_savings_account_number  }}" />
+                            <input class="form-control" placeholder="Account Number" type="number" name="bankaccountnumber" value="{{ $bankAccount->primary_savings_account_number  }}" />
                         </div>
                     </div>
                 </div>

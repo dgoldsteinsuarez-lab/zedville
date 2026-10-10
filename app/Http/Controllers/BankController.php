@@ -1111,133 +1111,6 @@ class BankController extends Controller
         return view('bank.form.bank-auto-debit-authorization-form', compact('user', 'bankAccount', 'billers'));
     }
     //Store auto debit authorization form
-/*public function store_auto_debit_authorization_form(Request $request){
-    $user = Auth::user();
-    // Validate base data
-    $request->validate([
-        'services' => 'required|array|min:1',
-        'bankaccountnumber' => 'required',
-    ]);
-    foreach ($request->services as $key => $accountNumber) {
-
-        $meta = $request->services_meta[$key] ?? null;
-        if (!$meta) continue;
-
-        AutoDebitRequest::create([
-            'user_id'        => $user->id,
-            'type'           => $meta['name'],           // School / Internet / Water
-            'accountno'      => $meta['account'],
-            'fullname'       => $user->name,
-            'email'          => $user->email,
-            'serviceaddress' => $user->student_address,
-            'bankname'       => $request->bankname,
-            'backaccountnumber' => $request->bankaccountnumber,
-            'amount'         => $request->amount, // can be updated later
-            'startDate'      => now(),
-            'signature'      => $user->name,
-            'date'           => now(),
-            'tandagree'      => 1,
-        ]);
-    }
-    return redirect()
-        ->route('bank.index') // change to your actual mailbox route name
-        ->with('success', 'Congratulations, you are all set!');
-}*/
-    /*public function store_auto_debit_authorization_form(Request $request)
-    {
-        $user = Auth::user();
-
-        // Validate base data
-        $request->validate([
-            'services' => 'required|array|min:1',
-            'bankaccountnumber' => 'required',
-        ]);
-
-        foreach ($request->services as $key => $accountNumber) {
-
-            $meta = $request->services_meta[$key] ?? null;
-            if (!$meta) continue;
-
-            // ✅ CHECK DUPLICATE (user + service)
-            $alreadySubmitted = AutoDebitRequest::where('user_id', $user->id)
-                ->where('type', $meta['name']) // City School / Internet / Water
-                ->exists();
-
-            if ($alreadySubmitted) {
-                return redirect()
-                    ->back()
-                    //->with('error', "You have already submitted auto-debit for {$meta['name']}.");
-                    ->with('error', "You have already submitted auto-debit for School Fees, Internet Service Provider, Electricity Service, Water Service.");
-            }
-
-            AutoDebitRequest::create([
-                'user_id'            => $user->id,
-                'type'               => $meta['name'],
-                'accountno'          => $meta['account'],
-                'fullname'           => $user->name,
-                'email'              => $user->email,
-                'serviceaddress'     => $user->student_address,
-                'bankname'           => $request->bankname,
-                'backaccountnumber'  => $request->bankaccountnumber,
-                'amount'             => $meta['amount'] ?? 0,
-                'startDate'          => now(),
-                'signature'          => $user->name,
-                'date'               => now(),
-                'tandagree'          => 1,
-            ]);
-        }
-
-        $salaryDate = now();
-        $fixedTransactions = [
-        ['description' => 'Utility - Electricity', 'amount' => rand(60, 90)],
-        ['description' => 'Utility - Water', 'amount' => rand(30, 60)],
-        ['description' => 'Internet', 'amount' => 20],
-        ['description' => 'Rent', 'amount' => config('zedville.rent', 300)],
-        ['description' => 'School Fees', 'amount' => config('zedville.school_fees', 1000)],
-    ];
-
-    $bankAccount = BankAccount::where('student_id', $user->id)->first();
-
-    foreach ($fixedTransactions as $item) {
-
-        // 🔒 Prevent duplicate bills on SAME salary date
-        $exists = Transaction1::where('user_id', $user->id)
-            ->where('description', $item['description'])
-            ->whereDate('transaction_date', $salaryDate->toDateString())
-            ->exists();
-
-        if ($exists) {
-            continue;
-        }
-
-        $latestTxn = Transaction1::where('user_id', $user->id)
-            ->latest('id')
-            ->first();
-
-        $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-        $newBalance  = max(0, $lastBalance - $item['amount']);
-
-        Transaction1::create([
-            'user_id' => $user->id,
-            'bank_account_id' => $bankAccount->id ?? null,
-            'transaction_date' => $salaryDate, // ✅ SAME DATE
-            'description' => $item['description'],
-            'type' => 'debit',
-            'category' => 'Wants',
-            'amount' => $item['amount'],
-            'balance' => $newBalance,
-            'is_penalty' => false,
-        ]);
-    }
-
-
-        /*return redirect()
-            ->route('bank.index')
-            ->with('success', 'Congratulations, you are all set!');
-            return redirect()
-        ->route('consumer-profile-survey')
-        ->with('success', 'Congratulations, your auto debit is set up. Now complete the survey');
-    }*/
     public function store_auto_debit_authorization_form(Request $request)
     {
         $user = Auth::user();
@@ -1277,7 +1150,7 @@ class BankController extends Controller
                 'email' => $user->email,
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
-                'backaccountnumber' => $request->bankaccountnumber,
+                'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => $meta['amount'] ?? 0,
                 'startDate' => now(),
                 'signature' => $user->nickname,
@@ -1300,7 +1173,7 @@ class BankController extends Controller
                 'email' => $user->email,
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
-                'backaccountnumber' => $request->bankaccountnumber,
+                'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.rent', 300), // fixed rent
                 'startDate' => now(),
                 'signature' => $user->nickname,
@@ -1322,7 +1195,7 @@ class BankController extends Controller
                 'email' => $user->email,
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
-                'backaccountnumber' => $request->bankaccountnumber,
+                'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.school_fees', 1000),
                 'startDate' => now(),
                 'signature' => $user->nickname,
@@ -1470,7 +1343,7 @@ class BankController extends Controller
             'accountno' => 'required|string|max:100',
             'serviceaddress' => 'required|string|max:255',
             'bankname' => 'required|string|max:191',
-            'backaccountnumber' => 'required|string|max:100',
+            'bankaccountnumber' => 'required|string|max:100',
             'amount' => 'required|numeric|min:1', // must have positive amount
             'startDate' => 'required|date',
             'endDate' => 'nullable|date|after_or_equal:startDate',

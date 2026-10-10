@@ -22,7 +22,7 @@ class AutoDebitRequest extends Model
         'accountno',
         'serviceaddress',
         'bankname',
-        'backaccountnumber',
+        'bankaccountnumber',
         'billschedule',
         'fixedpayment',
         'amount',
