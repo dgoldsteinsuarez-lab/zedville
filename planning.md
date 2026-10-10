@@ -44,7 +44,9 @@ Before starting Phase 2, get baseline test coverage (feature tests) around: logi
 
    Added `tests/Feature/Bank/StoreAutoDebitAuthorizationFormTest.php` (previously uncovered) before/after the first move; the second was verified via the existing `EmergencyFundAccountTest` (exercises the cross-controller call through the real route) plus confirming the `index()`/`my_account()` views execute past the `SavingsAccountController` call into blade rendering (a pre-existing, unrelated `User::avatar()` relation bug blocks a full render-based smoke test for those two pages specifically - not something this pass touched).
 
-   `ProfileController` (1158 LOC) and `AdminEducationController` (1321 LOC) not yet touched - `SetSelectedSchool` middleware (Phase 2 #3, not started) would remove a lot of what makes `AdminEducationController` specifically fat, so that one's better done after.
+   `ProfileController` 1158 → 1080 LOC: extracted `mailbox()`/`showMail()`/`updateMailStatus()` into a new `MailboxController` (also fully self-contained). Found and fixed a duplicate route registration for `/profile/mailbox` while updating `routes/web.php`, and removed two dead commented-out mailbox route blocks alongside it. Added `tests/Feature/MailboxTest.php`, previously uncovered.
+
+   `AdminEducationController` (1321 LOC) not yet touched - `SetSelectedSchool` middleware (Phase 2 #3, not started) would remove a lot of what makes it fat, so that one's better done after.
 
 ## Phase 4 — Cleanup (any time, low risk, keep isolated from functional PRs)
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MailboxController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
@@ -43,11 +44,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/autopilot/{id}/cancel', [\App\Http\Controllers\StudentAutopilotController::class, 'cancel'])->name('profile.autopilot.cancel');
     Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.updateAvatar');
     Route::post('/profile/save-mood', [ProfileController::class, 'saveMode'])->name('profile.saveMode');
-    Route::get('/profile/mailbox', [ProfileController::class, 'mailbox'])->name('profile.mailbox');
     // Mailbox routes
-    Route::get('/profile/mailbox', [ProfileController::class, 'mailbox'])->name('profile.mailbox');
-    Route::get('/profile/mailbox/show/{encryptedId}', [ProfileController::class, 'showMail'])->name('profile.showMail');
-    Route::post('/profile/mailbox/update-status', [ProfileController::class, 'updateMailStatus'])->name('profile.mailbox.updateStatus');
+    Route::get('/profile/mailbox', [MailboxController::class, 'mailbox'])->name('profile.mailbox');
+    Route::get('/profile/mailbox/show/{encryptedId}', [MailboxController::class, 'showMail'])->name('profile.showMail');
+    Route::post('/profile/mailbox/update-status', [MailboxController::class, 'updateMailStatus'])->name('profile.mailbox.updateStatus');
 
      // ✅ ADD THESE LINES HERE (BEFORE THIS CLOSING BRACE)
     Route::post('/cart/save', [CartController::class, 'save'])->name('cart.save');
@@ -65,12 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::post('/notifications/preferences', [\App\Http\Controllers\NotificationPreferenceController::class, 'update'])->name('notifications.preferences.update');
 });
-// URL when mail is clicked
-/*Route::get('/profile/mailbox/{tab}/{encryptedId}', function ($tab, $encryptedId) {
-    return view('mailbox.index', compact('tab', 'encryptedId'));
-});*/
-// AJAX route to fetch mail content
-//Route::get('/profile/mailbox/show/{encryptedId}', [ProfileController::class, 'showMail'])->name('profile.showMail');
 require __DIR__.'/auth.php';
 require __DIR__.'/closet_routes.php';
 Route::get('/profile/consumer-profile-survey', [ProfileController::class, 'consumerProfileSurvey'])->name('consumer-profile-survey')->middleware('auth');
