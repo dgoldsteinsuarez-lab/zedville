@@ -74,7 +74,7 @@ class OrderController extends Controller
             // 4. Balance check — under row lock, and inside the transaction,
             // so two concurrent orders can't both read the same stale
             // balance and both pass this check (see bugs.md #5).
-            $lastBalance = \App\Services\BalanceService::lockedBalance($user->id);
+            $lastBalance = \App\Services\LedgerService::lockedBalance($user->id);
 
             if ($lastBalance < $serverTotal) {
                 DB::rollBack();
@@ -123,20 +123,18 @@ class OrderController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                Transaction1::create([
-                    'user_id' => $user->id,
-                    'sid' => $user->sid,
-                    'bank_account_id' => $bankAccount->id,
-                    'transaction_date' => now(),
-                    'description' => "Purchase: {$product->product_name} (Order #{$orderId})",
-                    'type' => 'debit',
-                    'category' => $product->category ?? 'Wants',
-                    'amount' => $itemSubtotal,
-                    'balance' => $runningBalance,
-                    'is_penalty' => 0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                \App\Services\LedgerService::post(
+                    $user->id,
+                    'debit',
+                    $product->category ?? 'Wants',
+                    (float) $itemSubtotal,
+                    "Purchase: {$product->product_name} (Order #{$orderId})",
+                    [
+                        'sid' => $user->sid,
+                        'bank_account_id' => $bankAccount->id,
+                        'transaction_date' => now(),
+                    ]
+                );
             }
 
             session()->forget('cart');

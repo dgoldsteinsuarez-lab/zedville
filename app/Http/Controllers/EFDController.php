@@ -447,11 +447,11 @@ class EFDController extends Controller
             ]);
         }
         try {
-            [$txn, $newBalance] = DB::transaction(function () use ($user, $bank, $request) {
+            $txn = DB::transaction(function () use ($user, $bank, $request) {
                 // ✅ Authoritative balance check under row lock — prevents two
                 // concurrent donation requests from both reading the same stale
                 // balance and both passing the insufficient-funds check.
-                $lastBalance = \App\Services\BalanceService::lockedBalance($user->id);
+                $lastBalance = \App\Services\LedgerService::lockedBalance($user->id);
 
                 if ($request->amount > $lastBalance) {
                     throw new \RuntimeException('INSUFFICIENT_BALANCE');
@@ -470,22 +470,21 @@ class EFDController extends Controller
                 // Update record with transaction id
                 $donation->transaction_ref = $txn;
                 $donation->save();
-                $newBalance = $lastBalance - $request->amount;
-                //Store Trasection
-                // Optionally, create a transaction record
-                Transaction1::create([
-                    'user_id' => $user->id,
-                    'sid' => $user->sid,
-                    'bank_account_id' => $bank->id,
-                    'transaction_date' => now(), // ✅ current timestamp
-                    'description' => 'Donation to ' . $request->npo_name, // optional descriptive text
-                    'type' => 'debit',
-                    'category' => 'Donation',
-                    'amount' => $request->amount,
-                    'balance' => $newBalance,
-                ]);
 
-                return [$txn, $newBalance];
+                \App\Services\LedgerService::post(
+                    $user->id,
+                    'debit',
+                    'Donation',
+                    (float) $request->amount,
+                    'Donation to ' . $request->npo_name,
+                    [
+                        'sid' => $user->sid,
+                        'bank_account_id' => $bank->id,
+                        'transaction_date' => now(),
+                    ]
+                );
+
+                return $txn;
             });
         } catch (\RuntimeException $e) {
             if ($e->getMessage() === 'INSUFFICIENT_BALANCE') {
