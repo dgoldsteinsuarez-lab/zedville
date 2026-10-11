@@ -18,51 +18,20 @@ class SpendingActivitiesController extends Controller
 {
     
     $userId = auth()->id();
-    $now = Carbon::now();
  // 🔹 Bank account check
     $hasBankAccount = BankAccount::where('student_id', $userId)->exists();
-    // 🔹 Get latest survey for CURRENT MONTH
-    $Consumersurvey = ConsumerSurvey::where('user_id', $userId)
-        //->whereMonth('created_at', $now->month)
-        //->whereYear('created_at', $now->year)
-        ->orderBy('id', 'desc')
-        ->first();
 
-    // 🔹 Survey exists for this month?
-    $ConsumersurveyExists = (bool) $Consumersurvey;
-
-    // 🔹 Diet
-    $diet = $Consumersurvey->diet ?? null;
+    $summary = \App\Services\ConsumerSurveySummaryService::forUser($userId);
+    $ConsumersurveyExists = $summary['exists'];
+    $diet = $summary['diet'];
     $hasSurvey = $ConsumersurveyExists;
-
-    // 🔹 Groceries handling (string or array safe)
-    $groceryItems = [];
-    if ($Consumersurvey && $Consumersurvey->groceries) {
-        $groceryItems = is_array($Consumersurvey->groceries)
-            ? $Consumersurvey->groceries
-            : json_decode($Consumersurvey->groceries, true);
-    }
-
-    $itemNames = collect($groceryItems)->pluck('name')->implode(', ');
-
-    // 🔹 Default values
-    $basketTotal = 0;
-    $lunch = 0;
-    $transport = 0;
-    $activities = 0;
-    $restaurants = 0;
-    $total = 0;
-
-    if ($Consumersurvey) {
-        $basketTotal = $Consumersurvey->basket_cost ?? 0;
-        $lunch = $Consumersurvey->lunch ?? 0;
-        $transport = $Consumersurvey->transport ?? 0;
-        $activities = $Consumersurvey->activities ?? 0;
-        $restaurants = $Consumersurvey->restaurants ?? 0;
-
-        $total = $Consumersurvey->total_cost
-            ?? ($basketTotal + $lunch + $transport + $activities + $restaurants);
-    }
+    $itemNames = $summary['itemNames'];
+    $basketTotal = $summary['basketTotal'];
+    $lunch = $summary['lunch'];
+    $transport = $summary['transport'];
+    $activities = $summary['activities'];
+    $restaurants = $summary['restaurants'];
+    $total = $summary['total'];
     $activityId = $request->query('activity_id');
     if (!$activityId) {
     return redirect('/education/high-spending-activities')
@@ -119,47 +88,22 @@ public function supermarket(Request $request)
     $lastBalance = $latestTxn ? $latestTxn->balance : 0;
 
     // 🔹 CURRENT MONTH consumer survey ONLY
-    $Consumersurvey = ConsumerSurvey::where('user_id', $user->id)
-        //->whereMonth('created_at', $now->month)
-        //->whereYear('created_at', $now->year)
-        ->orderBy('id', 'desc')
-        ->first();
-
-    $ConsumersurveyExists = (bool) $Consumersurvey;
+    $summary = \App\Services\ConsumerSurveySummaryService::forUser($user->id);
+    $ConsumersurveyExists = $summary['exists'];
 
     if (!$ConsumersurveyExists) {
         return redirect('/supermarket/market-list')
             ->with('error', 'Please complete your monthly survey first.');
     }
 
-    // 🔹 Groceries (string / array safe)
-    $groceriesRaw = $Consumersurvey->groceries ?? '[]';
-
-    $groceryItems = is_array($groceriesRaw)
-        ? $groceriesRaw
-        : json_decode($groceriesRaw, true);
-
-    $groceries = $groceryItems;
-    $itemNames = collect($groceryItems)->pluck('name')->implode(', ');
-
-    // 🔹 Default values
-    $basketTotal = 0;
-    $lunch = 0;
-    $transport = 0;
-    $activities = 0;
-    $restaurants = 0;
-    $total = 0;
-
-    if ($Consumersurvey) {
-        $basketTotal = $Consumersurvey->basket_cost ?? 0;
-        $lunch = $Consumersurvey->lunch ?? 0;
-        $transport = $Consumersurvey->transport ?? 0;
-        $activities = $Consumersurvey->activities ?? 0;
-        $restaurants = $Consumersurvey->restaurants ?? 0;
-
-        $total = $Consumersurvey->total_cost
-            ?? ($basketTotal + $lunch + $transport + $activities + $restaurants);
-    }
+    $groceries = $summary['groceryItems'];
+    $itemNames = $summary['itemNames'];
+    $basketTotal = $summary['basketTotal'];
+    $lunch = $summary['lunch'];
+    $transport = $summary['transport'];
+    $activities = $summary['activities'];
+    $restaurants = $summary['restaurants'];
+    $total = $summary['total'];
     //check the price and product qty limit
     $activityId = $request->query('activity_id');
     if (!$activityId) {
