@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MailboxController;
 use App\Http\Controllers\ConsumerSurveyController;
+use App\Http\Controllers\MoodController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
@@ -44,7 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/autopilot', [\App\Http\Controllers\StudentAutopilotController::class, 'store'])->name('profile.autopilot.store');
     Route::post('/profile/autopilot/{id}/cancel', [\App\Http\Controllers\StudentAutopilotController::class, 'cancel'])->name('profile.autopilot.cancel');
     Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.updateAvatar');
-    Route::post('/profile/save-mood', [ProfileController::class, 'saveMode'])->name('profile.saveMode');
+    Route::post('/profile/save-mood', [MoodController::class, 'saveMode'])->name('profile.saveMode');
     // Mailbox routes
     Route::get('/profile/mailbox', [MailboxController::class, 'mailbox'])->name('profile.mailbox');
     Route::get('/profile/mailbox/show/{encryptedId}', [MailboxController::class, 'showMail'])->name('profile.showMail');
@@ -115,7 +116,7 @@ Route::get('/login-quiz/today',   [LoginQuizController::class, 'getTodayQuestion
 Route::post('/login-quiz/submit', [LoginQuizController::class, 'submit'])->name('login.quiz.submit')->middleware('auth');
 
 //City Mood & Profile Mood
-Route::get('/city-mood',   [ProfileController::class, 'city_mood'])->name('city-mood')->middleware('auth');
+Route::get('/city-mood',   [MoodController::class, 'city_mood'])->name('city-mood')->middleware('auth');
 Route::post('/award-poster-room', function () {
     app(\App\Services\ParticipationService::class)
         ->award(auth()->id(), 'poster_room_enter');
