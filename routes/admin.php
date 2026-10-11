@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SalaryBonusController;
 use App\Http\Controllers\Admin\NpoController;
 use App\Http\Controllers\Admin\RoomPosterController;
 use App\Http\Controllers\Admin\PenaltyWantsItemController;
+use App\Http\Controllers\Admin\SpendBudgetProductController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -173,11 +174,11 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::put('/education/updatePoster/{id}', [RoomPosterController::class, 'updatePoster'])->name('admin.education.updatePoster');
     Route::delete('/education/deletePoster/{id}', [RoomPosterController::class, 'deletePoster'])->name('admin.education.deletePoster');
     //spandBudget
-    Route::get('/education/city-mall', [AdminEducationController::class, 'spandbudget'])->name('admin.education.city-mall');
-    Route::post('/education/product-store', [AdminEducationController::class, 'productStore'])->name('admin.education.product-store');
-    Route::get('/education/products-list', [AdminEducationController::class, 'productList'])->name('admin.education.products-list');
-    Route::post('/education/products-update/{id}', [AdminEducationController::class, 'productUpdate'])->name('admin.education.products-update');
-    Route::delete('/education/products-delete/{id}', [AdminEducationController::class, 'productDelete'])->name('admin.education.products-delete');
+    Route::get('/education/city-mall', [SpendBudgetProductController::class, 'spandBudget'])->name('admin.education.city-mall');
+    Route::post('/education/product-store', [SpendBudgetProductController::class, 'productStore'])->name('admin.education.product-store');
+    Route::get('/education/products-list', [SpendBudgetProductController::class, 'productList'])->name('admin.education.products-list');
+    Route::post('/education/products-update/{id}', [SpendBudgetProductController::class, 'productUpdate'])->name('admin.education.products-update');
+    Route::delete('/education/products-delete/{id}', [SpendBudgetProductController::class, 'productDelete'])->name('admin.education.products-delete');
     //For Store
     Route::get('/education/city-mall-store', [AdminEducationController::class, 'cityMallStore'])->name('admin.education.city-mall-store');
     Route::post('/education/create-city-mall-store', [AdminEducationController::class, 'CreatecityMallStore'])->name('admin.education.create-city-mall-store');
