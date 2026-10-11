@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\PenaltyWantsItemController;
 use App\Http\Controllers\Admin\SpendBudgetProductController;
 use App\Http\Controllers\Admin\CityMallStoreController;
 use App\Http\Controllers\Admin\SupermarketProductController;
+use App\Http\Controllers\Admin\MbaPositionController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -156,9 +157,9 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::get('/accounts', [AdminDashboardController::class, 'city_bank_account'])->name('accounts');
 
     //Education — curriculum/content configuration
-    Route::get('/education/monthly-budget-activity', [AdminEducationController::class, 'monthly_budget_activity'])->name('admin.education.monthly-budget-activity');
-    Route::post('/education/mba-position', [AdminEducationController::class, 'mba_position'])->name('admin.education.mba-position');
-    Route::get('/education/mba-position/delete/{id}', [AdminEducationController::class, 'mba_position_delete'])
+    Route::get('/education/monthly-budget-activity', [MbaPositionController::class, 'monthly_budget_activity'])->name('admin.education.monthly-budget-activity');
+    Route::post('/education/mba-position', [MbaPositionController::class, 'mba_position'])->name('admin.education.mba-position');
+    Route::get('/education/mba-position/delete/{id}', [MbaPositionController::class, 'mba_position_delete'])
         ->name('admin.education.mba-position.delete');
 
     Route::get('/education/emergency-fund-account', [AdminEducationController::class, 'emergencyFundAccount'])->name('admin.education.emergency-fund-account');
