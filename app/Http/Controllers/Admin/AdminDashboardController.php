@@ -680,7 +680,7 @@ public function updateBaseSalary(Request $request)
 public function toggleViewMode(Request $request)
 {
     $user = Auth::user();
-    if (in_array($user->role, [1, 2, 3, '1', '2', '3', 'admin', 'tutor'])) {
+    if ($user->isAdminOrTutor()) {
         $current = session('view_mode', 'admin');
         $newMode = ($current === 'citizen') ? 'admin' : 'citizen';
         session(['view_mode' => $newMode]);
