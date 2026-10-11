@@ -2,7 +2,6 @@
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminEmailTemplateController;
-use App\Http\Controllers\Admin\AdminEducationController;
 use App\Http\Controllers\Admin\WellbeingController;
 use App\Http\Controllers\Admin\CivicChamberController;
 use App\Http\Controllers\Tutor\TutorStudentController;
@@ -15,6 +14,9 @@ use App\Http\Controllers\Admin\SpendBudgetProductController;
 use App\Http\Controllers\Admin\CityMallStoreController;
 use App\Http\Controllers\Admin\SupermarketProductController;
 use App\Http\Controllers\Admin\MbaPositionController;
+use App\Http\Controllers\Admin\EmergencyFundPositionController;
+use App\Http\Controllers\Admin\HighBudgetActivityController;
+use App\Http\Controllers\Admin\LowBudgetActivityController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -162,14 +164,14 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::get('/education/mba-position/delete/{id}', [MbaPositionController::class, 'mba_position_delete'])
         ->name('admin.education.mba-position.delete');
 
-    Route::get('/education/emergency-fund-account', [AdminEducationController::class, 'emergencyFundAccount'])->name('admin.education.emergency-fund-account');
-    Route::post('/education/emergency-fund-position', [AdminEducationController::class, 'emergencyFundPosition'])->name('admin.education.emergency-fund-position');
+    Route::get('/education/emergency-fund-account', [EmergencyFundPositionController::class, 'emergencyFundAccount'])->name('admin.education.emergency-fund-account');
+    Route::post('/education/emergency-fund-position', [EmergencyFundPositionController::class, 'emergencyFundPosition'])->name('admin.education.emergency-fund-position');
 
-    Route::get('/education/high-budget-activity', [AdminEducationController::class, 'high_budget_activity'])->name('admin.education.high-budget-activity');
-    Route::post('/education/hba-position', [AdminEducationController::class, 'hba_position'])->name('admin.education.hba-position');
+    Route::get('/education/high-budget-activity', [HighBudgetActivityController::class, 'high_budget_activity'])->name('admin.education.high-budget-activity');
+    Route::post('/education/hba-position', [HighBudgetActivityController::class, 'hba_position'])->name('admin.education.hba-position');
 
-    Route::get('/education/low-budget-activity', [AdminEducationController::class, 'low_budget_activity'])->name('admin.education.low-budget-activity');
-    Route::post('/education/lba-position', [AdminEducationController::class, 'lba_position'])->name('admin.education.lba-position');
+    Route::get('/education/low-budget-activity', [LowBudgetActivityController::class, 'low_budget_activity'])->name('admin.education.low-budget-activity');
+    Route::post('/education/lba-position', [LowBudgetActivityController::class, 'lba_position'])->name('admin.education.lba-position');
 
     //Poster
     Route::get('/education/poster', [RoomPosterController::class, 'poster'])->name('admin.education.poster');
