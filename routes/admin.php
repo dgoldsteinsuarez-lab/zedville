@@ -9,6 +9,7 @@ use App\Http\Controllers\Tutor\TutorStudentController;
 use App\Http\Controllers\Tutor\AssignmentExtensionController;
 use App\Http\Controllers\Admin\SalaryBonusController;
 use App\Http\Controllers\Admin\NpoController;
+use App\Http\Controllers\Admin\RoomPosterController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -166,10 +167,10 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/education/lba-position', [AdminEducationController::class, 'lba_position'])->name('admin.education.lba-position');
 
     //Poster
-    Route::get('/education/poster', [AdminEducationController::class, 'poster'])->name('admin.education.poster');
-    Route::post('/education/storePoster', [AdminEducationController::class, 'storePoster'])->name('admin.education.storePoster');
-    Route::put('/education/updatePoster/{id}', [AdminEducationController::class, 'updatePoster'])->name('admin.education.updatePoster');
-    Route::delete('/education/deletePoster/{id}', [AdminEducationController::class, 'deletePoster'])->name('admin.education.deletePoster');
+    Route::get('/education/poster', [RoomPosterController::class, 'poster'])->name('admin.education.poster');
+    Route::post('/education/storePoster', [RoomPosterController::class, 'storePoster'])->name('admin.education.storePoster');
+    Route::put('/education/updatePoster/{id}', [RoomPosterController::class, 'updatePoster'])->name('admin.education.updatePoster');
+    Route::delete('/education/deletePoster/{id}', [RoomPosterController::class, 'deletePoster'])->name('admin.education.deletePoster');
     //spandBudget
     Route::get('/education/city-mall', [AdminEducationController::class, 'spandbudget'])->name('admin.education.city-mall');
     Route::post('/education/product-store', [AdminEducationController::class, 'productStore'])->name('admin.education.product-store');
