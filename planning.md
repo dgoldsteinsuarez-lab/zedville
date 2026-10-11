@@ -46,6 +46,8 @@ Before starting Phase 2, get baseline test coverage (feature tests) around: logi
 
    `ProfileController` 1158 → 1080 LOC: extracted `mailbox()`/`showMail()`/`updateMailStatus()` into a new `MailboxController` (also fully self-contained). Found and fixed a duplicate route registration for `/profile/mailbox` while updating `routes/web.php`, and removed two dead commented-out mailbox route blocks alongside it. Added `tests/Feature/MailboxTest.php`, previously uncovered.
 
+   `ProfileController` 1080 → 842 LOC: extracted `consumerProfileSurvey()`/`storesurvey()` into a new `ConsumerSurveyController` (fully self-contained). Migrated `storesurvey()`'s two Transaction1 writes onto `LedgerService` while moving (both already used `$user->sid` correctly, so pure consolidation, not a bug fix - and the move puts them inside the method's existing `DB::beginTransaction()`, so `LedgerService`'s row lock is now actually effective there, unlike before). Added `tests/Feature/StoreSurveyTest.php`, previously uncovered.
+
    `AdminEducationController` (1321 LOC) not yet touched - `SetSelectedSchool` middleware (Phase 2 #3, not started) would remove a lot of what makes it fat, so that one's better done after.
 
 ## Phase 4 — Cleanup (any time, low risk, keep isolated from functional PRs)

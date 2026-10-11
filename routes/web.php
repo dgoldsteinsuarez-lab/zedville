@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MailboxController;
+use App\Http\Controllers\ConsumerSurveyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
@@ -67,8 +68,8 @@ Route::middleware('auth')->group(function () {
 });
 require __DIR__.'/auth.php';
 require __DIR__.'/closet_routes.php';
-Route::get('/profile/consumer-profile-survey', [ProfileController::class, 'consumerProfileSurvey'])->name('consumer-profile-survey')->middleware('auth');
-Route::post('/profile/storesurvey', [ProfileController::class, 'storesurvey'])->name('storesurvey')->middleware('auth');
+Route::get('/profile/consumer-profile-survey', [ConsumerSurveyController::class, 'consumerProfileSurvey'])->name('consumer-profile-survey')->middleware('auth');
+Route::post('/profile/storesurvey', [ConsumerSurveyController::class, 'storesurvey'])->name('storesurvey')->middleware('auth');
 
 //Cms Routes
 Route::get('/how-it-work', [\App\Http\Controllers\CMSController::class, 'howItWork'])->name('how-it-work');
