@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\RoomPosterController;
 use App\Http\Controllers\Admin\PenaltyWantsItemController;
 use App\Http\Controllers\Admin\SpendBudgetProductController;
 use App\Http\Controllers\Admin\CityMallStoreController;
+use App\Http\Controllers\Admin\SupermarketProductController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -187,11 +188,11 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/education/store-update/{id}', [CityMallStoreController::class, 'storeUpdate'])->name('admin.education.store-update');
     Route::delete('/education/store-delete/{id}', [CityMallStoreController::class, 'storeDelete'])->name('admin.education.store-delete');
     //For Supermarket
-    Route::get('/education/supermarket', [AdminEducationController::class, 'supermarket'])->name('admin.education.supermarket');
-    Route::post('/education/supermarket-store', [AdminEducationController::class, 'supermarketStore'])->name('admin.education.supermarket-store');
-    Route::get('/education/supermarket-list', [AdminEducationController::class, 'supermarketList'])->name('admin.education.supermarket-list');
-    Route::post('/education/supermarket-update/{id}', [AdminEducationController::class, 'supermarketUpdate'])->name('admin.education.supermarket-update');
-    Route::delete('/education/supermarket-delete/{id}', [AdminEducationController::class, 'supermarketDelete'])->name('admin.education.supermarket-delete');
+    Route::get('/education/supermarket', [SupermarketProductController::class, 'supermarket'])->name('admin.education.supermarket');
+    Route::post('/education/supermarket-store', [SupermarketProductController::class, 'supermarketStore'])->name('admin.education.supermarket-store');
+    Route::get('/education/supermarket-list', [SupermarketProductController::class, 'supermarketList'])->name('admin.education.supermarket-list');
+    Route::post('/education/supermarket-update/{id}', [SupermarketProductController::class, 'supermarketUpdate'])->name('admin.education.supermarket-update');
+    Route::delete('/education/supermarket-delete/{id}', [SupermarketProductController::class, 'supermarketDelete'])->name('admin.education.supermarket-delete');
     //For Wants Iteam
     Route::get('/education/wants-iteams', [PenaltyWantsItemController::class, 'wantsIteam'])->name('admin.education.wants-iteams');
     Route::post('/education/wants-iteams-store', [PenaltyWantsItemController::class, 'wantsIteamStore'])->name('admin.education.wants-iteams-store');
