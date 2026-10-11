@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CivicChamberController;
 use App\Http\Controllers\Tutor\TutorStudentController;
 use App\Http\Controllers\Tutor\AssignmentExtensionController;
 use App\Http\Controllers\Admin\SalaryBonusController;
+use App\Http\Controllers\Admin\NpoController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -194,11 +195,11 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/education/wants-iteams-update/{id}', [AdminEducationController::class, 'wantsIteamUpdate'])->name('admin.education.wants-iteams-update');
     Route::delete('/education/wants-iteams-delete/{id}', [AdminEducationController::class, 'wantsIteamDelete'])->name('admin.education.wants-iteams-delete');
     //For NPOs
-    Route::get('/npos', [AdminEducationController::class, 'npos'])->name('admin.npos.npos');
-    Route::post('/npo/add-npo', [AdminEducationController::class, 'add_npo'])->name('admin.npo.add-npo');
-    Route::get('/npo/edit/{id}', [AdminEducationController::class, 'edit_npo']);
-    Route::post('/npo/update/{id}', [AdminEducationController::class, 'update_npo']);
-    Route::get('/npo/delete/{id}', [AdminEducationController::class, 'delete_npo']);
+    Route::get('/npos', [NpoController::class, 'npos'])->name('admin.npos.npos');
+    Route::post('/npo/add-npo', [NpoController::class, 'add_npo'])->name('admin.npo.add-npo');
+    Route::get('/npo/edit/{id}', [NpoController::class, 'edit_npo']);
+    Route::post('/npo/update/{id}', [NpoController::class, 'update_npo']);
+    Route::get('/npo/delete/{id}', [NpoController::class, 'delete_npo']);
     //For Login Question
     Route::get('/login-question', [AdminDashboardController::class, 'login_question'])->name('admin.login-question.login-question');
     Route::post('/login-question/loginQuestionStore', [AdminDashboardController::class, 'loginQuestionStore'])->name('admin.login-question.loginQuestionStore');
