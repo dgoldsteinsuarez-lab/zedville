@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Providers\RouteServiceProvider;
-use App\Http\Controllers\BankAccountController;
-use App\Http\Controllers\BankController;
 use App\Services\StatementGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,9 +11,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Carbon\Carbon;
 use App\Models\Mailbox;
-use App\Helpers\MailboxHelper;
-use App\Helpers\MailboxScheduler;
-use App\Models\Transaction1;
 use App\Models\BankAccount;
 use App\Models\BankStatement;
 use App\Services\CitizenActivationService;
@@ -50,23 +44,6 @@ class AuthenticatedSessionController extends Controller
             'sid' => $user->sid,        // if SID exists in DB
             'user_id' => $user->id,     // optional but useful
         ]);
-
-        $now = now();
-        $accountCreatedAt = Carbon::parse($user->created_at);
-
-        // Check if user is NOT a new account
-        $isEligible =
-            !($accountCreatedAt->year === $now->year &&
-                $accountCreatedAt->month === $now->month);
-
-        // ✅ Only run logic if eligible
-        /*if ($isEligible && $now->day >= 6) {
-            app(StatementGenerator::class)->generateForUser($user->id);
-        }
-
-        if ($isEligible && $now->day >= 7) {
-            $this->ensureMonthlyBills($user);
-        }*/
 
         // Penalty on LAST DAY of month
         $today = now();
@@ -114,12 +91,6 @@ class AuthenticatedSessionController extends Controller
                     ->exists();
 
                 if ($statementExists) {
-                    $subject = 'Your ' . $prevMonthDate->format('F Y') . ' Bank Statement';
-                    /*$mailAlreadySent = Mailbox::where('student_id', $user->id)
-                         ->where('subject', $subject)
-                        ->whereYear('created_at', now()->year)
-                        ->whereMonth('created_at', now()->month)
-                        ->exists();*/
                     $subject = 'Your ' . $prevMonthDate->format('F Y') . ' Bank Statement';
 
                     $mailAlreadySent = Mailbox::where('student_id', $user->id)
@@ -178,54 +149,6 @@ class AuthenticatedSessionController extends Controller
         }
 
         return redirect('/dashboard'); // fallback
-    }
-
-
-    private function ensureMonthlyBills(\App\Models\User $user)
-    {
-        $fixedTransactions = [
-            ['day' => 7, 'description' => 'Utility - Electricity', 'amount' => rand(60, 90)],
-            ['day' => 7, 'description' => 'Utility - Water', 'amount' => rand(30, 60)],
-            ['day' => 7, 'description' => 'Internet', 'amount' => 20],
-            ['day' => 7, 'description' => 'Rent', 'amount' => 300],
-            ['day' => 7, 'description' => 'School Fees', 'amount' => 1000],
-        ];
-
-        $today = now();
-
-        foreach ($fixedTransactions as $item) {
-
-            $exists = Transaction1::where('user_id', $user->id)
-                ->where('description', $item['description'])
-                ->whereYear('transaction_date', $today->year)
-                ->whereMonth('transaction_date', $today->month)
-                ->exists();
-
-            if ($exists) {
-                continue;
-            }
-
-            $txnDate = now()->startOfMonth()->addDays($item['day'] - 1);
-
-            $latestTxn = Transaction1::where('user_id', $user->id)
-                ->latest('id')
-                ->first();
-
-            $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-            $newBalance = max(0, $lastBalance - $item['amount']);
-            $bankAccount = BankAccount::where('student_id', $user->id)->first();
-            Transaction1::create([
-                'user_id' => $user->id,
-                'bank_account_id' => $bankAccount->id ?? null,
-                'transaction_date' => $txnDate,
-                'description' => $item['description'],
-                'type' => 'debit',
-                'category' => 'Wants',
-                'amount' => $item['amount'],
-                'balance' => $newBalance,
-                'is_penalty' => false,
-            ]);
-        }
     }
 
     /**
