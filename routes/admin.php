@@ -10,6 +10,7 @@ use App\Http\Controllers\Tutor\AssignmentExtensionController;
 use App\Http\Controllers\Admin\SalaryBonusController;
 use App\Http\Controllers\Admin\NpoController;
 use App\Http\Controllers\Admin\RoomPosterController;
+use App\Http\Controllers\Admin\PenaltyWantsItemController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -190,11 +191,11 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/education/supermarket-update/{id}', [AdminEducationController::class, 'supermarketUpdate'])->name('admin.education.supermarket-update');
     Route::delete('/education/supermarket-delete/{id}', [AdminEducationController::class, 'supermarketDelete'])->name('admin.education.supermarket-delete');
     //For Wants Iteam
-    Route::get('/education/wants-iteams', [AdminEducationController::class, 'wantsIteam'])->name('admin.education.wants-iteams');
-    Route::post('/education/wants-iteams-store', [AdminEducationController::class, 'wantsIteamStore'])->name('admin.education.wants-iteams-store');
-    Route::get('/education/wants-iteams-list', [AdminEducationController::class, 'wantsIteamList'])->name('admin.education.wants-iteams-list');
-    Route::post('/education/wants-iteams-update/{id}', [AdminEducationController::class, 'wantsIteamUpdate'])->name('admin.education.wants-iteams-update');
-    Route::delete('/education/wants-iteams-delete/{id}', [AdminEducationController::class, 'wantsIteamDelete'])->name('admin.education.wants-iteams-delete');
+    Route::get('/education/wants-iteams', [PenaltyWantsItemController::class, 'wantsIteam'])->name('admin.education.wants-iteams');
+    Route::post('/education/wants-iteams-store', [PenaltyWantsItemController::class, 'wantsIteamStore'])->name('admin.education.wants-iteams-store');
+    Route::get('/education/wants-iteams-list', [PenaltyWantsItemController::class, 'wantsIteamList'])->name('admin.education.wants-iteams-list');
+    Route::post('/education/wants-iteams-update/{id}', [PenaltyWantsItemController::class, 'wantsIteamUpdate'])->name('admin.education.wants-iteams-update');
+    Route::delete('/education/wants-iteams-delete/{id}', [PenaltyWantsItemController::class, 'wantsIteamDelete'])->name('admin.education.wants-iteams-delete');
     //For NPOs
     Route::get('/npos', [NpoController::class, 'npos'])->name('admin.npos.npos');
     Route::post('/npo/add-npo', [NpoController::class, 'add_npo'])->name('admin.npo.add-npo');
