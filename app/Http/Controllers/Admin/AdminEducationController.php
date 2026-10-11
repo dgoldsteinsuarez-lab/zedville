@@ -11,7 +11,6 @@ use App\Models\Role;
 use App\Models\Grade;
 use App\Models\Mascot;
 use App\Models\SchoolDomain;
-use App\Models\Store;
 use App\Models\Supermarket;
 use App\Models\Supermarketname;
 
@@ -422,123 +421,8 @@ class AdminEducationController extends Controller
         return back()->with('success', 'Emergency Fund Account Position updated successfully!');
     }
 
-    public function cityMallStore()
-    {
-        return view('admin.education.city-mall-store');
-    }
-    /*public function storeList()
-    {
-        //return response()->json(Store::latest()->get());
-        return response()->json(
-        Store::orderBy('id', 'ASC')->get()
-    );
-
-    }*/
-    public function storeList()
-    {
-        $sid = session('selected_school');
-
-        $stores = Store::orderBy('id', 'ASC')->get();
-
-        return response()->json($stores);
-    }
-
-    public function CreatecityMallStore(Request $request)
-    {
-        $request->validate([
-            'stores' => 'required|array',
-            'stores.*.store_name' => 'required|string|max:255',
-            'stores.*.store_image' => 'nullable|image|max:2048',
-        ]);
-        // ✅ Get SID (null if not selected)
-        $sid = session('selected_school');
-        DB::beginTransaction();
-
-        try {
-            foreach ($request->stores as $index => $item) {
-
-                $imageName = null;
-
-                if ($request->hasFile("stores.$index.store_image")) {
-                    $image = $request->file("stores.$index.store_image");
-                    $imageName = time() . '_' . $index . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('uploads/stores'), $imageName);
-                }
-
-                Store::create([
-                    'sid' => $sid,
-                    'store_name' => $item['store_name'],
-                    'store_image' => $imageName,
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Stores added successfully'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-    public function storeUpdate(Request $request, $id)
-    {
-        $request->validate([
-            'store_name' => 'required|string|max:255',
-            'store_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
-        $sid = session('selected_school');
-
-        $store = Store::findOrFail($id);
-
-        $store->store_name = $request->store_name;
-
-        if ($sid) {
-            $store->sid = $sid;
-        }
-
-        if ($request->hasFile('store_image')) {
-
-            // delete old image (optional but recommended)
-            if ($store->store_image && file_exists(public_path('uploads/stores/' . $store->store_image))) {
-                unlink(public_path('uploads/stores/' . $store->store_image));
-            }
-
-            $image = $request->file('store_image');
-            $imageName = time() . '_' . $id . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('uploads/stores'), $imageName);
-
-            $store->store_image = $imageName;
-        }
-
-        $store->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Store updated successfully'
-        ]);
-    }
-    public function storeDelete(Request $request, $id)
-    {
-        if ($request->confirm_code != $request->delete_code) {
-            return back()->with('error', 'Confirmation code does not match.');
-        }
-        Store::where('id', $id)->delete();
-        return response()->json(['success' => true]);
-    }
     public function supermarket()
     {
-        //$stores = Store::all(); 
-        //$stores = Supermarketname::orderBy('id', 'ASC')->get();
-        $sid = session('selected_school');
-
         $stores = Supermarketname::orderBy('id', 'ASC')->get();
 
         return view('admin.supermarket.supermarket', compact('stores'));
