@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\StudentBadgeRecord;
+use App\Services\Concerns\CalculatesBadgeAccumulation;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -26,6 +27,8 @@ use Carbon\Carbon;
  */
 class BadgeCalculatorService
 {
+    use CalculatesBadgeAccumulation;
+
     // -------------------------------------------------------------------------
     // MONTHLY BADGE THRESHOLDS
     // -------------------------------------------------------------------------
@@ -88,7 +91,7 @@ class BadgeCalculatorService
         $monthlyBadgePts   = StudentBadgeRecord::BADGE_POINTS[$monthlyBadge];
 
         // --- Calculate accumulated points for the year ---
-        $accumulatedPoints = $this->getAccumulatedPoints($studentId, $academicYear, $month, $year, $monthlyBadgePts);
+        $accumulatedPoints = $this->sumAccumulatedPoints(StudentBadgeRecord::class, $studentId, $academicYear, $month, $year, $monthlyBadgePts);
         $accumulatedBadge  = $this->determineAccumulatedBadge($accumulatedPoints);
 
         // --- Upsert record (insert or update if already exists) ---
@@ -156,12 +159,7 @@ class BadgeCalculatorService
      */
     public function determineAccumulatedBadge(int $totalPoints): string
     {
-        foreach (StudentBadgeRecord::ACCUMULATED_THRESHOLDS as $level => $threshold) {
-            if ($totalPoints >= $threshold) {
-                return $level;
-            }
-        }
-        return 'NONE';
+        return $this->lookupAccumulatedBadge(StudentBadgeRecord::ACCUMULATED_THRESHOLDS, $totalPoints);
     }
 
     // -------------------------------------------------------------------------
@@ -195,47 +193,8 @@ class BadgeCalculatorService
     }
 
     // -------------------------------------------------------------------------
-    // ACADEMIC YEAR HELPER
-    // -------------------------------------------------------------------------
-
-    /**
-     * Determine academic year string from month/year.
-     * Academic year runs September to August.
-     * e.g. Month 5 (May) 2026 → "2025-2026"
-     *      Month 10 (Oct) 2025 → "2025-2026"
-     *
-     * TODO: Adjust the start month if your academic year starts differently.
-     */
-    public function getAcademicYear(int $month, int $year): string
-    {
-        $academicStartMonth = config('zedville.academic_year_start_month', 4); // September — change if needed
-
-        if ($month >= $academicStartMonth) {
-            return $year . '-' . ($year + 1);
-        } else {
-            return ($year - 1) . '-' . $year;
-        }
-    }
-
-    // -------------------------------------------------------------------------
     // DATA QUERIES — TODO: fill these in with your actual table/column names
     // -------------------------------------------------------------------------
-
-    /**
-     * Get all active students who should receive badge calculations.
-     *
-     * TODO: Replace with your actual query.
-     *       - Change 'users' to your students table name if different
-     *       - Change 'role' and 'student' to match your role system
-     *       - Add any other filters (e.g. active, enrolled in a class)
-     */
-    private function getAllActiveStudents()
-    {
-        return DB::table('users')
-            ->where('role', 4)
-            ->select('id')
-            ->get();
-    }
 
     /**
      * Count how many Required activities were assigned to the calendar

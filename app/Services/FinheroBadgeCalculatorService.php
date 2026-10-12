@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FinheroBadgeRecord;
+use App\Services\Concerns\CalculatesBadgeAccumulation;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -21,6 +22,8 @@ use Carbon\Carbon;
  */
 class FinheroBadgeCalculatorService
 {
+    use CalculatesBadgeAccumulation;
+
     // ─────────────────────────────────────────────────────────────
     // MAIN ENTRY POINT — called by the scheduled job
     // ─────────────────────────────────────────────────────────────
@@ -61,7 +64,7 @@ class FinheroBadgeCalculatorService
         $monthlyPts   = FinheroBadgeRecord::BADGE_POINTS[$monthlyBadge];
 
         // ── Accumulated ────────────────────────────────────────────
-        $accumulatedPts   = $this->getAccumulatedPoints($studentId, $academicYear, $month, $year, $monthlyPts);
+        $accumulatedPts   = $this->sumAccumulatedPoints(FinheroBadgeRecord::class, $studentId, $academicYear, $month, $year, $monthlyPts);
         $accumulatedBadge = $this->determineAccumulatedBadge($accumulatedPts);
 
         // ── Upsert ────────────────────────────────────────────────
@@ -103,10 +106,7 @@ class FinheroBadgeCalculatorService
 
     public function determineAccumulatedBadge(int $totalPoints): string
     {
-        foreach (FinheroBadgeRecord::ACCUMULATED_THRESHOLDS as $level => $threshold) {
-            if ($totalPoints >= $threshold) return $level;
-        }
-        return 'NONE';
+        return $this->lookupAccumulatedBadge(FinheroBadgeRecord::ACCUMULATED_THRESHOLDS, $totalPoints);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -153,32 +153,8 @@ class FinheroBadgeCalculatorService
     }
 
     // ─────────────────────────────────────────────────────────────
-    // ACADEMIC YEAR HELPER
-    // ─────────────────────────────────────────────────────────────
-
-    public function getAcademicYear(int $month, int $year): string
-    {
-        $startMonth = config('zedville.academic_year_start_month', 4); // September — TODO: adjust if needed
-        return $month >= $startMonth
-            ? "{$year}-" . ($year + 1)
-            : ($year - 1) . "-{$year}";
-    }
-
-    // ─────────────────────────────────────────────────────────────
     // DATA QUERIES — fill in TODOs with your actual table names
     // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Get all active students.
-     * TODO: change 'users', 'role', 'student' to match your schema.
-     */
-    private function getAllActiveStudents()
-    {
-        return DB::table('users')
-            ->where('role', 4)
-            ->select('id')
-            ->get();
-    }
 
     /**
      * Get Daily Quiz points for a student this month.
