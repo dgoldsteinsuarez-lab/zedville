@@ -41,6 +41,7 @@ class SalaryBonusController extends Controller
         $data = $request->validate([
             'student_id' => ['required', 'integer'],
             'amount' => ['required', 'numeric', 'min:0.01', 'max:100000'],
+            'type' => ['nullable', 'string', 'max:50'],
             'reason' => ['required', 'string', 'min:5', 'max:1000'],
             'frequency' => ['nullable', 'in:weekly,monthly'],
             'start_date' => ['required', 'date'],
@@ -55,6 +56,7 @@ class SalaryBonusController extends Controller
             'student_id' => $student->id,
             'granted_by' => Auth::id(),
             'amount' => $data['amount'],
+            'type' => $data['type'] ?? 'Bonus',
             'reason' => $data['reason'],
             'frequency' => $data['frequency'] ?? null,
             'start_date' => $data['start_date'],

@@ -13,10 +13,10 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="home" aria-selected="true">Account Information</button>
             </li>
-            <!-- <li class="nav-item" role="presentation">
-                <button class="nav-link" id="balance-tab" data-bs-toggle="tab" data-bs-target="#balance" type="button" role="tab" aria-controls="profile" aria-selected="false" tabindex="-1">Payment Details</button>
-            </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank" type="button" role="tab" aria-controls="bank" aria-selected="false">Bank</button>
+            </li>
+            <!-- <li class="nav-item" role="presentation">
                 <button class="nav-link" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing" type="button" role="tab" aria-controls="contact" aria-selected="false" tabindex="-1">Change Password</button>
             </li>
             <li class="nav-item" role="presentation">
@@ -250,6 +250,165 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane" id="bank" role="tabpanel" aria-labelledby="bank-tab">
+        @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+        @if (session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
+        @if ($errors->any())
+            <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+        @endif
+
+        <div class="themeCard card themeForm card-custom card-stretch gutter-b mab-15">
+            <div class="card-body pall-30">
+                <h4 class="fs-16 fw-700 theme-text-dark mab-20">Current balance: {{ number_format($balance, 2) }} zeds</h4>
+
+                @if (auth()->user()->isSuperAdmin())
+                <form method="POST" action="{{ route('admin.ledger.reset') }}" class="row g-3">
+                    @csrf
+                    <input type="hidden" name="student_id" value="{{ $student->id }}">
+                    <div class="col-md-3">
+                        <label class="form-label">Set balance to</label>
+                        <input type="number" step="0.01" min="0" name="new_balance" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Reason (required)</label>
+                        <input type="text" name="reason" class="form-control" required minlength="5" maxlength="500">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-warning" onclick="return confirm('Reset this balance? A new adjustment line will be added.')">Reset balance</button>
+                    </div>
+                </form>
+                @endif
+            </div>
+        </div>
+
+        @if (auth()->user()->isSuperAdmin())
+        <div class="themeCard card themeForm card-custom card-stretch gutter-b mab-15">
+            <div class="card-body pall-30">
+                <h4 class="fs-16 fw-700 theme-text-dark mab-20">Transaction History</h4>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>#</th><th>Date</th><th>Description</th><th>Type</th><th>Amount</th><th>Balance</th><th>Reverse (reason required)</th></tr></thead>
+                        <tbody>
+                        @foreach ($entries as $e)
+                            <tr>
+                                <td>{{ $e->id }}</td>
+                                <td>{{ $e->transaction_date?->format('Y-m-d H:i') }}</td>
+                                <td>{{ $e->description }}</td>
+                                <td>{{ $e->type }}</td>
+                                <td>{{ number_format($e->amount, 2) }}</td>
+                                <td>{{ number_format($e->balance, 2) }}</td>
+                                <td>
+                                    @if (!empty(($e->meta ?? [])['reversed_by']))
+                                        <span class="text-muted">Reversed (line #{{ $e->meta['reversed_by'] }})</span>
+                                    @elseif (in_array($e->category, ['Reversal', 'Admin Adjustment', 'Autopilot']))
+                                        <span class="text-muted">&mdash;</span>
+                                    @else
+                                        <form method="POST" action="{{ route('admin.ledger.reverse', $e->id) }}" class="d-flex gap-1" onsubmit="return confirm('Reverse transaction #{{ $e->id }}?')">
+                                            @csrf
+                                            <input type="text" name="reason" class="form-control form-control-sm" required minlength="5" maxlength="500" placeholder="Reason">
+                                            <button class="btn btn-sm btn-outline-danger">Reverse</button>
+                                        </form>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <div class="themeCard card themeForm card-custom card-stretch gutter-b mab-15">
+            <div class="card-body pall-30">
+                <h4 class="fs-16 fw-700 theme-text-dark mab-20">Salary Management</h4>
+                <form method="POST" action="{{ route('admin.salary-bonuses.store') }}" class="mab-20">
+                    @csrf
+                    <input type="hidden" name="student_id" value="{{ $student->id }}">
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label class="form-label">Type</label>
+                            <input type="text" name="type" class="form-control" list="salaryTypeOptions" placeholder="Bonus" value="{{ old('type') }}">
+                            <datalist id="salaryTypeOptions">
+                                <option value="Salary">
+                                <option value="Allowance">
+                                <option value="Bonus">
+                                <option value="Payment">
+                                <option value="Other">
+                            </datalist>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Amount (zeds)</label>
+                            <input type="number" step="0.01" min="0.01" name="amount" class="form-control" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Frequency</label>
+                            <select name="frequency" class="form-control">
+                                <option value="">One-time</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Start date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">End date</label>
+                            <input type="date" name="end_date" class="form-control">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Reason (required)</label>
+                            <input type="text" name="reason" class="form-control" required minlength="5" maxlength="1000">
+                        </div>
+                    </div>
+                    <button type="submit" class="themeBtn text-white mt-3">Add Salary</button>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead><tr><th>Type</th><th>Amount</th><th>Frequency</th><th>Dates</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                        @forelse ($salaryBonuses as $bonus)
+                            <tr>
+                                <td>{{ $bonus->type }}</td>
+                                <td>{{ number_format($bonus->amount, 2) }} zeds</td>
+                                <td>{{ $bonus->frequency ? ucfirst($bonus->frequency) : 'One-time' }}</td>
+                                <td>
+                                    {{ $bonus->start_date->format('d M Y') }}
+                                    @if ($bonus->end_date) &rarr; {{ $bonus->end_date->format('d M Y') }} @endif
+                                </td>
+                                <td>{{ $bonus->reason }}</td>
+                                <td>{{ ucfirst($bonus->status) }}</td>
+                                <td class="d-flex gap-1">
+                                    @if ($bonus->status === 'active')
+                                        <form method="POST" action="{{ route('admin.salary-bonuses.pause', $bonus->id) }}">
+                                            @csrf
+                                            <button class="btn btn-sm btn-outline-secondary">Pause</button>
+                                        </form>
+                                    @elseif ($bonus->status === 'paused')
+                                        <form method="POST" action="{{ route('admin.salary-bonuses.resume', $bonus->id) }}">
+                                            @csrf
+                                            <button class="btn btn-sm btn-outline-primary">Resume</button>
+                                        </form>
+                                    @endif
+                                    @if ($bonus->status !== 'cancelled')
+                                        <form method="POST" action="{{ route('admin.salary-bonuses.cancel', $bonus->id) }}" onsubmit="return confirm('Remove this salary?')">
+                                            @csrf
+                                            <button class="btn btn-sm btn-outline-danger">Remove</button>
+                                        </form>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="7" class="text-muted p-3">No salary or bonus entries yet.</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

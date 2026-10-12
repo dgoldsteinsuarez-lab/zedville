@@ -105,13 +105,6 @@
                                         </a>
                                     </li>
                                     @endif
-                                    @if(auth()->user()->isAdminOrTutor())
-                                    <li class="nav-item {{ request()->is('admin/salary-bonuses*') ? 'active' : '' }}">
-                                        <a class="nav-link" href="{{ url('admin/salary-bonuses') }}">
-                                            <span class="navTxt">Salary Bonuses</span>
-                                        </a>
-                                    </li>
-                                    @endif
                                     @if(auth()->user()->isSuperAdmin() || auth()->user()->isTutor())
                                     <li class="nav-item {{ request()->is('admin/city-proposals*') ? 'active' : '' }}">
                                         <a class="nav-link" href="{{ url('admin/city-proposals') }}">
@@ -176,11 +169,6 @@
                                                         <span class="navTxt">School Domain</span>
                                                     </a>
                                                 </li>
-                                                <li class="nav-item {{ request()->is('admin/ledger') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/ledger') }}">
-                                                        <span class="navTxt">Reverse / Adjust</span>
-                                                    </a>
-                                                </li>
                                                 @endif
                                                 <li class="nav-item {{ request()->is('admin/grades') && !request()->is('admin/grade') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/grades') }}">
@@ -236,20 +224,23 @@
                                     </li>
                                     @endif
                                     @php
+                                        $navBank = $navOrg || auth()->user()->isTutor();
                                         $usersMenuActive2 = request()->is(
                                             'admin/accounts*',
+                                            'admin/ledger*',
+                                            'admin/salary-bonuses*',
                                         );
                                     @endphp
-                                    @if($navOrg)
-                                    <li class="nav-item {{ $usersMenuActive2 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="City Bank">
+                                    @if($navBank)
+                                    <li class="nav-item {{ $usersMenuActive2 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Bank">
                                         <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#citybank" aria-expanded="{{ $usersMenuActive2 ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
-                                                
+
 
 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M260-280v-320h40v320h-40Zm200 0v-320h40v320h-40ZM141.54-160v-40h676.92v40H141.54ZM660-280v-320h40v320h-40ZM141.54-680v-33.85L480-875.38l338.46 161.53V-680H141.54Zm105.69-40h465.54-465.54Zm0 0h465.54L480-830 247.23-720Z"/></svg>
-                                                
+
                                             </span>
-                                            <span class="navTxt">City Bank</span>
+                                            <span class="navTxt">Bank</span>
                                             <span class="nav-arrow">
                                                 <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M1.07129 1.62756L6.00033 6.55661L10.9294 1.62756" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
@@ -258,30 +249,25 @@
                                         </a>
                                         <div id="citybank" class="collapse {{ $usersMenuActive2 ? 'show' : '' }} collapseNavItems" data-bs-parent="#toggleNavsubnav">
                                             <ul class="subnav">
-                                                <!-- <li class="nav-item active">
-                                                    <a class="nav-link" href="#">
-                                                        <span class="navTxt">Requests</span>
-                                                        <span class="menu-label">23</span>
-                                                    </a>
-                                                </li> -->
+                                                @if($navOrg)
                                                 <li class="nav-item {{ request()->is('admin/accounts') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/accounts') }}">
                                                         <span class="navTxt">Accounts</span>
-                                                        <!-- <span class="menu-label">0</span> -->
                                                     </a>
                                                 </li>
-                                                <!-- <li class="nav-item">
-                                                    <a class="nav-link" href="#">
-                                                        <span class="navTxt">Payments</span>
-                                                        <span class="menu-label"></span>
+                                                @endif
+                                                @if($navSuper)
+                                                <li class="nav-item {{ request()->is('admin/ledger*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/ledger') }}">
+                                                        <span class="navTxt">Reverse / Adjust</span>
                                                     </a>
                                                 </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="#">
-                                                        <span class="navTxt">Statement</span>
-                                                        <span class="menu-label"></span>
+                                                @endif
+                                                <li class="nav-item {{ request()->is('admin/salary-bonuses*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/salary-bonuses') }}">
+                                                        <span class="navTxt">Salary Bonuses</span>
                                                     </a>
-                                                </li> -->
+                                                </li>
                                             </ul>
                                         </div>
                                     </li>

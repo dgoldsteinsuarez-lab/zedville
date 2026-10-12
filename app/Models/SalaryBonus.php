@@ -13,6 +13,7 @@ class SalaryBonus extends Model
         'student_id',
         'granted_by',
         'amount',
+        'type',
         'reason',
         'frequency',
         'start_date',

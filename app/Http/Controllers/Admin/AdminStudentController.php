@@ -36,6 +36,13 @@ class AdminStudentController extends Controller
             });
         }
 
+        // Filter by Class (Bank Admin Functions doc: "Filter by Class").
+        // `users.grade` holds the student's Class id (SchoolClass), not a
+        // curriculum Grade - see the SchoolClass/Grade split note elsewhere.
+        if ($request->filled('class_id')) {
+            $query->where('grade', $request->class_id);
+        }
+
         //$students = $query->get();
         // Grade level first, then class, then name (students without a class last).
         $students = $query
@@ -70,7 +77,15 @@ class AdminStudentController extends Controller
         $schools = DB::table('school_domains')
             ->orderBy('id', 'asc')
             ->get();
-        return view('admin.student.details', compact('student', 'grades', 'mascots', 'schools'));
+
+        // Bank Admin Functions doc, Screen 2: balance, transaction history,
+        // and salary list shown on the same page as the rest of the
+        // student's details, instead of three disconnected admin tools.
+        $entries = \App\Models\Transaction1::where('user_id', $student->id)->orderByDesc('id')->limit(100)->get();
+        $balance = $entries->first()->balance ?? 0;
+        $salaryBonuses = \App\Models\SalaryBonus::where('student_id', $student->id)->latest()->get();
+
+        return view('admin.student.details', compact('student', 'grades', 'mascots', 'schools', 'entries', 'balance', 'salaryBonuses'));
     }
 
     public function update_details(Request $request, $id)

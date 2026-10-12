@@ -125,6 +125,6 @@ class LedgerController extends Controller
             ]);
         });
 
-        return redirect()->route('admin.ledger.index', ['student_id' => $student->id])->with('success', 'Balance updated.');
+        return back()->with('success', 'Balance updated.');
     }
 }

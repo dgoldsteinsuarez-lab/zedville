@@ -25,6 +25,12 @@
                                                 placeholder="Please enter Citizen ID, Name, Email" name="search"
                                                 value="{{ request('search') }}" />
                                         </div>
+                                        <select name="class_id" class="form-select fs-14 w-auto" onchange="this.form.submit()">
+                                            <option value="">All Classes</option>
+                                            @foreach ($grades as $class)
+                                                <option value="{{ $class->id }}" @selected(request('class_id') == $class->id)>{{ $class->name }}</option>
+                                            @endforeach
+                                        </select>
                                         <button type="submit" class="themeBtn text-white">Search</button>
 
                                         <!-- <div class="daterangePickerField rangePicker haveicon text-nowrap" style="display: flex;">12 May 2025 - 24 May 2025</div> -->
