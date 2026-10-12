@@ -2,25 +2,18 @@
 
 Sequenced by risk/impact. Each phase is independently shippable — don't start phase N+1 until phase N is merged and verified, since later phases assume earlier fixes are in place. No functionality should change as a *side effect* of refactors in Phase 2-4; only Phase 1 changes behavior (it's bug fixes).
 
-## Phase 0 — Verify before touching anything (no code changes)
+## Phase 0 — Verify before touching anything (no code changes) — STALE, RESOLVED 2026-10-12
 
-1. Confirm actual `role` column values on `users` table (int codes like `4` vs string `'student'`) — resolves `bugs.md` #8. Check migration + a `php artisan tinker` sample row.
-2. Confirm whether `routes/admin.php` self-applies the `admin` middleware anywhere — resolves `bugs.md` #6. If not, this is a live authorization gap; escalate immediately regardless of refactor timeline.
-3. Confirm the correct canonical monthly salary figure (`3952.40` vs `4250`) with product owner — resolves `bugs.md` #13.
-4. Confirm the correct academic-year start month — resolves `bugs.md` #12.
-5. Grep whether `EFDController`'s `spending_tracker_basicco/stationary/citymall` methods are still referenced by any route/view before deleting (`bugs.md` #18).
+Every item below referenced a `bugs.md` number from before that file's 2026-09-30 re-verification pass, which found and removed `bugs.md` #1-#9, #12, #13, #15 as already fixed in the live code. This phase was simply never deleted from `planning.md` after that cleanup. Re-confirmed directly this pass rather than just trusting the old note:
+1. ~~Confirm `role` column values~~ — moot, `bugs.md` #8 no longer exists (resolved in the 2026-09-30 pass).
+2. ~~Confirm `routes/admin.php` applies `admin` middleware~~ — **re-verified live 2026-10-12, it does.** `RouteServiceProvider` wraps the whole file in `['web','auth','admin']`, and `routes/admin.php` itself re-wraps most routes in `['auth','admin']` again - doubly applied, not missing. `IsAdmin` middleware correctly checks `isAdminOrTutor()` and `abort(403)`s otherwise. Confirmed with a real request/response test, not just reading the route registration: `tests/Feature/AdminMiddlewareGateTest.php` (guest → redirect to login, student role → 403, school-admin role → 200). No live authorization gap.
+3. ~~Confirm canonical monthly salary figure~~ — moot, `bugs.md` #13 no longer exists.
+4. ~~Confirm academic-year start month~~ — moot, `bugs.md` #12 no longer exists (and is live in `config('zedville.academic_year_start_month')`, used by both badge calculators).
+5. ~~Check `EFDController`'s `spending_tracker_*` methods before deleting~~ — moot, and the premise doesn't even match current code: there's one parameterized `spending_tracker($type)` method (in both `EFDController` and `SpendingActivitiesController`), not three separate `_basicco/_stationary/_citymall` methods, and both are live-routed (`routes/efd.php`, `routes/spendingactivities.php`). Nothing to delete.
 
-## Phase 1 — Critical/High bug fixes (behavior-changing, ship individually, each with a test)
+## Phase 1 — Critical/High bug fixes — STALE, RESOLVED 2026-10-12
 
-Do these one at a time, each as its own PR, each verified against a real login → salary → bill-deduction flow before merge.
-
-1. **Fix the ledger split** (`bugs.md` #1): point `BankController::creditMonthlySalary()` at `Transaction1` instead of `Transaction`, matching the column shape used everywhere else (`transaction_date`, `type`, `category`, `amount`, `balance`, `bank_account_id`, `sid`). Verify: credit salary, confirm it appears in the same balance chain `ensureMonthlyBills` reads from, confirm bills deduct correctly afterward.
-2. **Add missing imports** (`bugs.md` #3, #4): `use App\Models\Mailbox;` in `CitizenActivationController.php`; `use App\Helpers\MailboxScheduler;` in `AdminStudentController.php`. Trivial, but verify the code paths that call them actually execute without error afterward (write a quick feature test hitting `authorize_direct_deposit` and `add_student`).
-3. **Move salary/bills off login-trigger onto a real schedule** (`bugs.md` #2): create an Artisan command (e.g. `students:process-monthly-finances`) that chunks over active students and calls `StatementGenerator::generateForUser()` / the bill-posting logic on the correct day-of-month, idempotently (reuse the existing "already processed this month" guards). Schedule it in `Console/Kernel.php` with `->dailyAt(...)` (checking day-of-month inside the command) rather than depending on user login. Keep the login-triggered call as a redundant safety net during transition, remove once the scheduled job is proven reliable for 1-2 full months in production.
-4. **Fix badge scheduling** (`bugs.md` #7): change `monthlyOn(31, ...)` to `lastDayOfMonth(...)`.
-5. **Wrap balance mutations in transactions with row locks** (`bugs.md` #5): standardize on a small helper — e.g. `BalanceService::withLockedBalance($userId, callable $fn)` that opens `DB::transaction()`, does `Transaction1::where('user_id',$userId)->latest('id')->lockForUpdate()->first()`, and hands the balance to the callback. Migrate `EFDController::storeDonation`, `OrderController::placeOrder`, `ProfileController::storesurvey` onto it one at a time, each with a concurrency-oriented test (two rapid requests, assert no overdraft).
-6. **Resolve admin middleware gap** (`bugs.md` #6) — once Phase 0 step 2 confirms the gap is real, add `admin` middleware to the `RouteServiceProvider` admin group (or per-route in `admin.php`, whichever the existing pattern favors). Treat as security-priority, don't wait for the rest of Phase 1.
-7. **Decide and resolve the dead penalty trigger** (`bugs.md` #9) — get a product decision (enable or delete), implement accordingly.
+Same situation as Phase 0: every `bugs.md` number cited here (#1-#9) was already fixed and removed from `bugs.md` in its 2026-09-30 re-verification pass, before this phase's items were ever actioned under this plan. Re-confirmed #6 directly this pass (see Phase 0 #2 above) since it was flagged security-priority; the rest are trusted to the prior pass's note ("every Critical and High severity item is now resolved") rather than re-deriving each one, since re-litigating already-fixed bugs isn't productive. If any of #1-#5, #7, #9 resurface in a future `bugs.md` re-verification, re-open them there with fresh evidence rather than reviving this stale phase.
 
 ## Phase 2 — Structural extraction (no behavior change, pure refactor, needs regression coverage first)
 
