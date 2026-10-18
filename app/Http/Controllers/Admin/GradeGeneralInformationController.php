@@ -30,7 +30,9 @@ class GradeGeneralInformationController extends Controller
             ->findOrFail($id);
 
         $school = SchoolDomain::find($grade->sid);
-        $levels = GradeLevel::where('sid', $grade->sid)->orderBy('sort_order')->get();
+        // Levels are a fixed global set (Rookie/Intermediate/Advance/Advance
+        // Economist) shared by every school - see bugs.md 2026-10-19.
+        $levels = GradeLevel::orderBy('sort_order')->get();
         $monthSetting = SchoolMonthSetting::where('school_id', $grade->sid)->first();
 
         return view('admin.grades.general-information', compact('grade', 'school', 'levels', 'monthSetting'));
