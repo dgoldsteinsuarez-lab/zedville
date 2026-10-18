@@ -110,5 +110,17 @@ Fixed: `GradeLevel` is now one fixed global set of 4 (Rookie/Intermediate/Advanc
 ### Fixed 2026-10-19 - admin nav didn't distinguish "Fix for all schools" from per-Grade settings
 Daniel asked for the admin nav to make clear, for a new/random admin user, which screens are global (same for every school) vs which vary per Grade - matching the Admin Structure Proposal doc's §7.1/§7.4 split. Turned out the grouping already existed correctly (the "City" nav group already contained exactly §7.1's list - City Mall, Store, Supermarket Stores/Products, Wants Items, NPOs - and the "Education" group already contained exactly the per-Grade items - Room Poster, Spending Activity, School Month Settings, Login Question, FinHero*) but neither was labeled to say so; both showed as a generic, unhelpful "Education" tooltip. Relabeled: "City" → **"Fix for All Schools"**, "Education" → **"Education (per Grade)"** (tooltip: "Variable - set per Grade"). Also fixed a visible typo found along the way ("Wants Iteams" → "Wants Items").
 
+### Fixed 2026-10-19 - GradeGeneralInformationController had the same per-school Level filter bug
+Same root cause as the `GradeController` fix above, found separately by Daniel on the live `admin/grades/{id}/general-information` page - `GradeLevel::where('sid', $grade->sid)` filtered out every real Level, leaving only "Unassigned" selectable. Two different controllers showing the same Grade, only one was fixed initially. Now both read the global list. Tested via `tests/Feature/Admin/GradeGeneralInformationLevelsTest.php`.
+
+### Seeded 2026-10-19 - City Mall catalog (clickable mall picture was fully built, had no products)
+The mall picture (`education/city-mall.blade.php`, clickable hotspots over `citymall.png`) and its shop pages (`EFDController::spending_tracker()`) were already fully built, but `products` had zero rows - every shop appeared empty. Seeded real items from Daniel's pricing doc (pages 3-4) for 8 of the mall's stores, `type` matching `$storeMap`'s existing values exactly so the hotspots work immediately. Two gaps found, not invented around:
+- **"Comfort Zone"** (mall hotspot `s6`) has no matching store in the doc at all - left unseeded.
+- **"Room Essentials"** (a real store in the doc - Home Goods, Small Furniture, Store & Organization, Room Decor) has no mall hotspot or `$storeMap` entry pointing to it at all - can't be reached through the current UI regardless of data, needs a code change (new hotspot + route), not just seeding.
+- The doc's "The Basics Hub" (Personal Care + Household Supplies) is seeded under the code's existing "Daily Essentials" type/hotspot, since that's the one that actually exists for this item category - a naming mismatch worth reconciling later, not fixed here.
+- A handful of Accessories items (Cane, Walker, Non Slip Mat, Hand Held Shower, Chair Cushion Lifter, Blood Pressure Monitor, Glucose Monitor) have no price in the doc - not seeded.
+
+Tested via `tests/Feature/CityMallCatalogTest.php` (all 8 stores return real items through their actual existing routes).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
