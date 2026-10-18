@@ -286,45 +286,54 @@ public function deleteGrade($id)
     return redirect()->back()->with('success', 'Class deleted successfully!');
 }
 
-// ---- Grade levels (Grade 7, Grade 8 ...) that group classes ----
+// ---- Levels (Rookie, Intermediate, Advance, Advance Economist) - a
+// fixed set shared by every school (Daniel, 2026-10-19), not something
+// each school types in independently. Super Admin only - a school/Grade
+// admin ASSIGNS one of these to their Grade (GradeController), they don't
+// create new ones.
 public function addGradeLevel(Request $request)
 {
-    $sid = session('selected_school');
-    abort_if($sid === null, 422, 'Select a school first.');
+    abort_unless(auth()->user()->isSuperAdmin(), 403);
 
     $request->validate([
-        'name' => ['required', 'string', 'max:100',
-            \Illuminate\Validation\Rule::unique('grade_levels', 'name')->where('sid', (string) $sid)],
+        'name' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::unique('grade_levels', 'name')],
     ]);
 
-    GradeLevel::create(['sid' => (string) $sid, 'name' => $request->name, 'sort_order' => (int) GradeLevel::where('sid', (string) $sid)->max('sort_order') + 1]);
+    GradeLevel::create([
+        'sid' => null,
+        'name' => $request->name,
+        'sort_order' => (int) GradeLevel::max('sort_order') + 1,
+    ]);
 
-    return redirect()->back()->with('success', 'Grade level added.');
+    return redirect()->back()->with('success', 'Level added.');
 }
 
 public function updateGradeLevel(Request $request, $id)
 {
-    $level = $this->schoolScoped(GradeLevel::query())->findOrFail($id);
+    abort_unless(auth()->user()->isSuperAdmin(), 403);
+
+    $level = GradeLevel::findOrFail($id);
 
     $request->validate([
-        'name' => ['required', 'string', 'max:100',
-            \Illuminate\Validation\Rule::unique('grade_levels', 'name')->where('sid', (string) $level->sid)->ignore($level->id)],
+        'name' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::unique('grade_levels', 'name')->ignore($level->id)],
     ]);
 
     $level->update(['name' => $request->name]);
 
-    return redirect()->back()->with('success', 'Grade level renamed.');
+    return redirect()->back()->with('success', 'Level renamed.');
 }
 
 public function deleteGradeLevel($id)
 {
-    $level = $this->schoolScoped(GradeLevel::query())->findOrFail($id);
+    abort_unless(auth()->user()->isSuperAdmin(), 403);
 
-    // Classes just become "unassigned"; nothing else is lost.
+    $level = GradeLevel::findOrFail($id);
+
+    // Grades just become "unassigned"; nothing else is lost.
     Grade::where('grade_level_id', $level->id)->update(['grade_level_id' => null]);
     $level->delete();
 
-    return redirect()->back()->with('success', 'Grade level removed. Its classes are now unassigned.');
+    return redirect()->back()->with('success', 'Level removed. Grades using it are now unassigned.');
 }
 // School Domain
 public function schoolDomain(Request $request)
@@ -503,9 +512,10 @@ public function city_bank_account(Request $request)
 public function login_question(Request $request)
 {
     $months = Month::all();
+    $levels = GradeLevel::orderBy('sort_order')->get();
     //$questions = LoginQuestion::with('month')->latest()->get();
     //$questions = LoginQuestion::with(['month','options'])->latest()->get();
-    $query = LoginQuestion::with(['month','options','school']);
+    $query = LoginQuestion::with(['month','options','school','level']);
 
     // ✅ SEARCH FILTER
     if ($request->search) {
@@ -534,7 +544,7 @@ public function login_question(Request $request)
     $schools = DB::table('school_domains')
         ->orderBy('id', 'asc')
         ->get();
-    return view('admin.loginQuestion.index', compact('months','questions', 'schools'));
+    return view('admin.loginQuestion.index', compact('months','questions', 'schools', 'levels'));
 }
 // Question STORE
 
@@ -547,6 +557,7 @@ public function loginQuestionStore(Request $request)
 
         $question->update([
             'sid' => $request->school,
+            'grade_level_id' => $request->grade_level_id,
             'month_name' => $request->month_name,
             'month_id' => $request->month_id,
             'question' => $request->question,
@@ -558,6 +569,7 @@ public function loginQuestionStore(Request $request)
         // ✅ CREATE QUESTION
         $question = LoginQuestion::create([
             'sid' => $request->school,
+            'grade_level_id' => $request->grade_level_id,
             'month_name' => $request->month_name,
             'month_id' => $request->month_id,
             'question' => $request->question,

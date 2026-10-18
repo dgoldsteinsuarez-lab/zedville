@@ -34,7 +34,10 @@ class GradeController extends Controller
             ->orderBy('name')
             ->get();
 
-        $levels = GradeLevel::where('sid', $sid)->orderBy('sort_order')->get();
+        // Levels are a fixed global set (Rookie/Intermediate/Advance/Advance
+        // Economist), same for every school - only which Level a given
+        // Grade is assigned is per-school.
+        $levels = GradeLevel::orderBy('sort_order')->get();
 
         return view('admin.grades.index', compact('grades', 'levels'));
     }
@@ -53,7 +56,7 @@ class GradeController extends Controller
         Grade::create([
             'sid' => $sid,
             'name' => $request->name,
-            'grade_level_id' => $this->validLevelId($request->grade_level_id, $sid),
+            'grade_level_id' => $this->validLevelId($request->grade_level_id),
         ]);
 
         return redirect()->back()->with('success', 'Grade added successfully!');
@@ -71,7 +74,7 @@ class GradeController extends Controller
 
         $grade->update([
             'name' => $request->name,
-            'grade_level_id' => $this->validLevelId($request->grade_level_id, $grade->sid),
+            'grade_level_id' => $this->validLevelId($request->grade_level_id),
         ]);
 
         return redirect()->back()->with('success', 'Grade updated successfully!');
@@ -90,13 +93,14 @@ class GradeController extends Controller
         return redirect()->back()->with('success', 'Grade deleted successfully!');
     }
 
-    private function validLevelId($levelId, $sid)
+    private function validLevelId($levelId)
     {
         if (empty($levelId)) {
             return null;
         }
-        $level = GradeLevel::where('id', $levelId)->where('sid', (string) $sid)->first();
-        abort_unless($level, 422, 'Grade level does not belong to this school.');
+        // Levels are global now - any school may assign any of the 4.
+        $level = GradeLevel::find($levelId);
+        abort_unless($level, 422, 'Grade level does not exist.');
         return $level->id;
     }
 }

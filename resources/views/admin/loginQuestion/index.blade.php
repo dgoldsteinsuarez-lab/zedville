@@ -43,6 +43,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Level</th>
                             <th>Month</th>
                             <th>Question</th>
                             <!-- <th>School Name</th> -->
@@ -53,7 +54,8 @@
                         @foreach($questions as $q)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $q->month->name }}</td>
+                            <td>{{ optional($q->level)->name ?? '—' }}</td>
+                            <td>{{ optional($q->month)->name ?? '—' }}</td>
                             <td>{{ $q->question }}</td>
                             <!-- <td>{{ optional($q->school)->school_name ?? '-' }}</td> -->
                             <td valign="middle">
@@ -65,7 +67,7 @@
                                             return $item->is_correct == 1;
                                         });
                                     @endphp
-                                    <a href="#" class="tableActionBtn me-3 editBtn"  data-id="{{ $q->id }}" data-sid="{{ $q->sid }}" data-name="{{ $q->month_name }}" data-month="{{ $q->month_id }}" data-question="{{ $q->question }}" data-type="{{ $q->type }}"  data-options='@json($options->pluck("option_text")->values())' data-option-ids='@json($options->pluck("id")->values())' data-option-index="{{ $correctIndex }}" data-bs-toggle="modal"  data-bs-target="#addstudent">
+                                    <a href="#" class="tableActionBtn me-3 editBtn"  data-id="{{ $q->id }}" data-sid="{{ $q->sid }}" data-name="{{ $q->month_name }}" data-month="{{ $q->month_id }}" data-level="{{ $q->grade_level_id }}" data-question="{{ $q->question }}" data-type="{{ $q->type }}"  data-options='@json($options->pluck("option_text")->values())' data-option-ids='@json($options->pluck("id")->values())' data-option-index="{{ $correctIndex }}" data-bs-toggle="modal"  data-bs-target="#addstudent">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M19 2H5C4.44772 2 4 2.44772 4 3V21C4 21.5523 4.44772 22 5 22H19C19.5523 22 20 21.5523 20 21V3C20 2.44772 19.5523 2 19 2Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path>
                                             <path d="M10.5 7H16.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -137,6 +139,17 @@
                                                         <option value="">Select Month Name</option>
                                                         @foreach([1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'] as $num => $name)
                                                             <option value="{{ $num }}">{{ $name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <div class="form-group mab-20">
+                                                    <label for="grade_level_id" class="form-label">Level</label>
+                                                    <select id="grade_level_id" name="grade_level_id" class="form-control" required>
+                                                        <option value="">Select Level</option>
+                                                        @foreach($levels as $level)
+                                                        <option value="{{ $level->id }}">{{ $level->name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -281,6 +294,7 @@ document.querySelectorAll('.editBtn').forEach(button => {
         let sid = this.dataset.sid;
         let name = this.dataset.name;
         let month = this.dataset.month;
+        let level = this.dataset.level;
         let question = this.dataset.question;
         let type = this.dataset.type;
 
@@ -293,6 +307,7 @@ document.querySelectorAll('.editBtn').forEach(button => {
         document.getElementById('school').value = sid;
         document.getElementById('month_name').value = name;
         document.getElementById('month_id').value = month;
+        document.getElementById('grade_level_id').value = level || '';
         document.getElementById('question').value = question;
         document.getElementById('type').value = type;
         handleTypeChange(type);

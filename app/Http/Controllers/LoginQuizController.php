@@ -7,13 +7,16 @@ use Illuminate\Http\Request;
 use App\Models\LoginQuestion;
 use App\Models\LoginOption;
 use App\Models\LoginQuizAttempt;
+use App\Models\Month;
+use App\Models\SchoolMonthSetting;
 use Illuminate\Support\Facades\Auth;
 
 class LoginQuizController extends Controller
 {
     public function getTodayQuestion()
 {
-    $userId = Auth::id();
+    $user = Auth::user();
+    $userId = $user->id;
 
     // Check if already answered today
     $alreadyAnswered = LoginQuizAttempt::where('user_id', $userId)
@@ -28,11 +31,37 @@ class LoginQuizController extends Controller
     $answeredIds = LoginQuizAttempt::where('user_id', $userId)
         ->pluck('question_id');
 
-    // Get ONE random question with its options
-    $question = LoginQuestion::with('options')
-        ->whereNotIn('id', $answeredIds)
-        ->inRandomOrder()
-        ->first();
+    // Doc: "a monthly set of questions, determined by that month's School
+    // Month Settings" - resolve the student's Level (Class -> Grade ->
+    // Level) and the school's current progression month (start_month +
+    // elapsed calendar months), then only pick from questions that match
+    // both. sid is an optional override (a question with sid set only
+    // applies to that one school); sid null applies to every school at
+    // that Level/month.
+    $gradeLevelId = optional(optional(optional($user->gradeRelation)->grade)->level)->id;
+    $progressionMonth = SchoolMonthSetting::currentProgressionMonthNumber($user->sid);
+    $monthId = $progressionMonth ? Month::where('name', "Month {$progressionMonth}")->value('id') : null;
+
+    $query = LoginQuestion::with('options')->whereNotIn('id', $answeredIds);
+
+    if ($gradeLevelId && $monthId) {
+        $question = (clone $query)
+            ->where('grade_level_id', $gradeLevelId)
+            ->where('month_id', $monthId)
+            ->where(fn ($q) => $q->whereNull('sid')->orWhere('sid', $user->sid))
+            ->inRandomOrder()
+            ->first();
+    } else {
+        $question = null;
+    }
+
+    // Fall back to any unanswered question if nothing matches the
+    // Level/month yet (e.g. content hasn't been entered for it) - keeps
+    // the feature from going silent rather than leaving students with
+    // nothing, until real content exists for every Level/month.
+    if (!$question) {
+        $question = $query->inRandomOrder()->first();
+    }
 
     if (!$question) {
         return response()->json(['show' => false]);
