@@ -286,13 +286,14 @@
                                                 </div>
                                                 <div class="col-lg-12">
                                                     <div class="form-group mab-20">
-                                                        <label for="email" class="form-label">Password</label>
+                                                        <label for="addStudentPassword" class="form-label">Password</label>
                                                         <div class="input-group">
-                                                            <input type="password" class="form-control"
-                                                                placeholder="********">
-                                                            <button class="btn btn-outline-secondary"
-                                                                type="button">Generate</button>
+                                                            <input type="text" class="form-control" id="addStudentPassword"
+                                                                name="password" placeholder="********" minlength="8" required>
+                                                            <button class="btn btn-outline-secondary" type="button"
+                                                                onclick="generateAddStudentPassword()">Generate</button>
                                                         </div>
+                                                        <div class="form-text">Shown in plain text so you can copy it for the student - write it down, it won't be shown again.</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -348,3 +349,16 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+<script>
+    function generateAddStudentPassword() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+        let pwd = '';
+        for (let i = 0; i < 10; i++) {
+            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('addStudentPassword').value = pwd;
+    }
+</script>
+@endpush

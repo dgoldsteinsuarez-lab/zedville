@@ -152,6 +152,7 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::get('/student/details/{id}', [AdminStudentController::class, 'details'])->name('admin.student.details');
     Route::post('/student/update-details/{id}', [AdminStudentController::class, 'update_details'])->name('admin.student.update-details');
     Route::post('/student/add-student', [AdminStudentController::class, 'add_student'])->name('admin.student.add-student');
+    Route::post('/student/{id}/reset-password', [AdminStudentController::class, 'reset_password'])->name('admin.student.reset-password');
 
     //Class List
     Route::get('/class-list', [AdminDashboardController::class, 'class_list'])->name('admin.class-list');

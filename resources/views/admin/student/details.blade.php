@@ -41,7 +41,10 @@
                                 </div>
                                 <a href="#"><span class="userName fs-20 fw-bold theme-text-dark">{{ $student->name}}</span></a>
                             </div>
-                            <div class="headBtnSec">
+                            <div class="headBtnSec d-flex gap-2">
+                                <a href="#" class="secondaryBtn theme-text-mute" data-bs-toggle="modal" data-bs-target="#resetPassword">
+                                    <span class="theme-text-dark fs-14 fw-500">Reset Password</span>
+                                </a>
                                 <a href="#" class="secondaryBtn theme-text-mute" data-bs-toggle="modal" data-bs-target="#editprofile">
                                     <span class="theme-text-dark fs-14 fw-500">Edit Profile</span>
                                 </a>
@@ -492,6 +495,46 @@
         </div>
     </div>
 </section>
+
+<section class="themeModal">
+    <div class="modal fade" id="resetPassword" tabindex="-1" aria-labelledby="resetPasswordLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mw-450px">
+            <form action="{{ route('admin.admin.student.reset-password', $student->id) }}" method="post">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title fs-16 fw-700 theme-text-dark" id="resetPasswordLabel">Reset Password</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="fs-14 theme-text-mute mab-20">Set a new password for {{ $student->nickname ?? $student->name }}. Shown in plain text so you can write it down for them - it won't be shown again.</p>
+                        <div class="form-group mab-20">
+                            <label for="resetPasswordInput" class="form-label">New password</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="resetPasswordInput" name="password" minlength="8" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="generateResetPassword()">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer text-center justify-content-center">
+                        <button type="button" class="secondaryBtn theme-text-mute" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="themeBtn text-white">Save new password</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<script>
+    function generateResetPassword() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+        let pwd = '';
+        for (let i = 0; i < 10; i++) {
+            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('resetPasswordInput').value = pwd;
+    }
+</script>
 
 <section class="themeModal rightSide rightsideSticky">
     <form action="{{ url('admin/student/update-details/'.$student->id) }}" method="post">

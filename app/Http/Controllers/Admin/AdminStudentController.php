@@ -102,13 +102,36 @@ class AdminStudentController extends Controller
         return redirect('admin/student/details/' . $student->id)->with('success', 'Student details updated successfully.');
 
     }
+    /**
+     * Set a new password for an existing student. Needed because
+     * add_student()'s password field had no `name` attribute at all
+     * until 2026-10-19 - every student added before that fix ended up
+     * with an unknown/empty password and no way to log in. See bugs.md.
+     */
+    public function reset_password(Request $request, $id)
+    {
+        $student = User::where('role', 4)->findOrFail($id);
+
+        $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $student->password = Hash::make($request->password);
+        $student->save();
+
+        return redirect('admin/student/details/' . $student->id)->with('success', 'Password updated.');
+    }
+
     public function add_student(Request $request)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
-            //'reEnterEmail' => ['required', 'same:email'],
-            //'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            // The password input had no `name` attribute at all until now,
+            // so this was never actually required or hashed - every
+            // admin-created student ended up with an unknown/empty
+            // password (bugs.md, 2026-10-19).
+            'password' => ['required', 'string', 'min:8'],
         ]);
         $email = $request->email;
         $emailDomain = substr(strrchr($email, "@"), 1); // Gets everything after '@'

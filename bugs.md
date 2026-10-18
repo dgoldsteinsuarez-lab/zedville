@@ -122,5 +122,10 @@ The mall picture (`education/city-mall.blade.php`, clickable hotspots over `city
 
 Tested via `tests/Feature/CityMallCatalogTest.php` (all 8 stores return real items through their actual existing routes).
 
+### Fixed 2026-10-19 - admin-created students got an unknown/empty password, no way to log in
+Daniel: manually registered a student via admin, didn't know the password, and re-registering with the same email failed as a duplicate. Root cause: the "Add Student" form's password `<input>` had no `name` attribute at all - never actually submitted - and `add_student()`'s password validation was commented out, so `Hash::make($request->password)` hashed `null` for every student added this way. The "Generate" button next to it was also just decorative (no handler).
+
+Fixed: the password field now has `name="password"`, is required (`min:8`), the "Generate" button fills in a real random password, and it's shown in plain text (not masked) so the admin can actually copy it to give to the student - it won't be shown again. Added `AdminStudentController::reset_password()` + a "Reset Password" button/modal on the student details page so an admin can fix an already-broken account (like the one Daniel already created) without needing to delete and re-register. Tested via `tests/Feature/Admin/StudentPasswordTest.php`.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
