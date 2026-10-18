@@ -43,19 +43,23 @@
               @include('citizen-activation.layouts.surveys')
              <!-- Consumer profile code -->
             </div>
-            <!-- <div class="btn-row">
-
+            {{-- The survey above is a client-side-only quiz that never
+                 submits to the server (bugs.md: "Consumer profile survey
+                 never actually submits") - this is a temporary way to get
+                 past this step until that's fixed for real. --}}
+            <div class="btn-row">
                 <a href="{{ route('CitizenActivation.autoDebit') }}"
                     class="ca-btn-secondary">
                     ← Back
                 </a>
 
-                <button type="submit"
-                        class="ca-btn-primary">
-                    Complete & See My Profile →
-                </button>
-
-            </div> -->
+                <form action="{{ route('CitizenActivation.consumerProfile.skip') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="ca-btn-primary">
+                        Skip for now →
+                    </button>
+                </form>
+            </div>
         </div>
 
     </div>

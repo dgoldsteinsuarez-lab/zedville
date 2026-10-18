@@ -13,6 +13,7 @@ use App\Models\AutoDebitRequest;
 use App\Models\Transaction;
 use App\Models\Transaction1;
 use App\Models\Mailbox;
+use App\Models\ConsumerSurvey;
 class CitizenActivationController extends Controller
 {
     /**
@@ -375,6 +376,44 @@ class CitizenActivationController extends Controller
         $user = Auth::user();
 
         return view('citizen-activation.consumer-profile', compact('user'));
+    }
+
+    /**
+     * Temporary unblock for Step 5 (bugs.md: "Consumer profile survey never
+     * actually submits"). citizen-activation.layouts.surveys is a purely
+     * client-side quiz - it computes and shows results in the browser but
+     * never POSTs anything, so ConsumerSurvey::exists() never becomes true
+     * and a student can never pass this step. Creates a zero-cost default
+     * record (no groceries/lunch/transport/etc selected, so no balance is
+     * touched) purely to satisfy CitizenActivationService::getNextRoute()'s
+     * gate and let onboarding continue. Does NOT reflect anything the
+     * student actually answered - the real fix (wiring the quiz's already-
+     * computed answers to a real submit, the same way
+     * ConsumerSurveyController::storesurvey already works for the monthly
+     * redo) is still open, see bugs.md.
+     */
+    public function skipConsumerProfile()
+    {
+        $user = Auth::user();
+
+        ConsumerSurvey::firstOrCreate(
+            ['user_id' => $user->id, 'survey_month' => Carbon::now()->format('M-Y')],
+            [
+                'sid' => $user->sid,
+                'diet' => null,
+                'groceries' => [],
+                'basket_cost' => 0,
+                'lunch' => 0,
+                'transport' => 0,
+                'activities' => 0,
+                'restaurants' => 0,
+                'total_cost' => 0,
+            ]
+        );
+
+        return redirect()
+            ->route('CitizenActivation.activationComplete')
+            ->with('success', 'Consumer profile skipped for now - you can fill in a real one later from your profile.');
     }
     //Post comsure profile
     /**

@@ -19,6 +19,8 @@ Route::controller(CitizenActivationController::class)->group(function () {
     Route::post('/store-auto-debit-authorization-form', 'store_auto_debit_authorization_form')->name('store-auto-debit-authorization-form');
 
     Route::get('/consumer-profile', 'consumerProfile')->name('consumerProfile');
+    // Temporary unblock - see CitizenActivationController::skipConsumerProfile()
+    Route::post('/consumer-profile/skip', 'skipConsumerProfile')->name('consumerProfile.skip');
 
     Route::get('/activation-complete', 'activationComplete')->name('activationComplete');
 

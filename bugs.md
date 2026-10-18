@@ -2,7 +2,20 @@
 
 Severity: 🔴 Critical (data-corrupting or runtime-fatal) · 🟠 High (real-world incorrect behavior) · 🟡 Medium (correctness risk under load/edge case) · ⚪ Low (cleanliness/inconsistency)
 
-**Re-verified against live code 2026-09-30** (first time this list was checked against the actual codebase since it was written): #1, #2, #3, #4, #6, #7, #8, #9, #12, #13, #15 were already fixed, and #5 was fixed during this same pass (one remaining call site, `OrderController::placeOrder`) — all removed below. Every Critical and High severity item is now resolved; what's left is architectural/cosmetic. Remaining items were re-confirmed still present. If you're reading this later and something here seems wrong, check the code directly rather than trusting this list blindly — that's exactly how it went stale the first time.
+**Re-verified against live code 2026-09-30** (first time this list was checked against the actual codebase since it was written): #1, #2, #3, #4, #6, #7, #8, #9, #12, #13, #15 were already fixed, and #5 was fixed during this same pass (one remaining call site, `OrderController::placeOrder`) — all removed below. Remaining items were re-confirmed still present. If you're reading this later and something here seems wrong, check the code directly rather than trusting this list blindly — that's exactly how it went stale the first time.
+
+**Update 2026-10-18:** a new High-severity item (#19) was found and temporarily unblocked - the consumer profile survey step in onboarding never actually submits, so it's not true anymore that every Critical/High item is resolved. See #19.
+
+## 🟠 High
+
+### 19. Consumer profile survey never actually submits — blocks all new student activation
+Found 2026-10-18 while trying to open a test student account. `CitizenActivationService::getNextRoute()` Step 4 gates onboarding on `ConsumerSurvey::where('user_id', $user->id)->exists()`. The step's view, `citizen-activation.consumer-profile.blade.php`, includes `citizen-activation.layouts.surveys` - a purely client-side, multi-step quiz that computes and displays "results" in the browser via JS, but contains no `fetch()`, no form `action`, no CSRF token - it never POSTs anything to the server. A student can click all the way through it and never pass the gate; the wizard just keeps redirecting back to this same step forever. The page's actual submit button was also commented out in the Blade file (`<!-- <div class="btn-row">...<button type="submit">...`), so there wasn't even a non-functional button to notice.
+
+Confirmed this is distinct from the already-working survey: `ConsumerSurveyController::storesurvey()` (used by `profile/consumer-profile-survey.blade.php` for the monthly redo, post-activation) is fully wired - real form, real persistence, real balance-check/debit. The onboarding step's quiz never reuses it.
+
+**Temporary unblock, 2026-10-18 (not the real fix):** `CitizenActivationController::skipConsumerProfile()` + a "Skip for now" button create a zero-cost placeholder `ConsumerSurvey` row (no groceries/lunch/transport selected, no balance touched) purely to satisfy the gate. This does not reflect anything the student actually answered. Tested via `tests/Feature/CitizenActivation/SkipConsumerProfileTest.php` (including a test proving the gate was genuinely stuck beforehand).
+
+**Fix:** wire the onboarding quiz's own computed answers (diet/groceries/lunch/etc. - already tracked in its JS `state`) to a real submit, the same way `storesurvey()` already works for the redo flow. Until then, every new student activation relies on the temporary skip.
 
 ## 🟡 Medium
 
