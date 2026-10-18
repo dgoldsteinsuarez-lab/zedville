@@ -122,10 +122,12 @@ class FinheroBadgeCalculatorService
             $total += 10;
         }
 
-        // Active registered activities
-        $activityTotal = DB::table('finhero_activity_registry')
-            ->where('is_active', true)
-            ->sum('max_points');
+        // Active registered activities. A row's own max_points overrides
+        // the global default for that activity_key; null falls back to it.
+        $activityTotal = DB::table('finhero_activity_registry as far')
+            ->leftJoin('finhero_activity_defaults as fad', 'fad.activity_key', '=', 'far.activity_key')
+            ->where('far.is_active', true)
+            ->sum(DB::raw('COALESCE(far.max_points, fad.max_points, 0)'));
 
         return $total + (int) $activityTotal;
     }
@@ -214,9 +216,12 @@ class FinheroBadgeCalculatorService
      */
     private function getActivityPoints(int $studentId, int $month, int $year): int
     {
-        // Get active activities and their max points
-        $activeActivities = DB::table('finhero_activity_registry')
-            ->where('is_active', true)
+        // Get active activities and their max points (own value overrides
+        // the global default for that activity_key; null falls back to it)
+        $activeActivities = DB::table('finhero_activity_registry as far')
+            ->leftJoin('finhero_activity_defaults as fad', 'fad.activity_key', '=', 'far.activity_key')
+            ->where('far.is_active', true)
+            ->selectRaw('far.activity_key, COALESCE(far.max_points, fad.max_points, 0) as max_points')
             ->pluck('max_points', 'activity_key');
 
         if ($activeActivities->isEmpty()) return 0;

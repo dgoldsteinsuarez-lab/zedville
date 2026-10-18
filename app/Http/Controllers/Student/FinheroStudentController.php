@@ -106,6 +106,12 @@ class FinheroStudentController extends Controller
             ], 422);
         }
 
+        // The row's own max_points overrides the global default for this
+        // activity_key; null falls back to it.
+        $maxPoints = $activity->max_points
+            ?? \App\Models\FinheroActivityDefault::where('activity_key', $v['activity_key'])->value('max_points')
+            ?? 0;
+
         // Check whether the student has already received points
         // for this activity during the current month.
         $alreadyEarned = DB::table('finhero_student_points')
@@ -116,7 +122,7 @@ class FinheroStudentController extends Controller
             ->whereYear('earned_at', $now->year)
             ->sum('points_earned');
 
-        if ($alreadyEarned >= $activity->max_points) {
+        if ($alreadyEarned >= $maxPoints) {
             return response()->json([
                 'success' => false,
                 'message' => 'Max points already earned for this activity.',
@@ -132,7 +138,7 @@ class FinheroStudentController extends Controller
          *
          * to control the number of points.
          */
-        $toAward = $activity->max_points - $alreadyEarned;
+        $toAward = $maxPoints - $alreadyEarned;
 
         if ($toAward <= 0) {
             return response()->json([
@@ -219,7 +225,9 @@ class FinheroStudentController extends Controller
             ->whereYear('earned_at', $now->year)
             ->sum('points_earned');
 
-        $maxPoints = (int) $activity->max_points;
+        $maxPoints = (int) ($activity->max_points
+            ?? \App\Models\FinheroActivityDefault::where('activity_key', $sourceKey)->value('max_points')
+            ?? 0);
 
         if ($alreadyEarned >= $maxPoints) {
             return response()->json([

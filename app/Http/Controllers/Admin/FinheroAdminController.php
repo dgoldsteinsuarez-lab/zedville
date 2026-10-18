@@ -8,6 +8,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FinheroActivityDefault;
 use App\Models\FinheroBadgeRecord;
 use App\Services\FinheroBadgeCalculatorService;
 use Illuminate\Http\Request;
@@ -243,22 +244,21 @@ class FinheroAdminController extends Controller
 
             'activity_name' => 'required|string|max:255',
 
-            // Required ONLY for task
+            // Left blank, the activity inherits the global default for this
+            // activity_key (see FinheroActivityDefault) instead of requiring
+            // every single assignment to repeat the same number.
             'max_points' => [
                 'nullable',
                 'integer',
                 'min:1',
                 'max:100',
-                'required_if:type,task',
             ],
 
             'position' => 'required|in:required,optional,free',
 
             'type' => 'required|string',
 
-            // Salary required ONLY for task
             'salary' => [
-                'required_if:type,task',
                 'nullable',
                 'numeric',
                 'min:0',
@@ -520,6 +520,52 @@ class FinheroAdminController extends Controller
         //return response()->json(['success' => true, 'message' => 'Activity removed.']);
         return redirect('/admin/finhero/activities')
             ->with('success', 'Activity removed.');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // GLOBAL POINT DEFAULTS
+    // One default point value (and, for tasks, salary) per activity_key,
+    // shared across every school. A finhero_activity_registry row only
+    // overrides it when an admin explicitly set a value on that row.
+    // ─────────────────────────────────────────────────────────────
+
+    /** GET /admin/finhero/point-defaults */
+    public function pointDefaultsIndex()
+    {
+        $defaults = FinheroActivityDefault::orderBy('activity_key')->get();
+
+        return view('admin.finhero.point-defaults', compact('defaults'));
+    }
+
+    /** POST /admin/finhero/point-defaults — add a new default for an activity_key not yet registered anywhere */
+    public function pointDefaultsStore(Request $request)
+    {
+        $validated = $request->validate([
+            'activity_key' => ['required', 'string', 'max:255', 'unique:finhero_activity_defaults,activity_key'],
+            'activity_name' => ['nullable', 'string', 'max:255'],
+            'type' => ['required', 'in:task,library'],
+            'max_points' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'salary' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        FinheroActivityDefault::create($validated);
+
+        return back()->with('success', 'Default added.');
+    }
+
+    /** PUT /admin/finhero/point-defaults/{id} */
+    public function pointDefaultsUpdate(Request $request, int $id)
+    {
+        $default = FinheroActivityDefault::findOrFail($id);
+
+        $validated = $request->validate([
+            'max_points' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'salary' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $default->update($validated);
+
+        return back()->with('success', 'Default updated - applies to every school that has not manually overridden this activity.');
     }
 
     // ─────────────────────────────────────────────────────────────

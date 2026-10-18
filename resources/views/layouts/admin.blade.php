@@ -310,6 +310,7 @@
                                             'admin/login-question/school-month-settings',
                                             'admin/finhero/activities',
                                             'admin/finhero/task-activities',
+                                            'admin/finhero/point-defaults',
                                         );
                                     @endphp
                                     @if($navOrg)
@@ -367,6 +368,13 @@
                                                         <span class="navTxt">FinHero Library Activity</span>
                                                     </a>
                                                 </li>
+                                                @if($navSuper)
+                                                <li class="nav-item {{ request()->is('admin/finhero/point-defaults') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/finhero/point-defaults') }}">
+                                                        <span class="navTxt">FinHero Point Defaults</span>
+                                                    </a>
+                                                </li>
+                                                @endif
                                             </ul>
                                         </div>
                                     </li>

@@ -173,4 +173,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function ()
     Route::post('/recalculate',        [FinheroAdminController::class, 'recalculate']);
   });
     Route::post('/reset-year',         [FinheroAdminController::class, 'resetAcademicYear'])->middleware('role:super_admin');
+
+    // Global point defaults - one value per activity, shared across every
+    // school. Super Admin only: it is a platform-wide setting, not a
+    // single-school one.
+    Route::middleware('role:super_admin')->group(function () {
+        Route::get ('/point-defaults',       [FinheroAdminController::class, 'pointDefaultsIndex'])->name('finhero.point-defaults.index');
+        Route::post('/point-defaults',       [FinheroAdminController::class, 'pointDefaultsStore'])->name('finhero.point-defaults.store');
+        Route::put ('/point-defaults/{id}',  [FinheroAdminController::class, 'pointDefaultsUpdate'])->name('finhero.point-defaults.update');
+    });
 });
