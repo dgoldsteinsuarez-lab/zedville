@@ -314,12 +314,12 @@
                                         );
                                     @endphp
                                     @if($navOrg)
-                                     <li class="nav-item {{ $usersMenuActive3 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Education">
+                                     <li class="nav-item {{ $usersMenuActive3 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Variable - set per Grade">
                                         <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#education" aria-expanded="{{ $usersMenuActive3 ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
                                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M478.46-210.77q-48.77-33.38-104-51.31Q319.23-280 260-280q-31.23 0-61.35 5.23Q168.54-269.54 140-258q-21.77 8.69-40.88-4.85Q80-276.38 80-300.15v-385.08q0-14.85 8.19-26.77t21.5-16.92q35.23-15.54 73.31-23.31 38.08-7.77 77-7.77 58.77 0 113.88 18.08Q429-723.85 480-693.85v434.77q50.23-32 106.62-46.46Q643-320 700-320q32.92 0 59.73 3.69 26.81 3.69 57.19 12.62 8.46 2.31 15.77.38Q840-305.23 840-316v-418.46q5.77 1.15 11.04 3.19t10.04 5.42q9.46 5 14.19 14.23 4.73 9.24 4.73 20.24v389.69q0 23.77-20.27 36.92-20.27 13.16-44.35 5.23-27.76-10.77-56.73-15.61Q729.69-280 700-280q-60 0-116.77 16.77-56.77 16.77-104.77 52.46ZM560-360v-340l200-200v360L560-360Zm-120 81.92v-392.15q-42.23-23.23-87.35-36.5Q307.54-720 260-720q-37 0-68.54 6.62-31.54 6.61-56.84 16.76-6.16 2.31-10.39 6.54T120-679.69v365.46q0 10.77 7.31 12.69t15.77-1.15q24.23-8.39 52.57-12.85Q224-320 260-320q53.69 0 100.88 12.54 47.2 12.54 79.12 29.38Zm0 0v-392.15 392.15Z"/></svg>
                                             </span>
-                                            <span class="navTxt">Education</span>
+                                            <span class="navTxt">Education (per Grade)</span>
                                             <span class="nav-arrow">
                                                 <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M1.07129 1.62756L6.00033 6.55661L10.9294 1.62756" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
@@ -387,14 +387,14 @@
                                             'admin/npos*',
                                         );
                                     @endphp
-                                    <li class="nav-item {{ $usersMenuActive4 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Education">
+                                    <li class="nav-item {{ $usersMenuActive4 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Fix for All Schools">
                                         <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#city" aria-expanded="{{ $usersMenuActive4 ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
 
-                                                
+
 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M140-153.85v-520h160v-160h360v320h160v360H540v-160H420v160H140Zm40-40h120v-120H180v120Zm0-160h120v-120H180v120Zm0-160h120v-120H180v120Zm160 160h120v-120H340v120Zm0-160h120v-120H340v120Zm0-160h120v-120H340v120Zm160 320h120v-120H500v120Zm0-160h120v-120H500v120Zm0-160h120v-120H500v120Zm160 480h120v-120H660v120Zm0-160h120v-120H660v120Z"/></svg>
                                             </span>
-                                            <span class="navTxt">City</span>
+                                            <span class="navTxt">Fix for All Schools</span>
                                             <span class="nav-arrow">
                                                 <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M1.07129 1.62756L6.00033 6.55661L10.9294 1.62756" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
@@ -425,7 +425,7 @@
                                                 </li>
                                                 <li class="nav-item {{ request()->is('admin/education/wants-iteams') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/education/wants-iteams') }}">
-                                                        <span class="navTxt">Wants Iteams</span>
+                                                        <span class="navTxt">Wants Items</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item {{ request()->is('admin/npos') ? 'active' : '' }}">
