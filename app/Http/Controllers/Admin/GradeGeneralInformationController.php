@@ -35,6 +35,23 @@ class GradeGeneralInformationController extends Controller
         $levels = GradeLevel::orderBy('sort_order')->get();
         $monthSetting = SchoolMonthSetting::where('school_id', $grade->sid)->first();
 
-        return view('admin.grades.general-information', compact('grade', 'school', 'levels', 'monthSetting'));
+        // City Proposals (students voting on a city name/quote change) moved
+        // here from its own global top-level nav item - it's a minor, purely
+        // Grade-scoped feature, not something that needs its own section of
+        // the admin sidebar. Same access rule as the old standalone page
+        // (routes/admin.php: role:super_admin,tutor) - School Admin never
+        // saw this, so it stays hidden here too; a Tutor only sees it for a
+        // Grade they actually have a Class in.
+        $canSeeCityProposals = $user->isSuperAdmin()
+            || ($user->isTutor() && $user->tutoredClasses()->where('classes.grade_id', $grade->id)->exists());
+
+        $cityProposals = $canSeeCityProposals
+            ? \App\Models\CityProposal::with(['proposer:id,name,nickname'])
+                ->where('grade_id', $grade->id)
+                ->orderByDesc('id')
+                ->get()
+            : collect();
+
+        return view('admin.grades.general-information', compact('grade', 'school', 'levels', 'monthSetting', 'canSeeCityProposals', 'cityProposals'));
     }
 }

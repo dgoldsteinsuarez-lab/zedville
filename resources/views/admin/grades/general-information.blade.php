@@ -90,6 +90,44 @@
         </div>
     </div>
 
+    @if ($canSeeCityProposals)
+    <div class="card mb-4">
+        <div class="card-header"><strong>City Proposals</strong></div>
+        <div class="card-body p-0">
+            <p class="text-muted small px-3 pt-3 mb-2">
+                Students in this Grade vote on a new city name/quote; Tutors agree here on whether it goes live in City Hall.
+            </p>
+            <table class="table mb-0 align-middle">
+                <thead><tr><th>Type</th><th>Proposed value</th><th>Proposed by</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                @forelse ($cityProposals as $p)
+                    <tr>
+                        <td>{{ ucfirst($p->type) }}</td>
+                        <td>"{{ $p->value }}"</td>
+                        <td>{{ $p->proposer->nickname ?? '—' }}</td>
+                        <td>{{ ucfirst($p->status) }}</td>
+                        <td class="d-flex gap-1">
+                            @if ($p->status === 'pending')
+                                <form method="POST" action="{{ route('admin.city-proposals.approve', $p->id) }}">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-success">Approve</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.city-proposals.reject', $p->id) }}">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-danger">Reject</button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5" class="text-muted p-3">No proposals yet for this Grade.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong>Classes in this Grade</strong>

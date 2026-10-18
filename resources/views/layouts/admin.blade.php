@@ -105,13 +105,6 @@
                                         </a>
                                     </li>
                                     @endif
-                                    @if(auth()->user()->isSuperAdmin() || auth()->user()->isTutor())
-                                    <li class="nav-item {{ request()->is('admin/city-proposals*') ? 'active' : '' }}">
-                                        <a class="nav-link" href="{{ url('admin/city-proposals') }}">
-                                            <span class="navTxt">City Proposals</span>
-                                        </a>
-                                    </li>
-                                    @endif
                                     <li class="nav-item {{ request()->is('admin/autopilot*') ? 'active' : '' }}">
                                         <a class="nav-link" href="{{ url('admin/autopilot') }}">
                                             <span class="navTxt">Autopilot</span>

@@ -138,5 +138,10 @@ Also fixed along the way: `add_student()`'s Class dropdown (`name="grade"`) was 
 
 Added a "Current password" field to `resources/views/auth/register.blade.php` (optional - only used by students claiming a pre-staged account; left blank for a brand-new registration). Tested via `tests/Feature/Auth/ClaimStagedAccountTest.php` (successful claim, wrong-current-password rejection, invalid-class-code rejection, class-code-conflict rejection, brand-new registration unaffected) and a new case in `tests/Feature/Admin/StudentPasswordTest.php` for the `grade`-not-saved fix.
 
+### Moved 2026-10-19 - City Proposals demoted from a top-level admin nav item into the Grade profile
+Daniel: "City proposals is at the top, but it's a very unimportant feature, should be only be seen in the grade profile" - students voting on a city name/quote and Tutors agreeing on it is a minor, purely Grade-scoped feature (`CityProposal.grade_id`), not something that needs its own entry in the global admin sidebar alongside Dashboard/Autopilot/Users.
+
+Removed the "City Proposals" `<li>` from the sidebar in `resources/views/layouts/admin.blade.php`. Added a "City Proposals" card to the existing per-Grade "General Information" page (`GradeGeneralInformationController::show()` / `admin/grades/general-information.blade.php`), filtered to that one Grade's proposals, reusing the same existing approve/reject routes (`admin.city-proposals.approve`/`.reject`) - no new endpoints needed. Kept the exact same visibility rule the standalone page already had (`routes/admin.php`: `role:super_admin,tutor` - School Admin never saw this, so the embedded card stays hidden for them too); a Tutor only sees it if they actually have a Class under that specific Grade. The old standalone route/controller/view are left in place (unlinked, harmless) rather than deleted. Tested via `tests/Feature/Admin/GradeProfileCityProposalsTest.php`.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
