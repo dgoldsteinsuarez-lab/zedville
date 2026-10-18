@@ -208,11 +208,14 @@ class FinheroBadgeCalculatorService
 
     /**
      * Get activity points for a student this month.
-     * Reads from finhero_student_points where source_type = 'activity'.
-     * Points are logged by IT when a student completes an activity.
+     * Reads from finhero_student_points, both source_type = 'activity'
+     * (awardPoints() - one row per whole activity, source_key already
+     * equals the activity_key) and source_type = 'task' (savePoints()'s
+     * Approach System path - one row per scored question, source_key like
+     * "task_1_question_1", rolling up to its parent task's activity_key).
+     * Points are logged by IT (activity) or Tasks 1-5's own views (task).
      *
-     * Each active activity contributes up to its max_points.
-     * If the student earned points for that activity this month, they count.
+     * Each active activity/task contributes up to its max_points.
      */
     private function getActivityPoints(int $studentId, int $month, int $year): int
     {
@@ -226,18 +229,25 @@ class FinheroBadgeCalculatorService
 
         if ($activeActivities->isEmpty()) return 0;
 
+        $earnedRows = DB::table('finhero_student_points')
+            ->where('student_id', $studentId)
+            ->whereIn('source_type', ['activity', 'task'])
+            ->whereMonth('earned_at', $month)
+            ->whereYear('earned_at', $year)
+            ->selectRaw('source_key, SUM(points_earned) as earned')
+            ->groupBy('source_key')
+            ->get();
+
+        $earnedByActivity = [];
+        foreach ($earnedRows as $row) {
+            $baseKey = preg_replace('/_question_\d+$/', '', $row->source_key);
+            $earnedByActivity[$baseKey] = ($earnedByActivity[$baseKey] ?? 0) + (int) $row->earned;
+        }
+
         // Sum points earned per activity, capped at that activity's max
         $total = 0;
         foreach ($activeActivities as $activityKey => $maxPts) {
-            $earned = DB::table('finhero_student_points')
-                ->where('student_id', $studentId)
-                ->where('source_type', 'activity')
-                ->where('source_key', $activityKey)
-                ->whereMonth('earned_at', $month)
-                ->whereYear('earned_at', $year)
-                ->sum('points_earned');
-
-            $total += min((int) $earned, $maxPts);
+            $total += min($earnedByActivity[$activityKey] ?? 0, $maxPts);
         }
 
         return $total;

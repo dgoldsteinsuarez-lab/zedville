@@ -611,7 +611,7 @@
       </div>
 
       <div class="intro-points-note">
-        <p><strong>Finhero Badge Points: up to 8</strong> — 1 point per question, but only if you get it right on your first try! A hint appears on the second attempt, and the full answer on the third.</p>
+        <p><strong>Finhero Badge Points: up to 24</strong> — up to 3 points per question. Get it right on your first approach for 3 points; each time you use up your tries, the hint gets stronger and the points available go down: 2, then 1, then 0 — but you can always keep trying.</p>
       </div>
 
       <button class="start-button" id="start-button">Let's Go! 🚀</button>
@@ -627,7 +627,7 @@
       </div>
 
       <div class="stats-row">
-        <div class="stat-pill points" id="stat-points">🏆 Finhero Badge Points: 0 / 8</div>
+        <div class="stat-pill points" id="stat-points">🏆 Finhero Badge Points: 0 / 24</div>
         <div class="stat-pill done" id="stat-done">✅ 0 / 8 done</div>
       </div>
 
@@ -657,7 +657,7 @@
               <div class="stat-label">Finhero Badge Points</div>
               <div class="stat-value">
                 <span id="final-points">0</span>
-                <span class="stat-divisor">/ 8</span>
+                <span class="stat-divisor">/ 24</span>
               </div>
             </div>
             <div class="stat-box attempts">
@@ -814,6 +814,23 @@
 
     const OP_ICONS = { addition: "➕", subtraction: "➖", multiplication: "✖️", division: "➗" };
 
+    // Zedville_FinHero_Point_Values_v1.pdf §2 "The Approach System" - same
+    // tier table as app/Services/FinheroApproachSystem.php (the server is
+    // the actual source of truth for points; this mirrors it client-side
+    // only to drive which hint/attempts-left UI to show).
+    const APPROACH_TIERS = [
+      { maxWrongAttempts: 2,        points: 3, hint: "none" },
+      { maxWrongAttempts: 2,        points: 2, hint: "light" },
+      { maxWrongAttempts: 2,        points: 1, hint: "full" },
+      { maxWrongAttempts: Infinity, points: 0, hint: "full" },
+    ];
+
+    function redactFinalStep(stepsText) {
+      const lines = stepsText.split("\n");
+      const last = lines[lines.length - 1].replace(/=\s*[\d,]+(\s*zeds)?\s*$/, "= ?");
+      return [...lines.slice(0, -1), last].join("\n");
+    }
+
     // ───────────────────────────────────────────────────────────────
     // STATE
     // ───────────────────────────────────────────────────────────────
@@ -822,8 +839,9 @@
       scale: null,
       questions: [],
       // Per-question state
-      qState: {},  // { [id]: { attempt: 0, status: null, earned: null, input: '' } }
+      qState: {},  // { [id]: { tier: 0, wrongInTier: 0, status: null, earned: null, input: '' } }
       scores: {},  // { [id]: pts }
+      firstTryCount: 0,
     };
 
     // ───────────────────────────────────────────────────────────────
@@ -841,7 +859,7 @@
 
       // Initialize per-question state
       state.questions.forEach(q => {
-        state.qState[q.id] = { attempt: 0, status: null, earned: null, input: "" };
+        state.qState[q.id] = { tier: 0, wrongInTier: 0, status: null, earned: null, input: "" };
       });
 
       // Apply scale CSS variables to document
@@ -976,76 +994,59 @@
       const correct = Math.abs(num - q.answer) <= tol;
 
       if (correct) {
-        const firstTryCorrect = qs.attempt === 0;
-        const pts = qs.attempt === 0 ? 1 : 0;
+        const pts = APPROACH_TIERS[qs.tier].points;
+        if (qs.tier === 0) state.firstTryCount += 1;
         qs.earned = pts;
         qs.status = "correct";
         state.scores[qid] = pts;
-         // Save point only on first correct attempt
-    if (firstTryCorrect) {
 
-        fetch("{{ route('finhero.save-points') }}", {
+        if (pts > 0) {
+          fetch("{{ route('finhero.save-points') }}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
             body: JSON.stringify({
-                source_key: 'task_2_question_' + qid
+                source_key: 'task_2_question_' + qid,
+                approach: qs.tier
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data);
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success === false) {
+              const extraFeedback = document.getElementById("extra-feedback");
+              extraFeedback.className = "feedback error";
+              extraFeedback.textContent = "You’ve already finished this task, but feel free to give it another go!";
+              setTimeout(() => {
+                extraFeedback.classList.remove("show");
+                extraFeedback.classList.add("hide");
+                setTimeout(() => {
+                    extraFeedback.textContent = "";
+                    extraFeedback.className = "";
+                }, 500);
+              }, 3000);
+            }
+          });
+        }
 
-            // Already earned
-            if (data.success  === false) {
-                  const extraFeedback = document.getElementById("extra-feedback");
-                  extraFeedback.className = "feedback error";
-                  extraFeedback.textContent = "You’ve already finished this task, but feel free to give it another go!";
-                  // Hide after 3 seconds
-                  setTimeout(() => {
-                    extraFeedback.classList.remove("show");
-                    extraFeedback.classList.add("hide");
-
-                    // Remove text after animation ends
-                    setTimeout(() => {
-                        extraFeedback.textContent = "";
-                        extraFeedback.className = "";
-                    }, 500);
-
-                }, 3000);
-
-              }
-
-            // Saved successfully
-            /*if (data.success === true) {
-                console.log("Point saved");
-            }*/
-        });
-
-    }
         renderQuestion(qid);
         updateProgress();
         checkAllDone();
       } else {
-        qs.attempt += 1;
+        qs.wrongInTier += 1;
         qs.status = "wrong";
         qs.input = "";
         renderQuestion(qid);
 
         setTimeout(() => {
-          if (qs.attempt >= 3) {
-            qs.status = "revealed";
-            qs.earned = 0;
-            state.scores[qid] = 0;
-            renderQuestion(qid);
-            updateProgress();
-            checkAllDone();
-          } else {
-            qs.status = null;
-            renderQuestion(qid);
+          const tierMax = APPROACH_TIERS[qs.tier].maxWrongAttempts;
+          if (qs.wrongInTier >= tierMax && qs.tier < APPROACH_TIERS.length - 1) {
+            qs.tier += 1;
+            qs.wrongInTier = 0;
           }
+          qs.status = null;
+          renderQuestion(qid);
         }, 1200);
       }
     }
@@ -1059,34 +1060,35 @@
       const card = document.querySelector(`.question-card[data-qid="${qid}"]`);
       if (!card) return;
 
-      const done = qs.status === "correct" || qs.status === "revealed";
+      const done = qs.status === "correct";
+      const tier = APPROACH_TIERS[qs.tier];
 
       // Card-level state
-      card.classList.toggle("done-correct",  qs.status === "correct");
-      card.classList.toggle("done-revealed", qs.status === "revealed");
+      card.classList.toggle("done-correct",  done);
 
       // Number cell
       const num = card.querySelector(".question-number");
-      num.textContent = done ? (qs.status === "correct" ? "✓" : "—") : q.id;
+      num.textContent = done ? "✓" : q.id;
 
-      // Hint (shown after attempt 1)
+      // Light hint (tier 1+): the short formula, no computed numbers worked out
       const hintEl = card.querySelector(".msg-hint");
-      if (qs.attempt >= 1 && !done) {
+      if (tier.hint === "light" && !done) {
         hintEl.innerHTML = `💡 <strong>Hint:</strong> ${q.hint}`;
         hintEl.classList.remove("hidden");
       } else {
         hintEl.classList.add("hidden");
       }
 
-      // Revealed (after 3 wrong attempts)
+      // Fuller hint (tier 2+): setup shown step by step, final answer never
+      // auto-revealed - doc §2 "Beyond Third Approach... answer is never
+      // auto-revealed." Stays visible at tier 3 too, unlimited attempts.
       const revEl = card.querySelector(".msg-revealed");
-      if (qs.status === "revealed") {
-        const stepsHtml = q.steps.split("\n")
+      if (tier.hint === "full" && !done) {
+        const stepsHtml = redactFinalStep(q.steps).split("\n")
           .map(line => `<div class="msg-revealed-step">${line}</div>`).join("");
         revEl.innerHTML = `
-          <div class="msg-revealed-title">📝 Here's how to solve it:</div>
+          <div class="msg-revealed-title">📝 Here's the setup — you finish the last step:</div>
           ${stepsHtml}
-          <div class="msg-revealed-answer">✅ Answer: ${q.answer.toLocaleString()} zeds</div>
         `;
         revEl.classList.remove("hidden");
       } else {
@@ -1095,10 +1097,11 @@
 
       // Correct
       const corrEl = card.querySelector(".msg-correct");
-      if (qs.status === "correct") {
+      if (done) {
+        const ptsText = qs.earned > 0 ? ` +${qs.earned} Finhero Badge Point${qs.earned === 1 ? '' : 's'}!` : '';
         corrEl.innerHTML = `
           <span class="msg-correct-icon">🎉</span>
-          <span>${q.answer.toLocaleString()} zeds — Correct!${qs.earned > 0 ? " +1 Finhero Badge Point!" : ""}</span>
+          <span>${q.answer.toLocaleString()} zeds — Correct!${ptsText}</span>
         `;
         corrEl.classList.remove("hidden");
       } else {
@@ -1124,33 +1127,33 @@
         inputEl.value = "";
       }
 
-      // Attempt indicator
+      // Attempt indicator - hidden once unlimited (tier 3, no points left)
       const attemptsRow = card.querySelector(".attempts-row");
-      attemptsRow.classList.toggle("hidden", done);
+      attemptsRow.classList.toggle("hidden", done || tier.maxWrongAttempts === Infinity);
 
-      if (!done) {
+      if (!done && tier.maxWrongAttempts !== Infinity) {
         const dots = card.querySelectorAll(".attempt-dot");
         dots.forEach((d, i) => {
-          d.classList.toggle("used",    i < qs.attempt);
-          d.classList.toggle("current", i === qs.attempt);
+          d.classList.toggle("hidden",  i >= tier.maxWrongAttempts);
+          d.classList.toggle("used",    i < qs.wrongInTier);
+          d.classList.toggle("current", i === qs.wrongInTier);
         });
 
         const label = card.querySelector(".attempts-label");
-        label.textContent =
-          qs.attempt === 0 ? "First try — 1 point!" :
-          qs.attempt === 1 ? "Hint shown — 0 points" :
-                             "Last chance";
+        label.textContent = `Approach ${qs.tier + 1} of ${APPROACH_TIERS.length} — ${tier.points} point${tier.points === 1 ? '' : 's'} if correct`;
       }
     }
 
     // ───────────────────────────────────────────────────────────────
     // UPDATE PROGRESS
     // ───────────────────────────────────────────────────────────────
+    const TASK2_TOTAL_POINTS = 24;
+
     function updateProgress() {
       const completedCount = Object.keys(state.scores).length;
       const totalPoints    = Object.values(state.scores).reduce((a, b) => a + b, 0);
 
-      $("stat-points").textContent = `🏆 Finhero Badge Points: ${totalPoints} / 8`;
+      $("stat-points").textContent = `🏆 Finhero Badge Points: ${totalPoints} / ${TASK2_TOTAL_POINTS}`;
       $("stat-done").textContent   = `✅ ${completedCount} / 8 done`;
       $("progress-fill").style.width = ((completedCount / 8) * 100) + "%";
     }
@@ -1164,14 +1167,14 @@
 
       const totalPoints = Object.values(state.scores).reduce((a, b) => a + b, 0);
       let message;
-      if (totalPoints === 8)      message = "Perfect score! You nailed every question on the first try! 🌟";
-      else if (totalPoints >= 5)  message = "Great work! You've got a strong handle on your budget numbers!";
-      else if (totalPoints >= 1)  message = "Good effort! Review the hints and steps to strengthen your budget skills.";
-      else                        message = "Don't worry — now you know how to break down a budget! Practice makes perfect.";
+      if (totalPoints === TASK2_TOTAL_POINTS) message = "Perfect score! You nailed every question on the first try! 🌟";
+      else if (totalPoints >= 18)              message = "Great work! You've got a strong handle on your budget numbers!";
+      else if (totalPoints >= 1)               message = "Good effort! Review the hints and steps to strengthen your budget skills.";
+      else                                     message = "Don't worry — now you know how to break down a budget! Practice makes perfect.";
 
       $("completion-text").textContent = message;
       $("final-points").textContent    = totalPoints;
-      $("final-firsttry").textContent  = totalPoints;
+      $("final-firsttry").textContent  = state.firstTryCount;
       $("completion").classList.remove("hidden");
     }
   </script>
