@@ -159,6 +159,11 @@ class AdminStudentController extends Controller
             'citizenId' => $cityzenId, // Generate a unique citizen ID
             'role' => 4,
             'avatar' => random_int(1, 9),
+            // The form's Class dropdown (name="grade") was never actually
+            // saved - found while building the self-service account-claim
+            // flow, which needs this set to verify a student's class code
+            // on claim.
+            'grade' => $request->grade ?: null,
         ]);
         MailboxScheduler::scheduleForEvent('registration', $user->id);
         return redirect('admin/student')->with('success', 'Student details Created successfully.');

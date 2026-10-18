@@ -129,6 +129,21 @@
                         </div>
                     </div>
                     <div class="relative form-group mb-5">
+                        <label for="" class="form-label mb-2">Current password</label>
+                        <p class="text-xs leading-4 text-black mb-2">Only fill this in if your teacher already created your account and gave you a starting password. Leave it blank if this is a brand-new account.</p>
+                        <div class="relative haveIcon pswtoggle">
+                            <span class="absolute inset-y-0 left-3 flex items-center">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16.8 16.4L15 17.75C13.2222 19.0833 10.7778 19.0833 9 17.75L7.2 16.4C5.18555 14.8892 4 12.5181 4 10V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V10C20 12.5181 18.8144 14.8892 16.8 16.4Z" stroke="currentColor" stroke-linecap="round"/>
+                                    <circle cx="12" cy="10" r="1" fill="currentColor"/>
+                                    <circle cx="9" cy="10" r="1" fill="currentColor"/>
+                                    <circle cx="15" cy="10" r="1" fill="currentColor"/>
+                                </svg>
+                            </span>
+                            <input type="password" name="current_password" autocomplete="off" class="form-control pswfield" placeholder="Password your teacher gave you (if any)" />
+                        </div>
+                    </div>
+                    <div class="relative form-group mb-5">
                         <label for="" class="form-label mb-2">Password <span class="text-gray-800">*</span></label>
                         <div class="relative haveIcon pswtoggle">
                             <span class="absolute inset-y-0 left-3 flex items-center">
@@ -139,7 +154,7 @@
                                     <circle cx="15" cy="10" r="1" fill="currentColor"/>
                                 </svg>
                             </span>
-                            <input type="password" name="password" required autocomplete="new-password"  class="form-control pswfield" placeholder="Password" />
+                            <input type="password" name="password" required autocomplete="new-password"  class="form-control pswfield" placeholder="New password" />
                             <span class="absolute togglePsw inset-y-0 right-3 flex items-center">
                                 <svg class="showPsw" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="12" cy="12" r="3.5" stroke="currentColor"/>

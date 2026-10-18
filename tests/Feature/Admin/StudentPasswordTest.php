@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\SchoolClass;
 use App\Models\SchoolDomain;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,6 +60,35 @@ class StudentPasswordTest extends TestCase
 
         $response->assertSessionHasErrors('password');
         $this->assertDatabaseMissing('users', ['email' => 'nopassword@testschool2.example']);
+    }
+
+    /**
+     * Daniel, 2026-10-19: found while building the self-service
+     * account-claim flow - the "Add Student" form's Class dropdown
+     * (name="grade") was collected but never saved to the User model,
+     * so a staged account's class could never be verified at claim time.
+     */
+    public function test_add_student_saves_the_selected_class(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        $school = SchoolDomain::create([
+            'school_name' => 'Test School',
+            'school_code' => 'TS-' . uniqid(),
+            'school_domain' => 'testschool3.example',
+        ]);
+        $class = SchoolClass::create(['sid' => (string) $school->id, 'name' => '8A']);
+
+        $this->actingAs($admin)->post(route('admin.admin.student.add-student'), [
+            'name' => 'New Student',
+            'email' => 'classed@testschool3.example',
+            'password' => 'a-real-password',
+            'school' => $school->id,
+            'grade' => $class->id,
+        ]);
+
+        $student = User::where('email', 'classed@testschool3.example')->first();
+        $this->assertNotNull($student);
+        $this->assertSame($class->id, $student->grade);
     }
 
     public function test_admin_can_reset_an_existing_students_password(): void
