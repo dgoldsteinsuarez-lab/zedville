@@ -54,7 +54,6 @@ class CitizenActivationController extends Controller
         $emergencyFund = $salary * 0.20;
         $moneyMarketFund = $salary * 0.30;
         $validated = $request->validate([
-            'fullName' => 'required|string|max:255',
             'email' => 'required|email|unique:bank_accounts,student_email',
             'homeAddress' => 'nullable|string|max:255',
             'rcvaccemail' => 'nullable|string',
@@ -68,7 +67,12 @@ class CitizenActivationController extends Controller
         $data = [
             'student_id' => $user->id,
             'sid' => $user->sid,
-            'student_name' => $validated['fullName'],
+            // Daniel, 2026-10-19: he already typed his real name at
+            // registration - asking again here just wastes time and risks
+            // the bank account ending up with a different name than the
+            // account itself. Always use the registered name; a typo gets
+            // fixed in Settings (profile.update), not re-typed here.
+            'student_name' => $user->name,
             //'student_dob' => Carbon::parse($validated['dob'])->format('Y-m-d'),
             'student_email' => $validated['email'],
             //'student_phone' => $validated['phone'],

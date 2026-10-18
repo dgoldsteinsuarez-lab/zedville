@@ -206,6 +206,11 @@
     outline: none;
   }
   .field-textarea:focus { border-color: var(--green); }
+  .field-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .field-hint a { color: var(--green); }
 
   /* ---- Checkbox rows ---- */
   .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; }

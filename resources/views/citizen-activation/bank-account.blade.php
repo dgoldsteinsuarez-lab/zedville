@@ -43,11 +43,11 @@
                     <div class="field-group">
                         <label class="field-label">Full Name</label>
                         <input
-                            class="field-input"
+                            class="field-input readonly"
                             type="text"
-                            name="fullName"
                             value="{{ Auth::user()->name }}"
-                            placeholder="Your Name">
+                            readonly>
+                        <small class="field-hint">Made a typo? Fix it in <a href="{{ route('profile.edit') }}">Settings</a>.</small>
                     </div>
 
                     <div class="field-group">

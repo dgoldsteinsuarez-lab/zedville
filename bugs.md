@@ -150,5 +150,10 @@ Fixed with `App\Http\Middleware\EnsureCitizenActivation`, registered globally on
 
 Because this is global `web` middleware, it broke ~50 unrelated existing feature tests that create a bare student fixture (`User::factory()->create(['role' => 4])`) with no onboarding records and then expect to hit a student page/endpoint directly - now correctly redirected, matching real behavior, but not what those tests were set up to check. Rather than retrofitting every unrelated test with onboarding fixtures, disabled this middleware by default for the whole test suite in `tests/TestCase.php::setUp()` (`withoutMiddleware`), and re-enabled it explicitly in the one suite that tests it, `tests/Feature/CitizenActivationGateTest.php` (`withMiddleware`).
 
+### Fixed 2026-10-19 - Bank Account step asked a student to re-type their name
+Daniel: "if he registers, why not already adding the name there, to not waste time and have misunderstanding, later on, he can change it in settings if he did some mistakes" - the Bank Account application's "Full Name" field was pre-filled with the student's registered name but left editable, so a student could type something different there, leaving `bank_accounts.student_name` out of sync with `users.name` for no reason.
+
+Fixed: the field is now read-only (matching the existing Citizen ID field's style) with a link to Settings for anyone who made a typo at registration. `CitizenActivationController::store()` no longer accepts `fullName` from the request at all - it always writes `$user->name` server-side, so even a tampered/direct POST can't create a mismatched bank account. Tested via `tests/Feature/CitizenActivationBankNameTest.php`.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
