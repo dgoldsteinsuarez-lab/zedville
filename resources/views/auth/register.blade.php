@@ -33,7 +33,7 @@
                                     <path d="M10 10.5003C11.3807 10.5003 12.5 9.38095 12.5 8.00024C12.5 6.61953 11.3807 5.50024 10 5.50024C8.61929 5.50024 7.5 6.61953 7.5 8.00024C7.5 9.38095 8.61929 10.5003 10 10.5003Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                             </span>
-                            <input type="text" name="name" value="{{old('name')}}" required autofocus minlength="3" maxlength="8" autocomplete="name" class="form-control" placeholder="Enter your full name" >
+                            <input type="text" name="name" value="{{old('name')}}" required autofocus minlength="3" maxlength="255" autocomplete="name" class="form-control" placeholder="Enter your full name" >
                         </div>
                     </div>
                     <div class="relative form-group mb-5">
