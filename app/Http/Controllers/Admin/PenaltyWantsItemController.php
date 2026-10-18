@@ -31,8 +31,6 @@ class PenaltyWantsItemController extends Controller
             'products.*.price' => 'required|numeric|min:0',
         ]);
 
-        $sid = session('selected_school');
-
         DB::beginTransaction();
 
         try {
@@ -44,8 +42,12 @@ class PenaltyWantsItemController extends Controller
                     continue;
                 }
 
+                // Wants Items are "Fix for all schools" (Admin Structure
+                // Proposal doc §7.1, same as Supermarket/City Mall/NPOs) -
+                // never tied to session('selected_school'); banks_penalty()
+                // already reads this table without any sid filter.
                 DB::table('penalty_wants_items')->insert([
-                    'sid' => $sid,
+                    'sid' => null,
                     'item_name' => $item['product_name'],
                     'price' => $item['price'],
                     'created_at' => now(),
@@ -81,15 +83,11 @@ class PenaltyWantsItemController extends Controller
 
     public function wantsIteamUpdate(Request $request, $id)
     {
-        $sid = session('selected_school');
-
-        $query = DB::table('penalty_wants_items')->where('id', $id);
-
-        if ($sid) {
-            $query->where('sid', $sid);
-        }
-
-        $query->update([
+        // Wants Items are global (sid null, see wantsIteamStore) - a
+        // leftover session('selected_school') filter here meant editing any
+        // existing item silently no-op'd whenever a school was selected,
+        // since no row's sid ever matched it.
+        DB::table('penalty_wants_items')->where('id', $id)->update([
             'item_name' => $request->product_name,
             'price' => $request->price,
             'updated_at' => now(),
