@@ -190,20 +190,24 @@ class FinheroStudentController extends Controller
     public function savePoints(Request $request)
     {
         $request->validate([
-            'source_key' => [
-                'required',
-                'string',
-                'exists:finhero_activity_registry,activity_key',
-            ],
+            'source_key' => ['required', 'string'],
+            'approach' => ['nullable', 'integer', 'min:0', 'max:3'],
         ]);
 
         $studentId = auth()->id();
         $sourceKey = $request->source_key;
         $now = now();
 
+        // A task's questions are scored individually (source_key like
+        // "task_1_question_1"), but finhero_activity_registry only ever
+        // has one row per whole task ("task_1") - admins configure
+        // activation/points per task, not per question. Strip the
+        // "_question_N" suffix to find the task that owns this question.
+        $baseActivityKey = preg_replace('/_question_\d+$/', '', $sourceKey);
+
         // Make sure this is an active task.
         $activity = DB::table('finhero_activity_registry')
-            ->where('activity_key', $sourceKey)
+            ->where('activity_key', $baseActivityKey)
             ->where('type', 'task')
             ->where('is_active', true)
             ->first();
@@ -215,6 +219,51 @@ class FinheroStudentController extends Controller
             ], 422);
         }
 
+        // ── Tiered "Approach System" path (Zedville_FinHero_Point_Values_v1.pdf §2) ──
+        // The client reports which attempt TIER the student is on; the
+        // server - never the client - resolves that tier to a point value,
+        // same principle as awardPoints() never trusting a raw point number.
+        if ($request->filled('approach')) {
+            $alreadyScored = DB::table('finhero_student_points')
+                ->where('student_id', $studentId)
+                ->where('source_type', 'task')
+                ->where('source_key', $sourceKey)
+                ->whereMonth('earned_at', $now->month)
+                ->whereYear('earned_at', $now->year)
+                ->exists();
+
+            if ($alreadyScored) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This question has already been scored this month.',
+                ], 422);
+            }
+
+            $pointsToAward = \App\Services\FinheroApproachSystem::pointsForTier((int) $request->approach);
+
+            if ($pointsToAward > 0) {
+                DB::table('finhero_student_points')->insert([
+                    'student_id' => $studentId,
+                    'month' => $now->month,
+                    'year' => $now->year,
+                    'academic_year' => $this->calculator->getAcademicYear($now->month, $now->year),
+                    'source_type' => 'task',
+                    'source_key' => $sourceKey,
+                    'points_earned' => $pointsToAward,
+                    'earned_at' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'status' => 'saved',
+                'points_awarded' => $pointsToAward,
+            ]);
+        }
+
+        // ── Legacy flat path (Tasks 2-4, not yet migrated to the Approach System) ──
         // Check whether this student has already earned points
         // for this task during the current month.
         $alreadyEarned = DB::table('finhero_student_points')
@@ -226,7 +275,7 @@ class FinheroStudentController extends Controller
             ->sum('points_earned');
 
         $maxPoints = (int) ($activity->max_points
-            ?? \App\Models\FinheroActivityDefault::where('activity_key', $sourceKey)->value('max_points')
+            ?? \App\Models\FinheroActivityDefault::where('activity_key', $baseActivityKey)->value('max_points')
             ?? 0);
 
         if ($alreadyEarned >= $maxPoints) {

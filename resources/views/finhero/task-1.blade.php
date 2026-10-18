@@ -494,7 +494,7 @@
         <p>👉 Each income level has a range — find the one that fits your number!</p>
       </div>
       <div class="intro-points-note">
-        <p><strong>Finhero Badge Points: 1</strong> — You only earn the point if you get it right on your very first try! No retakes for points.</p>
+        <p><strong>Finhero Badge Points: up to 3</strong> — get it right on your first try for 3 points. Each wrong try lowers the hint tier and the points available: 2 on your second approach, 1 on your third. After that, no more points, but no limit on tries either.</p>
       </div>
       <button class="start-button" id="start-button">Let's Go! 🚀</button>
     </div>
@@ -510,7 +510,7 @@
 
       <div class="status-row">
         <div class="status-pill status-approach" id="status-approach">Approach 1 of 4</div>
-        <div class="status-pill status-points" id="status-points">🏆 Finhero Badge Points: 1</div>
+        <div class="status-pill status-points" id="status-points">🏆 Finhero Badge Points: 3</div>
         <div class="status-pill status-attempts" id="status-attempts">Attempts left: 1</div>
       </div>
 
@@ -570,10 +570,13 @@
       { id: "high",      label: "High Income",         term: "Manager / Executive",        range: "7,500+ zeds",        min: 7500, max: Infinity, emoji: "🟣", color: "#7C3AED", bg: "#EDE9FE", bgHover: "#DDD6FE", border: "#C4B5FD" },
     ];
 
+    // Zedville_FinHero_Point_Values_v1.pdf §2 "The Approach System".
+    // maxAttempts here counts WRONG attempts allowed before escalating to
+    // the next tier (doc: "2 wrong attempts" per tier, not 2 total tries).
     const APPROACHES = [
-      { maxAttempts: 1,        points: 1, hint: null },
-      { maxAttempts: 2,        points: 0, hint: "salary_ranges" },
-      { maxAttempts: 2,        points: 0, hint: "correct_glow" },
+      { maxAttempts: 2,        points: 3, hint: null },
+      { maxAttempts: 2,        points: 2, hint: "salary_ranges" },
+      { maxAttempts: 2,        points: 1, hint: "correct_glow" },
       { maxAttempts: Infinity, points: 0, hint: "correct_glow" },
     ];
 
@@ -758,7 +761,8 @@
                 "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
               },
               body: JSON.stringify({
-                source_key: "{{ $activityKey }}_question_1"
+                source_key: "{{ $activityKey }}_question_1",
+                approach: state.approach
               })
             })
             .then(res => res.json())
@@ -777,7 +781,7 @@
         state.completed     = true;
         state.totalAttempts = state.totalAttempts; // no increment on success (matches JSX)
         const text = pts > 0
-          ? `Correct! Your salary of ${state.salary.toLocaleString()} zeds falls under ${state.correctLevel.label} (${state.correctLevel.term}). You earned 1 Finhero Badge Point! 🎉`
+          ? `Correct! Your salary of ${state.salary.toLocaleString()} zeds falls under ${state.correctLevel.label} (${state.correctLevel.term}). You earned ${pts} Finhero Badge Point${pts === 1 ? '' : 's'}! 🎉`
           : `Correct! Your salary of ${state.salary.toLocaleString()} zeds falls under ${state.correctLevel.label} (${state.correctLevel.term}). 🎉`;
         showFeedback("success", text);
         state.dragging = false;
@@ -838,7 +842,7 @@
     function updateStatus() {
       const currentApproach = APPROACHES[state.approach];
       $("status-approach").textContent = `Approach ${state.approach + 1} of ${APPROACHES.length}`;
-      $("status-points").textContent   = `🏆 Finhero Badge Points: ${state.completed ? state.earnedPoints : (currentApproach.points > 0 ? 1 : 0)}`;
+      $("status-points").textContent   = `🏆 Finhero Badge Points: ${state.completed ? state.earnedPoints : currentApproach.points}`;
 
       const attemptsEl = $("status-attempts");
       if (!state.completed && currentApproach.maxAttempts !== Infinity) {

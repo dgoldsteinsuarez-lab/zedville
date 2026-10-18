@@ -36,17 +36,17 @@ class FinheroPointDefaultsTest extends TestCase
         $superAdmin = User::factory()->create(['role' => 1]);
         $student = User::factory()->create(['role' => 4]);
 
-        FinheroActivityDefault::create(['activity_key' => 'task_1', 'type' => 'task', 'max_points' => 1]);
+        FinheroActivityDefault::create(['activity_key' => 'task_test_x', 'type' => 'task', 'max_points' => 1]);
 
         DB::table('finhero_activity_registry')->insert([
             'sid' => $student->sid, 'cid' => null, 'type' => 'task',
-            'activity_key' => 'task_1', 'activity_name' => 'Task 1',
+            'activity_key' => 'task_test_x', 'activity_name' => 'Task 1',
             'max_points' => null, // no override - inherits the default
             'position' => 'required', 'is_active' => 1,
             'created_at' => now(), 'updated_at' => now(),
         ]);
 
-        $default = FinheroActivityDefault::where('activity_key', 'task_1')->first();
+        $default = FinheroActivityDefault::where('activity_key', 'task_test_x')->first();
 
         $this->actingAs($superAdmin)->put(route('finhero.point-defaults.update', $default->id), [
             'max_points' => 3,
@@ -64,17 +64,17 @@ class FinheroPointDefaultsTest extends TestCase
         $superAdmin = User::factory()->create(['role' => 1]);
         $student = User::factory()->create(['role' => 4]);
 
-        FinheroActivityDefault::create(['activity_key' => 'task_1', 'type' => 'task', 'max_points' => 1]);
+        FinheroActivityDefault::create(['activity_key' => 'task_test_x', 'type' => 'task', 'max_points' => 1]);
 
         DB::table('finhero_activity_registry')->insert([
             'sid' => $student->sid, 'cid' => null, 'type' => 'task',
-            'activity_key' => 'task_1', 'activity_name' => 'Task 1',
+            'activity_key' => 'task_test_x', 'activity_name' => 'Task 1',
             'max_points' => 5, // explicit override
             'position' => 'required', 'is_active' => 1,
             'created_at' => now(), 'updated_at' => now(),
         ]);
 
-        $default = FinheroActivityDefault::where('activity_key', 'task_1')->first();
+        $default = FinheroActivityDefault::where('activity_key', 'task_test_x')->first();
         $this->actingAs($superAdmin)->put(route('finhero.point-defaults.update', $default->id), ['max_points' => 50]);
 
         $calculator = app(FinheroBadgeCalculatorService::class);
