@@ -24,6 +24,48 @@ class SupermarketProductController extends Controller
         return view('admin.supermarket.supermarket', compact('stores'));
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // STORE NAMES (Supermarketname) — the "type" a product is assigned to
+    // above. Nothing in the app ever created these; there was no admin
+    // screen at all. The consumer-profile survey's diet step
+    // (/api/groceries/{diet}) filters supermarkets.type against exactly
+    // 'omnivore'/'vegetarian'/'pescatarian'/'vegan' - a store must be
+    // named one of those four (case-insensitive) for that diet's grocery
+    // list to show anything. bugs.md #19.
+    // ─────────────────────────────────────────────────────────────
+
+    public function storeNamesIndex()
+    {
+        $sid = session('selected_school');
+
+        $storeNames = Supermarketname::when($sid, fn ($q) => $q->where('sid', $sid))
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.supermarket.store-names', compact('storeNames'));
+    }
+
+    public function storeNamesStore(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+        ]);
+
+        Supermarketname::create([
+            'sid' => session('selected_school'),
+            'name' => $request->name,
+        ]);
+
+        return back()->with('success', 'Store added.');
+    }
+
+    public function storeNamesDelete($id)
+    {
+        Supermarketname::findOrFail($id)->delete();
+
+        return back()->with('success', 'Store removed.');
+    }
+
     public function supermarketStore(Request $request)
     {
         $request->validate([

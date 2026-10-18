@@ -191,6 +191,9 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/education/store-update/{id}', [CityMallStoreController::class, 'storeUpdate'])->name('admin.education.store-update');
     Route::delete('/education/store-delete/{id}', [CityMallStoreController::class, 'storeDelete'])->name('admin.education.store-delete');
     //For Supermarket
+    Route::get('/education/supermarket-store-names', [SupermarketProductController::class, 'storeNamesIndex'])->name('admin.education.supermarket-store-names');
+    Route::post('/education/supermarket-store-names', [SupermarketProductController::class, 'storeNamesStore'])->name('admin.education.supermarket-store-names.store');
+    Route::delete('/education/supermarket-store-names/{id}', [SupermarketProductController::class, 'storeNamesDelete'])->name('admin.education.supermarket-store-names.delete');
     Route::get('/education/supermarket', [SupermarketProductController::class, 'supermarket'])->name('admin.education.supermarket');
     Route::post('/education/supermarket-store', [SupermarketProductController::class, 'supermarketStore'])->name('admin.education.supermarket-store');
     Route::get('/education/supermarket-list', [SupermarketProductController::class, 'supermarketList'])->name('admin.education.supermarket-list');

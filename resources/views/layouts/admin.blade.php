@@ -413,9 +413,14 @@
                                                         <span class="navTxt">Store</span>
                                                     </a>
                                                 </li>
+                                                <li class="nav-item {{ request()->is('admin/education/supermarket-store-names') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/education/supermarket-store-names') }}">
+                                                        <span class="navTxt">Supermarket Stores</span>
+                                                    </a>
+                                                </li>
                                                 <li class="nav-item {{ request()->is('admin/education/supermarket') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/education/supermarket') }}">
-                                                        <span class="navTxt">Supermarket</span>
+                                                        <span class="navTxt">Supermarket Products</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item {{ request()->is('admin/education/wants-iteams') ? 'active' : '' }}">

@@ -90,4 +90,8 @@ Also still open for every task: no school currently has actual `finhero_activity
 - Do not touch DB schema/migrations as part of any Phase 1-3 item unless explicitly called out (only the column-rename item in Phase 4 touches schema, and it's flagged as needing special care).
 - Re-run the verification steps in Phase 0 whenever revisiting this plan after a gap in time — the codebase may have moved since this audit.
 
+## Flagged future initiative (not started, not scoped)
+
+**Multi-language support** (2026-10-18, Daniel: "I want to create this web for other languages like Spanish, German or French... I want everything to be in that languages"). Mentioned in passing while discussing the consumer-profile survey fix, not an active request yet - noted here so it isn't lost. Nothing in the codebase is currently i18n-ready (no `__()`/`trans()` usage found in a spot-check, no `resources/lang` structure beyond Laravel's default English, all admin/student-facing copy is hardcoded English directly in Blade/JS, including the two large JS-heavy survey/task files touched this session). A real scoping pass is needed before starting this - likely sequenced after the FinHero/survey content work, given its own size.
+
 See `bugs.md` for the full defect list this plan resolves, and `ProjectArchitecture.md` for system context.
