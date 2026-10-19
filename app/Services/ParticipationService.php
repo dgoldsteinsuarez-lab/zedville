@@ -18,7 +18,14 @@ class ParticipationService
     public function award(int $studentId, string $actionType, ?string $detail = null): bool
     {
         $now   = Carbon::now();
-        $month = $now->month;
+        // 0-based, matching the only reader: ProfileController::
+        // calculateMonthlyEngagement() queries participation_logs.month
+        // as 0-based (it converts to 1-based itself only for the
+        // separate calendar_events query) - this was previously stored
+        // 1-based here, so a row written this month could never actually
+        // match "this month" in the Engagement badge calculation (see
+        // bugs.md, 2026-10-19).
+        $month = $now->month - 1;
         $year  = $now->year;
         $today = $now->toDateString(); // 'YYYY-MM-DD'
 
@@ -42,15 +49,28 @@ class ParticipationService
         }
 
 
-        // Insert participation point
+        // Insert participation point. action_type is always the
+        // 'optional'/'required' bucket ProfileController::
+        // calculateMonthlyEngagement() counts by - every award() call
+        // site is an optional engagement action, never a required
+        // calendar event (those go through handleActivity() instead).
+        // The specific action name goes in action_detail (matching
+        // handleActivity()'s existing convention), and $detail (shop id,
+        // NPO name, building id, sign id) goes in action_ref so it
+        // doesn't collide with that - see bugs.md, 2026-10-19.
         DB::table('participation_logs')->insert([
             'student_id'    => $studentId,
-            'action_type'   => $actionType,
-            'action_detail' => $detail,
+            'action_type'   => 'optional',
+            'action_detail' => $actionType,
+            'action_ref'    => $detail,
             'points_earned' => 1,
             'month'         => $month,
             'year'          => $year,
-            'academic_year' => $this->academicYear($month, $year),
+            // academicYear() expects a 1-based month (matches
+            // config('zedville.academic_year_start_month')'s own
+            // convention) - use $now->month here, not the 0-based
+            // $month used for participation_logs storage above.
+            'academic_year' => $this->academicYear($now->month, $year),
             'earned_at'     => $now,
         ]);
 
@@ -63,15 +83,18 @@ class ParticipationService
         int $studentId, string $type, ?string $detail,
         int $month, int $year, string $today
     ): bool {
+        // Matched by action_detail now, not action_type - action_type is
+        // always the literal 'optional' bucket after the 2026-10-19 fix,
+        // so it can no longer identify which specific action this is.
         $q = DB::table('participation_logs')
             ->where('student_id', $studentId)
-            ->where('action_type', $type);
+            ->where('action_detail', $type);
 
 
         switch ($type) {
             // Once per shop per day
             case 'shopping':
-                return $q->where('action_detail', $detail)
+                return $q->where('action_ref', $detail)
                          ->whereDate('earned_at', $today)->exists();
 
 
@@ -79,7 +102,7 @@ class ParticipationService
             case 'voting':
                 return false;
             case 'donation':
-            /* return $q->where('action_detail', $detail)
+            /* return $q->where('action_ref', $detail)
              ->whereDate('earned_at', $today)
              ->exists(); */
               return $q->whereDate('earned_at', $today)->exists();
@@ -90,6 +113,7 @@ class ParticipationService
             // Once per month
             case 'emergency_fund_open':
             case 'money_market_open':
+            case 'substitute_goods_swap':
                 return $q->where('month', $month)->where('year', $year)->exists();
 
 
@@ -101,13 +125,13 @@ class ParticipationService
 
             // Once per building per day
             case 'building_enter':
-                return $q->where('action_detail', $detail)
+                return $q->where('action_ref', $detail)
                          ->whereDate('earned_at', $today)->exists();
 
 
             // Once per sign per month
             case 'street_sign_press':
-                return $q->where('action_detail', $detail)
+                return $q->where('action_ref', $detail)
                          ->where('month', $month)->where('year', $year)->exists();
 
 
@@ -193,6 +217,8 @@ class ParticipationService
 }*/
 public function handleActivity($studentId, $activityKey, $eventId = null)
 {
+    // 1-based - needed as-is for the activity_completions/whereMonth()
+    // check below (real calendar months) and for getAcademicYear().
     $month = now()->month;
     $year  = now()->year;
 
@@ -255,12 +281,15 @@ public function handleActivity($studentId, $activityKey, $eventId = null)
 $academicYear = app(\App\Services\BadgeCalculatorService::class)
     ->getAcademicYear($month, $year);
     // ✅ STEP 6: Insert into participation_logs (for points)
+    // 0-based, matching the only reader (ProfileController::
+    // calculateMonthlyEngagement()) - see the identical fix/reasoning in
+    // award() above (bugs.md, 2026-10-19).
     DB::table('participation_logs')->insert([
         'student_id'    => $studentId,
         'action_type'   => $type,
         'action_detail' => $activityKey,
         'points_earned' => $points,
-        'month'         => $month,
+        'month'         => $month - 1,
         'year'          => $year,
         'academic_year' => $academicYear,
         'earned_at'     => now(),

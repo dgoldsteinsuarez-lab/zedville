@@ -58,10 +58,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/order/place', [OrderController::class, 'placeOrder'])->name('order.place');
     Route::post('/order/placeActivity', [OrderController::class, 'placeOrder'])->name('order.place');
 
-    // Substitute Goods feature + FinHero Task 6 (2026-10-19)
+    // Substitute Goods activity - Engagement badge, not FinHero (2026-10-19)
     Route::get('/profile/basket/state', [\App\Http\Controllers\BasketController::class, 'state'])->name('basket.state');
     Route::get('/profile/basket/options', [\App\Http\Controllers\BasketController::class, 'options'])->name('basket.options');
     Route::post('/profile/basket/swap', [\App\Http\Controllers\BasketController::class, 'swap'])->name('basket.swap');
+    Route::get('/engagement/substitute-goods', fn () => view('engagement.substitute-goods'))->name('engagement.substitute-goods');
     Route::get('/toggle-view-mode', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'toggleViewMode'])->name('toggle-view-mode');
 });
 

@@ -93,7 +93,7 @@ Key decision made with Daniel: no real interactive 3D in the browser (too heavy,
 
 **Explicitly deferred, confirmed with Daniel:** real pages for the ~18 not-yet-built buildings; any real 3D/interactive rendering; per-street custom house-number ranges (even round-robin only); multiple city images per Grade (one shared image for now, since there's only one 3D model).
 
-## Phase 8 — Substitute Goods: Supermarket basket-swap + FinHero Task 6 (new feature, 2026-10-19)
+## Phase 8 — Substitute Goods: Supermarket basket-swap (new feature, 2026-10-19) — later moved to the Engagement badge, see bugs.md
 
 Daniel wanted two related things, both teaching **substitute goods** (microeconomics - confirmed correct term): an always-available way to swap a basket item for a substitute (no need to redo the full Consumer Profile survey), and a new FinHero Task 6 rebuilding a scenario he wrote before - 3 basket items go "temporarily unavailable," student must pick valid substitutes. Confirmed with Daniel: a "valid substitute" = any other item in the same diet catalog, no formal substitute-pairing data. Full plan: `C:\Users\HP\.claude\plans\quizzical-kindling-sutherland.md`.
 

@@ -1,13 +1,13 @@
 @extends('layouts.profile')
 
-@section('title', 'Task 6: Shopping Basket Update')
+@section('title', 'Shopping Basket Update')
 
 @section('content')
 <div class="flex items-center justify-between pb-6">
-    <h1 class="text-xl font-bold whitespace-nowrap">Task 6: Shopping Basket Update</h1>
+    <h1 class="text-xl font-bold whitespace-nowrap">Shopping Basket Update</h1>
 </div>
 
-<div class="grid grid-cols-1 gap-5" x-data="task6()" x-init="load()">
+<div class="grid grid-cols-1 gap-5" x-data="substituteGoods()" x-init="load()">
 
     <div class="tailCard w-full rounded-lg p-6">
         <h2 class="text-lg font-bold mb-2">🔄 Special Challenge: Shopping Basket Update!</h2>
@@ -18,7 +18,7 @@
             <strong>substitute good</strong> (think chicken and tofu, or butter and margarine).
         </p>
 
-        <p class="text-gray-700 mb-2"><strong>Your task:</strong></p>
+        <p class="text-gray-700 mb-2"><strong>Your challenge:</strong></p>
         <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
             <li>Look at your current shopping basket in the Supermarket.</li>
             <li>Any item marked <strong class="text-red-600">"Currently unavailable"</strong> needs a substitute.</li>
@@ -56,7 +56,7 @@
 
 @push('scripts')
 <script>
-function task6() {
+function substituteGoods() {
     return {
         loaded: false,
         diet: null,

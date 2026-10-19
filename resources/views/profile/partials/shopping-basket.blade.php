@@ -1,7 +1,7 @@
 {{--
     Substitute Goods feature (2026-10-19). A clear, always-available way
     to swap one grocery item for a substitute, without redoing the full
-    Consumer Profile survey. Also where FinHero Task 6 plays out: an
+    Consumer Profile survey. Also where the Substitute Goods activity plays out: an
     item an admin/tutor has marked "temporarily unavailable" shows here
     and must be swapped to complete the task.
 --}}
@@ -138,8 +138,8 @@ function shoppingBasket() {
                         return;
                     }
                     this.swapping = false;
-                    if (data.task6_completed) {
-                        alert('Task 6 complete! You replaced every unavailable item with a valid substitute.');
+                    if (data.engagement_point_awarded) {
+                        alert('Nice work! You replaced every unavailable item with a valid substitute.');
                     }
                     this.load();
                 })

@@ -3,63 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Models\ConsumerSurvey;
-use App\Models\FinheroTask6StudentPick;
+use App\Models\SubstituteGoodsPick;
 use App\Models\Supermarket;
 use App\Services\ConsumerSurveySummaryService;
-use App\Services\FinheroBadgeCalculatorService;
+use App\Services\ParticipationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 /**
- * Substitute Goods feature (2026-10-19): lets a student swap one item in
+ * Substitute Goods activity (2026-10-19): lets a student swap one item in
  * their shopping basket for a substitute from the same diet catalog,
  * without redoing the full Consumer Profile survey. Also the mechanism
- * FinHero Task 6 is built on - swapping out the last auto-picked item
- * completes the task.
+ * the auto-picked "which items are temporarily unavailable" exercise is
+ * built on - swapping out the last auto-picked item earns an Engagement
+ * point.
  *
- * Daniel, 2026-10-19: "no quiero que el admin o el tutor hagan nada...
- * que tomes los productos de cada alumno y escogas cuales debe
- * sustituir" - no admin/tutor action beyond activating the task (the
- * same thing they already do for every other FinHero task). Which items
- * are blocked is picked automatically, per student, from that student's
- * own current basket.
+ * Daniel, 2026-10-19: this counts toward the **Engagement** badge, not
+ * FinHero - "no deberia ser en Finance Badge... deberia ser en
+ * Engagement badge... no deberia llamarse Task 6." No admin/tutor
+ * involvement at all (not even an on/off toggle) - matches how every
+ * other Engagement activity (poster_room_enter, etc.) already works via
+ * ParticipationService: always live, awarded whenever it happens.
  */
 class BasketController extends Controller
 {
     private const PICKS_PER_MONTH = 3;
 
     /**
-     * This student's currently-blocked item ids for this month - empty
-     * unless Task 6 is active for their Class. Auto-picks up to 3 random
-     * items from the student's own current basket the first time this is
-     * called in a given month, so the selection stays stable afterward.
+     * This student's currently-blocked item ids for this month. Auto-picks
+     * up to 3 random items from the student's own current basket the
+     * first time this is called in a given month, so the selection stays
+     * stable afterward.
      */
     private function blockedItemIdsFor($user): array
     {
-        if (!$user->sid || !$user->grade) {
-            return [];
-        }
-
-        $taskActive = DB::table('finhero_activity_registry')
-            ->where('activity_key', 'task_6')
-            ->where('type', 'task')
-            ->where('is_active', true)
-            ->where(function ($q) use ($user) {
-                $q->whereNull('cid')->orWhere('cid', $user->grade);
-            })
-            ->where(function ($q) use ($user) {
-                $q->whereNull('sid')->orWhere('sid', $user->sid);
-            })
-            ->exists();
-
-        if (!$taskActive) {
-            return [];
-        }
-
         $now = now();
 
-        $existing = FinheroTask6StudentPick::where('student_id', $user->id)
+        $existing = SubstituteGoodsPick::where('student_id', $user->id)
             ->where('month', $now->month)
             ->where('year', $now->year)
             ->pluck('supermarket_id');
@@ -80,7 +60,7 @@ class BasketController extends Controller
             ->take(self::PICKS_PER_MONTH);
 
         foreach ($picked as $supermarketId) {
-            FinheroTask6StudentPick::create([
+            SubstituteGoodsPick::create([
                 'student_id' => $user->id,
                 'supermarket_id' => $supermarketId,
                 'month' => $now->month,
@@ -200,13 +180,13 @@ class BasketController extends Controller
         $survey->total_cost = $totalCost;
         $survey->save();
 
-        $task6Completed = false;
+        $engagementAwarded = false;
         if ($wasBlocked) {
             $remainingBlocked = collect($blockedIds)->diff([$oldItemId]);
             $stillHasBlocked = collect($survey->groceries)->contains(fn ($item) => $remainingBlocked->contains((int) $item['id']));
 
             if (!$stillHasBlocked) {
-                $task6Completed = $this->awardTask6Points($user);
+                $engagementAwarded = app(ParticipationService::class)->award($user->id, 'substitute_goods_swap');
             }
         }
 
@@ -214,54 +194,7 @@ class BasketController extends Controller
             'status' => true,
             'basket_cost' => $basketCost,
             'total_cost' => $totalCost,
-            'task6_completed' => $task6Completed,
+            'engagement_point_awarded' => $engagementAwarded,
         ]);
-    }
-
-    private function awardTask6Points($user): bool
-    {
-        $now = now();
-
-        $alreadyScored = DB::table('finhero_student_points')
-            ->where('student_id', $user->id)
-            ->where('source_type', 'task')
-            ->where('source_key', 'task_6')
-            ->whereMonth('earned_at', $now->month)
-            ->whereYear('earned_at', $now->year)
-            ->exists();
-
-        if ($alreadyScored) {
-            return false;
-        }
-
-        $maxPoints = (int) (
-            DB::table('finhero_activity_registry')
-                ->where('activity_key', 'task_6')
-                ->where('type', 'task')
-                ->value('max_points')
-            ?? \App\Models\FinheroActivityDefault::where('activity_key', 'task_6')->value('max_points')
-            ?? 0
-        );
-
-        if ($maxPoints <= 0) {
-            return false;
-        }
-
-        $calculator = app(FinheroBadgeCalculatorService::class);
-
-        DB::table('finhero_student_points')->insert([
-            'student_id' => $user->id,
-            'month' => $now->month,
-            'year' => $now->year,
-            'academic_year' => $calculator->getAcademicYear($now->month, $now->year),
-            'source_type' => 'task',
-            'source_key' => 'task_6',
-            'points_earned' => $maxPoints,
-            'earned_at' => $now,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-
-        return true;
     }
 }

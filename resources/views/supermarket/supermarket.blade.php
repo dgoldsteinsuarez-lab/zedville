@@ -896,18 +896,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="survey-info-box centered-box">
-                    <h3>Monthly Groceries</h3>
-                    <p>
-                        <strong>11 Products Compulsory.</strong><br>
-                        Always next month after the survey is being done.<br>
-                        Last surveys done are applied.
-                    </p>
-
-                    <a href="#myShoppingBasket" class="btn btn-primary btn-sm mt-2">
-                        My Shopping Basket
-                    </a>
-                </div>
             </div>
         </div>
         <!-- For Model -->

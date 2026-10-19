@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ConsumerSurvey;
-use App\Models\FinheroTask6StudentPick;
+use App\Models\SubstituteGoodsPick;
 use App\Models\Supermarket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,19 +11,19 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * Substitute Goods feature (2026-10-19): swap one basket item for another
- * from the same diet catalog, without redoing the full Consumer Profile
- * survey. Also the mechanism FinHero Task 6 is built on.
+ * Substitute Goods activity (2026-10-19): swap one basket item for
+ * another from the same diet catalog, without redoing the full Consumer
+ * Profile survey. Also the mechanism the auto-picked "which items are
+ * temporarily unavailable" exercise is built on.
  *
- * Task 6's "blocked" items are picked automatically by the system from
- * the student's OWN basket - no admin/tutor action beyond activating the
- * task (Daniel, 2026-10-19: "no quiero que el admin o el tutor hagan
- * nada... que tomes los productos de cada alumno"). Tests pre-seed a
- * FinheroTask6StudentPick row to simulate "this was already auto-picked
- * this month," since BasketController::blockedItemIdsFor() only
- * generates fresh picks when none exist yet for the student this month -
- * this keeps the tests deterministic instead of depending on the random
- * pick.
+ * Counts toward the Engagement badge, not FinHero (Daniel caught this
+ * was wired into the wrong badge). Fully automatic - no admin/tutor
+ * action at all, not even an activation toggle: every student always has
+ * up to 3 items auto-picked from their own basket each month. Tests
+ * pre-seed a SubstituteGoodsPick row to simulate "this was already
+ * auto-picked this month," since BasketController::blockedItemIdsFor()
+ * only generates fresh picks when none exist yet - keeps tests
+ * deterministic instead of depending on the random pick.
  */
 class BasketSwapTest extends TestCase
 {
@@ -68,18 +68,9 @@ class BasketSwapTest extends TestCase
         return [$student, $survey];
     }
 
-    private function activateTask6(): void
-    {
-        DB::table('finhero_activity_registry')->insert([
-            'sid' => 1, 'cid' => 99, 'type' => 'task', 'activity_key' => 'task_6',
-            'activity_name' => 'Task 6', 'max_points' => 5, 'is_active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
-    }
-
     private function seedPick(User $student, Supermarket $item): void
     {
-        FinheroTask6StudentPick::create([
+        SubstituteGoodsPick::create([
             'student_id' => $student->id,
             'supermarket_id' => $item->id,
             'month' => now()->month,
@@ -150,13 +141,11 @@ class BasketSwapTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_task_6_auto_picks_items_from_the_students_own_basket(): void
+    public function test_items_are_auto_picked_from_the_students_own_basket_with_no_activation_needed(): void
     {
         $chicken = $this->makeDietItem('omnivore', 'Chicken', 10);
         $beans = $this->makeDietItem('omnivore', 'Beans', 4);
         [$student] = $this->makeStudentWithBasket([$chicken, $beans]);
-        $student->update(['grade' => 99]);
-        $this->activateTask6();
 
         $response = $this->actingAs($student)->getJson(route('basket.state'));
 
@@ -173,14 +162,12 @@ class BasketSwapTest extends TestCase
         $this->assertEquals($blockedIds->sort()->values(), $blockedIdsAgain->sort()->values());
     }
 
-    public function test_swapping_out_the_last_blocked_item_completes_task_6_and_awards_points_once(): void
+    public function test_swapping_out_the_last_blocked_item_awards_an_engagement_point_once(): void
     {
         $chicken = $this->makeDietItem('omnivore', 'Chicken', 10);
         $tofu = $this->makeDietItem('omnivore', 'Tofu', 6);
         $eggs = $this->makeDietItem('omnivore', 'Eggs', 3);
         [$student, $survey] = $this->makeStudentWithBasket([$chicken]);
-        $student->update(['grade' => 99]);
-        $this->activateTask6();
         $this->seedPick($student, $chicken);
 
         $response = $this->actingAs($student)->postJson(route('basket.swap'), [
@@ -189,12 +176,11 @@ class BasketSwapTest extends TestCase
         ]);
 
         $response->assertOk();
-        $response->assertJson(['status' => true, 'task6_completed' => true]);
-        $this->assertDatabaseHas('finhero_student_points', [
+        $response->assertJson(['status' => true, 'engagement_point_awarded' => true]);
+        $this->assertDatabaseHas('participation_logs', [
             'student_id' => $student->id,
-            'source_type' => 'task',
-            'source_key' => 'task_6',
-            'points_earned' => 5,
+            'action_type' => 'optional',
+            'action_detail' => 'substitute_goods_swap',
         ]);
 
         // Swapping again (a different, non-blocked item) must not re-award.
@@ -204,8 +190,11 @@ class BasketSwapTest extends TestCase
             'new_item_id' => $eggs->id,
         ]);
         $response2->assertOk();
-        $response2->assertJson(['task6_completed' => false]);
-        $this->assertSame(1, DB::table('finhero_student_points')->where('student_id', $student->id)->where('source_key', 'task_6')->count());
+        $response2->assertJson(['engagement_point_awarded' => false]);
+        $this->assertSame(
+            1,
+            DB::table('participation_logs')->where('student_id', $student->id)->where('action_detail', 'substitute_goods_swap')->count()
+        );
     }
 
     public function test_an_already_swapped_out_blocked_item_cannot_be_chosen_again(): void
@@ -214,8 +203,6 @@ class BasketSwapTest extends TestCase
         $tofu = $this->makeDietItem('omnivore', 'Tofu', 6);
         $beans = $this->makeDietItem('omnivore', 'Beans', 4);
         [$student] = $this->makeStudentWithBasket([$chicken, $tofu]);
-        $student->update(['grade' => 99]);
-        $this->activateTask6();
         // "Beans" was auto-picked as blocked earlier this month, even
         // though it's no longer in the basket (already swapped out once).
         $this->seedPick($student, $beans);
@@ -234,8 +221,6 @@ class BasketSwapTest extends TestCase
         $tofu = $this->makeDietItem('omnivore', 'Tofu', 6);
         $beans = $this->makeDietItem('omnivore', 'Beans', 4);
         [$student] = $this->makeStudentWithBasket([$chicken]);
-        $student->update(['grade' => 99]);
-        $this->activateTask6();
         $this->seedPick($student, $beans); // blocked, not in basket
 
         $response = $this->actingAs($student)->getJson(route('basket.options'));
