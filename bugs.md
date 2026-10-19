@@ -194,5 +194,14 @@ Fixed by adding an explicit `catalog` field (`'products'` default, keeping every
 
 **Not fixed (out of scope, flagged):** this bug already produced bad live data - any order placed through the Supermarket before this fix has the wrong item name/price recorded in `orders`/`order_items`/`transactions1`. Not corrected here since it touches real account balances; use the existing admin Reverse/Reset tool (Bank tab on student details, Phase 5) on any affected account if a correction is needed.
 
+### Seeded 2026-10-19 - the NGO directory (`npos`) had zero rows locally
+Daniel: "lets try to find the date for the NGOs, I know the IT guys did it, could I find this in hostinger?" - yes. Same pattern as the avatars table and the City Mall catalog found earlier this session: the real 7 NGOs (Animal Shelter, Senior Care Home, Children's Orphanage, Food Bank, Local Library, Community Center, EcoFun) were only ever added directly into the production database on Hostinger, never committed as a seeder here - the `npos` table was completely empty locally, even though its schema was already correctly migration-tracked (`2026_10_10_000001_create_missing_live_schema_tables.php`).
+
+Daniel pulled the production data himself via phpMyAdmin's Export and shared the SQL dump; replayed it in a new migration (`2026_10_19_000002_seed_npos_from_production`, upserts by `slug` so it's safe to re-run).
+
+One deliberate substitution: production's `image` column holds upload-style filenames with a unix-timestamp prefix (`NpoController::add_npo()`'s `time() . '_' . original name` pattern, e.g. `1773142879_animal-shelter.png`) pointing at files in `public/uploads/npos/` that only exist on the live server. The exact same 7 NGOs already had plain-named images committed at `public/asset/front/images/npos/` (e.g. `animal-shelter.png`) - almost certainly the original source files before they were uploaded through the admin form. Copied those into `public/uploads/npos/` (where `npos/index.blade.php` actually reads from) and used their plain filenames in the seed instead. Since `/public/uploads` is normally gitignored (genuine runtime admin uploads, correctly not committed), carved out a narrow exception for just this one subfolder in `.gitignore` - this is bundled default content the seed migration depends on, not admin-uploaded data.
+
+Tested via `tests/Feature/NpoCatalogSeededTest.php` (all 7 rows present and active, every row's image file actually exists on disk, the student-facing NGO directory page renders them).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
