@@ -57,6 +57,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::post('/order/place', [OrderController::class, 'placeOrder'])->name('order.place');
     Route::post('/order/placeActivity', [OrderController::class, 'placeOrder'])->name('order.place');
+
+    // Substitute Goods feature + FinHero Task 6 (2026-10-19)
+    Route::get('/profile/basket/state', [\App\Http\Controllers\BasketController::class, 'state'])->name('basket.state');
+    Route::get('/profile/basket/options', [\App\Http\Controllers\BasketController::class, 'options'])->name('basket.options');
+    Route::post('/profile/basket/swap', [\App\Http\Controllers\BasketController::class, 'swap'])->name('basket.swap');
     Route::get('/toggle-view-mode', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'toggleViewMode'])->name('toggle-view-mode');
 });
 
@@ -181,5 +186,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function ()
         Route::get ('/point-defaults',       [FinheroAdminController::class, 'pointDefaultsIndex'])->name('finhero.point-defaults.index');
         Route::post('/point-defaults',       [FinheroAdminController::class, 'pointDefaultsStore'])->name('finhero.point-defaults.store');
         Route::put ('/point-defaults/{id}',  [FinheroAdminController::class, 'pointDefaultsUpdate'])->name('finhero.point-defaults.update');
+    });
+
+    // Task 6 (Substitute Goods) blocked items - same access as the
+    // Activity Manager.
+    Route::middleware('role:super_admin,school_admin')->group(function () {
+        Route::get ('/task6-blocked-items', [\App\Http\Controllers\Admin\FinheroTask6Controller::class, 'index'])->name('finhero.task6-blocked-items.index');
+        Route::post('/task6-blocked-items', [\App\Http\Controllers\Admin\FinheroTask6Controller::class, 'update'])->name('finhero.task6-blocked-items.update');
     });
 });
