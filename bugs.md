@@ -171,5 +171,8 @@ A 500 on `/citizen-activation/store-auto-debit-authorization-form`: `SQLSTATE[23
 
 Beyond the crash, this was the wrong field regardless: `'fullname'`/`'signature'` on a legal auto-debit authorization document should be the student's real name, same reasoning as the Bank Account "Full Name" fix earlier today - not the casual, possibly-null nickname. Fixed in all three places with the identical bug (`CitizenActivationController::store_auto_debit_authorization_form`, `AutoDebitController::store_auto_debit_authorization_form` - a near-duplicate extracted during an earlier refactor pass, same bug copied along with it - and `CitizenActivationService::provisionForTutor`'s auto-debit rows for Tutors) by switching to `$user->name`. Tested via `tests/Feature/CitizenActivationAutoDebitNameTest.php` (a nickname-less student completes the step without crashing, and `fullname`/`signature` are correctly the real name).
 
+### Fixed 2026-10-19 - "Go to My Bank Account" button on the activation-complete page did nothing
+Daniel: "I can not go to bank account by pressing the green tap." The button was a plain `href="#"` placeholder in `citizen-activation/activation-complete.blade.php` - never actually wired to a route. Fixed to `route('bank.index')`. Tested via `tests/Feature/ActivationCompleteBankLinkTest.php`.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

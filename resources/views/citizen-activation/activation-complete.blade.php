@@ -187,7 +187,7 @@
 
             <div class="btn-row" style="margin-top:1.5rem">
 
-                <a href="#"
+                <a href="{{ route('bank.index') }}"
                    class="ca-btn-primary">
                     Go to My Bank Account →
                 </a>
