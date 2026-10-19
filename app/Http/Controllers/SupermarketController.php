@@ -61,6 +61,8 @@ public function supermarket()
     $user = auth()->user();
     $now = now(); // ✅ SAFE replacement for Carbon
 
+    app(\App\Services\ParticipationService::class)->award($user->id, 'building_enter', 'supermarket');
+
     // 🔹 Bank account
     $bankAccount = \App\Models\BankAccount::where('student_id', $user->id)->first();
 

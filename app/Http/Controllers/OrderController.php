@@ -154,6 +154,8 @@ class OrderController extends Controller
 
             DB::commit();
 
+            app(ParticipationService::class)->award($user->id, 'shopping', $catalogTable);
+
             return response()->json([
                 'status' => true,
                 'message' => 'Order placed successfully.',

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->prefix('closet')->name('closet.')->group(function () {
     // Closet page
     Route::get('/', function () {
+        app(\App\Services\ParticipationService::class)->award(auth()->id(), 'closet_enter');
         return view('closet.index');
     })->name('index');
 

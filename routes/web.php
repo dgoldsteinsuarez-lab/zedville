@@ -130,6 +130,23 @@ Route::post('/award-poster-room', function () {
     return response()->json(['success' => true]);
 })->middleware('auth');
 
+// Generic secure endpoint for frontend-triggered Participation actions
+// that have no natural page-load/form-submit hook of their own (spec
+// §7: these must go through a backend endpoint, never be awarded
+// client-side only). Restricted to a small allow-list - extend the list
+// as more such actions come up, see bugs.md, 2026-10-19.
+Route::post('/participation/award', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'action' => 'required|in:street_sign_press',
+        'detail' => 'nullable|string|max:255',
+    ]);
+
+    $awarded = app(\App\Services\ParticipationService::class)
+        ->award(auth()->id(), $request->input('action'), $request->input('detail'));
+
+    return response()->json(['success' => true, 'awarded' => $awarded]);
+})->middleware('auth')->name('participation.award');
+
 //Finhero route
 Route::middleware(['auth'])->group(function () {
     Route::get('/finhero-badge',       [FinheroStudentController::class, 'index'])->name('finhero.index');

@@ -51,7 +51,15 @@
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             @foreach ($streets as $street)
                 <button type="button"
-                    @click="modalTitle = @js($street->name); modalBody = @js($street->bio); showModal = true"
+                    @click="modalTitle = @js($street->name); modalBody = @js($street->bio); showModal = true;
+                        fetch('{{ route('participation.award') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ action: 'street_sign_press', detail: '{{ $street->id }}' }),
+                        })"
                     class="block w-full text-left rounded-md border border-[#D2DDDB] px-4 py-3 text-sm font-semibold hover:bg-[#E9F0E9]">
                     {{ $street->name }}
                 </button>

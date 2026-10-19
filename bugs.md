@@ -236,5 +236,22 @@ Tested via the rebuilt `tests/Feature/BasketSwapTest.php` and `tests/Feature/Eng
 
 **Still deferred (confirmed with Daniel earlier, unchanged):** the "aggregate basket" / CPI-style city-wide macro data point hasn't been started - it's a separate initiative, not forgotten, waiting on its own pass (see planning.md Phase 7's deferred list).
 
+### Fixed 2026-10-19 - Engagement badge consolidation follow-up: real system wired end to end
+Daniel confirmed ("yes") taking on the bounded follow-up flagged above. Also corrects item 3 of the "silently broken three different ways" entry above: that earlier pass switched `ParticipationService` to store 0-based months to match the legacy `ProfileController::calculateMonthlyEngagement()`, since that was the only reader at the time. It no longer is (see below), and both `BadgeCalculatorService` and Daniel's own spec reference implementation use 1-based months throughout - reverted `ParticipationService::award()`/`handleActivity()` back to 1-based.
+
+1. **`BadgeCalculatorService`'s two real query bugs, fixed.** `getRequiredAssigned()`/`getRequiredCompleted()` now filter `calendar_events.activityType` (was the unused `position` column); `getRequiredAssigned()` now filters the real `start` date column (was `created_at`). `getParticipationPoints()` now sums `points_earned` filtered by the real `month`/`year` integer columns (was `whereMonth('created_at', ...)` - `participation_logs` has no `created_at` column at all, so this was a fatal error waiting to happen). Confirmed via `tests/Feature/BadgeCalculatorServiceTest.php` that a student who actually completes everything now earns PLATINUM, not a forced NONE.
+2. **`/badges` and `/admin/badges/*` routes** - re-checked and found these were already registered (`routes/badges.php`, loaded from `RouteServiceProvider`) - the "Step 6 skipped" diagnosis in the earlier investigation was stale. Added one freshness line to `BadgeStudentController::data()`: it now calls `calculateForStudent()` for the current month before reading `student_badge_records`, so a student sees live current-month progress rather than waiting for the end-of-month scheduled job. Covered by `tests/Feature/BadgeRoutesTest.php`.
+3. **Settings page switched to the real data source.** `ProfileController::getEngagementData()` now calls `BadgeCalculatorService::calculateForStudent()` and reads the result from `StudentBadgeRecord`, instead of running its own separate, now-deleted `calculateMonthlyEngagement()` query logic - the Settings page's Engagement section and `/badges` now always agree, by construction, since they read the same rows. The JSON shape returned to the Blade view's JS is unchanged. Covered by `tests/Feature/EngagementBadgeSettingsPageTest.php` (a real earned badge) and the existing `tests/Feature/EngagementBadgeNoRequiredEventsTest.php` (the 0-required-events edge case, still correctly NONE).
+4. **The 6 missing/dead Participation actions - 5 actually needed wiring** (re-checking live code found `poster_room_enter` already wired via `POST /award-poster-room`, called from `efd.js`'s `openDoorModal()` - the "dead endpoint" diagnosis was also stale):
+   - `voting` - `EFDController::castVote()`, right after `ReferendumVote::create()`.
+   - `building_enter` - `EFDController::city_hall()`/`city_mall()`/`npos()` and `SupermarketController::supermarket()`, using the spec's exact suggested slugs (`city_hall`, `city_mall`, `npo`, `supermarket`).
+   - `shopping` - `OrderController::placeOrder()`, after a successful commit, using the already-distinguished `products`/`supermarkets` catalog name as the shop identifier.
+   - `closet_enter` - the closet index route closure (`routes/closet_routes.php`).
+   - `street_sign_press` - new generic `POST /participation/award` endpoint (`routes/web.php`, allow-listed to just this action for now, per spec §7's requirement that frontend-triggered actions go through a backend endpoint), wired into the street-plaque click handler already built in `resources/views/education/city/district.blade.php`.
+
+   All 5 covered by `tests/Feature/Engagement/ParticipationWiringTest.php`.
+
+Full suite stayed at the pre-existing 3-failure baseline throughout (Breeze auth-scaffolding tests, unrelated).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

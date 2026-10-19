@@ -105,6 +105,17 @@ Daniel wanted two related things, both teaching **substitute goods** (microecono
 
 **Local-environment quirk, not a code bug:** while testing file uploads to `public/uploads/city`/`public/uploads/*` on this Windows/XAMPP setup, the directory's "Read-Only" attribute kept getting re-applied by Windows between test runs, making PHP's `is_writable()` check (used by Symfony's `UploadedFile::move()`) return false even though writes inside it actually succeed. Not a production concern (Linux hosting), but if a local upload test fails with "Unable to write in the directory" again, clear the attribute: `(Get-Item '<path>').Attributes = 'Directory'` in PowerShell.
 
+## Phase 9 — Engagement badge consolidation (2026-10-19, follow-up to Phase 8's badge move + Daniel's "is the engagement badge all good?")
+
+Daniel's original IT handoff docs confirmed `BadgeCalculatorService`/`StudentBadgeRecord`/the admin+student Badge controllers are the real, spec-delivered Engagement badge system - fully built, but never fully wired up, with the Settings page still showing a separate, earlier ad-hoc calculation instead. Confirmed via `AskUserQuestion`: switch the Settings page to the real system rather than keep patching the ad-hoc one. Full plan: `C:\Users\HP\.claude\plans\quizzical-kindling-sutherland.md`.
+
+1. ~~Fix `BadgeCalculatorService`'s two real query bugs~~ — DONE 2026-10-19 (`calendar_events.position` → `activityType`; `participation_logs` queried by its real `month`/`year` columns instead of a nonexistent `created_at`). `tests/Feature/BadgeCalculatorServiceTest.php`.
+2. ~~Register `/badges` + `/admin/badges/*` routes~~ — found already registered on re-check; added a freshness call in `BadgeStudentController::data()` instead so current-month data doesn't wait for the scheduled job. `tests/Feature/BadgeRoutesTest.php`.
+3. ~~Switch the Settings page to read from `student_badge_records`~~ — DONE 2026-10-19. `ProfileController::getEngagementData()` now calls `BadgeCalculatorService`/reads `StudentBadgeRecord` instead of its own deleted inline `calculateMonthlyEngagement()`. `tests/Feature/EngagementBadgeSettingsPageTest.php` + the existing `EngagementBadgeNoRequiredEventsTest.php`.
+4. ~~Wire up the 6 missing/dead Participation actions~~ — DONE 2026-10-19 (`poster_room_enter` turned out already wired on re-check; `voting`, `building_enter` x4, `shopping`, `closet_enter`, `street_sign_press` added). `tests/Feature/Engagement/ParticipationWiringTest.php`.
+
+See `bugs.md`'s "Engagement badge consolidation follow-up" entry for the full technical detail per item.
+
 ## Phase 4 — Cleanup (any time, low risk, keep isolated from functional PRs)
 
 1. ~~Delete all dead/commented-out code blocks listed in `bugs.md` #16~~ — DONE 2026-10-07.

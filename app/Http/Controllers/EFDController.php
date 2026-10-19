@@ -283,6 +283,7 @@ class EFDController extends Controller
     //City Hall
     public function city_mall()
     {
+        app(\App\Services\ParticipationService::class)->award(auth()->id(), 'building_enter', 'city_mall');
         return view('education.city-mall');
     }
     public function spending_tracker($type)
@@ -394,6 +395,8 @@ class EFDController extends Controller
     }
     public function npos()
     {
+        app(\App\Services\ParticipationService::class)->award(auth()->id(), 'building_enter', 'npo');
+
         $npos = \App\Models\Npo::where('status', 1)
             ->orderBy('sort_order', 'asc')
             ->get();
@@ -531,6 +534,7 @@ class EFDController extends Controller
     //City Hall
     public function city_hall()
     {
+        app(\App\Services\ParticipationService::class)->award(auth()->id(), 'building_enter', 'city_hall');
         return view('education.city-hall.city-hall');
     }
     public function main_hall()
@@ -744,6 +748,8 @@ class EFDController extends Controller
             'student_id' => $studentId,
             'vote' => $request->vote,
         ]);
+
+        app(\App\Services\ParticipationService::class)->award($studentId, 'voting');
 
         return response()->json([
             'success' => true
