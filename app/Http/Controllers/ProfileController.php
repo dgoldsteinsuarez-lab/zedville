@@ -236,79 +236,44 @@ class ProfileController extends Controller
 
         return redirect()->back()->with('status', 'avatar-updated');
     }
-    //Student engagement  badges
-    private function calculateMonthlyEngagement($studentId, $month, $year)
-    {
-        // 🔹 REQUIRED EVENTS (calendar_events)
-        $assignedRequired = DB::table('calendar_events')
-            ->whereMonth('start', $month + 1)
-            ->whereYear('start', $year)
-            ->where('activityType', 'required')
-            ->count();
-
-        $completedRequired = DB::table('participation_logs')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('action_type', 'required')
-            ->count();
-
-        // Daniel's real spec (engagement_badge_spec_v2, §7 Edge Cases):
-        // "No Required activities assigned that month → No badge can be
-        // earned that month. The Required category cannot be satisfied if
-        // the calendar is empty." 0 is correct here, not a bug - reverted
-        // an earlier incorrect "fix" that assumed otherwise before this
-        // doc was available (bugs.md, 2026-10-19).
-        $requiredPct = $assignedRequired > 0
-            ? ($completedRequired / $assignedRequired) * 100
-            : 0;
-
-        // 🔹 OPTIONAL COUNT
-        $optionalCount = DB::table('participation_logs')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('action_type', 'optional')
-            ->count();
-
-        // 🔹 PARTICIPATION POINTS (CAPPED AT 15)
-        $participationPts = DB::table('participation_logs')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->sum('points_earned');
-
-        $participationPts = min($participationPts, 15); // ✅ CAP APPLIED
-
-        // 🔹 BADGE LOGIC
-        if ($requiredPct == 100 && $optionalCount >= 4 && $participationPts >= 15) {
-            return 'PLATINUM';
-        } elseif ($requiredPct == 100 && $optionalCount >= 3 && $participationPts >= 10) {
-            return 'GOLD';
-        } elseif ($requiredPct == 100 && $optionalCount >= 2 && $participationPts >= 7) {
-            return 'SILVER';
-        } elseif ($requiredPct == 100 && $optionalCount >= 1 && $participationPts >= 5) {
-            return 'BRONZE';
-        }
-
-        return 'NONE';
-    }
+    /**
+     * Settings page Engagement badge data - sourced from the real,
+     * spec-delivered BadgeCalculatorService/student_badge_records rather
+     * than an inline recalculation, so this always matches /badges and
+     * the admin badge views exactly (bugs.md, 2026-10-19). Keeps the
+     * same return shape student-badges.blade.php's JS already expects
+     * (0-based months, matching this file's prior convention).
+     */
     private function getEngagementData($studentId)
     {
         $now = now();
+        $calculator = app(\App\Services\BadgeCalculatorService::class);
 
-        // Academic year starts in September
+        // Keep the current month's record fresh on every page view,
+        // same approach as BadgeStudentController::data().
+        $calculator->calculateForStudent($studentId, $now->month, $now->year);
+
         $academicYearStartMonth1Based = config('zedville.academic_year_start_month', 4);
         $academicStartMonth = $academicYearStartMonth1Based - 1; // JS style (0-based)
         $academicStartYear = $now->month >= $academicYearStartMonth1Based ? $now->year : $now->year - 1;
+        $academicYear = $calculator->getAcademicYear($now->month, $now->year);
 
         $pointsMap = [
             'PLATINUM' => 4,
             'GOLD' => 3,
             'SILVER' => 2,
             'BRONZE' => 1,
-            'NONE' => 0
+            'NONE' => 0,
         ];
+
+        // StudentBadgeRecord::month is 1-based; key by (month - 1) to
+        // match this method's existing 0-based history/currentMonth
+        // convention. 10 consecutive academic months never repeat a
+        // month number, so this key is unambiguous.
+        $records = \App\Models\StudentBadgeRecord::where('student_id', $studentId)
+            ->where('academic_year', $academicYear)
+            ->get()
+            ->keyBy(fn ($r) => $r->month - 1);
 
         $history = [];
         $totalPts = 0;
@@ -318,11 +283,11 @@ class ProfileController extends Controller
 
         // 🔹 Loop 10 academic months
         for ($i = 0; $i < 10; $i++) {
-
-            $badge = $this->calculateMonthlyEngagement($studentId, $month, $year);
+            $record = $records->get($month);
+            $badge = $record ? $record->effective_monthly_badge : 'NONE';
 
             $history[$month] = $badge;
-            $totalPts += $pointsMap[$badge];
+            $totalPts += $pointsMap[$badge] ?? 0;
 
             $month++;
             if ($month > 11) {
@@ -331,47 +296,20 @@ class ProfileController extends Controller
             }
         }
 
-        // 🔹 CURRENT MONTH
-        /*$currentMonth = $now->month - 1; // convert to 0-based
+        $currentMonth = $now->month - 1; // 0-based
         $currentYear = $now->year;
+        $currentRecord = $records->get($currentMonth);
 
-        $monthly = $this->calculateMonthlyEngagement($studentId, $currentMonth, $currentYear);*/
-        // 🔹 LAST COMPLETED MONTH
-        // 🔹 CURRENT MONTH (DB uses 0-11 format)
-        $currentMonth = $now->month - 1;
-        $currentYear = $now->year;
+        $monthly = $currentRecord ? $currentRecord->effective_monthly_badge : 'NONE';
+        $yearly = $currentRecord ? $currentRecord->accumulated_badge : $calculator->determineAccumulatedBadge($totalPts);
 
-        $monthly = $this->calculateMonthlyEngagement(
-            $studentId,
-            $currentMonth,
-            $currentYear
-        );
-
-        // 🔹 YEARLY BADGE
-        if ($totalPts >= 32)
-            $yearly = 'PLATINUM';
-        elseif ($totalPts >= 24)
-            $yearly = 'GOLD';
-        elseif ($totalPts >= 16)
-            $yearly = 'SILVER';
-        elseif ($totalPts >= 8)
-            $yearly = 'BRONZE';
-        else
-            $yearly = 'NONE';
-
-        /*return [
-            'monthly' => $monthly,
-            'yearly' => $yearly,
-            'history' => $history,
-            'academicStartYear' => $academicStartYear
-        ];*/
         return [
             'monthly' => $monthly,
             'yearly' => $yearly,
             'history' => $history,
             'academicStartYear' => $academicStartYear,
             'academicStartMonth' => $academicStartMonth,
-            'currentMonth' => $currentMonth - 1,
+            'currentMonth' => $currentMonth,
             'currentYear' => $currentYear,
         ];
     }

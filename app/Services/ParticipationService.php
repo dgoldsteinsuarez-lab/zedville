@@ -18,14 +18,15 @@ class ParticipationService
     public function award(int $studentId, string $actionType, ?string $detail = null): bool
     {
         $now   = Carbon::now();
-        // 0-based, matching the only reader: ProfileController::
-        // calculateMonthlyEngagement() queries participation_logs.month
-        // as 0-based (it converts to 1-based itself only for the
-        // separate calendar_events query) - this was previously stored
-        // 1-based here, so a row written this month could never actually
-        // match "this month" in the Engagement badge calculation (see
-        // bugs.md, 2026-10-19).
-        $month = $now->month - 1;
+        // 1-based, matching Daniel's actual spec doc exactly (Participation
+        // Part Explanation.docx §5's reference implementation stores
+        // $now->month directly) and BadgeCalculatorService's convention
+        // throughout (doc comment: "$month 1–12"). An earlier pass
+        // switched this to 0-based to match ProfileController::
+        // calculateMonthlyEngagement()'s ad-hoc convention - reverted now
+        // that that method is being retired in favor of the real,
+        // spec-delivered BadgeCalculatorService (bugs.md, 2026-10-19).
+        $month = $now->month;
         $year  = $now->year;
         $today = $now->toDateString(); // 'YYYY-MM-DD'
 
@@ -50,14 +51,13 @@ class ParticipationService
 
 
         // Insert participation point. action_type is always the
-        // 'optional'/'required' bucket ProfileController::
-        // calculateMonthlyEngagement() counts by - every award() call
-        // site is an optional engagement action, never a required
-        // calendar event (those go through handleActivity() instead).
-        // The specific action name goes in action_detail (matching
-        // handleActivity()'s existing convention), and $detail (shop id,
-        // NPO name, building id, sign id) goes in action_ref so it
-        // doesn't collide with that - see bugs.md, 2026-10-19.
+        // 'optional'/'required' bucket BadgeCalculatorService reads -
+        // every award() call site is an optional engagement action, never
+        // a required calendar event (those go through handleActivity()
+        // instead). The specific action name goes in action_detail
+        // (matching handleActivity()'s existing convention), and $detail
+        // (shop id, NPO name, building id, sign id) goes in action_ref so
+        // it doesn't collide with that - see bugs.md, 2026-10-19.
         DB::table('participation_logs')->insert([
             'student_id'    => $studentId,
             'action_type'   => 'optional',
@@ -66,11 +66,7 @@ class ParticipationService
             'points_earned' => 1,
             'month'         => $month,
             'year'          => $year,
-            // academicYear() expects a 1-based month (matches
-            // config('zedville.academic_year_start_month')'s own
-            // convention) - use $now->month here, not the 0-based
-            // $month used for participation_logs storage above.
-            'academic_year' => $this->academicYear($now->month, $year),
+            'academic_year' => $this->academicYear($month, $year),
             'earned_at'     => $now,
         ]);
 
@@ -281,15 +277,12 @@ public function handleActivity($studentId, $activityKey, $eventId = null)
 $academicYear = app(\App\Services\BadgeCalculatorService::class)
     ->getAcademicYear($month, $year);
     // ✅ STEP 6: Insert into participation_logs (for points)
-    // 0-based, matching the only reader (ProfileController::
-    // calculateMonthlyEngagement()) - see the identical fix/reasoning in
-    // award() above (bugs.md, 2026-10-19).
     DB::table('participation_logs')->insert([
         'student_id'    => $studentId,
         'action_type'   => $type,
         'action_detail' => $activityKey,
         'points_earned' => $points,
-        'month'         => $month - 1,
+        'month'         => $month,
         'year'          => $year,
         'academic_year' => $academicYear,
         'earned_at'     => now(),

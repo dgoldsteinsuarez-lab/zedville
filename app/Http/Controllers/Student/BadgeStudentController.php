@@ -39,6 +39,11 @@ class BadgeStudentController extends Controller
         // Replace Auth::id() if your auth works differently
         $studentId = Auth::id();
 
+        // Keep the current month's record fresh on every page view, rather
+        // than waiting for the end-of-month scheduled job - past months stay
+        // as their already-finalized snapshots.
+        $this->calculator->calculateForStudent($studentId, now()->month, now()->year);
+
         $academicYear = $this->calculator->getAcademicYear(now()->month, now()->year);
 
         $records = StudentBadgeRecord::where('student_id', $studentId)

@@ -74,15 +74,15 @@ class ParticipationServiceEngagementTest extends TestCase
         $now = now();
         $count = \DB::table('participation_logs')
             ->where('student_id', $student->id)
-            ->where('month', $now->month - 1) // calculateMonthlyEngagement's 0-based convention
+            ->where('month', $now->month) // 1-based, matching BadgeCalculatorService
             ->where('year', $now->year)
             ->where('action_type', 'optional')
             ->count();
 
         // Confirms the month-numbering and action_type fixes line up with
-        // what calculateMonthlyEngagement actually reads - full badge
-        // award also needs a completed Required calendar activity that
-        // month (separate from Participation), not exercised here.
+        // what BadgeCalculatorService actually reads - full badge award
+        // also needs a completed Required calendar activity that month
+        // (separate from Participation), not exercised here.
         $this->assertSame(5, $count);
     }
 }

@@ -13,7 +13,10 @@ use Tests\TestCase;
  * can be earned that month. The Required category cannot be satisfied if
  * the calendar is empty." An earlier pass "fixed" this the other way
  * (treating 0 assigned as 100%) before this doc was available - reverted
- * once it turned out to be intended behavior, not a bug.
+ * once it turned out to be intended behavior, not a bug. Now that the
+ * Settings page reads from the real BadgeCalculatorService/
+ * student_badge_records instead of its own inline query, this exercises
+ * that path end to end.
  */
 class EngagementBadgeNoRequiredEventsTest extends TestCase
 {
@@ -31,7 +34,7 @@ class EngagementBadgeNoRequiredEventsTest extends TestCase
             'action_type' => 'optional',
             'action_detail' => 'poster_room_enter',
             'points_earned' => 5,
-            'month' => $now->month - 1, // calculateMonthlyEngagement uses 0-based months
+            'month' => $now->month, // 1-based, matching BadgeCalculatorService
             'year' => $now->year,
             'academic_year' => '2026-2027',
             'earned_at' => $now,

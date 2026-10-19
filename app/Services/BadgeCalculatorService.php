@@ -193,47 +193,31 @@ class BadgeCalculatorService
     }
 
     // -------------------------------------------------------------------------
-    // DATA QUERIES — TODO: fill these in with your actual table/column names
+    // DATA QUERIES
     // -------------------------------------------------------------------------
 
     /**
      * Count how many Required activities were assigned to the calendar
      * for a given month and year.
-     *
-     * TODO: Replace with your actual query.
-     *       - Change 'calendar_events' to your FullCalendar events table name
-     *       - Change 'event_type' to the field that marks Required vs Optional
-     *         (this field needs to be added — see spec IT notes)
-     *       - Change 'event_date' to your date column name
      */
     private function getRequiredAssigned(int $month, int $year): int
     {
         return DB::table('calendar_events')
-            //->where('event_type', 'required')
-            ->where('position', 'required')
-            //->whereMonth('event_date', $month)
-            //->whereYear('event_date', $year)
-             ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year)
+            ->where('activityType', 'required')
+            ->whereMonth('start', $month)
+            ->whereYear('start', $year)
             ->count();
     }
 
     /**
      * Count how many Required activities a student completed in a given month.
-     *
-     * TODO: Replace with your actual query.
-     *       - Change 'activity_completions' to your completions table name
-     *       - Change column names to match your schema
-     *       - Join to calendar_events to filter for Required-only completions
      */
     private function getRequiredCompleted(int $studentId, int $month, int $year): int
     {
         return DB::table('activity_completions')
-           // ->join('calendar_events', 'activity_completions.activity_id', '=', 'calendar_events.activity_id')
             ->join('calendar_events', 'activity_completions.activity_id', '=', 'calendar_events.id')
             ->where('activity_completions.student_id', $studentId)
-            //->where('calendar_events.event_type', 'required')
-            ->where('calendar_events.position', 'required')
+            ->where('calendar_events.activityType', 'required')
             ->whereMonth('activity_completions.completed_at', $month)
             ->whereYear('activity_completions.completed_at', $year)
             ->count();
@@ -242,11 +226,6 @@ class BadgeCalculatorService
     /**
      * Count how many Optional activities a student completed in a given month.
      * Includes BOTH calendar-assigned optional AND platform optional activities.
-     *
-     * TODO: Replace with your actual query.
-     *       - All optional activities from any source should be counted here
-     *       - If your system tracks optional platform activities separately,
-     *         combine both counts here
      */
     private function getOptionalCompleted(int $studentId, int $month, int $year): int
     {
@@ -261,20 +240,15 @@ class BadgeCalculatorService
     /**
      * Get total Participation points earned by a student in a given month.
      * Points are capped at 15 for badge calculation (100% threshold).
-     *
-     * TODO: Replace with your actual query.
-     *       - Change 'participation_logs' to your participation tracking table
-     *       - Each row should represent one participation action worth 1 point
-     *       - The cap of 15 is applied here — extra points have no effect
      */
     private function getParticipationPoints(int $studentId, int $month, int $year): int
     {
         $raw = DB::table('participation_logs')
             ->where('student_id', $studentId)
-            ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year)
-            ->count();
+            ->where('month', $month)
+            ->where('year', $year)
+            ->sum('points_earned');
 
-        return min($raw, 15); // Cap at 15 (= 100%)
+        return min((int) $raw, 15); // Cap at 15 (= 100%)
     }
 }
