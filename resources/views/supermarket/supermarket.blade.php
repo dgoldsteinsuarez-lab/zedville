@@ -1288,7 +1288,8 @@
                 body: JSON.stringify({
                     pin: pin,
                     cart: cart,
-                    total: totalSpent
+                    total: totalSpent,
+                    catalog: 'supermarkets'
                 })
             })
                 .then(res => res.json())

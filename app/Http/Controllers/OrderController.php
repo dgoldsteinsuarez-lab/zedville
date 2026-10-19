@@ -14,9 +14,22 @@ class OrderController extends Controller
         $request->validate([
             'pin' => 'required|digits:4',
             'cart' => 'required|array|min:1',
-            'cart.*.id' => 'required|integer|exists:products,id',
+            'cart.*.id' => 'required|integer',
             'cart.*.quantity' => 'required|integer|min:1',
+            // City Mall/spending-activity shops and the Supermarket are two
+            // entirely separate catalogs (`products` vs `supermarkets`
+            // tables), with their own, independently auto-incrementing
+            // `id` columns - a cart item's id alone doesn't say which one
+            // it came from. Every page that checks out here must say so
+            // explicitly; defaulting to 'products' previously let a
+            // Supermarket cart item's id collide with an unrelated
+            // products.id, silently charging for the wrong item entirely
+            // (e.g. "Chicken" id=47 resolving to products.id=47,
+            // "Competition Basketball" - see bugs.md, 2026-10-19).
+            'catalog' => 'nullable|in:products,supermarkets',
         ]);
+
+        $catalogTable = $request->input('catalog') === 'supermarkets' ? 'supermarkets' : 'products';
 
         $user = Auth::user();
 
@@ -45,7 +58,7 @@ class OrderController extends Controller
         $validatedCart = [];
 
         foreach ($request->cart as $item) {
-            $product = DB::table('products')
+            $product = DB::table($catalogTable)
                 ->where('id', $item['id'])
                 ->first();
 
