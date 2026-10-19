@@ -187,11 +187,4 @@ Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function ()
         Route::post('/point-defaults',       [FinheroAdminController::class, 'pointDefaultsStore'])->name('finhero.point-defaults.store');
         Route::put ('/point-defaults/{id}',  [FinheroAdminController::class, 'pointDefaultsUpdate'])->name('finhero.point-defaults.update');
     });
-
-    // Task 6 (Substitute Goods) blocked items - same access as the
-    // Activity Manager.
-    Route::middleware('role:super_admin,school_admin')->group(function () {
-        Route::get ('/task6-blocked-items', [\App\Http\Controllers\Admin\FinheroTask6Controller::class, 'index'])->name('finhero.task6-blocked-items.index');
-        Route::post('/task6-blocked-items', [\App\Http\Controllers\Admin\FinheroTask6Controller::class, 'update'])->name('finhero.task6-blocked-items.update');
-    });
 });

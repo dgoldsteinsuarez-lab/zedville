@@ -304,7 +304,6 @@
                                             'admin/finhero/activities',
                                             'admin/finhero/task-activities',
                                             'admin/finhero/point-defaults',
-                                            'admin/finhero/task6-blocked-items',
                                         );
                                     @endphp
                                     @if($navOrg)
@@ -360,11 +359,6 @@
                                                 <li class="nav-item {{ request()->is('admin/finhero/task-activities') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/finhero/task-activities') }}">
                                                         <span class="navTxt">FinHero Library Activity</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item {{ request()->is('admin/finhero/task6-blocked-items') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/finhero/task6-blocked-items') }}">
-                                                        <span class="navTxt">Task 6 — Blocked Items</span>
                                                     </a>
                                                 </li>
                                                 @if($navSuper)

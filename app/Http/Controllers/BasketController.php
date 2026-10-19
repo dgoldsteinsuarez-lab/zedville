@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ConsumerSurvey;
-use App\Models\FinheroTask6BlockedItem;
+use App\Models\FinheroTask6StudentPick;
 use App\Models\Supermarket;
 use App\Services\ConsumerSurveySummaryService;
 use App\Services\FinheroBadgeCalculatorService;
@@ -15,16 +15,25 @@ use Illuminate\Support\Facades\DB;
  * Substitute Goods feature (2026-10-19): lets a student swap one item in
  * their shopping basket for a substitute from the same diet catalog,
  * without redoing the full Consumer Profile survey. Also the mechanism
- * FinHero Task 6 is built on - swapping out the last item an admin/tutor
- * has marked "temporarily unavailable" for the student's Class completes
- * the task.
+ * FinHero Task 6 is built on - swapping out the last auto-picked item
+ * completes the task.
+ *
+ * Daniel, 2026-10-19: "no quiero que el admin o el tutor hagan nada...
+ * que tomes los productos de cada alumno y escogas cuales debe
+ * sustituir" - no admin/tutor action beyond activating the task (the
+ * same thing they already do for every other FinHero task). Which items
+ * are blocked is picked automatically, per student, from that student's
+ * own current basket.
  */
 class BasketController extends Controller
 {
+    private const PICKS_PER_MONTH = 3;
+
     /**
-     * This Class's currently-blocked item ids - empty unless Task 6 is
-     * active for it. Scoped by sid+cid, never by diet directly (a blocked
-     * row's own `type` already says which diet it belongs to).
+     * This student's currently-blocked item ids for this month - empty
+     * unless Task 6 is active for their Class. Auto-picks up to 3 random
+     * items from the student's own current basket the first time this is
+     * called in a given month, so the selection stays stable afterward.
      */
     private function blockedItemIdsFor($user): array
     {
@@ -48,10 +57,38 @@ class BasketController extends Controller
             return [];
         }
 
-        return FinheroTask6BlockedItem::where('sid', $user->sid)
-            ->where('cid', $user->grade)
-            ->pluck('supermarket_id')
-            ->all();
+        $now = now();
+
+        $existing = FinheroTask6StudentPick::where('student_id', $user->id)
+            ->where('month', $now->month)
+            ->where('year', $now->year)
+            ->pluck('supermarket_id');
+
+        if ($existing->isNotEmpty()) {
+            return $existing->all();
+        }
+
+        $summary = ConsumerSurveySummaryService::forUser($user->id);
+        if (!$summary['exists'] || empty($summary['groceryItems'])) {
+            return [];
+        }
+
+        $picked = collect($summary['groceryItems'])
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->shuffle()
+            ->take(self::PICKS_PER_MONTH);
+
+        foreach ($picked as $supermarketId) {
+            FinheroTask6StudentPick::create([
+                'student_id' => $user->id,
+                'supermarket_id' => $supermarketId,
+                'month' => $now->month,
+                'year' => $now->year,
+            ]);
+        }
+
+        return $picked->all();
     }
 
     /** The student's current basket, each item flagged if it's currently blocked (Task 6). */
