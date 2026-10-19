@@ -63,4 +63,37 @@ class CityMapAdminTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_super_admin_can_edit_a_streets_name_and_bio(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        $street = \App\Models\Street::where('name', 'Adam Smith Avenue')->first();
+
+        $response = $this->actingAs($admin)->put(route('admin.city-map.streets.update', $street->id), [
+            'name' => 'Adam Smith Lane',
+            'bio' => 'Updated bio text.',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('streets', [
+            'id' => $street->id,
+            'name' => 'Adam Smith Lane',
+            'bio' => 'Updated bio text.',
+        ]);
+    }
+
+    public function test_the_updated_street_bio_shows_to_students_on_the_city_map(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        $street = \App\Models\Street::where('name', 'Adam Smith Avenue')->first();
+        $this->actingAs($admin)->put(route('admin.city-map.streets.update', $street->id), [
+            'name' => 'Adam Smith Avenue',
+            'bio' => 'A brand new bio only an admin would write.',
+        ]);
+
+        $student = User::factory()->create(['role' => 4]);
+        $response = $this->actingAs($student)->get(route('education.city'));
+
+        $response->assertSee('A brand new bio only an admin would write.');
+    }
 }

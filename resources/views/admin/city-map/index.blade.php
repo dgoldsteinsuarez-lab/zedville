@@ -38,6 +38,16 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Streets</strong>
+            <a href="{{ route('admin.city-map.streets') }}" class="btn btn-sm btn-primary">Manage Streets</a>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-0">Edit the name or economist bio shown when a student clicks a street plaque on the City Map.</p>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-header"><strong>Addresses by Grade</strong></div>
         <div class="card-body p-0">

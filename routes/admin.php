@@ -100,6 +100,9 @@ Route::middleware('role:super_admin')->group(function () {
     Route::get('/city-map', [\App\Http\Controllers\Admin\CityMapController::class, 'index'])->name('city-map.index');
     Route::post('/city-map/image', [\App\Http\Controllers\Admin\CityMapController::class, 'uploadImage'])->name('city-map.upload');
     Route::get('/city-map/addresses/{grade}', [\App\Http\Controllers\Admin\CityMapController::class, 'addresses'])->name('city-map.addresses');
+    Route::get('/city-map/streets', [\App\Http\Controllers\Admin\CityMapController::class, 'streets'])->name('city-map.streets');
+    Route::get('/city-map/streets/{street}/edit', [\App\Http\Controllers\Admin\CityMapController::class, 'editStreet'])->name('city-map.streets.edit');
+    Route::put('/city-map/streets/{street}', [\App\Http\Controllers\Admin\CityMapController::class, 'updateStreet'])->name('city-map.streets.update');
 
     // Role Routes
     Route::get('/role', [AdminDashboardController::class, 'role'])->name('role');
