@@ -253,16 +253,15 @@ class ProfileController extends Controller
             ->where('action_type', 'required')
             ->count();
 
-        // A month with nothing required means nothing was missed - treat
-        // it as 100%, not 0%. Previously forced to 0 whenever
-        // $assignedRequired was 0, which made every badge tier
-        // mathematically impossible that month (every tier requires
-        // $requiredPct == 100) - confirmed live: 0 calendar_events exist
-        // at all right now, so this was silently zeroing out every
-        // student's Engagement badge every month (bugs.md, 2026-10-19).
+        // Daniel's real spec (engagement_badge_spec_v2, §7 Edge Cases):
+        // "No Required activities assigned that month → No badge can be
+        // earned that month. The Required category cannot be satisfied if
+        // the calendar is empty." 0 is correct here, not a bug - reverted
+        // an earlier incorrect "fix" that assumed otherwise before this
+        // doc was available (bugs.md, 2026-10-19).
         $requiredPct = $assignedRequired > 0
             ? ($completedRequired / $assignedRequired) * 100
-            : 100;
+            : 0;
 
         // 🔹 OPTIONAL COUNT
         $optionalCount = DB::table('participation_logs')
