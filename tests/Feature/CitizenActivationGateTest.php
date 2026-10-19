@@ -97,4 +97,19 @@ class CitizenActivationGateTest extends TestCase
 
         $response->assertOk();
     }
+
+    /**
+     * The mood-meter widget is baked into the shared layout, so it also
+     * renders on the wizard pages themselves and fires its own AJAX POST
+     * from there. A student mid-onboarding must still be able to use it -
+     * only GET (full page navigation) is gated, not POST/action endpoints.
+     */
+    public function test_ajax_action_endpoints_are_not_blocked_mid_onboarding(): void
+    {
+        $student = User::factory()->create(['role' => 4]);
+
+        $response = $this->actingAs($student)->postJson('/profile/save-mood', ['mood' => 'happy']);
+
+        $response->assertOk();
+    }
 }

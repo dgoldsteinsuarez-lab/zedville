@@ -155,5 +155,10 @@ Daniel: "if he registers, why not already adding the name there, to not waste ti
 
 Fixed: the field is now read-only (matching the existing Citizen ID field's style) with a link to Settings for anyone who made a typo at registration. `CitizenActivationController::store()` no longer accepts `fullName` from the request at all - it always writes `$user->name` server-side, so even a tampered/direct POST can't create a mismatched bank account. Tested via `tests/Feature/CitizenActivationBankNameTest.php`.
 
+### Fixed 2026-10-19 - the onboarding gate broke the mood-meter widget mid-onboarding
+Daniel hit "Server error, please try again." trying to save his mood while still on the Bank Account wizard step. Caused directly by the previous fix above (`EnsureCitizenActivation`): the mood-meter widget is baked into the shared layout (`layouts/profile.blade.php`), so it also renders on the wizard pages themselves and fires its own AJAX `POST /profile/save-mood` from there - which the new middleware was also redirecting to the wizard, since that route isn't under `CitizenActivation.*`. The frontend expects JSON back and tries `JSON.parse()` on whatever it gets; parsing a redirected HTML page throws, which the existing `catch` block surfaces as "Server error, please try again."
+
+Fixed by scoping the gate to `GET` requests only - full page loads are what sidebar navigation actually does (the original bug report), while POST/PUT/DELETE calls are action endpoints (mood meter, cart, notifications, ...) that widgets fire from whatever page they happen to be rendered on, including the wizard pages, and must keep working regardless of onboarding state. Tested via a new case in `tests/Feature/CitizenActivationGateTest.php` (`test_ajax_action_endpoints_are_not_blocked_mid_onboarding`).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

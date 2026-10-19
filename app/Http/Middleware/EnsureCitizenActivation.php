@@ -30,6 +30,17 @@ class EnsureCitizenActivation
             return $next($request);
         }
 
+        // Only gate full page loads (what sidebar navigation actually does).
+        // Widgets baked into the shared layout - the mood meter, cart,
+        // notifications - also render on the wizard pages themselves and
+        // fire their own AJAX POSTs there; redirecting those breaks them,
+        // since the frontend expects JSON back, not a redirect to an HTML
+        // page (see bugs.md, 2026-10-19 - "Server error, please try again"
+        // on the mood meter while mid-onboarding).
+        if (!$request->isMethod('GET')) {
+            return $next($request);
+        }
+
         $nextRoute = app(CitizenActivationService::class)->getNextRoute($user);
 
         if ($nextRoute) {
