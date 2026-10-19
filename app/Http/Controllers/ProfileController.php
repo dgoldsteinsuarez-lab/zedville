@@ -33,6 +33,13 @@ class ProfileController extends Controller
         // 🔹 Bank account check
         $hasBankAccount = BankAccount::where('student_id', $user->id)->exists();
 
+        // City Map, Phase 1 (2026-10-19): the student's own street+number,
+        // auto-assigned on first view - null if they have no Class yet or
+        // their Grade's address pool is exhausted.
+        $myAddress = $user->isStudent()
+            ? \App\Services\AddressService::assignForStudent($user)?->load('street')
+            : null;
+
 
         // 🔹 Grades
         $grades = SchoolClass::where('status', 1)->get();
@@ -167,6 +174,7 @@ class ProfileController extends Controller
             'total' => $total,
             'itemNames' => $itemNames,
             'hasBankAccount' => $hasBankAccount,
+            'myAddress' => $myAddress,
             // ✅ ADD THESE
             'myLogs' => $moodData['myLogs'],
             'todayMyLog' => $moodData['todayMyLog'],

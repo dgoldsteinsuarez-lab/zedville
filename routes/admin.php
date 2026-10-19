@@ -95,6 +95,12 @@ Route::middleware('role:super_admin')->group(function () {
     Route::post('/ledger/reverse/{id}', [\App\Http\Controllers\Admin\LedgerController::class, 'reverse'])->name('ledger.reverse');
     Route::post('/ledger/reset', [\App\Http\Controllers\Admin\LedgerController::class, 'reset'])->name('ledger.reset');
 
+    // City Map, Phase 1 (2026-10-19) - the one shared city map hero image,
+    // and a read-only per-Grade address list.
+    Route::get('/city-map', [\App\Http\Controllers\Admin\CityMapController::class, 'index'])->name('city-map.index');
+    Route::post('/city-map/image', [\App\Http\Controllers\Admin\CityMapController::class, 'uploadImage'])->name('city-map.upload');
+    Route::get('/city-map/addresses/{grade}', [\App\Http\Controllers\Admin\CityMapController::class, 'addresses'])->name('city-map.addresses');
+
     // Role Routes
     Route::get('/role', [AdminDashboardController::class, 'role'])->name('role');
     Route::post('/role/add', [AdminDashboardController::class, 'addRole'])->name('admin.role.add');

@@ -23,6 +23,10 @@ Route::get('/low-spending-activities', [EFDController::class,'low_spending_activ
 Route::get('/city-hall', [EFDController::class, 'city_hall'])->name('city-hall');
 Route::get('/main-hall', [EFDController::class, 'main_hall'])->name('main-hall');
 Route::get('/civic-chamber', [EFDController::class, 'civic_chamber'])->name('civic-chamber');
+
+// City Map, Phase 1 (2026-10-19) - the interactive city map with building
+// and street-plaque hotspots.
+Route::get('/city', [\App\Http\Controllers\CityController::class, 'index'])->name('city');
 Route::get('/well-being-room', [EFDController::class, 'well_being_room'])->name('well-being-room');
 
 // Civic Chamber AJAX

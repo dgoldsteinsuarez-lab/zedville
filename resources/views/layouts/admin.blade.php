@@ -378,6 +378,7 @@
                                             'admin/education/supermarket*',
                                             'admin/education/wants-iteams*',
                                             'admin/npos*',
+                                            'admin/city-map*',
                                         );
                                     @endphp
                                     <li class="nav-item {{ $usersMenuActive4 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Fix for All Schools">
@@ -396,6 +397,11 @@
                                         </a>
                                         <div id="city" class="collapse {{ $usersMenuActive4 ? 'show' : '' }} collapseNavItems" data-bs-parent="#toggleNavsubnav">
                                             <ul class="subnav">
+                                                <li class="nav-item {{ request()->is('admin/city-map*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/city-map') }}">
+                                                        <span class="navTxt">City Map</span>
+                                                    </a>
+                                                </li>
                                                 <li class="nav-item {{ request()->is('admin/education/city-mall') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/education/city-mall') }}">
                                                         <span class="navTxt">City Mall</span>

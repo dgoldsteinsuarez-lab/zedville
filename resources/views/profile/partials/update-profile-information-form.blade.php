@@ -166,6 +166,20 @@
                 </div>
             </div>
         </div>
+        @if ($myAddress)
+        <div class="fieldsItems border-b border-[#D2DDDB] py-8">
+            <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
+                <div class="leftContent max-w-full lg:max-w-[300px] w-full">
+                    <h4 class="text-base font-medium text-black">My City Address</h4>
+                </div>
+                <div class="rightFields w-full">
+                    <div class="relative">
+                        <input type="text" class="form-control" value="{{ $myAddress->house_number }} {{ $myAddress->street->name }}" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">

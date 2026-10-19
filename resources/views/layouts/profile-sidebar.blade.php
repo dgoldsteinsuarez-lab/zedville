@@ -175,7 +175,7 @@
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Bank Account</span>
                 </a>
             </li>
-            <li x-data="{ open: {{ Route::is(['education.city-mall', 'education.spending-tracker*','supermarket*', 'education.npos','city-mood','education.city-hall', 'education.main-hall', 'education.civic-chamber', 'education.well-being-room']) ? 'true' : 'false' }}  }" class="relative">
+            <li x-data="{ open: {{ Route::is(['education.city', 'education.city-mall', 'education.spending-tracker*','supermarket*', 'education.npos','city-mood','education.city-hall', 'education.main-hall', 'education.civic-chamber', 'education.well-being-room']) ? 'true' : 'false' }}  }" class="relative">
 
                 <!-- Parent -->
                 <button
@@ -215,6 +215,12 @@
                     class="mt-1 pl-10 space-y-1 overflow-hidden"
                     :class="{ 'hidden': !isSidebarOpen }"
                 >
+                    <li class="{{ Route::is('education.city') ? 'active' : '' }}">
+                        <a href="{{ url('education/city') }}"
+                        class="block px-2 py-2 text-sm rounded-md hover:bg-[#E9F0E9]">
+                            City Map
+                        </a>
+                    </li>
                     <li class="{{ Route::is(['education.city-hall', 'education.main-hall', 'education.civic-chamber', 'education.well-being-room']) ? 'active' : '' }}">
                         <a href="{{ url('education/city-hall') }}"
                         class="block px-2 py-2 text-sm rounded-md hover:bg-[#E9F0E9]">

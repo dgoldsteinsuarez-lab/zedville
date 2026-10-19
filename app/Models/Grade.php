@@ -22,6 +22,7 @@ class Grade extends Model
         'sid',
         'name',
         'grade_level_id',
+        'max_addresses',
     ];
 
     public function level()
