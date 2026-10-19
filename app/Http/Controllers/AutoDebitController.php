@@ -50,6 +50,10 @@ class AutoDebitController extends Controller
             'bankaccountnumber' => 'required',
         ]);
 
+        // 'fullname'/'signature' below use $user->name (real name), not
+        // nickname - see the identical fix/reasoning in
+        // CitizenActivationController::store_auto_debit_authorization_form.
+
         /*
         |--------------------------------------------------------------------------
         | 1️⃣ SAVE AUTO DEBIT AUTHORIZATION (NO CHANGE)
@@ -76,14 +80,14 @@ class AutoDebitController extends Controller
                 'sid' => $user->sid,
                 'type' => $meta['name'],
                 'accountno' => $meta['account'],
-                'fullname' => $user->nickname,
+                'fullname' => $user->name,
                 'email' => $user->email,
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => $meta['amount'] ?? 0,
                 'startDate' => now(),
-                'signature' => $user->nickname,
+                'signature' => $user->name,
                 'date' => now(),
                 'tandagree' => 1,
             ]);
@@ -99,14 +103,14 @@ class AutoDebitController extends Controller
                 'sid' => $user->sid,
                 'type' => 'Rent',
                 'accountno' => 'RENT-AUTO', // static / dummy
-                'fullname' => $user->nickname,
+                'fullname' => $user->name,
                 'email' => $user->email,
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.rent', 300), // fixed rent
                 'startDate' => now(),
-                'signature' => $user->nickname,
+                'signature' => $user->name,
                 'date' => now(),
                 'tandagree' => 1,
             ]);
@@ -129,14 +133,14 @@ class AutoDebitController extends Controller
                 'sid' => $user->sid,
                 'type' => 'City School',
                 'accountno' => $billers[3]->account_number ?? 'SCHOOL-AUTO',
-                'fullname' => $user->nickname,
+                'fullname' => $user->name,
                 'email' => $user->email,
                 'serviceaddress' => $user->student_address,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.school_fees', 1000),
                 'startDate' => now(),
-                'signature' => $user->nickname,
+                'signature' => $user->name,
                 'date' => now(),
                 'tandagree' => 1,
             ]);

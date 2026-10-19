@@ -94,20 +94,23 @@ class CitizenActivationService
 
         // Mandatory auto-debits only (Rent, City School) - same two every
         // student gets regardless of what they pick in the wizard.
+        // 'fullname'/'signature' use $user->name (real name), not nickname
+        // - see the identical fix/reasoning in
+        // CitizenActivationController::store_auto_debit_authorization_form.
         if (!AutoDebitRequest::where('user_id', $user->id)->where('type', 'Rent')->exists()) {
             AutoDebitRequest::create([
                 'user_id' => $user->id,
                 'sid' => $user->sid,
                 'type' => 'Rent',
                 'accountno' => 'RENT-AUTO',
-                'fullname' => $user->nickname,
+                'fullname' => $user->name,
                 'email' => $user->email,
                 'serviceaddress' => $bankAccount->student_address,
                 'bankname' => $bankAccount->bank_name,
                 'bankaccountnumber' => $bankAccount->primary_savings_account_number,
                 'amount' => config('zedville.rent', 300),
                 'startDate' => now(),
-                'signature' => $user->nickname,
+                'signature' => $user->name,
                 'date' => now(),
                 'tandagree' => 1,
             ]);
@@ -121,14 +124,14 @@ class CitizenActivationService
                 'sid' => $user->sid,
                 'type' => 'City School',
                 'accountno' => $schoolBiller->account_number ?? 'SCHOOL-AUTO',
-                'fullname' => $user->nickname,
+                'fullname' => $user->name,
                 'email' => $user->email,
                 'serviceaddress' => $bankAccount->student_address,
                 'bankname' => $bankAccount->bank_name,
                 'bankaccountnumber' => $bankAccount->primary_savings_account_number,
                 'amount' => config('zedville.school_fees', 1000),
                 'startDate' => now(),
-                'signature' => $user->nickname,
+                'signature' => $user->name,
                 'date' => now(),
                 'tandagree' => 1,
             ]);
