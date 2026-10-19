@@ -25,8 +25,9 @@ Route::get('/main-hall', [EFDController::class, 'main_hall'])->name('main-hall')
 Route::get('/civic-chamber', [EFDController::class, 'civic_chamber'])->name('civic-chamber');
 
 // City Map, Phase 1 (2026-10-19) - the interactive city map with building
-// and street-plaque hotspots.
+// and street-plaque hotspots, split into an overview + 9 district pages.
 Route::get('/city', [\App\Http\Controllers\CityController::class, 'index'])->name('city');
+Route::get('/city/{district}', [\App\Http\Controllers\CityController::class, 'district'])->name('city.district');
 Route::get('/well-being-room', [EFDController::class, 'well_being_room'])->name('well-being-room');
 
 // Civic Chamber AJAX

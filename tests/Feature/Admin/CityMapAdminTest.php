@@ -92,7 +92,7 @@ class CityMapAdminTest extends TestCase
         ]);
 
         $student = User::factory()->create(['role' => 4]);
-        $response = $this->actingAs($student)->get(route('education.city'));
+        $response = $this->actingAs($student)->get(route('education.city.district', 'residential-quarter'));
 
         $response->assertSee('A brand new bio only an admin would write.');
     }

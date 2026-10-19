@@ -7,74 +7,135 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 /**
- * City Map, Phase 1 (2026-10-19 - "City and Map" doc). One shared city
- * image (not per-Grade - Daniel only has one 3D model) with clickable
- * building hotspots and street plaques, same clip-path-polygon technique
- * as education/city-mall.blade.php and education/city-hall/city-hall.
- * blade.php.
+ * City Map, Phase 1/1b (2026-10-19 - "City and Map" doc). Two-level map:
+ * one overview image with the 9 districts the doc itself groups buildings
+ * into, then one closer-in image per district with that district's own
+ * buildings - instead of one overview image carrying ~25 tiny hotspots.
+ * Same clip-path-polygon hotspot technique as education/city-mall.blade.php
+ * either way; this only changes how many images/levels there are.
+ *
+ * Street plaques live on the Residential Quarter district page, not the
+ * overview - streets are residential by definition (bugs.md's "never
+ * live in the Bank" rule).
  *
  * The real hotspot polygon coordinates can only be hand-fitted once
- * Daniel supplies the actual exported hero image (angled/isometric, not
- * top-down - he wants each building's unique architecture recognizable).
- * Until then this renders a plain clickable directory instead of
- * positioned hotspots, so the routing/data layer is fully testable now.
+ * Daniel supplies the actual exported images (angled/isometric, not
+ * top-down). Until then this renders a plain clickable directory instead
+ * of positioned hotspots, so the routing/data layer is fully testable now.
  */
 class CityController extends Controller
 {
+    public static function districts(): array
+    {
+        return [
+            ['key' => 'residential-quarter', 'name' => 'Residential Quarter'],
+            ['key' => 'civic-plaza', 'name' => 'Civic Plaza'],
+            ['key' => 'education-hub', 'name' => 'Education Hub'],
+            ['key' => 'main-city-facilities', 'name' => 'Main City Facilities'],
+            ['key' => 'financial-square', 'name' => 'Financial Square'],
+            ['key' => 'community-care', 'name' => 'Community Care'],
+            ['key' => 'public-services', 'name' => 'Public Services'],
+            ['key' => 'industrial-utilities', 'name' => 'Industrial and Utilities Zone'],
+            ['key' => 'recreation-development', 'name' => 'Recreation and Development Spaces'],
+        ];
+    }
+
     /**
      * The 7 buildings that already have a real page. Every other building
-     * in the doc (Hospital, Courthouse, Police/Fire Station, Power Plant,
-     * Water Treatment, Gas Station, Recycling Center, Farmers Market, Car
-     * Dealership, 3 Restaurants, Small Business District, Money Factory,
-     * Repair Shop, School, Wall of Inspiration, Vacant Lots) stays visible
-     * with no route - "Coming soon" - until Daniel builds its real page;
-     * adding one later is a one-line change here, not a new map.
+     * in the doc stays visible with no route - "Coming soon" - until
+     * Daniel builds its real page; adding one later is a one-line change
+     * here, not a new map.
      */
     public static function buildings(): array
     {
         return [
-            ['key' => 'bank', 'name' => 'Universal Bank', 'route' => route('bank.index')],
-            ['key' => 'city-mall', 'name' => 'City Mall', 'route' => route('education.city-mall')],
-            ['key' => 'supermarket', 'name' => 'Supermarket', 'route' => route('supermarket.market-list')],
-            ['key' => 'efd', 'name' => 'Educational Finance Department', 'route' => route('education.educational_finance_department')],
-            ['key' => 'post-office', 'name' => 'Post Office (City Mailbox)', 'route' => route('profile.mailbox')],
-            ['key' => 'donation-center', 'name' => 'Donation Center', 'route' => route('education.npos')],
-            ['key' => 'city-hall', 'name' => 'City Hall', 'route' => route('education.city-hall')],
+            // A. Residential Quarter
+            ['key' => 'student-houses', 'name' => "Students' Houses", 'district' => 'residential-quarter', 'route' => null],
+            ['key' => 'parks', 'name' => 'Parks', 'district' => 'residential-quarter', 'route' => null],
 
-            ['key' => 'hospital', 'name' => 'Hospital', 'route' => null],
-            ['key' => 'courthouse', 'name' => 'Courthouse', 'route' => null],
-            ['key' => 'fire-station', 'name' => 'Fire Station', 'route' => null],
-            ['key' => 'police-station', 'name' => 'Police Station', 'route' => null],
-            ['key' => 'repair-shop', 'name' => 'Repair Shop', 'route' => null],
-            ['key' => 'water-treatment', 'name' => 'Water Treatment Plant / Utilities Office', 'route' => null],
-            ['key' => 'power-plant', 'name' => 'Power Plant / Electrical Grid', 'route' => null],
-            ['key' => 'gas-station', 'name' => 'Gas Station', 'route' => null],
-            ['key' => 'recycling-center', 'name' => 'Recycling Center', 'route' => null],
-            ['key' => 'farmers-market', 'name' => 'Farmers Market', 'route' => null],
-            ['key' => 'car-dealership', 'name' => 'Car Dealership / Auto Repair', 'route' => null],
-            ['key' => 'restaurants', 'name' => 'Restaurants', 'route' => null],
-            ['key' => 'small-business-district', 'name' => 'Small Business District', 'route' => null],
-            ['key' => 'money-factory', 'name' => 'Money Factory', 'route' => null],
-            ['key' => 'school', 'name' => 'School', 'route' => null],
-            ['key' => 'wall-of-inspiration', 'name' => 'Wall of Inspiration, Voice and Art', 'route' => null],
-            ['key' => 'vacant-lots', 'name' => 'Vacant Lots', 'route' => null],
+            // B. Civic Plaza
+            ['key' => 'city-hall', 'name' => 'City Hall', 'district' => 'civic-plaza', 'route' => route('education.city-hall')],
+            ['key' => 'efd', 'name' => 'Educational Finance Department', 'district' => 'civic-plaza', 'route' => route('education.educational_finance_department')],
+            ['key' => 'post-office', 'name' => 'Post Office (City Mailbox)', 'district' => 'civic-plaza', 'route' => route('profile.mailbox')],
+            ['key' => 'news-center', 'name' => 'News Center', 'district' => 'civic-plaza', 'route' => null],
+            ['key' => 'bus-station', 'name' => 'Bus Station', 'district' => 'civic-plaza', 'route' => null],
+
+            // C. Education Hub
+            ['key' => 'school', 'name' => 'School', 'district' => 'education-hub', 'route' => null],
+            ['key' => 'wall-of-inspiration', 'name' => 'Wall of Inspiration, Voice and Art', 'district' => 'education-hub', 'route' => null],
+
+            // D. Main City Facilities
+            ['key' => 'city-mall', 'name' => 'City Mall', 'district' => 'main-city-facilities', 'route' => route('education.city-mall')],
+            ['key' => 'supermarket', 'name' => 'Supermarket', 'district' => 'main-city-facilities', 'route' => route('supermarket.market-list')],
+            ['key' => 'restaurants', 'name' => 'Restaurants', 'district' => 'main-city-facilities', 'route' => null],
+            ['key' => 'farmers-market', 'name' => 'Farmers Market', 'district' => 'main-city-facilities', 'route' => null],
+            ['key' => 'car-dealership', 'name' => 'Car Dealership / Auto Repair', 'district' => 'main-city-facilities', 'route' => null],
+
+            // E. Financial Square
+            ['key' => 'bank', 'name' => 'Universal Bank', 'district' => 'financial-square', 'route' => route('bank.index')],
+            ['key' => 'small-business-district', 'name' => 'Small Business District', 'district' => 'financial-square', 'route' => null],
+            ['key' => 'money-factory', 'name' => 'Money Factory', 'district' => 'financial-square', 'route' => null],
+
+            // F. Community Care
+            ['key' => 'hospital', 'name' => 'Hospital', 'district' => 'community-care', 'route' => null],
+            ['key' => 'donation-center', 'name' => 'Donation Center', 'district' => 'community-care', 'route' => route('education.npos')],
+
+            // G. Public Services
+            ['key' => 'courthouse', 'name' => 'Courthouse', 'district' => 'public-services', 'route' => null],
+            ['key' => 'fire-station', 'name' => 'Fire Station', 'district' => 'public-services', 'route' => null],
+            ['key' => 'police-station', 'name' => 'Police Station', 'district' => 'public-services', 'route' => null],
+            ['key' => 'repair-shop', 'name' => 'Repair Shop', 'district' => 'public-services', 'route' => null],
+
+            // H. Industrial and Utilities Zone
+            ['key' => 'water-treatment', 'name' => 'Water Treatment Plant / Utilities Office', 'district' => 'industrial-utilities', 'route' => null],
+            ['key' => 'power-plant', 'name' => 'Power Plant / Electrical Grid', 'district' => 'industrial-utilities', 'route' => null],
+            ['key' => 'gas-station', 'name' => 'Gas Station', 'district' => 'industrial-utilities', 'route' => null],
+            ['key' => 'recycling-center', 'name' => 'Recycling Center', 'district' => 'industrial-utilities', 'route' => null],
+
+            // I. Recreation and Development Spaces
+            ['key' => 'vacant-lots', 'name' => 'Vacant Lots', 'district' => 'recreation-development', 'route' => null],
         ];
     }
 
     public function index(): View
     {
         $user = Auth::user();
-        $myAddress = $user->isStudent()
-            ? \App\Services\AddressService::assignForStudent($user)?->load('street')
-            : null;
-
-        $streets = Street::orderBy('sort_order')->get();
+        $myAddress = $this->myAddress($user);
 
         return view('education.city.index', [
-            'user' => $user,
             'myAddress' => $myAddress,
-            'buildings' => self::buildings(),
-            'streets' => $streets,
+            'districts' => self::districts(),
         ]);
+    }
+
+    public function district(string $district): View
+    {
+        $districts = collect(self::districts());
+        $current = $districts->firstWhere('key', $district);
+
+        if (!$current) {
+            abort(404);
+        }
+
+        $user = Auth::user();
+        $buildings = collect(self::buildings())->where('district', $district)->values()->all();
+
+        $streets = $district === 'residential-quarter'
+            ? Street::orderBy('sort_order')->get()
+            : collect();
+
+        return view('education.city.district', [
+            'district' => $current,
+            'buildings' => $buildings,
+            'streets' => $streets,
+            'myAddress' => $this->myAddress($user),
+        ]);
+    }
+
+    private function myAddress($user)
+    {
+        return $user->isStudent()
+            ? \App\Services\AddressService::assignForStudent($user)?->load('street')
+            : null;
     }
 }

@@ -10,38 +10,75 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * City Map, Phase 1 (2026-10-19). Backend/data layer is fully testable
- * before Daniel supplies the real exported hero image - see
- * CityController's doc comment.
+ * City Map, Phase 1/1b (2026-10-19). Two levels: an overview page listing
+ * the 9 districts the doc itself groups buildings into, then one page per
+ * district listing just its own buildings - instead of ~25 hotspots
+ * crammed onto a single overview image. Street plaques live on the
+ * Residential Quarter district page specifically, since streets are
+ * residential by definition.
  */
 class CityMapTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_the_city_map_page_renders_and_lists_the_seven_real_buildings(): void
+    public function test_the_overview_page_lists_all_nine_districts(): void
     {
         $student = User::factory()->create(['role' => 4]);
 
         $response = $this->actingAs($student)->get(route('education.city'));
 
         $response->assertOk();
-        foreach (['Universal Bank', 'City Mall', 'Supermarket', 'Educational Finance Department', 'City Hall'] as $name) {
+        foreach (['Residential Quarter', 'Civic Plaza', 'Education Hub', 'Main City Facilities', 'Financial Square', 'Community Care', 'Public Services', 'Industrial and Utilities Zone', 'Recreation and Development Spaces'] as $name) {
             $response->assertSee($name);
         }
-        // A not-yet-built building is still visible (per Daniel: "the
-        // other buildings, should still be visible"), just not a link.
-        $response->assertSee('Hospital');
     }
 
-    public function test_the_city_map_page_lists_all_27_street_plaques(): void
+    public function test_a_district_page_lists_only_its_own_buildings(): void
     {
         $student = User::factory()->create(['role' => 4]);
 
-        $response = $this->actingAs($student)->get(route('education.city'));
+        $response = $this->actingAs($student)->get(route('education.city.district', 'financial-square'));
+
+        $response->assertOk();
+        $response->assertSee('Universal Bank');
+        $response->assertSee('Money Factory');
+        // A building from a different district shouldn't show in the
+        // buildings grid (the shared sidebar links to City Mall on every
+        // page regardless, so check the controller data directly instead
+        // of scraping the rendered page for this one).
+        $response->assertViewHas('buildings', function ($buildings) {
+            return collect($buildings)->doesntContain(fn ($b) => $b['name'] === 'City Mall');
+        });
+    }
+
+    public function test_an_unknown_district_404s(): void
+    {
+        $student = User::factory()->create(['role' => 4]);
+
+        $response = $this->actingAs($student)->get(route('education.city.district', 'not-a-real-district'));
+
+        $response->assertStatus(404);
+    }
+
+    public function test_the_residential_quarter_lists_all_27_street_plaques(): void
+    {
+        $student = User::factory()->create(['role' => 4]);
+
+        $response = $this->actingAs($student)->get(route('education.city.district', 'residential-quarter'));
 
         $response->assertOk();
         $response->assertSee('Adam Smith Avenue');
         $response->assertSee('Gramsci Street');
+    }
+
+    public function test_other_districts_do_not_show_street_plaques(): void
+    {
+        $student = User::factory()->create(['role' => 4]);
+
+        $response = $this->actingAs($student)->get(route('education.city.district', 'civic-plaza'));
+
+        $response->assertOk();
+        $response->assertDontSee('Adam Smith Avenue');
     }
 
     public function test_a_student_sees_their_own_assigned_address(): void
