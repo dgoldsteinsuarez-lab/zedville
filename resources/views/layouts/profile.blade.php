@@ -658,7 +658,7 @@
                 ->exists();
         @endphp
         @if (!$hasMoodToday)
-        <div x-data="moodPopup()" x-init="initPopup()">                
+        <div x-data="moodPopup()">
             <div
                 x-show="moodMeater"
                 x-transition.opacity
