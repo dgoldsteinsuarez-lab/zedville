@@ -174,5 +174,16 @@ Beyond the crash, this was the wrong field regardless: `'fullname'`/`'signature'
 ### Fixed 2026-10-19 - "Go to My Bank Account" button on the activation-complete page did nothing
 Daniel: "I can not go to bank account by pressing the green tap." The button was a plain `href="#"` placeholder in `citizen-activation/activation-complete.blade.php` - never actually wired to a route. Fixed to `route('bank.index')`. Tested via `tests/Feature/ActivationCompleteBankLinkTest.php`.
 
+### Fixed 2026-10-19 - several pages hardcoded a link back to the developers' own working domain
+Daniel: clicking a diet option (Omnivore/Pescatarian/Vegetarian/Vegan) in the Supermarket "brings me to the IT guys website, the original place that they were using to build the website." Root cause: the four diet tiles in `supermarket/market-list.blade.php` were hardcoded to absolute URLs on `https://zedville.nexovah.in/...` - the original developers' own domain - instead of a relative/`APP_URL`-based link, so clicking one always took the visitor there regardless of which domain the app is actually deployed on.
+
+Searched the whole codebase for the same pattern and found 5 more pages with the identical bug, all fixed the same way (`url()`/`route()` instead of the literal string):
+- `spendingActivities/market-list.blade.php` and `activity/market-list.blade.php` (the latter is dead/unrouted, fixed for consistency anyway)
+- `spendingActivities/high-spending-activities.blade.php` - the student "High Budget Activity" shop picker, all 7 store links
+- Three admin pages' uploaded-image `<img>` tags (`admin/education/city-mall-store.blade.php`, `admin/education/poster/index.blade.php` - also its edit-form `action` URL - `admin/education/spand-budget.blade.php`, `admin/supermarket/supermarket.blade.php`)
+- `admin/calendar/calendar.blade.php`'s `CLASS_LIST_API_URL` (the sibling `API_BASE_URL` two lines above it already used the correct relative pattern - only this one constant was missed)
+
+`config/app.php`'s `'url' => env('APP_URL', 'https://zedville.nexovah.in')` is the one legitimate place this domain belongs - every fix here routes through that single config value via `url()`/`route()`/`asset()`, instead of each page repeating its own hardcoded copy. Tested via `tests/Feature/SupermarketDietLinksTest.php` (the originally-reported page).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

@@ -516,7 +516,7 @@
 
                 <td>
                     ${p.image ? `
-                        <img src="https://zedville.nexovah.in/public/uploads/products/${p.image}" width="40">
+                        <img src="{{ url('public/uploads/products') }}/${p.image}" width="40">
                     ` : ''}
                     <label class="file-btn mr-1">
                         <span class="file-text">Choose File</span>

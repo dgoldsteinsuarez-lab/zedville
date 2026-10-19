@@ -287,7 +287,7 @@
                 <tr data-id="${s.id}">
                     <td>${s.id}</td>
                     <td><input class="grid-input" value="${s.store_name}" disabled></td>
-                    <td>${s.store_image ? `<img class='mr-2' src="https://zedville.nexovah.in/public/uploads/stores/${s.store_image}" width="40">` : ''}
+                    <td>${s.store_image ? `<img class='mr-2' src="{{ url('public/uploads/stores') }}/${s.store_image}" width="40">` : ''}
                     <label class="file-btn">
                         <span class="file-text">Choose Image</span>
                         <input type="file" accept="image/*" hidden onchange="updateFileLabel(this)">

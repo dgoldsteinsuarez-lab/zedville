@@ -274,10 +274,10 @@
     };
 
     const categories = {
-        omnivore:    { name: 'Omnivore',     class: 's1', url: 'https://zedville.nexovah.in/supermarket/omnivore' },
-        pescatarian: { name: 'Pescatarian',  class: 's2', url: 'https://zedville.nexovah.in/supermarket/pescatarian' },
-        vegetarian:  { name: 'Vegetarian',   class: 's3', url: 'https://zedville.nexovah.in/supermarket/vegetarian' },
-        vegan:       { name: 'Vegan',        class: 's4', url: 'https://zedville.nexovah.in/supermarket/vegan' }
+        omnivore:    { name: 'Omnivore',     class: 's1', url: '{{ route('supermarket.supermarket', 'omnivore') }}' },
+        pescatarian: { name: 'Pescatarian',  class: 's2', url: '{{ route('supermarket.supermarket', 'pescatarian') }}' },
+        vegetarian:  { name: 'Vegetarian',   class: 's3', url: '{{ route('supermarket.supermarket', 'vegetarian') }}' },
+        vegan:       { name: 'Vegan',        class: 's4', url: '{{ route('supermarket.supermarket', 'vegan') }}' }
     };
 
     function openModal(id)  { document.getElementById(id)?.classList.add('show'); }

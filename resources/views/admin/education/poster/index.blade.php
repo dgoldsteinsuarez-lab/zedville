@@ -349,7 +349,7 @@ $(document).on("click", ".edit-role-btn", function () {
     $("#poster_name").val(name);
 
     // Correct FULL image path
-    let imagePath = "https://zedville.nexovah.in/public/uploads/room_poster/" + image;
+    let imagePath = "{{ url('public/uploads/room_poster') }}/" + image;
 
     const wrapper = $('.image-upload-wrapper');
     const previewImage = $('#editPreviewImage');
@@ -365,7 +365,7 @@ $(document).on("click", ".edit-role-btn", function () {
     }
 
     // Correct form action using FULL BASE URL
-    $("#editRoleForm").attr("action", "https://zedville.nexovah.in/admin/education/updatePoster/" + id);
+    $("#editRoleForm").attr("action", "{{ url('admin/education/updatePoster') }}/" + id);
 });
 
 //Delete security

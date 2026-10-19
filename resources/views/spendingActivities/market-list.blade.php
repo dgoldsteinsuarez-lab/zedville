@@ -273,10 +273,10 @@
     };
 
     const categories = {
-        omnivore:    { name: 'Omnivore',     class: 's1', url: 'https://zedville.nexovah.in/spending-activities/omnivore?activity_id={{ $activityId}}' },
-        pescatarian: { name: 'Pescatarian',  class: 's2', url: 'https://zedville.nexovah.in/spending-activities/pescatarian?activity_id={{ $activityId}}' },
-        vegetarian:  { name: 'Vegetarian',   class: 's3', url: 'https://zedville.nexovah.in/spending-activities/vegetarian?activity_id={{ $activityId}}' },
-        vegan:       { name: 'Vegan',        class: 's4', url: 'https://zedville.nexovah.in/spending-activities/vegan?activity_id={{ $activityId}}' }
+        omnivore:    { name: 'Omnivore',     class: 's1', url: '{{ route('spendingactivities.supermarket', ['type' => 'omnivore', 'activity_id' => $activityId]) }}' },
+        pescatarian: { name: 'Pescatarian',  class: 's2', url: '{{ route('spendingactivities.supermarket', ['type' => 'pescatarian', 'activity_id' => $activityId]) }}' },
+        vegetarian:  { name: 'Vegetarian',   class: 's3', url: '{{ route('spendingactivities.supermarket', ['type' => 'vegetarian', 'activity_id' => $activityId]) }}' },
+        vegan:       { name: 'Vegan',        class: 's4', url: '{{ route('spendingactivities.supermarket', ['type' => 'vegan', 'activity_id' => $activityId]) }}' }
     };
 
     function openModal(id)  { document.getElementById(id)?.classList.add('show'); }

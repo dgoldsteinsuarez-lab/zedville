@@ -356,7 +356,7 @@ let classList = []; // Store classes from API
 
 // API Configuration
 const API_BASE_URL = '{{ url('/api/admin/calendar-events') }}';
-const CLASS_LIST_API_URL = 'https://zedville.nexovah.in/admin/class-list';
+const CLASS_LIST_API_URL = '{{ url('/admin/class-list') }}';
 
 // Clear any old localStorage data from previous implementation
 localStorage.removeItem('calendarEvents');
