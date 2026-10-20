@@ -68,10 +68,17 @@ class HighBudgetActivityController extends Controller
 
     public function hba_position(Request $request)
     {
+        $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
         $userId = Auth::id();
         $position = $request->input('position');
         $cid = $request->input('cid');
         $id = $request->id;
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
         $required = $position === 'required' ? 1 : 0;
         $optional = $position === 'optional' ? 1 : 0;
 
@@ -103,6 +110,8 @@ class HighBudgetActivityController extends Controller
                     'cid' => $cid,
                     'required' => $required,
                     'optional' => $optional,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
                     'updated_at' => now(),
                 ]);
         } else {
@@ -113,6 +122,8 @@ class HighBudgetActivityController extends Controller
                 'cid' => $cid,
                 'required' => $required,
                 'optional' => $optional,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -126,6 +137,11 @@ class HighBudgetActivityController extends Controller
             ->whereMonth('created_at', now()->month)
             ->first();
 
+        // See MbaPositionController - FullCalendar's end is exclusive, +1
+        // day so an admin-picked end_date is still shown as included.
+        $calendarStart = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : now();
+        $calendarEnd = $endDate ? \Carbon\Carbon::parse($endDate)->addDay()->startOfDay() : now();
+
         if ($calendarEvent) {
             DB::table('calendar_events')
                 ->where('id', $calendarEvent->id)
@@ -133,6 +149,8 @@ class HighBudgetActivityController extends Controller
                     'position' => $position,
                     'backgroundColor' => '#0053f9',
                     'borderColor' => '#0053f9',
+                    'start' => $calendarStart,
+                    'end' => $calendarEnd,
                     'updated_at' => now(),
                 ]);
         } else {
@@ -145,8 +163,8 @@ class HighBudgetActivityController extends Controller
                 'repeatActivity' => '0',
                 'backgroundColor' => '#0053f9',
                 'borderColor' => '#0053f9',
-                'start' => now(),
-                'end' => now(),
+                'start' => $calendarStart,
+                'end' => $calendarEnd,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
