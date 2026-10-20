@@ -379,5 +379,14 @@ Also: "in admin, remove Workload, as it doesnt have any function." Removed the "
 
 Tested via `tests/Feature/CityMapTest.php` (new: the overview page also lists all 27 street plaques; existing coverage confirms other district pages are unaffected).
 
+### Built 2026-10-20 - PISA proficiency levels (admin reference catalog)
+Daniel: "Add in admin a section for PISA with the different difficult levels thats PISA has in their exams, later i want to build assignments based on this." "PISA" previously existed only as a dead student-sidebar link (`href="#"`, no content anywhere). Confirmed via `AskUserQuestion`, and a follow-up clarification, exactly what this is: the real OECD PISA assessment's own official proficiency levels - separate from Zedville's own Grade Level progression (Rookie/Intermediate/Advance/Advance Economist, explicitly **not** renamed or touched) and not nested under any one of them ("PISA is the same for all levels").
+
+New `pisa_proficiency_levels` table/`PisaProficiencyLevel` model - a global reference catalog (same convention as the Grade Levels global-catalog migration), seeded with the OECD's real **Financial Literacy** scale (the domain most relevant to this finance-education platform - confirmed via web search against OECD/NCES sources rather than from memory, since this is meant to be accurate international reference data): 6 official bands (Below Level 1 through Level 5) with their real score cut-offs (PISA scores run 0-1000) and descriptions. A `domain` column exists so Reading/Maths/Science's own scales (PISA defines each separately) can be added later without a schema change - not seeded now, Daniel only asked for Financial Literacy's.
+
+New Super-Admin-only `/admin/pisa` screen (`PisaLevelController`) - list/add/edit/delete, same simple pattern as Grade Levels, with its own "PISA" sidebar entry (replacing the dead student-facing link's absent admin counterpart - the student-facing "PISA" link itself is still unbuilt, flagged for whenever Daniel starts building the actual PISA-practice assignments against this catalog).
+
+Tested via `tests/Feature/Admin/PisaLevelControllerTest.php` (the 6 official levels seed correctly, Grade Levels are confirmed untouched, full CRUD, Super-Admin-only access).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

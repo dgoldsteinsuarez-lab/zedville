@@ -110,6 +110,15 @@ Route::middleware('role:super_admin')->group(function () {
     Route::get('/city-map/streets/{street}/edit', [\App\Http\Controllers\Admin\CityMapController::class, 'editStreet'])->name('city-map.streets.edit');
     Route::put('/city-map/streets/{street}', [\App\Http\Controllers\Admin\CityMapController::class, 'updateStreet'])->name('city-map.streets.update');
 
+    // PISA's own official proficiency/difficulty levels (Financial
+    // Literacy seeded) - a global reference catalog, separate from Grade
+    // Levels, for Daniel to build PISA-practice assignments against
+    // later (bugs.md, 2026-10-20).
+    Route::get('/pisa', [\App\Http\Controllers\Admin\PisaLevelController::class, 'index'])->name('pisa.index');
+    Route::post('/pisa', [\App\Http\Controllers\Admin\PisaLevelController::class, 'store'])->name('pisa.store');
+    Route::put('/pisa/{pisaLevel}', [\App\Http\Controllers\Admin\PisaLevelController::class, 'update'])->name('pisa.update');
+    Route::delete('/pisa/{pisaLevel}', [\App\Http\Controllers\Admin\PisaLevelController::class, 'destroy'])->name('pisa.destroy');
+
     // Role Routes
     Route::get('/role', [AdminDashboardController::class, 'role'])->name('role');
     Route::post('/role/add', [AdminDashboardController::class, 'addRole'])->name('admin.role.add');

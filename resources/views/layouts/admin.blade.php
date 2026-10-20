@@ -267,6 +267,16 @@
                                         </div>
                                     </li>
                                     @endif
+                                    @if($navSuper)
+                                    <li class="nav-item {{ request()->is('admin/pisa*') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="PISA">
+                                        <a class="nav-link" href="{{ url('admin/pisa') }}">
+                                            <span class="navIcon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-120 80-320v-240L0-600l480-240 480 240v320h-40v-300l-80 40v240L480-120Zm0-280 358-179-358-179-358 179 358 179Zm0 221 320-160v-180l-320 160-320-160v180l320 160Z"/></svg>
+                                            </span>
+                                            <span class="navTxt">PISA</span>
+                                        </a>
+                                    </li>
+                                    @endif
                                     @php
                                         $usersMenuActive3 = request()->is(
                                             'admin/education/monthly-budget-activity*',
