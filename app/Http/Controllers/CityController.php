@@ -102,9 +102,19 @@ class CityController extends Controller
         $user = Auth::user();
         $myAddress = $this->myAddress($user);
 
+        $basketTrend = \App\Services\ConsumerSurveySummaryService::cityBasketTrend($user);
+        foreach ($basketTrend as $i => &$row) {
+            $prev = $basketTrend[$i + 1]['avgBasketCost'] ?? null;
+            $row['pctChange'] = ($prev && $prev > 0)
+                ? round((($row['avgBasketCost'] - $prev) / $prev) * 100, 1)
+                : null;
+        }
+        unset($row);
+
         return view('education.city.index', [
             'myAddress' => $myAddress,
             'districts' => self::districts(),
+            'basketTrend' => $basketTrend,
         ]);
     }
 

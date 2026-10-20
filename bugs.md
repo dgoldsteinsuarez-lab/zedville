@@ -253,5 +253,10 @@ Daniel confirmed ("yes") taking on the bounded follow-up flagged above. Also cor
 
 Full suite stayed at the pre-existing 3-failure baseline throughout (Breeze auth-scaffolding tests, unrelated).
 
+### Built 2026-10-20 - city-wide average basket cost (the deferred "aggregate basket" stat)
+Closes the item deferred twice in planning.md (Phase 7 and Phase 8's deferred lists) - Daniel had asked "where did you put the aggregate basket of all students to calculate?" with no scope decided yet at the time. Confirmed via `AskUserQuestion`: average `consumer_surveys.basket_cost` per calendar month, cohort-scoped to the same school + grade (exactly matching `MoodController::city_mood()`'s existing precedent, not a new convention), displayed on the City Map index page with a short note on its real-world CPI/inflation significance.
+
+New `ConsumerSurveySummaryService::cityBasketTrend()` groups by the real `created_at` year/month (not the non-chronological `survey_month` string label) - same join-users/group-by-month shape as `city_mood()`'s `cityMonths` query, built against `consumer_surveys` instead of `mood_logs`. `CityController::index()` computes each month's % change from the previous one. `education/city/index.blade.php` shows the current month's average + change + a short history table, or a plain "not enough data yet" message when nobody in the cohort has submitted a survey yet - no suppression logic for small sample sizes, this is a learning tool, not production analytics. Tested via `tests/Feature/CityBasketTrendTest.php` (cohort averaging, grade-exclusion, both empty and populated page states).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

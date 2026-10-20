@@ -24,6 +24,59 @@
     </div>
 
     <div class="tailCard w-full rounded-lg p-6">
+        <h2 class="text-lg font-bold mb-2">City Basket Index</h2>
+        <p class="text-gray-500 mb-4">
+            This tracks the same idea as a real Consumer Price Index: the average cost of a fixed
+            basket of groceries over time is one of the main ways economists measure inflation.
+        </p>
+
+        @if (empty($basketTrend))
+            <p class="text-gray-500">Not enough data yet - once students in your grade submit their
+                monthly grocery survey, the average basket cost will show up here.</p>
+        @else
+            @php $current = $basketTrend[0]; @endphp
+            <div class="flex items-baseline gap-3 mb-4">
+                <span class="text-2xl font-bold">{{ number_format($current['avgBasketCost'], 2) }} Z</span>
+                @if ($current['pctChange'] !== null)
+                    <span class="text-sm font-semibold {{ $current['pctChange'] > 0 ? 'text-red-600' : ($current['pctChange'] < 0 ? 'text-green-600' : 'text-gray-500') }}">
+                        {{ $current['pctChange'] > 0 ? '+' : '' }}{{ $current['pctChange'] }}% vs last month
+                    </span>
+                @endif
+                <span class="text-sm text-gray-500">({{ $current['studentCount'] }} student{{ $current['studentCount'] === 1 ? '' : 's' }})</span>
+            </div>
+
+            @if (count($basketTrend) > 1)
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500">
+                            <th class="pb-2">Month</th>
+                            <th class="pb-2">Avg. basket cost</th>
+                            <th class="pb-2">Change</th>
+                            <th class="pb-2">Students</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($basketTrend as $row)
+                            <tr class="border-t border-[#D2DDDB]">
+                                <td class="py-2">{{ \Carbon\Carbon::create($row['year'], $row['month'], 1)->format('M Y') }}</td>
+                                <td class="py-2">{{ number_format($row['avgBasketCost'], 2) }} Z</td>
+                                <td class="py-2">
+                                    @if ($row['pctChange'] === null)
+                                        &mdash;
+                                    @else
+                                        {{ $row['pctChange'] > 0 ? '+' : '' }}{{ $row['pctChange'] }}%
+                                    @endif
+                                </td>
+                                <td class="py-2">{{ $row['studentCount'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        @endif
+    </div>
+
+    <div class="tailCard w-full rounded-lg p-6">
         <h2 class="text-lg font-bold mb-4">Districts</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             @foreach ($districts as $district)
