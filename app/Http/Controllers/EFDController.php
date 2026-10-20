@@ -133,8 +133,7 @@ class EFDController extends Controller
                 ->first();
         }
         $lbaPosition = DB::table('mba_position')
-            //->where('user_id', Auth::id())
-            ->where('id', 4)   // ✅ Low Budget Activity
+            ->where('activity_key', 'lba_position')   // ✅ Low Budget Activity
             ->where('sid', $user->sid)
             ->where('cid', $user->grade)
             ->first();

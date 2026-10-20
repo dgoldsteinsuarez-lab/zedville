@@ -7,34 +7,92 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Baseline coverage for Admin\LowBudgetActivityController - written
- * while extracting it out of AdminEducationController (planning.md
- * Phase 3 #4). Previously uncovered.
- *
- * Confirms the pre-existing (not fixed in this pass - see the class
- * docblock and bugs.md) behavior survived the move exactly: the
- * hardcoded id=4 "slot" and the session('sid') (not 'selected_school')
- * lookup.
+ * LowBudgetActivityController was structurally broken compared to its
+ * three siblings (Mba/EmergencyFund/HighBudgetActivityController):
+ * lba_position() read session('sid') instead of 'selected_school' (so
+ * $sid was always null), had no class (cid) scoping at all, and did
+ * updateOrInsert(['user_id' => $userId, 'id' => 4], ...) - treating the
+ * mba_position table's auto-increment primary key as a fixed "slot"
+ * reserved for this activity rather than matching on activity_key/cid
+ * like the siblings do. Fixed to match the per-class pattern exactly
+ * (bugs.md, 2026-10-20).
  */
 class LowBudgetActivityControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_setting_a_low_budget_position_inserts_at_the_hardcoded_id_slot(): void
+    public function test_admin_can_set_a_low_budget_activity_position_and_it_creates_a_calendar_event(): void
     {
         $admin = User::factory()->create(['role' => 1]);
+        session(['selected_school' => 5001]);
 
         $response = $this->actingAs($admin)->post('/admin/education/lba-position', [
             'position' => 'required',
+            'cid' => 1,
         ]);
 
         $response->assertRedirect();
         $this->assertDatabaseHas('mba_position', [
-            'id' => 4,
             'user_id' => $admin->id,
             'activity_key' => 'lba_position',
+            'sid' => 5001,
+            'cid' => 1,
             'required' => 1,
         ]);
-        $this->assertDatabaseHas('calendar_events', ['title' => 'Spending Low activity']);
+        $this->assertDatabaseHas('calendar_events', ['title' => 'Spending Low activity', 'classId' => 1, 'sid' => 5001]);
+    }
+
+    public function test_two_different_classes_can_each_have_their_own_position(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        session(['selected_school' => 5001]);
+
+        $this->actingAs($admin)->post('/admin/education/lba-position', [
+            'position' => 'required',
+            'cid' => 1,
+        ]);
+        $this->actingAs($admin)->post('/admin/education/lba-position', [
+            'position' => 'optional',
+            'cid' => 2,
+        ]);
+
+        $this->assertDatabaseHas('mba_position', ['cid' => 1, 'required' => 1, 'optional' => 0]);
+        $this->assertDatabaseHas('mba_position', ['cid' => 2, 'required' => 0, 'optional' => 1]);
+    }
+
+    public function test_the_same_class_cannot_get_a_second_position_row(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        session(['selected_school' => 5001]);
+
+        $this->actingAs($admin)->post('/admin/education/lba-position', [
+            'position' => 'required',
+            'cid' => 1,
+        ]);
+
+        $response = $this->actingAs($admin)->post('/admin/education/lba-position', [
+            'position' => 'optional',
+            'cid' => 1,
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertSame(1, \DB::table('mba_position')->where('activity_key', 'lba_position')->where('cid', 1)->count());
+    }
+
+    public function test_index_page_scopes_to_the_selected_school(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        session(['selected_school' => 5001]);
+
+        $this->actingAs($admin)->post('/admin/education/lba-position', [
+            'position' => 'required',
+            'cid' => 1,
+        ]);
+
+        session(['selected_school' => 9999]);
+        $response = $this->actingAs($admin)->get('/admin/education/low-budget-activity');
+
+        $response->assertOk();
+        $response->assertViewHas('mbaList', fn ($list) => $list->isEmpty());
     }
 }

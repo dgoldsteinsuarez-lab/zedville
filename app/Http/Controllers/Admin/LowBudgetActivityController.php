@@ -8,59 +8,130 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Admin screen for the Low (Spending) Budget Activity position.
- * Extracted out of AdminEducationController (planning.md Phase 3 #4).
+ * Admin screen for the Low (Spending) Budget Activity position: which
+ * class has it required/optional, surfaced on the calendar. Extracted
+ * out of AdminEducationController (planning.md Phase 3 #4) - fully
+ * self-contained. Structurally identical to MbaPositionController/
+ * HighBudgetActivityController/EmergencyFundPositionController, just
+ * keyed by activity_key 'lba_position' / calendar title "Spending Low
+ * activity".
  *
- * Unlike its three siblings (Mba/EmergencyFund/HighBudgetActivity
- * PositionController), this one is NOT per-class: lba_position() reads
- * session('sid') instead of 'selected_school' (every sibling, and the
- * IsAdmin middleware, use 'selected_school' - 'sid' is never set to
- * anything here, so $sid is always null), and
- * updateOrInsert(['user_id' => $userId, 'id' => 4], ...) treats the
+ * Until 2026-10-20 this was NOT per-class like its three siblings:
+ * lba_position() read session('sid') instead of 'selected_school' (every
+ * sibling, and the IsAdmin middleware, use 'selected_school' - 'sid' is
+ * never set to anything here, so $sid was always null), and
+ * updateOrInsert(['user_id' => $userId, 'id' => 4], ...) treated the
  * auto-increment primary key as if `id` 4 were a fixed "slot" for this
  * activity, rather than matching on activity_key/cid like the siblings
- * do. Preserved verbatim during the move rather than silently fixed -
- * see bugs.md.
+ * do - see bugs.md for the fix.
  */
 class LowBudgetActivityController extends Controller
 {
     public function low_budget_activity()
     {
         $userId = Auth::id();
+        $sid = session('selected_school');
 
-        $position = DB::table('mba_position')
+        $positionQuery = DB::table('mba_position')
             ->where('user_id', $userId)
-            ->where('id', 4)
-            ->first();
+            ->where('activity_key', 'lba_position');
 
-        return view('admin.education.low-budget-activity', compact('position'));
+        if ($sid) {
+            $positionQuery->where('sid', $sid);
+        } else {
+            $positionQuery->whereNull('sid');
+        }
+
+        $position = $positionQuery->first();
+
+        $classes = DB::table('classes')
+            ->when($sid, function ($q) use ($sid) {
+                $q->where('sid', $sid);
+            })
+            ->get();
+
+        $mbaList = DB::table('mba_position as mp')
+            ->leftJoin('school_domains as sd', 'mp.sid', '=', 'sd.id')
+            ->leftJoin('classes as c', function ($join) {
+                $join->on('mp.cid', '=', 'c.id')
+                    ->on('mp.sid', '=', 'c.sid');
+            })
+            ->where('mp.user_id', $userId)
+            ->where('mp.activity_key', 'lba_position')
+            ->when($sid, function ($q) use ($sid) {
+                $q->where('mp.sid', $sid);
+            }, function ($q) {
+                $q->whereNull('mp.sid');
+            })
+            ->select(
+                'mp.*',
+                'sd.school_name',
+                'sd.id as school_id',
+                'c.name as class_name',
+                'c.classCode'
+            )
+            ->orderByDesc('mp.id')
+            ->get();
+
+        return view('admin.education.low-budget-activity', compact('position', 'classes', 'mbaList'));
     }
 
     public function lba_position(Request $request)
     {
         $userId = Auth::id();
         $position = $request->input('position');
+        $cid = $request->input('cid');
+        $id = $request->id;
 
         $required = $position === 'required' ? 1 : 0;
         $optional = $position === 'optional' ? 1 : 0;
 
-        $sid = session()->has('sid') ? session('sid') : null;
+        $sid = session()->has('selected_school') ? session('selected_school') : null;
 
-        DB::table('mba_position')->updateOrInsert(
-            [
+        $duplicate = DB::table('mba_position')
+            ->where('user_id', $userId)
+            ->where('activity_key', 'lba_position')
+            ->where('cid', $cid)
+            ->when($sid, function ($q) use ($sid) {
+                $q->where('sid', $sid);
+            }, function ($q) {
+                $q->whereNull('sid');
+            })
+            ->when($id, function ($q) use ($id) {
+                $q->where('id', '!=', $id);
+            })
+            ->first();
+
+        if ($duplicate) {
+            return back()->with('error', 'This class already has a Low Budget Activity Position.');
+        }
+
+        if ($id) {
+            DB::table('mba_position')
+                ->where('id', $id)
+                ->update([
+                    'sid' => $sid,
+                    'cid' => $cid,
+                    'required' => $required,
+                    'optional' => $optional,
+                    'updated_at' => now(),
+                ]);
+        } else {
+            DB::table('mba_position')->insert([
                 'user_id' => $userId,
-                'id' => 4,
-            ],
-            [
                 'activity_key' => 'lba_position',
+                'sid' => $sid,
+                'cid' => $cid,
                 'required' => $required,
                 'optional' => $optional,
+                'created_at' => now(),
                 'updated_at' => now(),
-                'created_at' => now()
-            ]
-        );
+            ]);
+        }
+
         $calendarEvent = DB::table('calendar_events')
             ->where('sid', $sid)
+            ->where('classId', $cid)
             ->where('title', 'Spending Low activity')
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
@@ -78,6 +149,7 @@ class LowBudgetActivityController extends Controller
         } else {
             DB::table('calendar_events')->insert([
                 'sid' => $sid,
+                'classId' => $cid,
                 'title' => 'Spending Low activity',
                 'description' => 'This is Low budget activity',
                 'position' => $position,
