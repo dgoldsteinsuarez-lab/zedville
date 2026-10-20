@@ -433,112 +433,61 @@
 @endsection
 @push('scripts')
 <script>
-    //const selectedActivityId = {{ $activitys->activityType ?? 'null' }};
+    // Daniel, 2026-10-21: "did you find all the activities for Spending
+    // activities?" - the 10 High activities are now a real DB catalog
+    // (app/Models/Activity.php), and the one assigned to this student's
+    // class is resolved server-side (EFDController::high_spending_
+    // activities()) instead of read from calendar_events.activityType
+    // (which nothing ever actually set). The server already knows which
+    // one, so it's passed directly - no client-side array/number lookup
+    // needed any more.
+    const a = {!! $activity ? $activity->toJson() : 'null' !!};
 
-    const selectedActivityId = {!! $activityType ?? 'null' !!};
-    
-    // ╔══════════════════════════════════════════════════════════════════╗
-    // ║  🔌 IT TEAM: Connect this function to your actual salary source ║
-    // ╚══════════════════════════════════════════════════════════════════╝
     async function getStudentSalary() {
         return 3953; // ⚠️ Placeholder — IT team replaces this
     }
 
-    const activities = [
-        { number: 1,  title: "Birthday Party Budget",    mission: "You're throwing a birthday party for your best friend! You need to buy food for 8–10 guests.",                                           requirements: "Purchase at least 15–25 food items. Choose diet preference: Omnivore, Vegetarian, Pescatarian, or Vegan",                  minItems: 15, maxItems: 25, destination: "Goes to a Friend",                  shop: "Supermarket",                           special: "Choose diet preference and buy variety of food categories" },
-        { number: 2,  title: "Digital Upgrade",          mission: "Enhance your technology setup for better productivity and entertainment.",                                                               requirements: "Choose at least 4–6 tech items. MUST include at least ONE major device (Tablet, Laptop, or Phone)",                        minItems: 4,  maxItems: 6,  destination: "Your Own Home",                     shop: "Tech Hub",                              special: "MUST include at least ONE major device (Tablet, Laptop, or Phone)" },
-        { number: 3,  title: "Community Food Drive",     mission: "The local food bank helps hungry families in your community. They need donations to fill their shelves.",                                requirements: "Select 3 items per family for 4 families (12 items total). Each family needs balanced nutrition",                          minItems: 12, maxItems: null, destination: "Food Bank / Community Center",  shop: "Supermarket",                           special: "3 items per family × 4 families = 12 minimum. Balance spending across families" },
-        { number: 4,  title: "Study Space Setup",        mission: "Create the perfect study environment at home to boost your academic performance.",                                                       requirements: "Purchase AT LEAST 8–10 items total. MUST include furniture or major tech item",                                             minItems: 8,  maxItems: 10, destination: "Your Own Home (Study Room)",        shop: "Stationery Store, Tech Hub, Comfort Zone", special: "MUST include furniture (desk or chair) OR major tech item (tablet)", multiStore: true },
-        { number: 5,  title: "Music Program Donation",   mission: "The local orphanage wants to start a music program for kids. Help them by buying musical instruments!",                                 requirements: "Purchase at least 8–12 instruments. Mix budget-friendly AND quality instruments",                                           minItems: 8,  maxItems: 12, destination: "Orphanage",                        shop: "Beats Music Store",                     special: "Mix budget-friendly instruments (5–8) AND quality instruments (2–4)" },
-        { number: 6,  title: "New Sport Starter Kit",    mission: "Choose a new sport to learn and buy EVERYTHING you need for a complete setup!",                                                         requirements: "Main equipment + protective gear + clothing (3–4) + accessories (2–3). MINIMUM: 6–10 items",                                minItems: 6,  maxItems: 10, destination: "Your Own Home (Closet)",           shop: "BeSpirit Sport Shop",                   special: "Complete kit: main equipment + protective gear + clothing + accessories" },
-        { number: 7,  title: "Room Makeover",            mission: "Transform your living space into the perfect personal sanctuary.",                                                                       requirements: "Transform at least 2–3 room zones. Minimum 6–10 items total",                                                              minItems: 6,  maxItems: 10, destination: "Your Own Home",                    shop: "Comfort Zone, BeU-BeLuxury",            special: "Transform at least 2–3 room zones (comfort, style, fashion)", multiStore: true },
-        { number: 8,  title: "Closet Restock",           mission: "Oh no! Thieves took all your clothes! You need to rebuild your wardrobe with the most important items.",                                requirements: "Buy NEEDS first (7–8 basic items), then WANTS (2–3 fashion items)",                                                        minItems: 9,  maxItems: 11, destination: "Your Own Home (Closet)",           shop: "The Basics Co., BeU-BeLuxury",          special: "Buy NEEDS first (7–8 basic items), then WANTS (2–3 fashion items)", multiStore: true },
-        { number: 9,  title: "Computer Donation",        mission: "The local orphanage wants to help children learn digital skills for their future, but they need a computer!",                           requirements: "1 Computer (Laptop Standard) + peripherals (4–5) + accessories (2–3). MINIMUM: 7–9 items",                                 minItems: 7,  maxItems: 9,  destination: "Orphanage",                        shop: "Tech Hub",                              special: "MUST include 1 Computer (Laptop Standard) + peripherals + accessories" },
-        { number: 10, title: "Phone Replacement Gift",   mission: "Your friend's phone was stolen and they need a replacement! You want to help them get back online.",                                    requirements: "Replacement phone + essential accessories (3–5). MINIMUM: 4–6 items",                                                      minItems: 4,  maxItems: 6,  destination: "A Friend",                         shop: "Tech Hub",                              special: "MUST include phone + charger + accessories" }
-    ];
+    let minZeds = 0, maxZeds = 0;
 
-    let minZeds = 0, maxZeds = 0, wantsMinZeds = 0;
-
-    /*async function init() {
+    async function init() {
         const salary = await getStudentSalary();
-        minZeds      = Math.round(salary * 0.10);
-        maxZeds      = Math.round(salary * 0.20);
-        wantsMinZeds = Math.round(salary * 0.20);
+
+        minZeds = Math.round(salary * 0.10);
+        maxZeds = Math.round(salary * 0.20);
 
         document.querySelectorAll('.min-zeds').forEach(el => el.textContent = minZeds);
         document.querySelectorAll('.max-zeds').forEach(el => el.textContent = maxZeds);
-        document.querySelectorAll('.wants-min-zeds').forEach(el => el.textContent = wantsMinZeds);
 
         const grid = document.getElementById('activitiesGrid');
-        activities.forEach(a => {
-            const card = document.createElement('div');
-            card.className = 'activity-card';
-            card.onclick = () => openModal(a);
-            const maxLabel = a.maxItems ? `${a.minItems}–${a.maxItems}` : `${a.minItems}+`;
-            card.innerHTML = `
-                <div class="card-top">
-                    <span class="card-number">Activity ${a.number}</span>
-                    <span class="card-arrow">→</span>
-                </div>
-                <div class="card-title">${a.title}</div>
-                <div class="card-desc">${a.mission}</div>
-                <div class="card-meta">
-                    <span class="meta-tag shop">🏪 ${a.shop.split(',')[0].trim()}${a.multiStore ? ' +more' : ''}</span>
-                    <span class="meta-tag dest">📍 ${a.destination}</span>
-                    <span class="meta-tag budget">Ƶ ${minZeds}–${maxZeds}</span>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }*/
-    async function init() {
-    const salary = await getStudentSalary();
+        grid.innerHTML = '';
 
-    minZeds = Math.round(salary * 0.10);  // ✅ FIX
-    maxZeds = Math.round(salary * 0.20);  // ✅ FIX
-    wantsMinZeds = Math.round(salary * 0.20);
+        if (!a) {
+            grid.innerHTML = '<p>No activity assigned</p>';
+            return;
+        }
 
-    document.querySelectorAll('.min-zeds').forEach(el => el.textContent = minZeds);
-    document.querySelectorAll('.max-zeds').forEach(el => el.textContent = maxZeds);
+        const card = document.createElement('div');
+        card.className = 'activity-card';
+        card.onclick = () => openModal(a);
 
-    const grid = document.getElementById('activitiesGrid');
-    grid.innerHTML = '';
+        card.innerHTML = `
+            <div class="card-top">
+                <span class="card-number">Activity ${a.number}</span>
+                <span class="card-arrow">→</span>
+            </div>
+            <div class="card-title">${a.title}</div>
+            <div class="card-desc">${a.mission}</div>
+            <div class="card-meta">
+                <span class="meta-tag shop">🏪 ${a.shop.split(',').join(', ')}</span>
+                <span class="meta-tag dest">📍 ${a.destination}</span>
+                <span class="meta-tag budget">Ƶ ${minZeds}–${maxZeds}</span>
+            </div>
+        `;
 
-    if (!selectedActivityId) {
-        grid.innerHTML = '<p>No activity assigned</p>';
-        return;
+        grid.appendChild(card);
     }
-
-    // ✅ FIND MATCHING ACTIVITY
-    const a = activities.find(act => act.number == selectedActivityId);
-
-    if (!a) {
-        grid.innerHTML = '<p>Activity not found</p>';
-        return;
-    }
-
-    const card = document.createElement('div');
-    card.className = 'activity-card';
-    card.onclick = () => openModal(a);
-
-    card.innerHTML = `
-        <div class="card-top">
-            <span class="card-number">Activity ${a.number}</span>
-            <span class="card-arrow">→</span>
-        </div>
-        <div class="card-title">${a.title}</div>
-        <div class="card-desc">${a.mission}</div>
-        <div class="card-meta">
-            <span class="meta-tag shop">🏪 ${a.shop}</span>
-            <span class="meta-tag dest">📍 ${a.destination}</span>
-            <span class="meta-tag budget">Ƶ ${minZeds}–${maxZeds}</span>
-        </div>
-    `;
-
-    grid.appendChild(card);
-}
     function openModal(a) {
-        const maxLabel = a.maxItems ? `${a.minItems}–${a.maxItems} items` : `${a.minItems}+ items`;
+        const maxLabel = a.max_items ? `${a.min_items}–${a.max_items} items` : `${a.min_items}+ items`;
         const shops = a.shop.split(',').map(s => s.trim());
         const shopButtons = shops.map(s =>
             `<button class="btn-pill teal" onclick="startShopping('${s}')">🛒 Start Shopping at ${s} →</button>`
@@ -615,14 +564,14 @@
     }*/
 
     const shopRoutes = {
- "Supermarket": "{{ url('/spending-activities/market-list') }}?activity_id={!! $activityType ?? '' !!}",
- "Tech Hub": "{{ url('/spending-activities/spending-tracker/tech-hub') }}?activity_id={!! $activityType ?? '' !!}",
- "Beats Music Store": "{{ url('/spending-activities/spending-tracker/beats-music-store') }}?activity_id={!! $activityType ?? '' !!}",
-  "BeSpirit Sport Shop": "{{ url('/spending-activities/spending-tracker/bespirit-sport-shop') }}?activity_id={!! $activityType ?? '' !!}",
-   "Comfort Zone": "{{ url('/spending-activities/spending-tracker/comfort-zone') }}?activity_id={!! $activityType ?? '' !!}",
-"Stationery Store": "{{ url('/spending-activities/spending-tracker/stationery-store') }}?activity_id={!! $activityType ?? '' !!}",
-"BeU-BeLuxury": "{{ url('/spending-activities/spending-tracker/beu-beLuxury') }}?activity_id={!! $activityType ?? '' !!}",
-"The Basics Co.": "{{ url('/spending-activities/spending-tracker/basicco') }}?activity_id={!! $activityType ?? '' !!}",
+ "Supermarket": "{{ url('/spending-activities/market-list') }}?activity_id={{ $activity->id ?? '' }}",
+ "Tech Hub": "{{ url('/spending-activities/spending-tracker/tech-hub') }}?activity_id={{ $activity->id ?? '' }}",
+ "Beats - Music Store": "{{ url('/spending-activities/spending-tracker/beats-music-store') }}?activity_id={{ $activity->id ?? '' }}",
+  "BeSpirit - Sport Shop": "{{ url('/spending-activities/spending-tracker/bespirit-sport-shop') }}?activity_id={{ $activity->id ?? '' }}",
+   "Comfort Zone": "{{ url('/spending-activities/spending-tracker/comfort-zone') }}?activity_id={{ $activity->id ?? '' }}",
+"Stationery Store": "{{ url('/spending-activities/spending-tracker/stationery-store') }}?activity_id={{ $activity->id ?? '' }}",
+"BeU - BeLuxury": "{{ url('/spending-activities/spending-tracker/beu-beLuxury') }}?activity_id={{ $activity->id ?? '' }}",
+"The Basics Co.": "{{ url('/spending-activities/spending-tracker/basicco') }}?activity_id={{ $activity->id ?? '' }}",
 
 };
 function startShopping(shop) {

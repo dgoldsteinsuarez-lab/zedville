@@ -249,113 +249,53 @@
             return 3953;
         }
 
-        // Activity data structure
-        const activities = [
-            {
-                number: 1,
-                title: "Accessories for Seniors",
-                mission: "The senior care home needs accessories to help elderly people feel more comfortable and stylish!",
-                requirements: "Purchase at least 3-4 items",
-                destination: "Senior Home Care",
-                shop: "Accessories Store"
-            },
-            {
-                number: 2,
-                title: "Gift for a Friend",
-                mission: "Find the perfect accessories that express your friend's personal style while staying within budget!",
-                requirements: "Purchase 2-3 thoughtful items",
-                destination: "A Friend",
-                shop: "Accessories Store"
-            },
-            {
-                number: 3,
-                title: "Sports Equipment Donation",
-                mission: "The orphanage needs sports equipment so kids can play and exercise!",
-                requirements: "Purchase at least 8-12 items (mix of balls, clothing, and accessories)",
-                destination: "Orphanage",
-                shop: "BeSpirit Sport Shop"
-            },
-            {
-                number: 4,
-                title: "Tech Gift for a Friend",
-                mission: "Help your friend level up their tech with essential accessories!",
-                requirements: "Purchase at least 4-6 tech items",
-                destination: "A Friend",
-                shop: "Tech Hub"
-            },
-            {
-                number: 5,
-                title: "Library Supplies",
-                mission: "Support learning in your community! Select essential supplies for a local library's children's section.",
-                requirements: "Purchase at least 8-10 different items or bundles",
-                destination: "Local Library Children's Section",
-                shop: "Stationery Store"
-            },
-            {
-                number: 6,
-                title: "Shelter Hygiene Items",
-                mission: "Help provide dignity and basic comfort to individuals in need at a local homeless shelter.",
-                requirements: "Purchase at least 6-8 hygiene and personal care items",
-                destination: "Homeless Shelter",
-                shop: "Daily Essentials"
-            },
-            {
-                number: 7,
-                title: "Community Tech Items",
-                mission: "Provide shareable tech accessories for a community center's computer lab.",
-                requirements: "Purchase at least 6-10 tech items",
-                destination: "Community Center",
-                shop: "Tech Hub"
-            },
-            {
-                number: 8,
-                title: "Clothing Donation",
-                mission: "Support a community clothing drive by contributing basic, versatile clothing items.",
-                requirements: "Purchase at least 20-30 clothing items",
-                destination: "Community Center",
-                shop: "The Basics Co."
-            },
-            {
-                number: 9,
-                title: "Community Cleaning Tools",
-                mission: "Help a high-traffic community area maintain cleanliness with durable cleaning supplies.",
-                requirements: "Purchase at least 10-15 cleaning items",
-                destination: "Community Center",
-                shop: "Daily Essentials"
-            },
-            {
-                number: 10,
-                title: "Sports Balls Donation",
-                mission: "Help upgrade the quality of shared balls available at a public park or youth recreation area.",
-                requirements: "Purchase quality/competition level balls (minimum 4-6)",
-                destination: "Orphanage",
-                shop: "BeSpirit Sport Shop"
-            }
-        ];
+        // Daniel, 2026-10-21: "did you find all the activities for Spending
+        // activities?" - the 10 Low activities are now a real DB catalog
+        // (app/Models/Activity.php). Previously this page showed all 10
+        // unconditionally with no selection and a dead "Go to shop" link
+        // (href="#") - it now shows only the one activity actually assigned
+        // to this student's class (EFDController::low_spending_activities()),
+        // brought up to the same "show the one assigned activity, with a
+        // real shop link" pattern already working on the High page.
+        const activity = {!! $activity ? $activity->toJson() : 'null' !!};
 
-        // Generate activity cards with dynamic salary
+        const shopRoutes = {
+            "Accessories": "{{ url('/spending-activities/spending-tracker/accessories') }}?activity_id={{ $activity->id ?? '' }}",
+            "BeSpirit - Sport Shop": "{{ url('/spending-activities/spending-tracker/bespirit-sport-shop') }}?activity_id={{ $activity->id ?? '' }}",
+            "Tech Hub": "{{ url('/spending-activities/spending-tracker/tech-hub') }}?activity_id={{ $activity->id ?? '' }}",
+            "Stationery Store": "{{ url('/spending-activities/spending-tracker/stationery-store') }}?activity_id={{ $activity->id ?? '' }}",
+            "Daily Essentials": "{{ url('/spending-activities/spending-tracker/daily-essentials') }}?activity_id={{ $activity->id ?? '' }}",
+            "The Basics Co.": "{{ url('/spending-activities/spending-tracker/basicco') }}?activity_id={{ $activity->id ?? '' }}",
+        };
+
+        // Generate the one assigned activity's card with dynamic salary
         async function generateActivities() {
             const salary = await getStudentSalary();
             const capZeds = Math.round(salary * 0.10);
 
             const grid = document.getElementById('activitiesGrid');
-            
-            activities.forEach(activity => {
-                const card = document.createElement('div');
-                card.className = 'activity-card';
-                
-                card.innerHTML = `
-                    <div class="activity-number">Activity ${activity.number}</div>
-                    <h3 class="activity-title">${activity.title}</h3>
-                    <p class="activity-mission">${activity.mission}</p>
-                    <div class="activity-requirements"><strong>Requirements:</strong> ${activity.requirements}</div>
-                    <div class="activity-destination">Delivery: ${activity.destination}</div>
-                    <div class="budget-limit">💰 Budget: Up to 10% of salary (max ${capZeds} zeds)</div>
-                    <a href="#" class="shop-link">Go to ${activity.shop} →</a>
-                `;
-                
-                grid.appendChild(card);
-            });
+
+            if (!activity) {
+                grid.innerHTML = '<p>No activity assigned</p>';
+                return;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'activity-card';
+
+            const shopUrl = shopRoutes[activity.shop] || '#';
+
+            card.innerHTML = `
+                <div class="activity-number">Activity ${activity.number}</div>
+                <h3 class="activity-title">${activity.title}</h3>
+                <p class="activity-mission">${activity.mission}</p>
+                <div class="activity-requirements"><strong>Requirements:</strong> ${activity.requirements}</div>
+                <div class="activity-destination">Delivery: ${activity.destination}</div>
+                <div class="budget-limit">💰 Budget: Up to 10% of salary (max ${capZeds} zeds)</div>
+                <a href="${shopUrl}" class="shop-link">Go to ${activity.shop} →</a>
+            `;
+
+            grid.appendChild(card);
 
             // Update the spending rules section
             document.querySelectorAll('.cap-zeds').forEach(el => {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,7 @@ class SpendingActivityController extends Controller
                 $join->on('mp.cid', '=', 'c.id')
                     ->on('mp.sid', '=', 'c.sid');
             })
+            ->leftJoin('activities as act', 'mp.activity_id', '=', 'act.id')
             ->where('mp.user_id', $userId)
             ->whereIn('mp.activity_key', ['hba_position', 'lba_position'])
             ->when($sid, function ($q) use ($sid) {
@@ -54,24 +56,29 @@ class SpendingActivityController extends Controller
             }, function ($q) {
                 $q->whereNull('mp.sid');
             })
-            ->select('mp.*', 'sd.school_name', 'sd.id as school_id', 'c.name as class_name', 'c.classCode')
+            ->select('mp.*', 'sd.school_name', 'sd.id as school_id', 'c.name as class_name', 'c.classCode', 'act.title as activity_title')
             ->orderByDesc('mp.id')
             ->get();
 
-        return view('admin.education.spending-activity', compact('classes', 'list'));
+        $activities = Activity::orderBy('type')->orderBy('number')->get();
+
+        return view('admin.education.spending-activity', compact('classes', 'list', 'activities'));
     }
 
     public function save(Request $request)
     {
         $request->validate([
-            'activity' => ['required', 'in:high,low'],
+            'activity_id' => ['required', 'integer', 'exists:activities,id'],
             'position' => ['required', 'in:required,optional'],
             'cid' => ['required'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
 
-        [$activityKey, $calendarTitle] = self::ACTIVITIES[$request->activity];
+        $activityId = $request->input('activity_id');
+        $activityRow = Activity::findOrFail($activityId);
+        abort_unless(isset(self::ACTIVITIES[$activityRow->type]), 422, 'Unknown activity type.');
+        [$activityKey, $calendarTitle] = self::ACTIVITIES[$activityRow->type];
 
         $userId = Auth::id();
         $position = $request->input('position');
@@ -110,6 +117,7 @@ class SpendingActivityController extends Controller
                     'sid' => $sid,
                     'cid' => $cid,
                     'activity_key' => $activityKey,
+                    'activity_id' => $activityId,
                     'required' => $required,
                     'optional' => $optional,
                     'start_date' => $startDate,
@@ -120,6 +128,7 @@ class SpendingActivityController extends Controller
             DB::table('mba_position')->insert([
                 'user_id' => $userId,
                 'activity_key' => $activityKey,
+                'activity_id' => $activityId,
                 'sid' => $sid,
                 'cid' => $cid,
                 'required' => $required,

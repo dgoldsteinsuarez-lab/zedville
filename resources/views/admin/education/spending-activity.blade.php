@@ -17,10 +17,18 @@
                         <div class="col-12 col-lg-6">
                             <div class="form-group mab-25">
                                 <label class="form-label">Activity</label>
-                                <select class="form-select" name="activity" id="activity">
+                                <select class="form-select" name="activity_id" id="activity_id">
                                     <option value="">Select Activity</option>
-                                    <option value="high">High</option>
-                                    <option value="low">Low</option>
+                                    <optgroup label="High Spending">
+                                        @foreach($activities->where('type', 'high') as $act)
+                                            <option value="{{ $act->id }}">{{ $act->number }}. {{ $act->title }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                    <optgroup label="Low Spending">
+                                        @foreach($activities->where('type', 'low') as $act)
+                                            <option value="{{ $act->id }}">{{ $act->number }}. {{ $act->title }}</option>
+                                        @endforeach
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
@@ -97,7 +105,12 @@
 
                                         <td>{{ $item->class_name }}</td>
 
-                                        <td>{{ $item->activity_key === 'hba_position' ? 'High' : 'Low' }}</td>
+                                        <td>
+                                            {{ $item->activity_key === 'hba_position' ? 'High' : 'Low' }}
+                                            @if ($item->activity_title)
+                                                - {{ $item->activity_title }}
+                                            @endif
+                                        </td>
 
                                         <td>
                                             {{ $item->required ? 'Required' : 'Optional' }}
@@ -110,7 +123,7 @@
 
                                             <a href="javascript:void(0)" class="btn btn-sm btn-primary editBtn"
                                                 data-id="{{ $item->id }}"
-                                                data-activity="{{ $item->activity_key === 'hba_position' ? 'high' : 'low' }}"
+                                                data-activity-id="{{ $item->activity_id }}"
                                                 data-cid="{{ $item->cid }}"
                                                 data-position="{{ $item->required ? 'required' : 'optional' }}"
                                                 data-start-date="{{ $item->start_date }}"
@@ -150,7 +163,7 @@
             btn.addEventListener('click', function () {
 
                 document.getElementById('edit_id').value = this.dataset.id;
-                document.getElementById('activity').value = this.dataset.activity;
+                document.getElementById('activity_id').value = this.dataset.activityId;
                 document.getElementById('cid').value = this.dataset.cid;
                 document.getElementById('position').value = this.dataset.position;
                 document.getElementById('start_date').value = this.dataset.startDate || '';

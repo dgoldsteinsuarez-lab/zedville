@@ -215,6 +215,7 @@ public function spending_tracker($type, Request $request)
             'lastBalance',
             'hasBankAccount',
             'activityId',
+            'activity',  // was computed above but never passed - budget limits always fell back to defaults (bugs.md, 2026-10-21)
             'npos'
         )
     );

@@ -509,26 +509,40 @@ class EFDController extends Controller
     {
         $user = Auth::user();
 
-        /*$activitys = DB::table('calendar_events')
-            ->where('classId', $user->grade)
-            ->select('activityType') // only ID
-            ->first();*/
-        $activitys = DB::table('calendar_events')
-            ->where('classId', $user->grade)
-            //->orderBy('id', 'desc') // latest ID first
-            ->orderBy('created_at', 'desc')
-            ->select('activityType')
+        // Daniel, 2026-10-21: "did you find all the activities for
+        // Spending activities?" - this used to read calendar_events.
+        // activityType, a generic field nothing ever actually wrote with
+        // spending-activity intent, so no activity was ever really
+        // assigned. Now resolves the real assignment the same way this
+        // file's own educational_finance_department() already does above
+        // (mba_position by activity_key + sid + cid).
+        $position = DB::table('mba_position')
+            ->where('activity_key', 'hba_position')
+            ->where('sid', $user->sid)
+            ->where('cid', $user->grade)
             ->first();
 
-        $activityType = $activitys->activityType ?? null;
+        $activity = $position && $position->activity_id
+            ? \App\Models\Activity::find($position->activity_id)
+            : null;
 
-
-        return view('spendingActivities.high-spending-activities', compact('activitys', 'activityType'));
+        return view('spendingActivities.high-spending-activities', compact('activity'));
     }
     public function low_spending_activities()
     {
+        $user = Auth::user();
 
-        return view('spendingActivities.low-spending-activities');
+        $position = DB::table('mba_position')
+            ->where('activity_key', 'lba_position')
+            ->where('sid', $user->sid)
+            ->where('cid', $user->grade)
+            ->first();
+
+        $activity = $position && $position->activity_id
+            ? \App\Models\Activity::find($position->activity_id)
+            : null;
+
+        return view('spendingActivities.low-spending-activities', compact('activity'));
     }
     //City Hall
     public function city_hall()
