@@ -292,8 +292,7 @@
                                         $usersMenuActive3 = request()->is(
                                             'admin/education/monthly-budget-activity*',
                                             'admin/education/poster*',
-                                            'admin/education/high-budget-activity*',
-                                            'admin/education/low-budget-activity*',
+                                            'admin/education/spending-activity*',
                                             'admin/login-question',
                                             'admin/finhero/activities',
                                             'admin/finhero/task-activities',
@@ -330,19 +329,15 @@
                                                         <span class="navTxt">Room Poster</span>
                                                     </a>
                                                 </li>
-                                                <li class="nav-item {{ request()->is('admin/education/high-budget-activity') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/education/high-budget-activity') }}">
-                                                        <span class="navTxt">Spending Activity (High)</span>
-                                                    </a>
-                                                </li>
-                                                {{-- Low Budget Activity has had a working route/controller/view all
-                                                     along (lba_position(), fixed to be per-class 2026-10-20) but was
-                                                     never linked from this nav - Daniel, 2026-10-21: "For the
-                                                     spending activity, I don't see the different spending
-                                                     activities." This was the actual cause, not missing content. --}}
-                                                <li class="nav-item {{ request()->is('admin/education/low-budget-activity') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/education/low-budget-activity') }}">
-                                                        <span class="navTxt">Spending Activity (Low)</span>
+                                                {{-- One unified "Spending Activity" screen with an Activity
+                                                     (High/Low) dropdown - Daniel, 2026-10-21: "I can not see all
+                                                     the spending activities... I can not select any," confirmed
+                                                     via AskUserQuestion he wanted one page, not two separate nav
+                                                     entries. The two underlying position screens/routes still
+                                                     exist and work (just unlinked from nav now) - see bugs.md. --}}
+                                                <li class="nav-item {{ request()->is('admin/education/spending-activity') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/education/spending-activity') }}">
+                                                        <span class="navTxt">Spending Activity</span>
                                                     </a>
                                                 </li>
                                                 {{-- School Month Settings moved to the Dashboard (Daniel,

@@ -225,6 +225,15 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::get('/education/low-budget-activity', [LowBudgetActivityController::class, 'low_budget_activity'])->name('admin.education.low-budget-activity');
     Route::post('/education/lba-position', [LowBudgetActivityController::class, 'lba_position'])->name('admin.education.lba-position');
 
+    // Unified Spending Activity screen (Daniel, 2026-10-21: "I can not see
+    // all the spending activities... I can not select any" - one page with
+    // an Activity dropdown, instead of two separate admin screens. The two
+    // routes above stay untouched/reachable - this is a new entry point,
+    // not a replacement of their underlying data writes).
+    Route::get('/education/spending-activity', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'index'])->name('spending-activity.index');
+    Route::post('/education/spending-activity-position', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'save'])->name('spending-activity.save');
+    Route::get('/education/spending-activity-position/delete/{id}', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'destroy'])->name('spending-activity.delete');
+
     //Poster
     Route::get('/education/poster', [RoomPosterController::class, 'poster'])->name('admin.education.poster');
     Route::post('/education/storePoster', [RoomPosterController::class, 'storePoster'])->name('admin.education.storePoster');
