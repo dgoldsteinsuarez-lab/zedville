@@ -199,11 +199,20 @@ class BadgeCalculatorService
     /**
      * Count how many Required activities were assigned to the calendar
      * for a given month and year.
+     *
+     * calendar_events.position (not activityType) is the real required/
+     * optional/free marker - every admin screen that actually creates
+     * these events (Mba/EmergencyFund/HighBudget/LowBudgetActivity
+     * PositionController, FinheroAdminController) writes to `position`.
+     * `activityType` is an unrelated integer field from the generic
+     * Calendar admin UI (CalendarEventController) - querying it here was
+     * a regression from an earlier pass that copied a mistake already
+     * present in other, now-corrected legacy code (bugs.md, 2026-10-20).
      */
     private function getRequiredAssigned(int $month, int $year): int
     {
         return DB::table('calendar_events')
-            ->where('activityType', 'required')
+            ->where('position', 'required')
             ->whereMonth('start', $month)
             ->whereYear('start', $year)
             ->count();
@@ -217,7 +226,7 @@ class BadgeCalculatorService
         return DB::table('activity_completions')
             ->join('calendar_events', 'activity_completions.activity_id', '=', 'calendar_events.id')
             ->where('activity_completions.student_id', $studentId)
-            ->where('calendar_events.activityType', 'required')
+            ->where('calendar_events.position', 'required')
             ->whereMonth('activity_completions.completed_at', $month)
             ->whereYear('activity_completions.completed_at', $year)
             ->count();

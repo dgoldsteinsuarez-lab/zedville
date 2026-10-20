@@ -25,7 +25,7 @@ class EngagementBadgeSettingsPageTest extends TestCase
 
         $eventId = DB::table('calendar_events')->insertGetId([
             'title'        => 'Required Activity',
-            'activityType' => 'required',
+            'position'     => 'required',
             'start'        => $now->toDateTimeString(),
             'created_at'   => $now,
             'updated_at'   => $now,

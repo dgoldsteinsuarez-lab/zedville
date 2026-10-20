@@ -94,46 +94,50 @@ class DashboardController extends Controller
     {
         $out = [];
 
+        // Engagement: read from the real, spec-delivered BadgeCalculatorService/
+        // student_badge_records (same source as the Settings page and /badges),
+        // instead of a separate ad-hoc recalculation - this used to be its own
+        // inline calculateEngagementBadge() querying a calendar_events column
+        // (activityType) that no admin screen ever actually writes to (they all
+        // write `position`), so it could never see a real required activity.
+        // It also used to only get a fallback table-read when BOTH this and
+        // FinHero's own ad-hoc calculation produced nothing, so a real
+        // Engagement badge could be hidden by an unrelated FinHero quirk.
+        // Fixed both problems by just reading the real system directly
+        // (bugs.md, 2026-10-20).
         try {
-            $engBadge = $this->calculateEngagementBadge($user->id);
-            if ($engBadge && $engBadge !== 'NONE') {
+            app(\App\Services\BadgeCalculatorService::class)
+                ->calculateForStudent($user->id, now()->month, now()->year);
+
+            $eng = StudentBadgeRecord::where('student_id', $user->id)
+                ->orderBy('year')->orderBy('month')->get()->last();
+
+            if ($eng && $eng->effective_monthly_badge && strtoupper($eng->effective_monthly_badge) !== 'NONE') {
                 $out[] = [
                     'type'    => 'engagement',
-                    'name'    => 'Engagement (' . ucfirst(strtolower($engBadge)) . ')',
+                    'name'    => 'Engagement (' . ucfirst(strtolower($eng->effective_monthly_badge)) . ')',
                     'icon'    => '🏅',
                     'message' => 'You showed up for your city every single week.',
                 ];
             }
+        } catch (\Throwable $e) {}
 
+        // FinHero: unchanged ad-hoc calculation, with its own table-record
+        // fallback - no longer gated behind whether Engagement found
+        // anything, same reasoning as above.
+        $finBadge = null;
+        try {
             $finBadge = $this->calculateFinHeroBadge($user->id);
-            if ($finBadge && $finBadge !== 'NONE') {
-                $out[] = [
-                    'type'    => 'finhero',
-                    'name'    => 'FinHero (' . ucfirst(strtolower($finBadge)) . ')',
-                    'icon'    => '🛡️',
-                    'message' => 'You kept your needs, wants and savings in balance.',
-                ];
-            }
-        } catch (\Throwable $e) {
-            // fallback
-        }
+        } catch (\Throwable $e) {}
 
-        // Table record fallback if empty
-        if (empty($out)) {
-            try {
-                $eng = StudentBadgeRecord::where('student_id', $user->id)
-                    ->orderBy('year')->orderBy('month')->get()->last();
-
-                if ($eng && $eng->monthly_badge && strtoupper($eng->monthly_badge) !== 'NONE') {
-                    $out[] = [
-                        'type'    => 'engagement',
-                        'name'    => 'Engagement (' . ucfirst(strtolower($eng->monthly_badge)) . ')',
-                        'icon'    => '🏅',
-                        'message' => 'You showed up for your city every single week.',
-                    ];
-                }
-            } catch (\Throwable $e) {}
-
+        if ($finBadge && $finBadge !== 'NONE') {
+            $out[] = [
+                'type'    => 'finhero',
+                'name'    => 'FinHero (' . ucfirst(strtolower($finBadge)) . ')',
+                'icon'    => '🛡️',
+                'message' => 'You kept your needs, wants and savings in balance.',
+            ];
+        } else {
             try {
                 $fin = FinheroBadgeRecord::where('student_id', $user->id)
                     ->orderBy('year')->orderBy('month')->get()->last();
@@ -150,57 +154,6 @@ class DashboardController extends Controller
         }
 
         return $out;
-    }
-
-    private function calculateEngagementBadge($studentId): string
-    {
-        $now = now();
-        $month = $now->month - 1;
-        $year = $now->year;
-
-        $assignedRequired = DB::table('calendar_events')
-            ->whereMonth('start', $month + 1)
-            ->whereYear('start', $year)
-            ->where('activityType', 'required')
-            ->count();
-
-        $completedRequired = DB::table('participation_logs')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('action_type', 'required')
-            ->count();
-
-        $requiredPct = $assignedRequired > 0
-            ? ($completedRequired / $assignedRequired) * 100
-            : 0;
-
-        $optionalCount = DB::table('participation_logs')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('action_type', 'optional')
-            ->count();
-
-        $participationPts = DB::table('participation_logs')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->sum('points_earned');
-
-        $participationPts = min($participationPts, 15);
-
-        if ($requiredPct == 100 && $optionalCount >= 4 && $participationPts >= 15) {
-            return 'PLATINUM';
-        } elseif ($requiredPct == 100 && $optionalCount >= 3 && $participationPts >= 10) {
-            return 'GOLD';
-        } elseif ($requiredPct == 100 && $optionalCount >= 2 && $participationPts >= 7) {
-            return 'SILVER';
-        } elseif ($requiredPct == 100 && $optionalCount >= 1 && $participationPts >= 5) {
-            return 'BRONZE';
-        }
-
-        return 'NONE';
     }
 
     private function calculateFinHeroBadge($studentId): string
