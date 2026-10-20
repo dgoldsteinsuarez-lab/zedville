@@ -11,24 +11,22 @@ use Illuminate\Support\Facades\DB;
 /**
  * Daniel, 2026-10-21: "for the spending activity, i can not see all the
  * spending activities that are in the system, I can not select any, solve
- * it." Confirmed via AskUserQuestion: one page, with an Activity dropdown
- * to pick High or Low, instead of two separate admin screens/nav links
- * (HighBudgetActivityController/LowBudgetActivityController, both still
- * present and untouched - this is a new, additional entry point, not a
- * replacement of their underlying routes, so nothing that already
- * referenced them breaks).
+ * it." Confirmed via AskUserQuestion: one page, with an Activity dropdown,
+ * instead of two separate admin screens/nav links (HighBudgetActivity
+ * Controller, still present and untouched - this is a new, additional
+ * entry point, not a replacement of its underlying routes).
  *
- * Both activities still share the one `mba_position` table (activity_key
- * 'hba_position'/'lba_position') and the same `calendar_events` sync
- * pattern as their two siblings - this controller is self-contained like
- * the other 3 "position" controllers, not a wrapper around them.
+ * Originally also covered "Low" (LowBudgetActivityController) the same
+ * way - removed entirely the same day (Daniel: "you can remove low
+ * spending activities from the system"), so this now only ever resolves
+ * to the one High entry in ACTIVITIES. Kept as a map (not a bare constant
+ * pair) in case a different activity type is added later.
  */
 class SpendingActivityController extends Controller
 {
     /** activity (form value) => [activity_key, calendar event title] */
     private const ACTIVITIES = [
         'high' => ['hba_position', 'Spending budget activity'],
-        'low' => ['lba_position', 'Spending Low activity'],
     ];
 
     public function index()
@@ -50,7 +48,7 @@ class SpendingActivityController extends Controller
             })
             ->leftJoin('activities as act', 'mp.activity_id', '=', 'act.id')
             ->where('mp.user_id', $userId)
-            ->whereIn('mp.activity_key', ['hba_position', 'lba_position'])
+            ->where('mp.activity_key', 'hba_position')
             ->when($sid, function ($q) use ($sid) {
                 $q->where('mp.sid', $sid);
             }, function ($q) {
@@ -191,14 +189,14 @@ class SpendingActivityController extends Controller
         $position = DB::table('mba_position')
             ->where('id', $id)
             ->where('user_id', $userId)
-            ->whereIn('activity_key', ['hba_position', 'lba_position'])
+            ->where('activity_key', 'hba_position')
             ->first();
 
         if (!$position) {
             return back()->with('error', 'Record not found.');
         }
 
-        [, $calendarTitle] = self::ACTIVITIES[$position->activity_key === 'hba_position' ? 'high' : 'low'];
+        [, $calendarTitle] = self::ACTIVITIES['high'];
 
         DB::table('calendar_events')
             ->where('sid', $position->sid)

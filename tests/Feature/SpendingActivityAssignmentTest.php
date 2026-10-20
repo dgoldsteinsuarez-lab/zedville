@@ -22,8 +22,11 @@ use Tests\TestCase;
  * Admin\SpendingActivityController, see its own test file).
  *
  * This covers the student-facing side: EFDController::
- * high_spending_activities()/low_spending_activities() resolving the
- * class's actual assignment instead of a hardcoded/broken lookup.
+ * high_spending_activities() resolving the class's actual assignment
+ * instead of a hardcoded/broken lookup.
+ *
+ * Later the same day: "you can remove low spending activities from the
+ * system" - Low removed entirely; this file covers High only now.
  */
 class SpendingActivityAssignmentTest extends TestCase
 {
@@ -39,11 +42,11 @@ class SpendingActivityAssignmentTest extends TestCase
         return [$student, $class];
     }
 
-    private function assign(SchoolClass $class, string $activityKey, Activity $activity): void
+    private function assign(SchoolClass $class, Activity $activity): void
     {
         DB::table('mba_position')->insert([
             'user_id' => 1,
-            'activity_key' => $activityKey,
+            'activity_key' => 'hba_position',
             'activity_id' => $activity->id,
             'sid' => 1,
             'cid' => $class->id,
@@ -68,7 +71,7 @@ class SpendingActivityAssignmentTest extends TestCase
     {
         [$student, $class] = $this->studentInClass();
         $activity = Activity::where('type', 'high')->where('number', 5)->first();
-        $this->assign($class, 'hba_position', $activity);
+        $this->assign($class, $activity);
 
         $response = $this->actingAs($student)->get('/education/high-spending-activities');
 
@@ -79,52 +82,19 @@ class SpendingActivityAssignmentTest extends TestCase
         $response->assertSee('Beats - Music Store', false);
     }
 
-    public function test_low_spending_page_now_passes_data_and_shows_only_the_assigned_activity(): void
-    {
-        // Previously low_spending_activities() passed zero data and showed
-        // all 10 activities unconditionally with dead shop links.
-        [$student, $class] = $this->studentInClass();
-        $activity = Activity::where('type', 'low')->where('number', 8)->first();
-        $this->assign($class, 'lba_position', $activity);
-
-        $response = $this->actingAs($student)->get('/education/low-spending-activities');
-
-        $response->assertOk();
-        $response->assertSee('Clothing Donation');
-        $response->assertDontSee('Accessories for Seniors');
-        // The shop link must be the real shopping-destination URL, not the
-        // prototype's dead placeholder (href="#" is legitimately used
-        // elsewhere on the page, e.g. the breadcrumb, so this checks for
-        // the real URL rather than a blanket absence of "#").
-        $response->assertSee('spending-tracker/basicco?activity_id=' . $activity->id, false);
-    }
-
     public function test_a_student_only_sees_their_own_classs_activity_not_another_classs(): void
     {
         [$student, $class] = $this->studentInClass();
         $otherGrade = Grade::create(['sid' => 1, 'name' => 'Other Grade', 'grade_level_id' => GradeLevel::first()->id]);
         $otherClass = SchoolClass::create(['sid' => 1, 'grade_id' => $otherGrade->id, 'name' => 'Other Class']);
 
-        $this->assign($otherClass, 'hba_position', Activity::where('type', 'high')->where('number', 1)->first());
-        $this->assign($class, 'hba_position', Activity::where('type', 'high')->where('number', 9)->first());
+        $this->assign($otherClass, Activity::where('type', 'high')->where('number', 1)->first());
+        $this->assign($class, Activity::where('type', 'high')->where('number', 9)->first());
 
         $response = $this->actingAs($student)->get('/education/high-spending-activities');
 
         $response->assertOk();
         $response->assertSee('Computer Donation');
         $response->assertDontSee('Birthday Party Budget');
-    }
-
-    public function test_high_and_low_assignments_for_the_same_class_are_independent(): void
-    {
-        [$student, $class] = $this->studentInClass();
-        $this->assign($class, 'hba_position', Activity::where('type', 'high')->where('number', 2)->first());
-        $this->assign($class, 'lba_position', Activity::where('type', 'low')->where('number', 7)->first());
-
-        $high = $this->actingAs($student)->get('/education/high-spending-activities');
-        $low = $this->actingAs($student)->get('/education/low-spending-activities');
-
-        $high->assertSee('Digital Upgrade')->assertDontSee('Community Tech Items');
-        $low->assertSee('Community Tech Items')->assertDontSee('Digital Upgrade');
     }
 }

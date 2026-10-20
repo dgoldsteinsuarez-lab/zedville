@@ -16,7 +16,6 @@ use App\Http\Controllers\Admin\SupermarketProductController;
 use App\Http\Controllers\Admin\MbaPositionController;
 use App\Http\Controllers\Admin\EmergencyFundPositionController;
 use App\Http\Controllers\Admin\HighBudgetActivityController;
-use App\Http\Controllers\Admin\LowBudgetActivityController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -222,8 +221,11 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::get('/education/high-budget-activity', [HighBudgetActivityController::class, 'high_budget_activity'])->name('admin.education.high-budget-activity');
     Route::post('/education/hba-position', [HighBudgetActivityController::class, 'hba_position'])->name('admin.education.hba-position');
 
-    Route::get('/education/low-budget-activity', [LowBudgetActivityController::class, 'low_budget_activity'])->name('admin.education.low-budget-activity');
-    Route::post('/education/lba-position', [LowBudgetActivityController::class, 'lba_position'])->name('admin.education.lba-position');
+    // Low Budget/Spending Activity removed entirely (Daniel, 2026-10-21:
+    // "you can remove low spending activities from the system") - was
+    // already unlinked from nav since the unified screen below replaced
+    // it; LowBudgetActivityController and its routes/view/test are gone,
+    // not just unlinked.
 
     // Unified Spending Activity screen (Daniel, 2026-10-21: "I can not see
     // all the spending activities... I can not select any" - one page with

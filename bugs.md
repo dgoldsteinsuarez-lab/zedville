@@ -470,5 +470,12 @@ Also worth knowing, not a regression: seeding the `activities` table has the sid
 
 Tested via `tests/Feature/Admin/SpendingActivityControllerTest.php` (10 tests, 3 new: the dropdown lists all 20, editing swaps the assigned activity without duplicating the row, an invalid activity_id is rejected) and new `tests/Feature/SpendingActivityAssignmentTest.php` (5 tests: no-activity-assigned state, the real assigned activity shows with corrected shop names, Low now shows data instead of none, a student never sees another class's activity, High/Low assignments for the same class stay independent). Full suite: 330 passed, same 4 known failures (3 baseline + the already-flagged unrelated CityMap environment issue), all unchanged by this work.
 
+### Removed 2026-10-21 - Low Spending Activities removed entirely
+Daniel, immediately after the above: "you can remove low spending activities from the system." A genuine removal, not just hiding it - deleted `LowBudgetActivityController` and its route/view/test (already unlinked from nav since yesterday's unification, now gone outright), the student-facing `low_spending_activities()` method/route/view, the 10 `type='low'` rows from `activities` (via a new migration, not by rewriting the already-run seed migration), and `'low'` from `SpendingActivityController`'s `ACTIVITIES` map (and its dropdown, now High-only). Also found and removed `EFDController::educational_finance_department()`'s `$lbaPosition` query while in there - it was computed and passed to the blackboard view but never actually read by it, confirmed via grep before removing, so nothing downstream needed it.
+
+Confirmed no real `mba_position`/`calendar_events` rows referenced Low in either database before removing the catalog data - the feature had only existed for a few hours and nothing had been assigned through it yet, so this was a clean removal with nothing to migrate away from.
+
+Trimmed the relevant test files to match (`SpendingActivityControllerTest.php`, `SpendingActivityAssignmentTest.php`) rather than leaving Low-shaped tests failing; `LowBudgetActivityControllerTest.php` deleted outright along with the controller it tested. Full suite: 321 passed, same 4 known failures (unchanged).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

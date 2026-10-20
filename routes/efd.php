@@ -18,7 +18,8 @@ Route::get('/npos', [EFDController::class, 'npos'])->name('npos');
 Route::get('/npos/{slug}', [EFDController::class, 'nposDonate'])->name('npos.donate');
 Route::post('/store-donation', [EFDController::class,'storeDonation'])->name('store.storeDonation');
 Route::get('/high-spending-activities', [EFDController::class,'high_spending_activities'])->name('high-spending-activities');
-Route::get('/low-spending-activities', [EFDController::class,'low_spending_activities'])->name('low-spending-activities');
+// low-spending-activities removed (Daniel, 2026-10-21: "remove low
+// spending activities from the system") - see bugs.md.
 //For City Hall
 Route::get('/city-hall', [EFDController::class, 'city_hall'])->name('city-hall');
 Route::get('/main-hall', [EFDController::class, 'main_hall'])->name('main-hall');

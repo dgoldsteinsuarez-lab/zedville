@@ -19,16 +19,11 @@
                                 <label class="form-label">Activity</label>
                                 <select class="form-select" name="activity_id" id="activity_id">
                                     <option value="">Select Activity</option>
-                                    <optgroup label="High Spending">
-                                        @foreach($activities->where('type', 'high') as $act)
-                                            <option value="{{ $act->id }}">{{ $act->number }}. {{ $act->title }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                    <optgroup label="Low Spending">
-                                        @foreach($activities->where('type', 'low') as $act)
-                                            <option value="{{ $act->id }}">{{ $act->number }}. {{ $act->title }}</option>
-                                        @endforeach
-                                    </optgroup>
+                                    @foreach($activities as $act)
+                                        <option value="{{ $act->id }}">{{ $act->number }}. {{ $act->title }}</option>
+                                    @endforeach
+                                    {{-- Low Spending removed entirely (Daniel, 2026-10-21: "remove low
+                                         spending activities from the system") - $activities is now High-only. --}}
                                 </select>
                             </div>
                         </div>

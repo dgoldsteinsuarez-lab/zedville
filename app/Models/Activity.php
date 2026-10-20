@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * A Spending Activity (type: 'high' or 'low') - a real, admin-selectable
- * catalog entry a class can be assigned, consumed by the student-facing
- * listing pages (EFDController::high_spending_activities()/
- * low_spending_activities()) and the shop-destination pages
- * (SpendingActivitiesController::supermarket()/spending_tracker()).
+ * A Spending Activity (type: 'high' - 'low' removed entirely 2026-10-21,
+ * Daniel: "remove low spending activities from the system") - a real,
+ * admin-selectable catalog entry a class can be assigned, consumed by the
+ * student-facing listing page (EFDController::high_spending_activities())
+ * and the shop-destination pages (SpendingActivitiesController::
+ * supermarket()/spending_tracker()).
  */
 class Activity extends Model
 {

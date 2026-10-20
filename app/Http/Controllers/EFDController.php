@@ -132,11 +132,10 @@ class EFDController extends Controller
                 ->where('cid', $user->grade)
                 ->first();
         }
-        $lbaPosition = DB::table('mba_position')
-            ->where('activity_key', 'lba_position')   // ✅ Low Budget Activity
-            ->where('sid', $user->sid)
-            ->where('cid', $user->grade)
-            ->first();
+        // lbaPosition (Low Budget Activity) removed (Daniel, 2026-10-21:
+        // "remove low spending activities from the system") - this was
+        // computed but never actually read by the blackboard view below,
+        // so nothing downstream needs it.
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
         $isBankAccountOpen = $bankAccount !== null;
         //Emmargency Fund
@@ -163,7 +162,7 @@ class EFDController extends Controller
             ->whereMonth('completed_at', now()->month)
             ->pluck('activity_type')
             ->toArray();
-        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'bankAccount', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'lbaPosition', 'taskActivities', 'completedActivities'));
+        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'bankAccount', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'taskActivities', 'completedActivities'));
     }
     public function emergencyFundInterest($userId)
     {
@@ -528,22 +527,8 @@ class EFDController extends Controller
 
         return view('spendingActivities.high-spending-activities', compact('activity'));
     }
-    public function low_spending_activities()
-    {
-        $user = Auth::user();
-
-        $position = DB::table('mba_position')
-            ->where('activity_key', 'lba_position')
-            ->where('sid', $user->sid)
-            ->where('cid', $user->grade)
-            ->first();
-
-        $activity = $position && $position->activity_id
-            ? \App\Models\Activity::find($position->activity_id)
-            : null;
-
-        return view('spendingActivities.low-spending-activities', compact('activity'));
-    }
+    // low_spending_activities() removed (Daniel, 2026-10-21: "remove low
+    // spending activities from the system") - see bugs.md.
     //City Hall
     public function city_hall()
     {
