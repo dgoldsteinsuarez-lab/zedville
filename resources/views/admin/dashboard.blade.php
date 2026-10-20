@@ -68,6 +68,26 @@
     </div>
 </div>
 
+{{-- School Month Settings moved here from the "Education (per Grade)"
+     dropdown (Daniel, 2026-10-21: "Its better to add the school month
+     settings in Dashboard") - same existing page/controller, just
+     surfaced from Dashboard. Still gated the same way the route itself
+     is (Super Admin/School Admin, not Tutor). --}}
+@if (auth()->user()->isSuperAdmin() || auth()->user()->isSchoolAdmin())
+<div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h5 class="card-title mb-1">School Month Settings</h5>
+            <p class="text-muted small mb-0">
+                Set which calendar month each school's "Month 1" progression starts on - this determines when that
+                month's Log In Questions appear.
+            </p>
+        </div>
+        <a href="{{ url('admin/login-question/school-month-settings') }}" class="btn btn-sm btn-primary flex-shrink-0">Manage Month Settings</a>
+    </div>
+</div>
+@endif
+
 {{-- Admin Structure Proposal doc §2.3: Grade/Class drill-down for the
      currently selected School. Which school that is, and picking a
      different one, is now shown by the "Managing: X" / "No school

@@ -33,6 +33,18 @@ class AdminDashboardSchoolSelectionTest extends TestCase
         $response->assertSee('NO SCHOOL SELECTED');
     }
 
+    public function test_dashboard_shows_school_month_settings_card_for_super_admin_but_not_tutor(): void
+    {
+        // Daniel, 2026-10-21: "Its better to add the school month settings
+        // in Dashboard." Card is gated the same way the route itself is
+        // (Super Admin/School Admin, not Tutor).
+        $superAdmin = User::factory()->create(['role' => 1]);
+        $this->actingAs($superAdmin)->get('/admin/dashboard')->assertSee('School Month Settings');
+
+        $tutor = User::factory()->create(['role' => 3]);
+        $this->actingAs($tutor)->get('/admin/dashboard')->assertDontSee('School Month Settings');
+    }
+
     public function test_selecting_a_school_sets_the_session_and_dashboard_reflects_it(): void
     {
         $superAdmin = User::factory()->create(['role' => 1]);

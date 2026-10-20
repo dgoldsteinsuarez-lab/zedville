@@ -293,8 +293,8 @@
                                             'admin/education/monthly-budget-activity*',
                                             'admin/education/poster*',
                                             'admin/education/high-budget-activity*',
+                                            'admin/education/low-budget-activity*',
                                             'admin/login-question',
-                                            'admin/login-question/school-month-settings',
                                             'admin/finhero/activities',
                                             'admin/finhero/task-activities',
                                             'admin/finhero/point-defaults',
@@ -332,14 +332,23 @@
                                                 </li>
                                                 <li class="nav-item {{ request()->is('admin/education/high-budget-activity') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/education/high-budget-activity') }}">
-                                                        <span class="navTxt">Spending Activity Position</span>
+                                                        <span class="navTxt">Spending Activity (High)</span>
                                                     </a>
                                                 </li>
-                                                <li class="nav-item {{ request()->is('admin/login-question/school-month-settings') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/login-question/school-month-settings') }}">
-                                                        <span class="navTxt">School Month Settings</span>
+                                                {{-- Low Budget Activity has had a working route/controller/view all
+                                                     along (lba_position(), fixed to be per-class 2026-10-20) but was
+                                                     never linked from this nav - Daniel, 2026-10-21: "For the
+                                                     spending activity, I don't see the different spending
+                                                     activities." This was the actual cause, not missing content. --}}
+                                                <li class="nav-item {{ request()->is('admin/education/low-budget-activity') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/education/low-budget-activity') }}">
+                                                        <span class="navTxt">Spending Activity (Low)</span>
                                                     </a>
                                                 </li>
+                                                {{-- School Month Settings moved to the Dashboard (Daniel,
+                                                     2026-10-21: "Its better to add the school month settings in
+                                                     Dashboard") - same existing page, just surfaced from there
+                                                     instead of this dropdown. --}}
                                                 <li class="nav-item {{ request()->is('admin/login-question') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/login-question') }}">
                                                         <span class="navTxt">Login Question</span>
