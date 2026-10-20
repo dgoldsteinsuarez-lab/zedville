@@ -20,6 +20,8 @@
     <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">New Campaign</h1>
 </div>
 
+<p class="text-muted mab-20">Pick a template, choose who receives it, and choose when it sends.</p>
+
 @if (count($templates) === 0)
     <div class="alert alert-warning">
         No templates exist yet. <a href="{{ url('admin/email-templates/create') }}">Create one first</a>.

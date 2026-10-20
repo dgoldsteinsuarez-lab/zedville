@@ -11,6 +11,13 @@
     </div>
 </div>
 
+<p class="text-muted mab-20">
+    A <strong>campaign</strong> sends a <a href="{{ url('admin/email-templates') }}">template</a> to a group of
+    students - who receives it (all students, one school, one grade, or hand-picked students) and when (right
+    away, on a fixed date, N days into a school's start month, or every month on a set day). Scheduled campaigns
+    send themselves automatically once due - nothing to remember or click on the day.
+</p>
+
 <div class="row">
     <div class="col-12">
         <div class="themeCard card card-custom card-stretch gutter-b">

@@ -11,6 +11,13 @@
     </div>
 </div>
 
+<p class="text-muted mab-20">
+    A <strong>template</strong> is the email itself - its subject and content. Create one here, then go to
+    <a href="{{ url('admin/email-campaigns/create') }}">Campaigns</a> to actually send it to students. One
+    template can be reused by several campaigns (e.g. the same "Welcome" template sent to different schools
+    on different dates).
+</p>
+
 <div class="row">
     <div class="col-12">
         <div class="themeCard card card-custom card-stretch gutter-b">
