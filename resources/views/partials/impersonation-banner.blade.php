@@ -8,7 +8,7 @@
         <div class="d-flex align-items-center gap-2">
             <span class="badge" style="background:#D97706; color:#fff; font-size:.8rem; padding:.45em .8em;">VIEWING AS</span>
             <span class="text-muted" style="font-size:.9rem;">
-                {{ auth()->user()->name }} ({{ auth()->user()->role_name }})
+                {{ auth()->user()->name }} ({{ auth()->user()->role_name }}) - read-only, nothing you do here is saved
             </span>
         </div>
         <form action="{{ url('/impersonate/stop') }}" method="POST" class="m-0">

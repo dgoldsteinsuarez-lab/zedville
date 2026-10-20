@@ -365,5 +365,12 @@ Daniel then: "are you sure you made the change, i should see all info" - the fix
 
 Tested via `tests/Feature/Admin/CityBankAccountsCardNumberTest.php`.
 
+### Built 2026-10-20 - "View as" is now read-only
+Daniel: "if i am in tutor mode, i should not be able to change something." Also asked, more broadly, whether being able to see another user's details (e.g. petitions) through "View as" is ethical/legal - answered directly in conversation (not a code question): Super Admin already has full database access regardless of this feature, so the real question isn't what's technically possible, it's not casually mutating another user's data while looking at their account. The two standard safeguards real platforms pair "view as" support tooling with are an audit log (already built - every impersonation is recorded in `impersonation_logs`) and read-only mode, which is what this entry adds.
+
+New `BlockWritesWhileImpersonating` middleware, registered in the `web` middleware group (covers both the admin area and the student-facing site in one place, since impersonating a Student leaves the admin area entirely) - blocks every non-GET/HEAD request while `session('impersonator_id')` is set, redirecting back with a clear flash message (or a 403 JSON response for AJAX/XHR requests). Two routes are deliberately exempted: `impersonate.stop` (the escape hatch - must always work) and `admin.impersonate.start` (it has its own, more specific "already impersonating" guard in `ImpersonateController::start()`, which gives a clearer error than this generic middleware would - letting the request through to it doesn't weaken anything). The "Viewing as X" banner (both the admin and student-facing copies) now says "read-only, nothing you do here is saved," so this is visible up front rather than discovered when a write silently fails.
+
+Tested via `tests/Feature/Admin/ImpersonationReadOnlyTest.php` (a write is blocked while impersonating, a read still works, returning to your own account still works, writes are unaffected outside impersonation) - running the full suite afterward caught that the new middleware ran ahead of `ImpersonateController::start()`'s own stacking guard and changed its 403 into a 302; fixed via the `admin.impersonate.start` exemption above rather than leaving the more specific guard shadowed.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

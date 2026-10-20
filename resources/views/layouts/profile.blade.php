@@ -633,7 +633,7 @@
                 <div class="flex justify-between items-center flex-wrap gap-2 mb-6 p-3 rounded-lg" style="background:#FEF3C7; border:1px solid #FCD34D;">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-semibold text-white px-3 py-1 rounded-full" style="background:#D97706;">VIEWING AS</span>
-                        <span class="text-sm text-gray-600">{{ auth()->user()->name }} ({{ auth()->user()->role_name }})</span>
+                        <span class="text-sm text-gray-600">{{ auth()->user()->name }} ({{ auth()->user()->role_name }}) - read-only, nothing you do here is saved</span>
                     </div>
                     <form action="{{ url('/impersonate/stop') }}" method="POST" class="m-0">
                         @csrf
