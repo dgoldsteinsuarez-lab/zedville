@@ -131,7 +131,7 @@
                     data-tooltip="Home"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/home.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#3B82F6"/><path fill="#fff" d="M12 4L19 10V20H5V10L12 4Z"/><rect x="10" y="14" width="4" height="6" fill="#3B82F6"/></svg>
                     </span>
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Home</span>
                 </a>
@@ -144,7 +144,7 @@
                     data-tooltip="City Mailbox"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/citymaill.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#F97316"/><rect x="5" y="7" width="14" height="10" rx="2" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M5 9l7 4.5L19 9" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </span>
                     <!-- <span class="w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">City Mailbox</span> -->
                      <div class="sidebarLabel flex items-center justify-between w-[calc(100%-30px)]"
@@ -170,7 +170,7 @@
                     data-tooltip="Bank Account"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/backaccount.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg"><circle cx="480" cy="-480" r="480" fill="#059669"/><path fill="#fff" d="M260-280v-320h40v320h-40Zm200 0v-320h40v320h-40ZM141.54-160v-40h676.92v40H141.54ZM660-280v-320h40v320h-40ZM141.54-680v-33.85L480-875.38l338.46 161.53V-680H141.54Zm105.69-40h465.54-465.54Zm0 0h465.54L480-830 247.23-720Z"/></svg>
                     </span>
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Bank Account</span>
                 </a>
@@ -187,7 +187,7 @@
                     data-tooltip-placement="right"
                 >
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/cityhall.svg') }}" alt="">
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#C026D3"/><rect x="4" y="12" width="4" height="8" fill="#fff"/><rect x="10" y="7" width="5" height="13" fill="#fff"/><rect x="17" y="10" width="4" height="10" fill="#fff"/></svg>
                     </span>
 
                     <span
@@ -264,7 +264,7 @@
                     data-tooltip="Educational Finance Department"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/department.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#F59E0B"/><rect x="4" y="7" width="16" height="12" rx="2" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M4 10.5h16" stroke="#fff" stroke-width="1.4"/><circle cx="16" cy="14" r="1.3" fill="#fff"/></svg>
                     </span>
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Educational Finance Department</span>
                 </a>
@@ -277,7 +277,7 @@
                     data-tooltip="Academy"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/department.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#6366F1"/><rect x="7" y="3.5" width="10" height="3" rx="1" fill="#fff"/><rect x="5" y="5.5" width="14" height="15" rx="2" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M8.5 13l2.5 2.5 5-5" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </span>
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Academy</span>
                 </a>
@@ -290,7 +290,7 @@
                     data-tooltip="PISA"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/pisa.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg"><circle cx="480" cy="-480" r="480" fill="#65A30D"/><path fill="#fff" d="M480-120 80-320v-240L0-600l480-240 480 240v320h-40v-300l-80 40v240L480-120Zm0-280 358-179-358-179-358 179 358 179Zm0 221 320-160v-180l-320 160-320-160v180l320 160Z"/></svg>
                     </span>
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">PISA</span>
                 </a>
@@ -303,7 +303,7 @@
                     data-tooltip="Calendar"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/calendar.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg"><circle cx="480" cy="-480" r="480" fill="#EF4444"/><path fill="#fff" d="M224.62-120q-27.62 0-46.12-18.5Q160-157 160-184.62v-510.76q0-27.62 18.5-46.12Q197-760 224.62-760h70.76v-89.23h43.08V-760h286.16v-89.23h40V-760h70.76q27.62 0 46.12 18.5Q800-723 800-695.38v510.76q0 27.62-18.5 46.12Q763-120 735.38-120H224.62Zm0-40h510.76q9.24 0 16.93-7.69 7.69-7.69 7.69-16.93v-350.76H200v350.76q0 9.24 7.69 16.93 7.69 7.69 16.93 7.69ZM200-575.39h560v-119.99q0-9.24-7.69-16.93-7.69-7.69-16.93-7.69H224.62q-9.24 0-16.93 7.69-7.69 7.69-7.69 16.93v119.99Zm0 0V-720-575.39Zm280 181.54q-12.38 0-21.58-9.19-9.19-9.19-9.19-21.58 0-12.38 9.19-21.57 9.2-9.19 21.58-9.19 12.38 0 21.58 9.19 9.19 9.19 9.19 21.57 0 12.39-9.19 21.58-9.2 9.19-21.58 9.19Zm-160 0q-12.38 0-21.58-9.19-9.19-9.19-9.19-21.58 0-12.38 9.19-21.57 9.2-9.19 21.58-9.19 12.38 0 21.58 9.19 9.19 9.19 9.19 21.57 0 12.39-9.19 21.58-9.2 9.19-21.58 9.19Zm320 0q-12.38 0-21.58-9.19-9.19-9.19-9.19-21.58 0-12.38 9.19-21.57 9.2-9.19 21.58-9.19 12.38 0 21.58 9.19 9.19 9.19 9.19 21.57 0 12.39-9.19 21.58-9.2 9.19-21.58 9.19ZM480-240q-12.38 0-21.58-9.19-9.19-9.19-9.19-21.58 0-12.38 9.19-21.58 9.2-9.19 21.58-9.19 12.38 0 21.58 9.19 9.19 9.2 9.19 21.58 0 12.39-9.19 21.58Q492.38-240 480-240Zm-160 0q-12.38 0-21.58-9.19-9.19-9.19-9.19-21.58 0-12.38 9.19-21.58 9.2-9.19 21.58-9.19 12.38 0 21.58 9.19 9.19 9.2 9.19 21.58 0 12.39-9.19 21.58Q332.38-240 320-240Zm320 0q-12.38 0-21.58-9.19-9.19-9.19-9.19-21.58 0-12.38 9.19-21.58 9.2-9.19 21.58-9.19 12.38 0 21.58 9.19 9.19 9.2 9.19 21.58 0 12.39-9.19 21.58Q652.38-240 640-240Z"/></svg>
                     </span>
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Calendar</span>
                 </a>
@@ -316,7 +316,7 @@
                     data-tooltip="Settings"
                     data-tooltip-placement="right">
                     <span class="w-[30px]">
-                        <img src="{{ asset('asset/front/images/settings.svg')}}" alt="">
+                        <svg width="24" height="24" viewBox="0 -960 960 960" xmlns="http://www.w3.org/2000/svg"><circle cx="480" cy="-480" r="480" fill="#64748B"/><path fill="#fff" d="m405.38-120-14.46-115.69q-19.15-5.77-41.42-18.16-22.27-12.38-37.88-26.53L204.92-235l-74.61-130 92.23-69.54q-1.77-10.84-2.92-22.34-1.16-11.5-1.16-22.35 0-10.08 1.16-21.19 1.15-11.12 2.92-25.04L130.31-595l74.61-128.46 105.93 44.61q17.92-14.92 38.77-26.92 20.84-12 40.53-18.54L405.38-840h149.24l14.46 116.46q23 8.08 40.65 18.54 17.65 10.46 36.35 26.15l109-44.61L829.69-595l-95.31 71.85q3.31 12.38 3.7 22.73.38 10.34.38 20.42 0 9.31-.77 19.65-.77 10.35-3.54 25.04L827.92-365l-74.61 130-107.23-46.15q-18.7 15.69-37.62 26.92-18.92 11.23-39.38 17.77L554.62-120H405.38ZM440-160h78.23L533-268.31q30.23-8 54.42-21.96 24.2-13.96 49.27-38.27L736.46-286l39.77-68-87.54-65.77q5-17.08 6.62-31.42 1.61-14.35 1.61-28.81 0-15.23-1.61-28.81-1.62-13.57-6.62-29.88L777.77-606 738-674l-102.08 42.77q-18.15-19.92-47.73-37.35-29.57-17.42-55.96-23.11L520-800h-79.77l-12.46 107.54q-30.23 6.46-55.58 20.81-25.34 14.34-50.42 39.42L222-674l-39.77 68L269-541.23q-5 13.46-7 29.23t-2 32.77q0 15.23 2 30.23t6.23 29.23l-86 65.77L222-286l99-42q23.54 23.77 48.88 38.12 25.35 14.34 57.12 22.34L440-160Zm38.92-220q41.85 0 70.93-29.08 29.07-29.07 29.07-70.92t-29.07-70.92Q520.77-580 478.92-580q-42.07 0-71.04 29.08-28.96 29.07-28.96 70.92t28.96 70.92Q436.85-380 478.92-380ZM480-480Z"/></svg>
                     </span>
                     <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Settings</span>
                 </a>
