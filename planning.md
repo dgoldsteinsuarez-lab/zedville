@@ -122,6 +122,16 @@ Daniel asked early in the City Map work "where did you put the aggregate basket 
 
 ~~Build it~~ — DONE 2026-10-20. New `ConsumerSurveySummaryService::cityBasketTrend()` (same join-users/group-by-real-month shape as `city_mood()`'s `cityMonths`, against `consumer_surveys` instead of `mood_logs`); `CityController::index()` computes month-over-month % change from it; `education/city/index.blade.php` shows the current month's average + change + a small history table, or a plain "not enough data yet" message when the cohort has no surveys. Tested via `tests/Feature/CityBasketTrendTest.php`.
 
+## Phase 10 — Admin panel UX: school selection, nav order, "view as" impersonation (2026-10-20)
+
+Daniel: "the autopilot is something irrelevant and it's on the second position, when I enter the admin, I should be able to select the school right away... About User, I need you to give me a more logical proposal and order," then "I also would like to be able to switch from my superadmin to all other roles without having to sign in and out." Full plan: `C:\Users\HP\.claude\plans\quizzical-kindling-sutherland.md`.
+
+~~School selection consolidated to one working mechanism~~ — DONE 2026-10-20. Three competing/broken "pick a school" mechanisms found; kept the header's "Change School" modal as the one real one, fixed its dead trigger and a stray-backtick id bug, added a "Select a school" prompt for when none is chosen yet, removed the Dashboard's now-redundant duplicate inline form.
+
+~~Autopilot repositioned, Users submenu reordered~~ — DONE 2026-10-20. Autopilot moved from right after Dashboard to right after the Users group (it's legitimate for all three admin-tier roles, just didn't belong first). Users submenu reordered to match the real hierarchy: School Domain → Grades → Classes → Students, then Staff & Access: School User → Role.
+
+~~Super Admin "view as" another role~~ — DONE 2026-10-20. Real-user impersonation (`ImpersonateController`), entry point on the existing Students/School User list pages, persistent banner + `impersonation_logs` audit trail. See `bugs.md` for full technical detail, including the routing subtlety where `stop()` can't live under the same admin-gated route group as `start()`.
+
 ## Phase 4 — Cleanup (any time, low risk, keep isolated from functional PRs)
 
 1. ~~Delete all dead/commented-out code blocks listed in `bugs.md` #16~~ — DONE 2026-10-07.

@@ -629,6 +629,21 @@
             <!-- </div> -->
             <!-- Toast Message End  -->
 
+            @if (auth()->check() && session()->has('impersonator_id'))
+                <div class="flex justify-between items-center flex-wrap gap-2 mb-6 p-3 rounded-lg" style="background:#FEF3C7; border:1px solid #FCD34D;">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-white px-3 py-1 rounded-full" style="background:#D97706;">VIEWING AS</span>
+                        <span class="text-sm text-gray-600">{{ auth()->user()->name }} ({{ auth()->user()->role_name }})</span>
+                    </div>
+                    <form action="{{ url('/impersonate/stop') }}" method="POST" class="m-0">
+                        @csrf
+                        <button type="submit" class="text-sm font-medium px-3 py-1.5 rounded-md bg-white border" style="border-color:#D97706; color:#D97706;">
+                            Return to my account
+                        </button>
+                    </form>
+                </div>
+            @endif
+
             @if (auth()->check() && auth()->user()->isTutor())
                 <div class="flex justify-between items-center flex-wrap gap-2 mb-6 p-3 rounded-lg" style="background:#E8F5EE; border:1px solid #A7E3C3;">
                     <div class="flex items-center gap-2">

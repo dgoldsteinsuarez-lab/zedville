@@ -86,7 +86,7 @@
         <div class="card-body p-0">
             <table class="table mb-0">
                 <thead>
-                    <tr><th>Name</th><th>Nickname</th><th>Email</th><th>Role</th><th>Classes</th><th></th></tr>
+                    <tr><th>Name</th><th>Nickname</th><th>Email</th><th>Role</th><th>Classes</th><th>Action</th></tr>
                 </thead>
                 <tbody>
                     @forelse ($staff as $member)
@@ -96,7 +96,7 @@
                             <td>{{ $member->email }}</td>
                             <td>{{ $member->role_name }}</td>
                             @if ($member->isTutor())
-                                <td colspan="2">
+                                <td>
                                     <form method="POST" action="{{ route('admin.staff.classes', $member->id) }}">
                                         @csrf
                                         @foreach ($classes->where('sid', $member->sid) as $class)
@@ -109,8 +109,16 @@
                                     </form>
                                 </td>
                             @else
-                                <td colspan="2" class="text-muted">—</td>
+                                <td class="text-muted">—</td>
                             @endif
+                            <td>
+                                @if (auth()->user()->isSuperAdmin() && !$member->isSuperAdmin())
+                                    <form method="POST" action="{{ url('admin/impersonate/' . $member->id) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">View as</button>
+                                    </form>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr><td colspan="6" class="text-muted p-3">No accounts yet.</td></tr>

@@ -134,6 +134,18 @@
                                                         fill="currentColor"></path>
                                                 </svg>
                                             </a>
+                                            @if (auth()->user()->isSuperAdmin())
+                                                <form action="{{ url('admin/impersonate/' . $student->id) }}" method="post" class="me-3 d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="tableActionBtn border-0 bg-transparent p-0" data-bs-toggle="tooltip"
+                                                        data-bs-placement="top" aria-label="View as" data-bs-original-title="View as this student">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M2.03993 12.3453C1.9039 12.1216 1.9039 11.8784 2.03993 11.6547C3.42372 9.38938 7.32967 4 12.0001 4C16.6705 4 20.5765 9.38938 21.9603 11.6547C22.0963 11.8784 22.0963 12.1216 21.9603 12.3453C20.5765 14.6106 16.6705 20 12.0001 20C7.32967 20 3.42372 14.6106 2.03993 12.3453Z" stroke="currentColor" stroke-width="1.4"/>
+                                                            <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="1.4"/>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
                                             <a href="#" class="deleteBtn">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg" data-bs-toggle="tooltip"

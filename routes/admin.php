@@ -90,6 +90,12 @@ Route::delete('/wellbeing/delete/{id}', [WellbeingController::class, 'destroy'])
 // Super-Admin-exclusive.
 // ================================================================
 Route::middleware('role:super_admin')->group(function () {
+    // "View as" another role (impersonation) - see ImpersonateController
+    // docblock. stop() is NOT here - it's in routes/web.php under plain
+    // auth, since the session role while impersonating a Student genuinely
+    // isn't admin-tier and this role:super_admin gate would 403 it.
+    Route::post('/impersonate/{user}', [\App\Http\Controllers\Admin\ImpersonateController::class, 'start'])->name('impersonate.start');
+
     // Reverse a transaction / reset a balance (append-only, reason required)
     Route::get('/ledger', [\App\Http\Controllers\Admin\LedgerController::class, 'index'])->name('ledger.index');
     Route::post('/ledger/reverse/{id}', [\App\Http\Controllers\Admin\LedgerController::class, 'reverse'])->name('ledger.reverse');

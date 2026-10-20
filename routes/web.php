@@ -147,6 +147,15 @@ Route::post('/participation/award', function (\Illuminate\Http\Request $request)
     return response()->json(['success' => true, 'awarded' => $awarded]);
 })->middleware('auth')->name('participation.award');
 
+// "View as" (impersonation) - stop/return. Deliberately plain `auth`, not
+// the admin-gated group in routes/admin.php: while impersonating a
+// Student, the session's role genuinely is a Student, so the IsAdmin
+// middleware would 403 this before it ever ran. Its own authorization is
+// "does session('impersonator_id') exist," not a role check - see
+// ImpersonateController.
+Route::post('/impersonate/stop', [\App\Http\Controllers\Admin\ImpersonateController::class, 'stop'])
+    ->middleware('auth')->name('impersonate.stop');
+
 //Finhero route
 Route::middleware(['auth'])->group(function () {
     Route::get('/finhero-badge',       [FinheroStudentController::class, 'index'])->name('finhero.index');
