@@ -12,7 +12,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 gap-5">
+<div class="grid grid-cols-1 gap-5" x-data="{ modalTitle: '', modalBody: '', showModal: false }">
 
     {{-- The real city overview image + positioned district hotspots go
     here once Daniel supplies the exported render - same clip-path-polygon
@@ -85,6 +85,46 @@
                     {{ $district['name'] }}
                 </a>
             @endforeach
+        </div>
+    </div>
+
+    @if ($streets->isNotEmpty())
+    <div class="tailCard w-full rounded-lg p-6">
+        <h2 class="text-lg font-bold mb-2">Street Plaques</h2>
+        <p class="text-gray-500 mb-4">Click a street to read who it's named after.</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            @foreach ($streets as $street)
+                <button type="button"
+                    @click="modalTitle = @js($street->name); modalBody = @js($street->bio); showModal = true;
+                        fetch('{{ route('participation.award') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ action: 'street_sign_press', detail: '{{ $street->id }}' }),
+                        })"
+                    class="block w-full text-left rounded-md border border-[#D2DDDB] px-4 py-3 text-sm font-semibold hover:bg-[#E9F0E9]">
+                    {{ $street->name }}
+                </button>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Shared modal for street bios --}}
+    <div x-show="showModal"
+         x-cloak
+         x-transition.opacity
+         @keydown.escape.window="showModal = false"
+         class="fixed w-full h-full z-[100] overflow-y-auto top-0 left-0 themeModal">
+        <div class="fixed inset-0 bg-black bg-opacity-50" @click="showModal = false"></div>
+        <div class="modalDilog max-w-[520px] mx-auto mt-24 relative">
+            <div class="modalContent bg-white py-8 px-10 rounded-lg border border-[#D2DDDB]">
+                <h4 class="text-xl font-semibold text-black mb-3" x-text="modalTitle"></h4>
+                <p class="text-gray-600" x-text="modalBody"></p>
+                <button type="button" @click="showModal = false" class="themeBtn w-full mt-6">Close</button>
+            </div>
         </div>
     </div>
 

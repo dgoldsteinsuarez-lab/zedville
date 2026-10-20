@@ -111,10 +111,17 @@ class CityController extends Controller
         }
         unset($row);
 
+        // Daniel, 2026-10-20: also reachable directly from the overview,
+        // not just from the Residential Quarter district page (which
+        // keeps its own copy too - this is an additional entry point, not
+        // a replacement).
+        $streets = Street::orderBy('sort_order')->get();
+
         return view('education.city.index', [
             'myAddress' => $myAddress,
             'districts' => self::districts(),
             'basketTrend' => $basketTrend,
+            'streets' => $streets,
         ]);
     }
 

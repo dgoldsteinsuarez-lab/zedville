@@ -266,35 +266,6 @@
                                             </ul>
                                         </div>
                                     </li>
-                                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Workload">
-                                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#workloadnav" aria-expanded="false" aria-controls="sideNavbar">
-                                            <span class="navIcon">
-                                               
-
-<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480.13-120q-74.67 0-140.41-28.34-65.73-28.34-114.36-76.92-48.63-48.58-76.99-114.26Q120-405.19 120-479.87q0-74.67 28.34-140.41 28.34-65.73 76.92-114.36 48.58-48.63 114.26-76.99Q405.19-840 479.87-840q74.67 0 140.41 28.34 65.73 28.34 114.36 76.92 48.63 48.58 76.99 114.26Q840-554.81 840-480.13q0 74.67-28.34 140.41-28.34 65.73-76.92 114.36-48.58 48.63-114.26 76.99Q554.81-120 480.13-120Zm-.13-40q134 0 227-93t93-227H480v-320q-134 0-227 93t-93 227q0 134 93 227t227 93Z"/></svg>
-                                            </span>
-                                            <span class="navTxt">Workload</span>
-                                            <span class="nav-arrow">
-                                                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M1.07129 1.62756L6.00033 6.55661L10.9294 1.62756" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
-                                                </svg>
-                                            </span>
-                                        </a>
-                                        <div id="workloadnav" class="collapse collapseNavItems" data-bs-parent="#toggleNavsubnav">
-                                            <ul class="subnav">
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="#">
-                                                        <span class="navTxt">Level</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="#">
-                                                        <span class="navTxt">Setup</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </li>
                                     @endif
                                     @php
                                         $usersMenuActive3 = request()->is(

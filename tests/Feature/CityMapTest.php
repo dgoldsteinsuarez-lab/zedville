@@ -13,9 +13,10 @@ use Tests\TestCase;
  * City Map, Phase 1/1b (2026-10-19). Two levels: an overview page listing
  * the 9 districts the doc itself groups buildings into, then one page per
  * district listing just its own buildings - instead of ~25 hotspots
- * crammed onto a single overview image. Street plaques live on the
- * Residential Quarter district page specifically, since streets are
- * residential by definition.
+ * crammed onto a single overview image. Street plaques originally lived
+ * only on the Residential Quarter district page (streets are residential
+ * by definition) - 2026-10-20, Daniel asked for them reachable directly
+ * from the overview too, so they're now shown in both places.
  */
 class CityMapTest extends TestCase
 {
@@ -79,6 +80,17 @@ class CityMapTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSee('Adam Smith Avenue');
+    }
+
+    public function test_the_overview_page_also_lists_all_27_street_plaques(): void
+    {
+        $student = User::factory()->create(['role' => 4]);
+
+        $response = $this->actingAs($student)->get(route('education.city'));
+
+        $response->assertOk();
+        $response->assertSee('Adam Smith Avenue');
+        $response->assertSee('Gramsci Street');
     }
 
     public function test_a_student_sees_their_own_assigned_address(): void

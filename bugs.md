@@ -372,5 +372,12 @@ New `BlockWritesWhileImpersonating` middleware, registered in the `web` middlewa
 
 Tested via `tests/Feature/Admin/ImpersonationReadOnlyTest.php` (a write is blocked while impersonating, a read still works, returning to your own account still works, writes are unaffected outside impersonation) - running the full suite afterward caught that the new middleware ran ahead of `ImpersonateController::start()`'s own stacking guard and changed its 403 into a 302; fixed via the `admin.impersonate.start` exemption above rather than leaving the more specific guard shadowed.
 
+### Built 2026-10-20 - City Map streets on the overview page; removed the non-functional Workload nav item
+Daniel: "you should add in city map a section below district with the streets too, with the same option of reading about each economist." Street plaques (click a street, read who it's named after) previously lived only on the Residential Quarter district page. Added the same section + click-to-read modal to the City Map overview page too (`CityController::index()`/`education/city/index.blade.php`) - reuses the exact pattern already built for the district page, including the `street_sign_press` participation award on click (already deduplicated per-street-per-month via `action_ref`, so clicking the same street from either page in the same month doesn't double-award). The Residential Quarter page keeps its own copy too - this is an additional entry point, not a replacement.
+
+Also: "in admin, remove Workload, as it doesnt have any function." Removed the "Workload" nav item (`layouts/admin.blade.php`) - its two sub-items ("Level," "Setup") were both `href="#"`, no backing route or controller ever existed for either.
+
+Tested via `tests/Feature/CityMapTest.php` (new: the overview page also lists all 27 street plaques; existing coverage confirms other district pages are unaffected).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
