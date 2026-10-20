@@ -105,11 +105,6 @@
                                         </a>
                                     </li>
                                     @endif
-                                    <li class="nav-item {{ request()->is('admin/autopilot*') ? 'active' : '' }}">
-                                        <a class="nav-link" href="{{ url('admin/autopilot') }}">
-                                            <span class="navTxt">Autopilot</span>
-                                        </a>
-                                    </li>
                                     @php
                                         $usersMenuActive = request()->is(
                                             'admin/student*',
@@ -141,22 +136,7 @@
                                         </a>
                                         <div id="usernav" class="collapse {{ $usersMenuActive ? 'show' : '' }} collapseNavItems" data-bs-parent="#toggleNavsubnav">
                                             <ul class="subnav">
-                                                <li class="nav-item {{ request()->is('admin/student') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/student') }}">
-                                                        <span class="navTxt">Students</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="{{ url('admin/staff') }}">
-                                                        <span class="navTxt">School User</span>
-                                                    </a>
-                                                </li>
                                                 @if($navSuper)
-                                                <li class="nav-item {{ request()->is('admin/role') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/role') }}">
-                                                        <span class="navTxt">Role</span>
-                                                    </a>
-                                                </li>
                                                 <li class="nav-item {{ request()->is('admin/school-domain') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/school-domain') }}">
                                                         <span class="navTxt">School Domain</span>
@@ -173,10 +153,33 @@
                                                         <span class="navTxt">Classes</span>
                                                     </a>
                                                 </li>
+                                                <li class="nav-item {{ request()->is('admin/student') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/student') }}">
+                                                        <span class="navTxt">Students</span>
+                                                    </a>
+                                                </li>
+                                                <li class="subnav-label px-3 pt-2 pb-1 text-uppercase" style="font-size:.7rem; letter-spacing:.05em; color:#9CA3AF;">Staff &amp; Access</li>
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="{{ url('admin/staff') }}">
+                                                        <span class="navTxt">School User</span>
+                                                    </a>
+                                                </li>
+                                                @if($navSuper)
+                                                <li class="nav-item {{ request()->is('admin/role') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/role') }}">
+                                                        <span class="navTxt">Role</span>
+                                                    </a>
+                                                </li>
+                                                @endif
                                             </ul>
                                         </div>
                                     </li>
                                     @endif
+                                    <li class="nav-item {{ request()->is('admin/autopilot*') ? 'active' : '' }}">
+                                        <a class="nav-link" href="{{ url('admin/autopilot') }}">
+                                            <span class="navTxt">Autopilot</span>
+                                        </a>
+                                    </li>
                                     @php
                                         $usersMenuActive1 = request()->is(
                                             'admin/email/communication*',
@@ -526,6 +529,8 @@
                 <section class="bodyContent pall-30 d-flex flex-column flex-column-fluid">
                     <div class="d-flex flex-column-fluid">
                         <div class="container-fluid p-0">
+
+@include('partials.impersonation-banner')
 
 @if (auth()->check() && auth()->user()->isTutor())
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3" style="background:#EEF2FF; border:1px solid #C7D2FE; border-radius:10px;">

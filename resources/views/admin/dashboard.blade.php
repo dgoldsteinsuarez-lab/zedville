@@ -49,54 +49,15 @@
     </div>
 @endif
 
-@if (auth()->user()->isSuperAdmin())
-<div class="row">
-    <div class="themeCard card card-custom card-stretch gutter-b mab-15">
-        <div class="card-body pall-30">
-
-            <div class="tableHeadAdvance themeForm">
-                <div class="dataTableAdvan">
-
-                    {{-- CENTERED SEARCH --}}
-                    <div class="row justify-content-center mab-15">
-                        <div class="col-md-6">
-
-                             <form action="{{ url('admin/school') }}" method="POST">
-                                        @csrf
-                                <div class="input-group">
-                                    {{-- DROPDOWN onchange="this.form.submit()" --}}
-
-                                        <select name="school_id" class="form-control form-select fs-14" >
-                                            <option value="">Select School User</option>
-                                            @foreach ($schools as $school)
-                                                <option value="{{ $school->id }}" {{ session('selected_school') == $school->id ? 'selected' : '' }}>
-                                                    {{ $school->school_name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
-
-
-                                    <button type="submit" class="btn themeBtn text-white">
-                                        Submit
-                                    </button>
-
-
-                                </div>
-                            </form>
-
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
+{{-- Admin Structure Proposal doc §2.3: always show the currently selected School.
+     Picking a school now happens from the header badge/"Select a school" prompt
+     (components/school-badge.blade.php), reachable from every admin page, not
+     just this one - see bugs.md, 2026-10-20. --}}
+@if (auth()->user()->isSuperAdmin() && !$selectedSchool)
+    <div class="alert alert-warning mab-15">
+        No school selected yet. Use <strong>Select a school</strong> at the top of the page to get started.
     </div>
-</div>
 @endif
-
-{{-- Admin Structure Proposal doc §2.3: always show the currently selected School. --}}
 @if ($selectedSchool)
     <div class="mb-3">
         <span class="text-muted small">Currently viewing:</span>

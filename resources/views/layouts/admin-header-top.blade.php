@@ -191,7 +191,7 @@
 
 <!-- Change School Modal -->
 <div class="themeModal">
-    <div class="modal fade" id="editmodel`" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editmodelLabel" aria-hidden="true">
+    <div class="modal fade" id="editmodel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editmodelLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
