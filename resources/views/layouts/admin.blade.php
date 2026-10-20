@@ -529,6 +529,37 @@
                     <div class="d-flex flex-column-fluid">
                         <div class="container-fluid p-0">
 
+{{-- Daniel, 2026-10-20: "when I select the school in Admin, it should show
+     clearly at the top the school that I am in." The header badge
+     (components/school-badge.blade.php) was too easy to miss - this is the
+     same information, impossible to miss, first thing on every admin page.
+     Super Admin only - everyone else is pinned to one school by IsAdmin
+     middleware and already knows which one. --}}
+@if (auth()->check() && auth()->user()->isSuperAdmin())
+    @php $currentSchool = \App\Models\SchoolDomain::find(session('selected_school')); @endphp
+    @if ($currentSchool)
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3" style="background:#F1FCF8; border:1px solid #CFE9DE; border-radius:10px;">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge" style="background:#1B6B3A; color:#fff; font-size:.8rem; padding:.45em .8em;">MANAGING</span>
+                <span class="fw-600" style="color:#1B6B3A; font-size:1rem;">{{ $currentSchool->school_name }}</span>
+            </div>
+            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#editmodel" class="btn btn-sm" style="background:#fff; border:1px solid #1B6B3A; color:#1B6B3A;">
+                Switch School
+            </a>
+        </div>
+    @else
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 p-3" style="background:#FEF3C7; border:1px solid #FCD34D; border-radius:10px;">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge" style="background:#D97706; color:#fff; font-size:.8rem; padding:.45em .8em;">NO SCHOOL SELECTED</span>
+                <span class="text-muted" style="font-size:.9rem;">Pick a school to manage its Grades, Classes, Students and settings.</span>
+            </div>
+            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#editmodel" class="btn btn-sm" style="background:#D97706; border:1px solid #D97706; color:#fff;">
+                Select a school
+            </a>
+        </div>
+    @endif
+@endif
+
 @include('partials.impersonation-banner')
 
 @if (auth()->check() && auth()->user()->isTutor())

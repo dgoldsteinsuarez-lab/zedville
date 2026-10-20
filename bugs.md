@@ -325,5 +325,14 @@ Also fixed a route-naming bug of my own while building this: the new routes init
 
 Tested via `tests/Feature/Admin/AdminEmailTemplateControllerTest.php` (every screen renders, template CRUD, campaign creation/targeting/immediate-send/scheduling/cancellation, access control), `tests/Feature/DispatchDueEmailCampaignsTest.php` (all three trigger types, due vs not-due, and idempotency across repeated runs/cycles), and `tests/Feature/MailboxHelperTemplateOverrideTest.php` (the event-pipeline fallback/override behavior).
 
+### Fixed 2026-10-20 - current school wasn't shown clearly, and Grades crashed with no school selected
+Daniel: "when I select the school in Admin, it should show clearly at the top the school that I am in. Also, I can not get inside grades in Admin" (with a screenshot of a raw Symfony exception page: `HttpException: Select a school first.` at `GradeController.php:31`).
+
+**The crash**: `GradeController::index()`/`store()` and `AdminDashboardController::addGrade()` used `abort_if($sid === null, 422, 'Select a school first.')` - a hard exception with no graceful handling, shown as a raw debug page locally (and would be an unhelpful generic "whoops" page in production with debug off). Changed all three to redirect to the Dashboard with a flash error message instead, matching how "no school selected" is already handled everywhere else in the admin panel.
+
+**The visibility problem**: the header's school badge (`components/school-badge.blade.php`, added earlier the same day) had no label at all - just the bare school name in a small pill next to the sidebar toggle - easy to miss entirely, and even if noticed, didn't clearly say "this is the school you're currently managing." Added a "Managing:" label to it, and - since a small header pill clearly wasn't "at the top" enough - added a full-width banner at the very top of every admin page (`layouts/admin.blade.php`, same visual pattern as the existing Tutor Mode/Impersonation banners): "MANAGING: [School Name]" with a Switch School button when one is selected, or an unmissable amber "NO SCHOOL SELECTED" prompt when none is. Super Admin only - School Admin/Tutor are pinned to one school and already know which one. Removed the Dashboard page's own now-redundant "Currently viewing"/"No school selected" text, since the banner covers every page including that one.
+
+Tested via `tests/Feature/Admin/GradeControllerTest.php` (the crash fix, plus a school-scoping check that had no coverage at all before) and `tests/Feature/Admin/ManagingSchoolBannerTest.php` (banner shown/hidden correctly for Super Admin vs a pinned School Admin).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

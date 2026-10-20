@@ -1,10 +1,13 @@
-{{-- Reusable "which school am I looking at" badge — no "Current School:" label,
-     just the name, styled. The edit pencil (switch school) only makes sense for
-     Super Admin; everyone else is pinned to one school by IsAdmin middleware.
-     When no school is selected yet (a fresh Super Admin login), shows a clear
-     "Select a school" call to action instead of rendering nothing - both open
-     the same "Change School" modal in layouts/admin-header-top.blade.php
-     (bugs.md, 2026-10-20). --}}
+{{-- Reusable "which school am I looking at" badge, with a "Managing:" label
+     so its purpose is unambiguous at a glance (Daniel, 2026-10-20: "it
+     should show clearly at the top the school that I am in" - also backed
+     up by a full-width banner in layouts/admin.blade.php, this badge alone
+     was too easy to miss). The edit pencil (switch school) only makes
+     sense for Super Admin; everyone else is pinned to one school by
+     IsAdmin middleware. When no school is selected yet (a fresh Super
+     Admin login), shows a clear "Select a school" call to action instead
+     of rendering nothing - both open the same "Change School" modal in
+     layouts/admin-header-top.blade.php (bugs.md, 2026-10-20). --}}
 @php
     $school = \App\Models\SchoolDomain::find(session('selected_school'));
 @endphp
@@ -13,7 +16,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6" stroke="#1B6B3A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="fw-600" style="color:#1B6B3A; font-size:.95rem; letter-spacing:.01em;">{{ $school->school_name }}</span>
+        <span style="color:#1B6B3A; font-size:.95rem;">Managing: <strong>{{ $school->school_name }}</strong></span>
         @if (auth()->user()->isSuperAdmin())
             <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#editmodel" title="Switch school" style="color:#1B6B3A; opacity:.6; line-height:1;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

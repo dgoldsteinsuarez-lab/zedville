@@ -49,21 +49,12 @@
     </div>
 @endif
 
-{{-- Admin Structure Proposal doc §2.3: always show the currently selected School.
-     Picking a school now happens from the header badge/"Select a school" prompt
-     (components/school-badge.blade.php), reachable from every admin page, not
-     just this one - see bugs.md, 2026-10-20. --}}
-@if (auth()->user()->isSuperAdmin() && !$selectedSchool)
-    <div class="alert alert-warning mab-15">
-        No school selected yet. Use <strong>Select a school</strong> at the top of the page to get started.
-    </div>
-@endif
+{{-- Admin Structure Proposal doc §2.3: Grade/Class drill-down for the
+     currently selected School. Which school that is, and picking a
+     different one, is now shown by the "Managing: X" / "No school
+     selected" banner at the very top of every admin page (layouts/admin
+     .blade.php) - not repeated here (bugs.md, 2026-10-20). --}}
 @if ($selectedSchool)
-    <div class="mb-3">
-        <span class="text-muted small">Currently viewing:</span>
-        <strong>{{ $selectedSchool->school_name }}</strong>
-    </div>
-
     <div class="row">
         @forelse ($grades as $grade)
             <div class="col-md-4 mb-4">

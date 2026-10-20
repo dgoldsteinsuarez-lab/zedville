@@ -28,7 +28,9 @@ class GradeController extends Controller
     public function index(Request $request)
     {
         $sid = session('selected_school');
-        abort_if($sid === null, 422, 'Select a school first.');
+        if ($sid === null) {
+            return redirect()->route('admin.dashboard')->with('error', 'Select a school first - use the banner at the top of the page.');
+        }
 
         $grades = $this->schoolScoped(Grade::with(['level', 'classes']))
             ->orderBy('name')
@@ -45,7 +47,9 @@ class GradeController extends Controller
     public function store(Request $request)
     {
         $sid = session('selected_school');
-        abort_if($sid === null, 422, 'Select a school first.');
+        if ($sid === null) {
+            return redirect()->route('admin.dashboard')->with('error', 'Select a school first - use the banner at the top of the page.');
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255',
