@@ -51,6 +51,12 @@ class RouteServiceProvider extends ServiceProvider
             ->prefix('education')
             ->name('education.')
             ->group(base_path('routes/efd.php'));
+        // Academy (Curriculum: Activities/Exams/Graphics per Grade Level,
+        // + PISA Practice) - bugs.md, 2026-10-20.
+        Route::middleware(['web', 'auth'])
+            ->prefix('academy')
+            ->name('academy.')
+            ->group(base_path('routes/academy.php'));
         // NEW: Load supermarket.php with optional prefix and auth middleware
         Route::middleware(['web', 'auth'])
             ->prefix('supermarket')

@@ -278,6 +278,16 @@
                                         </a>
                                     </li>
                                     @endif
+                                    @if($navSuper)
+                                    <li class="nav-item {{ request()->is('admin/curriculum*') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Curriculum">
+                                        <a class="nav-link" href="{{ url('admin/curriculum') }}">
+                                            <span class="navIcon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#65A30D"/><rect x="7" y="3" width="10" height="3" rx="1" fill="#fff"/><rect x="5" y="5" width="14" height="16" rx="2" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8.5 13l2.5 2.5 5-5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </span>
+                                            <span class="navTxt">Curriculum</span>
+                                        </a>
+                                    </li>
+                                    @endif
                                     @php
                                         $usersMenuActive3 = request()->is(
                                             'admin/education/monthly-budget-activity*',

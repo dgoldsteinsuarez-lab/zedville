@@ -271,7 +271,20 @@
             </li>
             <li>
                 <a
-                    href="#"
+                    href="{{ route('academy.index') }}"
+                    class="flex items-center px-2 py-3 space-x-2 text-base font-semibold rounded-md hover:bg-[#E9F0E9] hover:text-black active"
+                    :class="{'justify-center': !isSidebarOpen}"
+                    data-tooltip="Academy"
+                    data-tooltip-placement="right">
+                    <span class="w-[30px]">
+                        <img src="{{ asset('asset/front/images/department.svg')}}" alt="">
+                    </span>
+                    <span class="sidebarLabel w-[calc(100%-30px)]" :class="{ 'lg:hidden': !isSidebarOpen }">Academy</span>
+                </a>
+            </li>
+            <li>
+                <a
+                    href="{{ route('academy.pisa') }}"
                     class="flex items-center px-2 py-3 space-x-2 text-base font-semibold rounded-md hover:bg-[#E9F0E9] hover:text-black active"
                     :class="{'justify-center': !isSidebarOpen}"
                     data-tooltip="PISA"

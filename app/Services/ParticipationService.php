@@ -131,6 +131,14 @@ class ParticipationService
                          ->where('month', $month)->where('year', $year)->exists();
 
 
+            // Once per curriculum item per month - retakes stay unlimited
+            // for practice (bugs.md, 2026-10-20), only the first completion
+            // this month earns the point.
+            case 'curriculum_item_complete':
+                return $q->where('action_ref', $detail)
+                         ->where('month', $month)->where('year', $year)->exists();
+
+
             default:
                 return false;
         }

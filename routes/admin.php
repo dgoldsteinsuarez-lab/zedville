@@ -119,6 +119,21 @@ Route::middleware('role:super_admin')->group(function () {
     Route::put('/pisa/{pisaLevel}', [\App\Http\Controllers\Admin\PisaLevelController::class, 'update'])->name('pisa.update');
     Route::delete('/pisa/{pisaLevel}', [\App\Http\Controllers\Admin\PisaLevelController::class, 'destroy'])->name('pisa.destroy');
 
+    // Curriculum ("Academy") authoring: Level -> Categories -> Items -> Questions
+    // (bugs.md, 2026-10-20 - PISA/Grade Level curriculum).
+    Route::get('/curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'index'])->name('curriculum.index');
+    Route::get('/curriculum/levels/{level}/categories', [\App\Http\Controllers\Admin\CurriculumController::class, 'categories'])->name('curriculum.categories');
+    Route::post('/curriculum/levels/{level}/categories', [\App\Http\Controllers\Admin\CurriculumController::class, 'storeCategory'])->name('curriculum.categories.store');
+    Route::put('/curriculum/categories/{category}', [\App\Http\Controllers\Admin\CurriculumController::class, 'updateCategory'])->name('curriculum.categories.update');
+    Route::delete('/curriculum/categories/{category}', [\App\Http\Controllers\Admin\CurriculumController::class, 'destroyCategory'])->name('curriculum.categories.destroy');
+    Route::get('/curriculum/categories/{category}/items', [\App\Http\Controllers\Admin\CurriculumController::class, 'items'])->name('curriculum.items');
+    Route::post('/curriculum/categories/{category}/items', [\App\Http\Controllers\Admin\CurriculumController::class, 'storeItem'])->name('curriculum.items.store');
+    Route::put('/curriculum/items/{item}', [\App\Http\Controllers\Admin\CurriculumController::class, 'updateItem'])->name('curriculum.items.update');
+    Route::delete('/curriculum/items/{item}', [\App\Http\Controllers\Admin\CurriculumController::class, 'destroyItem'])->name('curriculum.items.destroy');
+    Route::get('/curriculum/items/{item}/questions', [\App\Http\Controllers\Admin\CurriculumController::class, 'questions'])->name('curriculum.questions');
+    Route::post('/curriculum/items/{item}/questions/save', [\App\Http\Controllers\Admin\CurriculumController::class, 'saveQuestion'])->name('curriculum.questions.save');
+    Route::delete('/curriculum/questions/{question}', [\App\Http\Controllers\Admin\CurriculumController::class, 'destroyQuestion'])->name('curriculum.questions.destroy');
+
     // Role Routes
     Route::get('/role', [AdminDashboardController::class, 'role'])->name('role');
     Route::post('/role/add', [AdminDashboardController::class, 'addRole'])->name('admin.role.add');
