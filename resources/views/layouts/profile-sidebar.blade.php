@@ -180,7 +180,7 @@
                 <!-- Parent -->
                 <button
                     type="button"
-                    @click="open = !open"
+                    @click="open = !open; if (!isSidebarOpen) { isSidebarOpen = true; window.localStorage.setItem('isSidebarOpen', true); }"
                     class="w-full flex items-center px-2 py-3 space-x-2 text-base font-semibold rounded-md hover:bg-[#E9F0E9] hover:text-black"
                     :class="{'justify-center': !isSidebarOpen}"
                     data-tooltip="City"
