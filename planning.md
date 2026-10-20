@@ -132,6 +132,12 @@ Daniel: "the autopilot is something irrelevant and it's on the second position, 
 
 ~~Super Admin "view as" another role~~ — DONE 2026-10-20. Real-user impersonation (`ImpersonateController`), entry point on the existing Students/School User list pages, persistent banner + `impersonation_logs` audit trail. See `bugs.md` for full technical detail, including the routing subtlety where `stop()` can't live under the same admin-gated route group as `start()`.
 
+## Phase 11 — Email Template / campaign system rebuild (2026-10-20)
+
+Daniel: "in Admin, the email template doesnt work... I need to be able to create templates of emails... for any school, or grade, or on a specific day of the First Month setting of each school." Full plan: `C:\Users\HP\.claude\plans\quizzical-kindling-sutherland.md`.
+
+~~Rebuilt as one system~~ — DONE 2026-10-20. Replaced the broken, hardcoded-10-slot admin page (empty table, 404 on every visit, no way to create a template) with a real template CRUD plus a campaign system: target all students, one school, one grade, or hand-picked students; send immediately or schedule (a fixed date, N days into a school's configured start month, or every month on a given day). Folded the old static event-triggered templates (Welcome, Bank Account Ready, etc.) into the same system via an optional "linked event" field, without touching the proven `MailboxScheduler` dispatch mechanics underneath. See `bugs.md` for full technical detail.
+
 ## Phase 4 — Cleanup (any time, low risk, keep isolated from functional PRs)
 
 1. ~~Delete all dead/commented-out code blocks listed in `bugs.md` #16~~ — DONE 2026-10-07.

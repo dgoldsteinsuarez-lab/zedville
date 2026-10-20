@@ -6,18 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmailTemplate extends Model
 {
-    // Table name (optional if it follows Laravel naming conventions)
     protected $table = 'email_templates';
 
-    // Fillable fields for mass assignment
     protected $fillable = [
         'sid',
-        'store_name',
-        'subTitle',
+        'name',
+        'trigger_event',
         'subject',
         'content',
     ];
 
-    // Optional: timestamps are enabled by default
     public $timestamps = true;
+
+    public function campaigns()
+    {
+        return $this->hasMany(EmailCampaign::class, 'template_id');
+    }
+
+    public function school()
+    {
+        return $this->belongsTo(SchoolDomain::class, 'sid');
+    }
 }

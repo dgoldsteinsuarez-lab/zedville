@@ -182,8 +182,8 @@
                                     </li>
                                     @php
                                         $usersMenuActive1 = request()->is(
-                                            'admin/email/communication*',
-                                            'admin/email-template*',
+                                            'admin/email-templates*',
+                                            'admin/email-campaigns*',
                                         );
                                     @endphp
                                     @if($navSuper)
@@ -204,15 +204,14 @@
                                         </a>
                                         <div id="mailbox" class="collapse {{ $usersMenuActive1 ? 'show' : '' }} collapseNavItems" data-bs-parent="#toggleNavsubnav">
                                             <ul class="subnav">
-                                                <li class="nav-item {{ request()->is('admin/email/communication') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/email/communication') }}">
-                                                        <span class="navTxt">Communication</span>
-                                                        <!-- <span class="menu-label">23</span> -->
+                                                <li class="nav-item {{ request()->is('admin/email-templates*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/email-templates') }}">
+                                                        <span class="navTxt">Email Templates</span>
                                                     </a>
                                                 </li>
-                                                <li class="nav-item {{ request()->is('admin/email-template*') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/email-template') }}">
-                                                        <span class="navTxt">Email Template</span>
+                                                <li class="nav-item {{ request()->is('admin/email-campaigns*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/email-campaigns') }}">
+                                                        <span class="navTxt">Email Campaigns</span>
                                                     </a>
                                                 </li>
                                             </ul>

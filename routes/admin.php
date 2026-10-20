@@ -123,12 +123,24 @@ Route::middleware('role:super_admin')->group(function () {
     Route::put('/school-domain/edit/{id}', [AdminDashboardController::class, 'updateschoolDomain'])->name('admin.grade.update');
     Route::delete('/school-domain/delete/{id}', [AdminDashboardController::class, 'deleteschoolDomain'])->name('admin.school-domain.delete');
 
-    //For Email Template — mass communication to users
-    Route::get('/email-template', [AdminEmailTemplateController::class, 'index'])->name('admin.email-template.index');
-    Route::post('/email-template/{id}', [AdminEmailTemplateController::class, 'update'])->name('admin.email-template.update');
-    Route::get('/email/communication', [AdminEmailTemplateController::class, 'communication'])->name('admin.email.communication');
-    Route::post('/email/send', [AdminEmailTemplateController::class, 'send'])->name('admin.email.send');
-    Route::get('/email/sent-email', [AdminEmailTemplateController::class, 'sentEmail'])->name('admin.email.sent-email');
+    //For Email Template / campaign system — create templates, target a
+    //school/grade/selected students, send now or schedule (bugs.md, 2026-10-20)
+    //
+    //No "admin." prefix on these names - this whole group is already loaded
+    //under RouteServiceProvider's ->name('admin.') group, so a self-prefixed
+    //name here would register as the double admin.admin.* (a pre-existing
+    //mistake on a few older routes elsewhere in this file - not followed here).
+    Route::get('/email-templates', [AdminEmailTemplateController::class, 'templates'])->name('email-templates.index');
+    Route::get('/email-templates/create', [AdminEmailTemplateController::class, 'createTemplate'])->name('email-templates.create');
+    Route::post('/email-templates', [AdminEmailTemplateController::class, 'storeTemplate'])->name('email-templates.store');
+    Route::get('/email-templates/{id}/edit', [AdminEmailTemplateController::class, 'editTemplate'])->name('email-templates.edit');
+    Route::put('/email-templates/{id}', [AdminEmailTemplateController::class, 'updateTemplate'])->name('email-templates.update');
+    Route::delete('/email-templates/{id}', [AdminEmailTemplateController::class, 'destroyTemplate'])->name('email-templates.delete');
+
+    Route::get('/email-campaigns', [AdminEmailTemplateController::class, 'campaigns'])->name('email-campaigns.index');
+    Route::get('/email-campaigns/create', [AdminEmailTemplateController::class, 'createCampaign'])->name('email-campaigns.create');
+    Route::post('/email-campaigns', [AdminEmailTemplateController::class, 'storeCampaign'])->name('email-campaigns.store');
+    Route::post('/email-campaigns/{id}/cancel', [AdminEmailTemplateController::class, 'cancelCampaign'])->name('email-campaigns.cancel');
 });
 
 

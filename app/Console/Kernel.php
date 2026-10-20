@@ -175,6 +175,15 @@ class Kernel extends ConsoleKernel
             ->monthlyOn(1, '03:00')
             ->name('students-anonymize-inactive')
             ->withoutOverlapping();
+
+        // Sends any email_campaigns row whose fixed_date/relative-to-school-
+        // start/recurring-monthly-day trigger has come due (bugs.md,
+        // 2026-10-20). Per-student idempotent via email_campaign_sends, so
+        // safe alongside the daily cadence even if a run is missed/retried.
+        $schedule->command('email-campaigns:dispatch-due --write')
+            ->dailyAt('08:00')
+            ->name('email-campaigns-dispatch-due')
+            ->withoutOverlapping();
     }
 
     /**
