@@ -356,5 +356,14 @@ Fixed one latent bug found while in this code: `admin.grade.update` was register
 
 Tested via `tests/Feature/Admin/GradeClassManagementTest.php` (add/edit/delete a Class from the Grade page, Grade Levels on its new page and gone from its old one, visibility gated correctly for a School Admin) - `tests/Feature/Admin/GradeGeneralInformationLevelsTest.php`'s existing coverage confirmed unaffected.
 
+### Fixed 2026-10-20 - two legacy bank accounts had no card at all, and the Card Number column was masked for everyone
+Daniel: "i should see the card number in here," pointing at the City Bank Account admin screen (`admin/accounts`) where 2 of 5 rows ("Maxi," "Riley") showed a blank Card Number.
+
+Traced it to genuinely missing data, not a display bug: those 2 `bank_accounts` rows were both created at the exact same timestamp (2026-10-02 11:06:20), bypassing every real account-creation path (`BankController`, `CitizenActivationController`, `CitizenActivationService::provisionForTutor()`) - all three correctly generate a full set of card fields (`card_name`, `card_type`, `card_number`, `card_valid`, `card_cvv`, `card_iban`, `card_swift`) on creation; these 2 rows had none of them. Filled in both rows using the exact same generation scheme the live code uses (`'2000' . <12 random digits>` for the card number, etc.) - synthetic data for a dummy-finance teaching platform, not real payment data.
+
+Daniel then: "are you sure you made the change, i should see all info" - the fix above was correct, but the column itself masks every row's number down to its last 4 digits (`xxxxxxxxxxxx4321`), which was true for all 5 rows before and after, not specific to the 2 that were blank. Since this is synthetic card data on a teaching platform (not real payment info needing PCI-style masking) and the admin view's own Primary Savings Account column already shows its number in full, removed the masking so Card Number does too. Also fixed the column header's own typo ("Card  NUmber" → "Card Number").
+
+Tested via `tests/Feature/Admin/CityBankAccountsCardNumberTest.php`.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

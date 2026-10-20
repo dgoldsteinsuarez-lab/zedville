@@ -49,7 +49,7 @@
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Primary Savings Account</th>
-                                    <th>Card  NUmber</th>
+                                    <th>Card Number</th>
                                     <th>Current Balance</th>
                                 </tr>
                             </thead>
@@ -66,23 +66,7 @@
                                         <td valign="middle">{{ $account->student_name }}</td>
                                         <td valign="middle">{{ $account->student_email }}</td>
                                         <td valign="middle">{{ $account->primary_savings_account_number }}</td>
-                                        <td valign="middle">
-                                            @php
-                                                $acc = (string) $account->card_number;
-
-                                                if (str_contains($acc, '-')) {
-                                                    [$first, $second] = explode('-', $acc, 2);
-
-                                                    $maskedFirst  = str_repeat('x', strlen($first));
-                                                    $maskedSecond = str_repeat('x', max(strlen($second) - 4, 0)) . substr($second, -4);
-
-                                                    echo $maskedFirst . '-' . $maskedSecond;
-                                                } else {
-                                                    // No dash → mask all except last 4
-                                                    echo str_repeat('x', max(strlen($acc) - 4, 0)) . substr($acc, -4);
-                                                }
-                                            @endphp
-                                        </td>
+                                        <td valign="middle">{{ $account->card_number }}</td>
 
                                         <td valign="middle">₹ {{ number_format($account->current_balance, 2) }}</td>
                                     </tr>
