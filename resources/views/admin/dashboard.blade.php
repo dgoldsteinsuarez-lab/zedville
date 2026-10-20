@@ -49,6 +49,25 @@
     </div>
 @endif
 
+{{-- Autopilot moved here from the main sidebar (Daniel, 2026-10-20: "I dont
+     want autopilot to be in such a relevant place... add it inside
+     dashboard, as its empty") - still a straight link to the existing,
+     unchanged admin/autopilot page (student absence records), just
+     surfaced from Dashboard instead of top-level nav. Reachable by whoever
+     could already reach admin/autopilot (Tutor/School Admin/Super Admin). --}}
+<div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h5 class="card-title mb-1">Autopilot</h5>
+            <p class="text-muted small mb-0">
+                Record an approved absence for a student - their class's average activity is applied on their
+                behalf for that period instead of counting as missed.
+            </p>
+        </div>
+        <a href="{{ url('admin/autopilot') }}" class="btn btn-sm btn-primary flex-shrink-0">Manage Autopilot</a>
+    </div>
+</div>
+
 {{-- Admin Structure Proposal doc §2.3: Grade/Class drill-down for the
      currently selected School. Which school that is, and picking a
      different one, is now shown by the "Managing: X" / "No school

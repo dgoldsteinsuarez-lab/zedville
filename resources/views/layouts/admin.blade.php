@@ -176,14 +176,10 @@
                                         </div>
                                     </li>
                                     @endif
-                                    <li class="nav-item {{ request()->is('admin/autopilot*') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Autopilot">
-                                        <a class="nav-link" href="{{ url('admin/autopilot') }}">
-                                            <span class="navIcon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#F59E0B"/><path fill="#fff" d="M13 3L6.5 13.5H11L10 21L17.5 10H13L13 3Z"/></svg>
-                                            </span>
-                                            <span class="navTxt">Autopilot</span>
-                                        </a>
-                                    </li>
+                                    {{-- Autopilot moved off the main sidebar onto the Dashboard card (Daniel,
+                                         2026-10-20: "I dont want autopilot to be in such a relevant place...
+                                         add it inside dashboard, as its empty") - still reachable by
+                                         Tutor/School Admin/Super Admin, just no longer top-level nav. --}}
                                     @php
                                         $usersMenuActive1 = request()->is(
                                             'admin/email-templates*',
