@@ -325,6 +325,18 @@
 
     @endphp
 </aside>
+
+{{-- Sidebar icon tooltip. Every nav item above already carries a
+     data-tooltip/data-tooltip-placement attribute, but nothing ever
+     implemented it - with the sidebar collapsed to icon-only, there was
+     no way to tell icons apart (Daniel, 2026-10-20: "I don't recognize
+     well which one is for a school or bank or city"). A plain CSS
+     ::after tooltip won't work here - <aside>, its <nav> and its <ul>
+     are all overflow:hidden (for the slide-in/out animation and the
+     scrollable link list), which would clip it. This div is deliberately
+     placed as a sibling of </aside>, not a descendant, and positioned via
+     JS with position:fixed, so none of that clipping applies. --}}
+<div id="sidebarTooltip" class="fixed hidden z-[9999] px-2.5 py-1.5 rounded-md text-xs font-medium text-white whitespace-nowrap pointer-events-none" style="background:#1F2937;"></div>
 <script>
     /* Greeting follows the viewer's own local time (device time zone),
        not the server clock. SSR value above is a fallback until this runs. */
@@ -337,5 +349,35 @@
               : h >= 17 && h < 21 ? 'Good evening'
               : 'Good night';
         el.textContent = g;
+    })();
+
+    (function () {
+        var tip = document.getElementById('sidebarTooltip');
+        if (!tip) return;
+
+        document.addEventListener('mouseover', function (e) {
+            var el = e.target.closest('[data-tooltip]');
+            if (!el) return;
+
+            // Only needed when the sidebar is collapsed to icons - when
+            // it's expanded, the text label is already shown right next
+            // to the icon. Same localStorage key themeScript.js's
+            // Alpine setup() reads/writes, so this always matches the
+            // sidebar's actual current state.
+            if (window.localStorage.getItem('isSidebarOpen') === 'true') return;
+
+            var rect = el.getBoundingClientRect();
+            tip.textContent = el.getAttribute('data-tooltip');
+            tip.style.top = (rect.top + rect.height / 2) + 'px';
+            tip.style.left = (rect.right + 10) + 'px';
+            tip.style.transform = 'translateY(-50%)';
+            tip.classList.remove('hidden');
+        });
+
+        document.addEventListener('mouseout', function (e) {
+            if (e.target.closest('[data-tooltip]')) {
+                tip.classList.add('hidden');
+            }
+        });
     })();
 </script>
