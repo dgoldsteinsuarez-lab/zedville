@@ -341,5 +341,20 @@ Root cause: the modal's `<select>` was `name="search"` - a leftover from being c
 
 This modal had never actually been exercised before earlier today's fix - it existed in the codebase but nothing opened it (see the "three broken mechanisms" entry above), so this second bug inside it had never surfaced either. Fixed the field name to `school_id`; also fixed its placeholder text ("Select School User", another copy-paste leftover) to "Select a school". Added `test_the_change_school_modals_select_actually_posts_school_id` to that same test file - renders the real modal and asserts on the actual `<select>` markup, specifically so a field-name mismatch like this can't pass silently again.
 
+### Restructured 2026-10-20 - Classes can now be managed from inside their Grade
+Daniel: "it's easier to make a grade and than add the classes? I wonder the purpose of grades and classes in different subcategories. If I am in Classes, I should be able to handle them easier inside each grade."
+
+Until now, adding/editing/deleting a Class only existed on the flat "Classes" screen (`admin/grade`, `AdminDashboardController`) - a table of every Class across every Grade, where you pick the Grade it belongs to from a dropdown. The per-Grade "General Information" page (`admin/grades/{id}/general-information`) already showed that Grade's Classes, but read-only, with an "Add Class" button that just deep-linked back to the flat screen and pre-filled the dropdown.
+
+Added real Add/Edit/Delete actions directly to the per-Grade page - posting to the exact same existing `AdminDashboardController::addGrade()`/`updateGrade()`/`deleteGrade()` endpoints the flat screen already used (no new business logic; `grade_id` is a hidden field fixed to the Grade you're already on instead of a dropdown you could pick wrong). The page's heading/title changed from "General Information — Grade 8" to just "Grade 8" and its row-link from "General Information" to "Manage Classes," since it's now the actual workspace, not a read-only info page.
+
+Also relocated the "Grade levels" management card from the Classes screen to the Grades screen while in there - a Level (`grade_level_id`) belongs to a *Grade*, not a Class, so it was always oddly placed; moving it also surfaced a pre-existing gap (it was visible to a School Admin even though `addGradeLevel`/`updateGradeLevel`/`deleteGradeLevel` are `abort_unless(isSuperAdmin())` - submitting it would 403. Added the missing visibility gate while moving it.
+
+The flat Classes screen stays (now explicitly framed as a cross-grade search/overview, per Daniel's confirmed direction to keep it as a secondary tool), and its own Add/Edit/Delete still work exactly as before for anyone who prefers it.
+
+Fixed one latent bug found while in this code: `admin.grade.update` was registered as the route name for *two* unrelated routes (`PUT /school-domain/edit/{id}` and `PUT /grade/edit/{id}`) - not currently exploited (nothing calls `route('admin.grade.update')`, both forms hardcode `url()`), but a real collision waiting to bite whichever one someone names next. Renamed the school-domain one to `admin.school-domain.update`.
+
+Tested via `tests/Feature/Admin/GradeClassManagementTest.php` (add/edit/delete a Class from the Grade page, Grade Levels on its new page and gone from its old one, visibility gated correctly for a School Admin) - `tests/Feature/Admin/GradeGeneralInformationLevelsTest.php`'s existing coverage confirmed unaffected.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

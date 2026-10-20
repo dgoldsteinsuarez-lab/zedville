@@ -7,9 +7,10 @@
         <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Classes</h1>
     </div>
     <p class="text-muted">
-        Each Class has its own Tutor(s) and its own student roster. Pick which Grade it belongs to — every
-        Class under the same Grade shares that Grade's curriculum and Level.
-        Manage Grades themselves on the <a href="{{ url('admin/grades') }}">Grades</a> screen.
+        Every Class across every Grade, for quick lookup or a fix without opening a specific Grade. To add a
+        Class, it's usually easier from inside its Grade - open <a href="{{ url('admin/grades') }}">Grades</a>
+        and use "Manage Classes" there. Assign a Tutor to a Class from the <a href="{{ url('admin/staff') }}">School
+        User</a> screen.
     </p>
     <div class="row">
         <div class="themeCard card card-custom card-stretch gutter-b mab-15">
@@ -112,31 +113,6 @@
                         @endif
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="themeCard card card-custom card-stretch gutter-b mab-15">
-            <div class="card-body pall-30">
-                <h2 class="fs-16 fw-500 mab-15">Grade levels</h2>
-                <p class="text-muted">Group your classes by grade (for example Grade 7, Grade 8). Then pick the grade level when you add or edit a class.</p>
-                <form action="{{ url('admin/grade-level/add') }}" method="post" class="d-flex gap-2 mab-15">
-                    @csrf
-                    <input class="form-control w-300px" type="text" name="name" placeholder="New grade level, e.g. Grade 8" required maxlength="100">
-                    <button type="submit" class="themeBtn text-white">Add grade level</button>
-                </form>
-                @forelse ($levels as $level)
-                    <form action="{{ url('admin/grade-level/edit', $level->id) }}" method="post" class="d-flex gap-2 mab-10 align-items-center">
-                        @csrf @method('PUT')
-                        <input class="form-control w-300px" type="text" name="name" value="{{ $level->name }}" required maxlength="100">
-                        <button type="submit" class="themeBtnGray theme-text-dark">Rename</button>
-                        <button type="submit" form="del-level-{{ $level->id }}" class="secondaryBtn theme-text-mute"
-                            onclick="return confirm('Remove this grade level? Its classes stay, but become unassigned.')">Remove</button>
-                    </form>
-                    <form id="del-level-{{ $level->id }}" action="{{ url('admin/grade-level/delete', $level->id) }}" method="post">@csrf @method('DELETE')</form>
-                @empty
-                    <p class="text-muted mb-0">No grade levels yet.</p>
-                @endforelse
             </div>
         </div>
     </div>

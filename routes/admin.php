@@ -120,7 +120,7 @@ Route::middleware('role:super_admin')->group(function () {
     //School Domain — provisioning a new school on the platform
     Route::get('/school-domain', [AdminDashboardController::class, 'schoolDomain'])->name('school-domain');
     Route::post('/school-domain/add', [AdminDashboardController::class, 'addschoolDomain'])->name('admin.school-domain.add');
-    Route::put('/school-domain/edit/{id}', [AdminDashboardController::class, 'updateschoolDomain'])->name('admin.grade.update');
+    Route::put('/school-domain/edit/{id}', [AdminDashboardController::class, 'updateschoolDomain'])->name('admin.school-domain.update');
     Route::delete('/school-domain/delete/{id}', [AdminDashboardController::class, 'deleteschoolDomain'])->name('admin.school-domain.delete');
 
     //For Email Template / campaign system — create templates, target a

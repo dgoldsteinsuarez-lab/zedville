@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'General Information')
+@section('title', $grade->name)
 
 @section('content')
 <div class="container-fluid">
@@ -15,7 +15,7 @@
         @endif
     </div>
 
-    <h2 class="mb-4">General Information — {{ $grade->name }}</h2>
+    <h2 class="mb-4">{{ $grade->name }}</h2>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -131,11 +131,11 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong>Classes in this Grade</strong>
-            <a href="{{ url('admin/grade?add_to_grade=' . $grade->id) }}" class="btn btn-sm btn-primary">Add Class</a>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">Add Class</button>
         </div>
         <div class="card-body p-0">
             <table class="table mb-0">
-                <thead><tr><th>Class Code</th><th>Name</th><th>Assigned Tutor</th><th>Students</th></tr></thead>
+                <thead><tr><th>Class Code</th><th>Name</th><th>Assigned Tutor</th><th>Students</th><th class="text-end">Action</th></tr></thead>
                 <tbody>
                     @forelse ($grade->classes as $class)
                         <tr>
@@ -143,24 +143,111 @@
                             <td>{{ $class->name }}</td>
                             <td>{{ $class->tutors->pluck('nickname')->filter()->implode(', ') ?: 'None assigned' }}</td>
                             <td>{{ $class->students_count }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-class-btn"
+                                    data-bs-toggle="modal" data-bs-target="#editClassModal"
+                                    data-id="{{ $class->id }}" data-name="{{ $class->name }}" data-code="{{ $class->classCode }}">
+                                    Edit
+                                </button>
+                                <form method="POST" action="{{ url('admin/grade/delete/' . $class->id) }}" class="d-inline"
+                                    onsubmit="return confirm('Delete this Class? Students must be moved out first.')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="text-muted p-3">No Classes under this Grade yet.</td></tr>
+                        <tr><td colspan="5" class="text-muted p-3">No Classes under this Grade yet - add the first one above.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         <div class="card-footer text-muted small">
             One Grade can contain several Classes (e.g. "8A", "8B") — each with its own Tutor(s) and its own
-            student roster — while sharing this Grade's curriculum and Level. Manage Tutor assignment and rosters
-            from the <a href="{{ url('admin/grade') }}">Classes</a> screen.
+            student roster — while sharing this Grade's curriculum and Level. Assign a Tutor to a Class from the
+            <a href="{{ url('admin/staff') }}">School User</a> screen. Looking for a Class from a different Grade?
+            The <a href="{{ url('admin/grade') }}">Classes</a> screen lists every Class across every Grade.
         </div>
     </div>
 </div>
+
+{{-- Add Class - posts to the same admin/grade/add endpoint the Classes
+     screen's own Add modal uses (AdminDashboardController::addGrade()) -
+     grade_id is fixed to this Grade, so there's no dropdown to pick wrong. --}}
+<section class="themeModal">
+    <form action="{{ url('admin/grade/add') }}" method="post">
+        @csrf
+        <input type="hidden" name="grade_id" value="{{ $grade->id }}">
+        <div class="modal fade" id="addClassModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Class to {{ $grade->name }}</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Class name</label>
+                            <input type="text" class="form-control" name="name" placeholder="e.g. 8A" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</section>
+
+{{-- Edit Class - posts to the same admin/grade/edit/{id} endpoint
+     (AdminDashboardController::updateGrade()); grade_id stays this Grade.
+     action is set by JS below, per row clicked. --}}
+<section class="themeModal">
+    <form id="editClassForm" method="post">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="grade_id" value="{{ $grade->id }}">
+        <div class="modal fade" id="editClassModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Edit Class</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Class name</label>
+                            <input type="text" class="form-control" name="name" id="editClassName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Class Code</label>
+                            <input type="text" class="form-control" name="classCode" id="editClassCode">
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</section>
+
 @endsection
 
 @push('scripts')
 <script>
+document.querySelectorAll('.edit-class-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        document.getElementById('editClassForm').action = '{{ url('admin/grade/edit') }}/' + this.dataset.id;
+        document.getElementById('editClassName').value = this.dataset.name;
+        document.getElementById('editClassCode').value = this.dataset.code;
+    });
+});
+
 function saveSchoolMonthSetting(schoolId) {
     const startMonth = document.getElementById('sms-start-month').value;
     if (!startMonth) {

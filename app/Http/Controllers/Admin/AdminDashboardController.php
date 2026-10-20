@@ -201,9 +201,8 @@ public function grade(Request $request)
 
     $grade = $query->orderBy('grade_id')->orderBy('name')->get();
     $grades = $this->schoolScoped(Grade::orderBy('name'))->get();
-    $levels = $this->schoolScoped(GradeLevel::orderBy('sort_order')->orderBy('name'))->get();
 
-    return view('admin.grade.index', compact('grade', 'grades', 'levels'));
+    return view('admin.grade.index', compact('grade', 'grades'));
 }
 
 /** The Grade must belong to the same school as the class. */

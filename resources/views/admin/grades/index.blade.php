@@ -6,8 +6,10 @@
 <div class="container-fluid">
     <h2 class="mb-2">Grades</h2>
     <p class="text-muted">
-        A Grade (e.g. "Grade 8") carries one curriculum Level, shared by every Class underneath it.
-        Manage Classes (Tutor, roster, class code) on the <a href="{{ url('admin/grade') }}">Classes</a> screen.
+        A Grade (e.g. "Grade 8") carries one curriculum Level, shared by every Class underneath it (e.g. "8A",
+        "8B"). Add a Grade below, then open <strong>Manage Classes</strong> on it to add its Classes. Each
+        Class gets its own student roster and Tutor - assign a Tutor from the
+        <a href="{{ url('admin/staff') }}">School User</a> screen.
     </p>
 
     @if (session('success'))
@@ -45,6 +47,41 @@
         </div>
     </div>
 
+    @if (auth()->user()->isSuperAdmin())
+    {{-- Managing a level writes to AdminDashboardController::addGradeLevel()/
+         updateGradeLevel()/deleteGradeLevel(), all Super-Admin-only (levels
+         are a shared, global set - a School Admin assigns one to their own
+         Grade above, but doesn't rename/add/remove the set itself). Gated
+         here to match - the old copy of this card (moved from the Classes
+         screen) wasn't, and would 403 silently for a School Admin on submit. --}}
+    <div class="card mb-4">
+        <div class="card-header"><strong>Grade levels</strong></div>
+        <div class="card-body">
+            <p class="text-muted">
+                A fixed set of curriculum levels (e.g. "Rookie", "Intermediate") shared by every school -
+                each Grade above is assigned one.
+            </p>
+            <form action="{{ url('admin/grade-level/add') }}" method="post" class="d-flex gap-2 mab-15">
+                @csrf
+                <input class="form-control w-300px" type="text" name="name" placeholder="New level, e.g. Rookie" required maxlength="100">
+                <button type="submit" class="themeBtn text-white">Add level</button>
+            </form>
+            @forelse ($levels as $level)
+                <form action="{{ url('admin/grade-level/edit', $level->id) }}" method="post" class="d-flex gap-2 mab-10 align-items-center">
+                    @csrf @method('PUT')
+                    <input class="form-control w-300px" type="text" name="name" value="{{ $level->name }}" required maxlength="100">
+                    <button type="submit" class="themeBtnGray theme-text-dark">Rename</button>
+                    <button type="submit" form="del-level-{{ $level->id }}" class="secondaryBtn theme-text-mute"
+                        onclick="return confirm('Remove this level? Grades using it become unassigned.')">Remove</button>
+                </form>
+                <form id="del-level-{{ $level->id }}" action="{{ url('admin/grade-level/delete', $level->id) }}" method="post">@csrf @method('DELETE')</form>
+            @empty
+                <p class="text-muted mb-0">No levels yet.</p>
+            @endforelse
+        </div>
+    </div>
+    @endif
+
     <div class="card">
         <div class="card-header"><strong>All Grades</strong></div>
         <div class="card-body p-0">
@@ -72,7 +109,7 @@
                             </a>
                         </td>
                         <td class="d-flex gap-1">
-                            <a href="{{ url('admin/grades/' . $g->id . '/general-information') }}" class="btn btn-sm btn-outline-secondary">General Information</a>
+                            <a href="{{ url('admin/grades/' . $g->id . '/general-information') }}" class="btn btn-sm btn-primary">Manage Classes</a>
                             <form method="POST" action="{{ url('admin/grades/' . $g->id) }}" onsubmit="return confirm('Delete this Grade? Its Classes must be empty/reassigned first.')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
