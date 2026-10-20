@@ -242,7 +242,11 @@ class FinheroAdminController extends Controller
 
             'cid' => 'nullable|exists:classes,id',
 
-            'activity_name' => 'required|string|max:255',
+            // Daniel, 2026-10-21: "Name, points, status are not required.
+            // For name, just add the name of the activity." - left blank,
+            // Name falls back to the activity_key below, same philosophy
+            // as max_points/salary falling back to their global defaults.
+            'activity_name' => 'nullable|string|max:255',
 
             // Left blank, the activity inherits the global default for this
             // activity_key (see FinheroActivityDefault) instead of requiring
@@ -264,7 +268,9 @@ class FinheroAdminController extends Controller
                 'min:0',
             ],
 
-            'is_active' => 'required|in:0,1',
+            // Daniel, 2026-10-21: "status are not required" - defaults to
+            // active (1) below, matching the modal's own "Active" default.
+            'is_active' => 'nullable|in:0,1',
 
             'description' => 'nullable|string',
         ]);
@@ -300,7 +306,10 @@ class FinheroAdminController extends Controller
 
         $id = DB::table('finhero_activity_registry')->insertGetId([
             'activity_key' => $validated['activity_key'],
-            'activity_name' => $validated['activity_name'],
+
+            // Not required - falls back to the activity_key itself so the
+            // list never shows a blank name.
+            'activity_name' => $validated['activity_name'] ?: $validated['activity_key'],
 
             // Library can have NULL max points
             'max_points' => $validated['max_points'] ?? null,
@@ -313,12 +322,17 @@ class FinheroAdminController extends Controller
 
             'cid' => $classId,
 
-            // Salary only for task
+            // Salary only for task - not required, falls back to the
+            // global default for this activity_key (FinheroActivityDefault,
+            // same philosophy as max_points), read at the point this is
+            // actually shown to a student (FinheroStudentController::
+            // taskPage()), not copied in here.
             'salary' => $validated['type'] === 'task'
                 ? ($validated['salary'] ?? null)
                 : null,
 
-            'is_active' => $validated['is_active'],
+            // Not required - defaults to active.
+            'is_active' => $validated['is_active'] ?? 1,
 
             'description' => $validated['description'] ?? null,
 

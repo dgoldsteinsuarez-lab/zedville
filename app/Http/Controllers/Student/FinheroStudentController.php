@@ -183,7 +183,13 @@ class FinheroStudentController extends Controller
             ->where('type', 'task')
             ->first();
 
-        $salary = $activity->salary ?? 0;
+        // The row's own salary overrides the global default for this
+        // activity_key; null falls back to it - same pattern as max_points
+        // above (Daniel, 2026-10-21: "salary, set one as default if not
+        // picked").
+        $salary = $activity->salary
+            ?? \App\Models\FinheroActivityDefault::where('activity_key', $activityKey)->value('salary')
+            ?? 0;
 
         return view($viewPath, compact('salary', 'activityKey'));
     }

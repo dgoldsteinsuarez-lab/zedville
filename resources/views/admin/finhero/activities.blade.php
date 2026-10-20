@@ -163,8 +163,7 @@
                             <div class="form-group  mb-3">
                                 <label>Salary</label>
                                 <select name="salary" id="salary" class="form-control">
-                                    <option value="">Select Salary</option>
-                                    <option value="2000">2,000</option>
+                                    <option value="2000" selected>2,000</option>
                                     <option value="3200">3,200</option>
                                     <option value="4000">4,000</option>
                                     <option value="6000">6,000</option>
@@ -257,7 +256,7 @@
                     }
                     let salaryEl = document.getElementById('salary');
                     if (salaryEl) {
-                        salaryEl.value = salaryVal || '';
+                        salaryEl.value = salaryVal || '2000';
                     }
                 @endif
                 document.getElementById('position').value = this.dataset.position;
