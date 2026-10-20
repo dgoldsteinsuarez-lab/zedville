@@ -477,5 +477,16 @@ Confirmed no real `mba_position`/`calendar_events` rows referenced Low in either
 
 Trimmed the relevant test files to match (`SpendingActivityControllerTest.php`, `SpendingActivityAssignmentTest.php`) rather than leaving Low-shaped tests failing; `LowBudgetActivityControllerTest.php` deleted outright along with the controller it tested. Full suite: 321 passed, same 4 known failures (unchanged).
 
+### Built 2026-10-21 - start/due date on FinHero Task & Library activities; Max Points removed from the Add Activity form
+Daniel, from the same "Add Activity" (FinHero Task/Library) screenshot as earlier today: "i can still see all the unnecesarry settings here and i need to be able to add start and due date in all activities, including the tasks, library and so on."
+
+"Unnecessary settings" - read in context of his earlier statement the same day ("there is one about adding points, but that is solved, as we already assigned points in badges separately") - meant **Max Points** specifically, not Salary (which he'd separately asked to get a sensible default, not be removed). Removed the Max Points field from the Add/Edit Activity modal (and its now-always-empty column from the activities table listing) and stopped reading it from the request entirely in `FinheroAdminController::addActivity()`/`updateActivity()` - the underlying mechanic isn't gone: every activity simply always uses the global default point value (`FinheroActivityDefault`) now, which `FinheroStudentController` already falls back to whenever an activity's own `max_points` is null. Pure admin-form simplification, not a loss of the points-awarding feature.
+
+Found and fixed a real bug in the same form while in there: the "Add Activity" button's click handler reset the Salary dropdown back to blank immediately after `form.reset()`, silently undoing yesterday's fix that set 2,000 as the pre-selected default - the default never actually took effect for a brand-new activity. Fixed by keeping the reset value in sync with the `<option selected>`.
+
+Added `start_date`/`end_date` to `finhero_activity_registry` (same column names as the 4 other "position" screens for consistency, labeled "Start Date"/"Due Date" in the form to match Daniel's own wording for a task), wired into both `addActivity()` and `updateActivity()`, synced to `calendar_events` with the same FullCalendar exclusive-end +1-day adjustment used everywhere else this session. Shown for both Task and Library types (Salary/the old Max Points stay Task-only, since Library items don't carry a salary).
+
+Tested via `tests/Feature/Admin/FinheroActivityFormTest.php` (5 tests: Max Points always ends up null regardless of what's posted, date range persists and syncs to the calendar correctly for both Task and Library, editing clears a previously-set max_points, end-before-start is rejected). Full suite: 326 passed, same 4 known failures (unchanged).
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.

@@ -33,12 +33,12 @@
                                 <th>Name</th>
                                 <th>Class</th>
                                 @if($type == 'task')
-                                    <th>Max Points</th>
-
                                     <th>Salary</th>
                                 @endif
                                 <th>Position</th>
                                 <th>Status</th>
+                                <th>Start Date</th>
+                                <th>Due Date</th>
                                 <th class="rightText">Action</th>
                             </tr>
                         </thead>
@@ -50,9 +50,7 @@
                                     <td>{{ $a->activity_name }}</td>
                                     <td>{{ $a->class_name }}</td>
                                     @if($type == 'task')
-                                        <td>{{ $a->max_points }}</td>
                                         {{-- Show salary only for task --}}
-
                                         <td>{{ number_format($a->salary ?? 0, 2) }} zeds</td>
                                     @endif
 
@@ -62,15 +60,19 @@
                                             {{ $a->is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </td>
+                                    <td>{{ $a->start_date ?? '—' }}</td>
+                                    <td>{{ $a->end_date ?? '—' }}</td>
                                     <td>
                                         <div class="actionBtns d-flex justify-content-end">
 
                                             <!-- EDIT -->
                                             <a href="#" class="tableActionBtn me-3 editBtn" data-id="{{ $a->id }}"
                                                 data-key="{{ $a->activity_key }}" data-name="{{ $a->activity_name }}"
-                                                data-points="{{ $a->max_points }}" data-position="{{ $a->position }}"
+                                                data-position="{{ $a->position }}"
                                                 data-salary="{{ $a->salary !== null ? (float)$a->salary : '' }}" data-active="{{ $a->is_active }}"
-                                                data-class="{{ $a->cid }}" data-bs-toggle="modal"
+                                                data-class="{{ $a->cid }}"
+                                                data-start-date="{{ $a->start_date }}" data-end-date="{{ $a->end_date }}"
+                                                data-bs-toggle="modal"
                                                 data-bs-target="#activityModal">
                                                 ✏️
                                             </a>
@@ -154,12 +156,12 @@
                             <label>Name</label>
                             <input type="text" name="activity_name" id="activity_name" class="form-control">
                         </div>
+                        {{-- Max Points removed from this form (Daniel, 2026-10-21: "i can
+                             still see all the unnecesarry settings here" - redundant now
+                             that points come from badges separately, per his earlier
+                             statement the same day). Every activity now always uses the
+                             global default point value instead - see FinheroAdminController. --}}
                         @if($type == 'task')
-                            <div class="form-group mb-3">
-                                <label>Max Points</label>
-                                <input type="number" name="max_points" id="max_points" class="form-control">
-                            </div>
-
                             <div class="form-group  mb-3">
                                 <label>Salary</label>
                                 <select name="salary" id="salary" class="form-control">
@@ -188,6 +190,19 @@
                                 <option value="1">Active</option>
                                 <option value="0">Inactive</option>
                             </select>
+                        </div>
+
+                        {{-- Daniel, 2026-10-21: "i need to be able to add start and due
+                             date in all activities, including the tasks, library and so
+                             on" - shown for both Task and Library, unlike Max Points/Salary
+                             above which stay Task-only. --}}
+                        <div class="form-group mb-3">
+                            <label>Start Date</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label>Due Date</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control">
                         </div>
 
                     </div>
@@ -226,8 +241,12 @@
 
             document.getElementById('activityForm').reset();
             @if($type == 'task')
+                // Daniel, 2026-10-21: "salary, set one as default if not
+                // picked" - this used to blank the field right back out
+                // after reset(), silently undoing the 2,000 default set on
+                // the <option> itself. Keep the default instead.
                 let salaryEl = document.getElementById('salary');
-                if (salaryEl) salaryEl.value = '';
+                if (salaryEl) salaryEl.value = '2000';
             @endif
         });
 
@@ -248,8 +267,6 @@
 
                 document.getElementById('activity_name').value = this.dataset.name;
                 @if($type == 'task')
-                    document.getElementById('max_points').value = this.dataset.points;
-
                     let salaryVal = this.dataset.salary;
                     if (salaryVal !== undefined && salaryVal !== null && salaryVal !== '') {
                         salaryVal = parseFloat(salaryVal).toString();
@@ -262,6 +279,8 @@
                 document.getElementById('position').value = this.dataset.position;
                 document.getElementById('is_active').value = this.dataset.active;
                 document.getElementById('classId').value = this.dataset.class;
+                document.getElementById('start_date').value = this.dataset.startDate || '';
+                document.getElementById('end_date').value = this.dataset.endDate || '';
 
 
             });

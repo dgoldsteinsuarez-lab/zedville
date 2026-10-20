@@ -248,16 +248,6 @@ class FinheroAdminController extends Controller
             // as max_points/salary falling back to their global defaults.
             'activity_name' => 'nullable|string|max:255',
 
-            // Left blank, the activity inherits the global default for this
-            // activity_key (see FinheroActivityDefault) instead of requiring
-            // every single assignment to repeat the same number.
-            'max_points' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:100',
-            ],
-
             'position' => 'required|in:required,optional,free',
 
             'type' => 'required|string',
@@ -273,6 +263,12 @@ class FinheroAdminController extends Controller
             'is_active' => 'nullable|in:0,1',
 
             'description' => 'nullable|string',
+
+            // Daniel, 2026-10-21: "i need to be able to add start and due
+            // date in all activities, including the tasks, library and so
+            // on" - same pattern as the other 4 "position" screens.
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
 
         /*
@@ -311,8 +307,15 @@ class FinheroAdminController extends Controller
             // list never shows a blank name.
             'activity_name' => $validated['activity_name'] ?: $validated['activity_key'],
 
-            // Library can have NULL max points
-            'max_points' => $validated['max_points'] ?? null,
+            // Daniel, 2026-10-21: "i can still see all the unnecesarry
+            // settings here" (Max Points, redundant now that points come
+            // from badges separately per his earlier statement) - no
+            // longer collected per-activity at all. Always null here;
+            // FinheroStudentController already falls back to the global
+            // default (FinheroActivityDefault) for every activity whose
+            // own max_points is null, so the underlying mechanic is
+            // unchanged, just no longer manually overridden per activity.
+            'max_points' => null,
 
             'position' => $validated['position'],
 
@@ -336,6 +339,9 @@ class FinheroAdminController extends Controller
 
             'description' => $validated['description'] ?? null,
 
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -355,6 +361,10 @@ class FinheroAdminController extends Controller
             ->whereMonth('created_at', now()->month)
             ->first();
 
+        // See MbaPositionController - FullCalendar's end is exclusive, +1
+        // day so an admin-picked end_date is still shown as included.
+        $calendarStart = !empty($validated['start_date']) ? \Carbon\Carbon::parse($validated['start_date'])->startOfDay() : now();
+        $calendarEnd = !empty($validated['end_date']) ? \Carbon\Carbon::parse($validated['end_date'])->addDay()->startOfDay() : now();
 
         if ($calendarEvent) {
 
@@ -364,6 +374,8 @@ class FinheroAdminController extends Controller
                     'position' => $validated['position'],
                     'backgroundColor' => '#0053f9',
                     'borderColor' => '#0053f9',
+                    'start' => $calendarStart,
+                    'end' => $calendarEnd,
                     'updated_at' => now(),
                 ]);
 
@@ -378,8 +390,8 @@ class FinheroAdminController extends Controller
                 'repeatActivity' => '0',
                 'backgroundColor' => '#0053f9',
                 'borderColor' => '#0053f9',
-                'start' => now(),
-                'end' => now(),
+                'start' => $calendarStart,
+                'end' => $calendarEnd,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -452,7 +464,6 @@ class FinheroAdminController extends Controller
 
         $validated = $request->validate([
             'activity_name' => 'sometimes|string|max:255',
-            'max_points' => 'sometimes|integer|min:1|max:100',
             'position' => 'sometimes|in:required,optional,free',
 
             // Salary required only for task type
@@ -462,15 +473,26 @@ class FinheroAdminController extends Controller
 
             'is_active' => 'sometimes|boolean',
             'description' => 'nullable|string',
+
+            // Daniel, 2026-10-21: "i need to be able to add start and due
+            // date in all activities, including the tasks, library and so
+            // on."
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
 
 
         // Prepare update data
         $updateData = array_merge($validated, [
             'cid' => $request->classId ?: null,
+            // Daniel, 2026-10-21: "i can still see all the unnecesarry
+            // settings here" - Max Points no longer collected per-activity
+            // (see addActivity()); always cleared here too so an existing
+            // row edited through this form also falls back to the global
+            // default from this point on.
+            'max_points' => null,
             'updated_at' => now()
         ]);
-        //dd($updateData);
         // Remove salary for library type
         if ($activity->type != 'task') {
             unset($updateData['salary']);
@@ -487,6 +509,11 @@ class FinheroAdminController extends Controller
             ->whereMonth('created_at', now()->month)
             ->first();
 
+        // See MbaPositionController - FullCalendar's end is exclusive, +1
+        // day so an admin-picked end_date is still shown as included.
+        $calendarStart = !empty($validated['start_date']) ? \Carbon\Carbon::parse($validated['start_date'])->startOfDay() : now();
+        $calendarEnd = !empty($validated['end_date']) ? \Carbon\Carbon::parse($validated['end_date'])->addDay()->startOfDay() : now();
+
         if ($calendarEvent) {
 
             DB::table('calendar_events')
@@ -496,6 +523,8 @@ class FinheroAdminController extends Controller
                     'position' => $validated['position'],
                     'backgroundColor' => '#0053f9',
                     'borderColor' => '#0053f9',
+                    'start' => $calendarStart,
+                    'end' => $calendarEnd,
                     'updated_at' => now(),
                 ]);
 
@@ -510,8 +539,8 @@ class FinheroAdminController extends Controller
                 'repeatActivity' => '0',
                 'backgroundColor' => '#0053f9',
                 'borderColor' => '#0053f9',
-                'start' => now(),
-                'end' => now(),
+                'start' => $calendarStart,
+                'end' => $calendarEnd,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
