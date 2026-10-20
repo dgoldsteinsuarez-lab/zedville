@@ -53,4 +53,31 @@ class AdminDashboardSchoolSelectionTest extends TestCase
         $response->assertSee('Zedville Academy');
         $response->assertDontSee('NO SCHOOL SELECTED');
     }
+
+    /**
+     * Found 2026-10-20: the "Change School" modal's actual <select> was
+     * name="search" - a leftover from a copy-pasted user-picker - while
+     * AdminDashboardController::setSchool() reads $request->school_id.
+     * Submitting the real modal therefore always posted school_id as
+     * null, which passed the controller's `nullable` validation rule and
+     * redirected with a "School selected successfully!" flash message -
+     * while actually clearing the selection instead of setting it. Silent
+     * both ways: no error shown, and the test above posts school_id
+     * directly, bypassing the real form entirely, so it never would have
+     * caught this. This test renders the actual modal markup and checks
+     * the field name the controller expects is the one really being sent.
+     */
+    public function test_the_change_school_modals_select_actually_posts_school_id(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 1]);
+        SchoolDomain::create(['school_name' => 'Zedville Academy', 'school_code' => 'ZED2', 'school_domain' => 'zedville-academy-2.test']);
+
+        $html = $this->actingAs($superAdmin)->get('/admin/dashboard')->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<select\s+name="school_id"\s+id="schoolSelect"/',
+            $html,
+            'The Change School modal\'s <select> must post as school_id - that\'s the field name AdminDashboardController::setSchool() reads.'
+        );
+    }
 }

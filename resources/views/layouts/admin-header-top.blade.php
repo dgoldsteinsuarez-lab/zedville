@@ -204,8 +204,8 @@
                              @csrf
                             <div class="mb-3">
                                 <label for="schoolSelect" class="form-label fs-14 fw-500 theme-text-dark">Select School</label>
-                                <select name="search" id="schoolSelect" class="form-control form-select fs-14" required>
-                                    <option value="">Select School User</option>
+                                <select name="school_id" id="schoolSelect" class="form-control form-select fs-14" required>
+                                    <option value="">Select a school</option>
                                     @php
                                         $schools = \App\Models\SchoolDomain::all();
                                     @endphp

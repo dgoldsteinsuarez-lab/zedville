@@ -334,5 +334,12 @@ Daniel: "when I select the school in Admin, it should show clearly at the top th
 
 Tested via `tests/Feature/Admin/GradeControllerTest.php` (the crash fix, plus a school-scoping check that had no coverage at all before) and `tests/Feature/Admin/ManagingSchoolBannerTest.php` (banner shown/hidden correctly for Super Admin vs a pinned School Admin).
 
+### Fixed 2026-10-20 - the "Change School" modal posted the wrong field name, silently clearing the selection
+Daniel, right after the "MANAGING" banner fix above: "i select a school, but I don't see which school on the top" - with a screenshot showing a green "School selected successfully!" toast, yet both the banner and header still said no school was selected.
+
+Root cause: the modal's `<select>` was `name="search"` - a leftover from being copy-pasted from a different user-picker - while `AdminDashboardController::setSchool()` reads `$request->school_id`. Submitting the real modal always posted `school_id` as null, which passed the controller's `nullable` validation rule and redirected with the success flash message anyway - silently *clearing* the selection instead of setting it. Doubly silent: no error shown to Daniel, and `tests/Feature/Admin/AdminDashboardSchoolSelectionTest.php`'s existing test posted `school_id` directly to the controller, bypassing the actual form markup, so it never would have caught a field-name mismatch like this.
+
+This modal had never actually been exercised before earlier today's fix - it existed in the codebase but nothing opened it (see the "three broken mechanisms" entry above), so this second bug inside it had never surfaced either. Fixed the field name to `school_id`; also fixed its placeholder text ("Select School User", another copy-paste leftover) to "Select a school". Added `test_the_change_school_modals_select_actually_posts_school_id` to that same test file - renders the real modal and asserts on the actual `<select>` markup, specifically so a field-name mismatch like this can't pass silently again.
+
 ---
 See `planning.md` for how these are sequenced into fix phases, and `ProjectArchitecture.md` for the system context behind each finding.
