@@ -1494,6 +1494,13 @@
       const totalQs        = state.questions.length;
       if (completedCount < totalQs) return;
 
+      // Tells the server this task is finished (blackboard + Engagement badge).
+      fetch("{{ route('finhero.task-complete') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+        body: JSON.stringify({ activity_key: @json($activityKey) })
+      }).catch(() => {});
+
       const totalPoints = Object.values(state.scores).reduce((a, b) => a + b, 0);
 
       let message;

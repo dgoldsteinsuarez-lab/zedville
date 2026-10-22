@@ -34,7 +34,7 @@ class MbaPositionControllerTest extends TestCase
             'optional' => 0,
         ]);
         $this->assertDatabaseHas('calendar_events', [
-            'title' => 'MBA',
+            'title' => 'Needs, Wants & Savings Match',
             'classId' => 1,
             'position' => 'required',
         ]);
@@ -89,7 +89,7 @@ class MbaPositionControllerTest extends TestCase
         // treats `end` as exclusive, so this is what makes Nov 6 actually
         // show as part of the event instead of being cut off.
         $this->assertDatabaseHas('calendar_events', [
-            'title' => 'MBA',
+            'title' => 'Needs, Wants & Savings Match',
             'classId' => 1,
             'start' => '2026-11-02 00:00:00',
             'end' => '2026-11-07 00:00:00',

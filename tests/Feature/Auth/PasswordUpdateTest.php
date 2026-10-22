@@ -24,9 +24,10 @@ class PasswordUpdateTest extends TestCase
                 'password_confirmation' => 'new-password',
             ]);
 
+        // Back to the settings page's password tab (PasswordController::update).
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/profile#tab2');
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }

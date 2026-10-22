@@ -58,6 +58,27 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
+        // FinHero badge calculation - this command has existed since it
+        // was written (its own file header even says to register it here)
+        // but was never actually scheduled, confirmed live: finhero_badge_
+        // records has 0 rows for any student, ever, while the Engagement
+        // badge job above has been producing real rows every month. Same
+        // slot as the Engagement badge job it mirrors (bugs.md, 2026-10-21).
+        $schedule->command('finhero:calculate-monthly')
+            ->lastDayOfMonth('23:59')
+            ->name('finhero-calculate-monthly')
+            ->withoutOverlapping()
+            ->runInBackground();
+
+        // PISA leaderboard month-end bonus (bugs.md, 2026-10-21) - same
+        // month-end slot as the badge calculation above, not a separate
+        // cron entry for "things that happen when the month ends."
+        $schedule->command('pisa:award-leaderboard-bonus')
+            ->lastDayOfMonth('23:59')
+            ->name('pisa-award-leaderboard-bonus')
+            ->withoutOverlapping()
+            ->runInBackground();
+
         // Autopilot month-end: records "Autopilot - [Month]" in the history of
         // accounts on Autopilot (no money moves).
         $schedule->command('autopilot:apply --write')

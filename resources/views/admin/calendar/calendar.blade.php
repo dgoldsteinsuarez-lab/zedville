@@ -228,6 +228,7 @@
     <div class="col-12">
         <div class="calendar-container">
             <div id="calendar"></div>
+            <div id="classColorLegend" class="d-flex flex-wrap align-items-center gap-3 mt-3"></div>
         </div>
     </div>
 </div>
@@ -407,6 +408,34 @@ function populateClassDropdowns() {
             eventClassSelect.appendChild(option);
         });
     }
+
+    renderClassColorLegend();
+}
+
+// Mirrors App\Support\ClassColor::hex() on the backend - keep in sync, so
+// the legend's swatches always match the colors events are actually
+// saved with (Daniel, 2026-10-21: "I cannot see which grade it is... give
+// colours to grades, but you need to sign it somewhere").
+const CLASS_COLOR_PALETTE = [
+    '#0053f9', '#e5484d', '#12b76a', '#f59e0b',
+    '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16',
+    '#f97316', '#6366f1',
+];
+
+function classColorHex(classId) {
+    return CLASS_COLOR_PALETTE[classId % CLASS_COLOR_PALETTE.length];
+}
+
+function renderClassColorLegend() {
+    const legend = document.getElementById('classColorLegend');
+    if (!legend) return;
+
+    legend.innerHTML = classList.map(cls => `
+        <div class="d-flex align-items-center gap-2" style="font-size:13px;">
+            <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background-color:${classColorHex(cls.id)};"></span>
+            <span>${cls.name}</span>
+        </div>
+    `).join('');
 }
 
 // Load events from localStorage or dummy data (NOT USED - Using API instead)

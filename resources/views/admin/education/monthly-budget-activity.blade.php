@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
-@section('title', 'Monthly Budget Activity')
+@section('title', 'Needs, Wants & Savings Match')
 
 @section('content')
     <div class="adminHeading">
-        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Monthly Budget Activity</h1>
+        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Needs, Wants & Savings Match</h1>
     </div>
     <div class="row">
         <div class="themeCard card card-custom card-stretch gutter-b mab-15">

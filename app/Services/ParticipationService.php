@@ -135,6 +135,9 @@ class ParticipationService
             // for practice (bugs.md, 2026-10-20), only the first completion
             // this month earns the point.
             case 'curriculum_item_complete':
+            // Academy Monthly Questions: once per month's set (or the final
+            // review) per month, same as any other Academy practice.
+            case 'monthly_questions_complete':
                 return $q->where('action_ref', $detail)
                          ->where('month', $month)->where('year', $year)->exists();
 
@@ -150,155 +153,57 @@ class ParticipationService
         $startMonth = config('zedville.academic_year_start_month', 4);
         return $month >= $startMonth ? "{$year}-" . ($year+1) : ($year-1) . "-{$year}";
     }
-    /*public function handleActivity($studentId, $activityKey, $refId = null)
-{
-    $month = now()->month;
-    $year  = now()->year;
 
-    // ✅ STEP 1: Get config using activity_key
-    $config = DB::table('mba_position')
-        ->where('activity_key', $activityKey)
-        ->first();
+    /**
+     * A required/optional activity configured per class in mba_position
+     * (currently Needs, Wants & Savings Match): records the completion
+     * against the student's own class's calendar event and adds its
+     * participation point, once per month. It used to read the first
+     * mba_position row of any school and always credit calendar event #1,
+     * whichever class the student was in.
+     */
+    public function handleActivity(int $studentId, string $activityKey, string $calendarTitle): array
+    {
+        $student = DB::table('users')->where('id', $studentId)->first(['sid', 'grade']);
 
-    if (!$config) {
-        return [
-            'status' => false,
-            'message' => 'Activity config not found'
-        ];
-    }
+        $config = $student
+            ? DB::table('mba_position')
+                ->where('activity_key', $activityKey)
+                ->where('sid', $student->sid)
+                ->where('cid', $student->grade)
+                ->first()
+            : null;
 
-    // ✅ STEP 2: Decide type safely
-    if ((int)$config->required === 1 && (int)$config->optional === 0) {
-        $type = 'required';
-    } elseif ((int)$config->optional === 1 && (int)$config->required === 0) {
-        $type = 'optional';
-    } else {
-        return [
-            'status' => false,
-            'message' => 'Invalid config: must be either required OR optional'
-        ];
-    }
-
-    // ✅ STEP 3: Get points (from DB, fallback 1)
-    $points = isset($config->points) ? (int)$config->points : 1;
-
-    // ✅ STEP 4: Prevent duplicate ONLY for required
-    if ($type === 'required') {
-        $exists = DB::table('participation_logs')
-            ->where([
-                'student_id'    => $studentId,
-                'action_type'   => 'required',
-                'action_detail' => $activityKey,
-                'month'         => $month,
-                'year'          => $year
-            ])
-            ->exists();
-
-        if ($exists) {
-            return [
-                'status' => true,
-                'message' => 'Already completed (required)'
-            ];
+        if (!$config) {
+            return ['status' => false, 'message' => 'Activity not assigned to this class'];
         }
-    }
 
-    // ✅ STEP 5: Insert log
-    DB::table('participation_logs')->insert([
-        'student_id'    => $studentId,
-        'action_type'   => $type,
-        'action_detail' => $activityKey,
-        'points_earned' => $points,
-        'month'         => $month,
-        'year'          => $year,
-        'academic_year' => '2025-26',
-        'earned_at'     => now(),
-    ]);
-
-    return [
-        'status' => true,
-        'message' => 'Activity logged successfully'
-    ];
-}*/
-public function handleActivity($studentId, $activityKey, $eventId = null)
-{
-    // 1-based - needed as-is for the activity_completions/whereMonth()
-    // check below (real calendar months) and for getAcademicYear().
-    $month = now()->month;
-    $year  = now()->year;
-
-    // ✅ STEP 1: Get config
-    $config = DB::table('mba_position')
-        ->where('activity_key', $activityKey)
-        ->first();
-
-    if (!$config) {
-        return [
-            'status' => false,
-            'message' => 'Activity config not found'
-        ];
-    }
-
-    // ✅ STEP 2: Decide type
-    if ((int)$config->required === 1 && (int)$config->optional === 0) {
-        $type = 'required';
-    } elseif ((int)$config->optional === 1 && (int)$config->required === 0) {
-        $type = 'optional';
-    } else {
-        return [
-            'status' => false,
-            'message' => 'Invalid config'
-        ];
-    }
-
-    // ✅ STEP 3: Points
-    $points = isset($config->points) ? (int)$config->points : 1;
-
-    // ✅ STEP 4: Prevent duplicate (for required)
-    if ($type === 'required') {
-        $exists = DB::table('activity_completions')
-            ->where('student_id', $studentId)
-            ->where('activity_id', $eventId)
-            ->whereMonth('completed_at', $month)
-            ->whereYear('completed_at', $year)
-            ->exists();
-
-        if ($exists) {
-            return [
-                'status' => true,
-                'message' => 'Already completed (required)'
-            ];
+        if ((int) $config->required === 1 && (int) $config->optional === 0) {
+            $type = 'required';
+        } elseif ((int) $config->optional === 1 && (int) $config->required === 0) {
+            $type = 'optional';
+        } else {
+            return ['status' => false, 'message' => 'Invalid config'];
         }
-    }
 
-    // ✅ STEP 5: Insert into activity_completions (IMPORTANT)
-    if ($eventId) {
-        DB::table('activity_completions')->insert([
-            'student_id'   => $studentId,
-            'activity_id'  => $eventId, // MUST be calendar_events.id
-            'activity_type'  => $activityKey, // MUST be calendar_events.id
-            'completed_at' => now(),
-            'created_at'   => now(),
-            'updated_at'   => now(),
+        if (!app(ActivityCompletionService::class)->complete($studentId, $activityKey, $calendarTitle)) {
+            return ['status' => true, 'message' => 'Already completed this month'];
+        }
+
+        $month = now()->month;
+        $year = now()->year;
+
+        DB::table('participation_logs')->insert([
+            'student_id'    => $studentId,
+            'action_type'   => $type,
+            'action_detail' => $activityKey,
+            'points_earned' => isset($config->points) ? (int) $config->points : 1,
+            'month'         => $month,
+            'year'          => $year,
+            'academic_year' => $this->academicYear($month, $year),
+            'earned_at'     => now(),
         ]);
+
+        return ['status' => true, 'message' => 'Activity logged successfully'];
     }
-
-$academicYear = app(\App\Services\BadgeCalculatorService::class)
-    ->getAcademicYear($month, $year);
-    // ✅ STEP 6: Insert into participation_logs (for points)
-    DB::table('participation_logs')->insert([
-        'student_id'    => $studentId,
-        'action_type'   => $type,
-        'action_detail' => $activityKey,
-        'points_earned' => $points,
-        'month'         => $month,
-        'year'          => $year,
-        'academic_year' => $academicYear,
-        'earned_at'     => now(),
-    ]);
-
-    return [
-        'status' => true,
-        'message' => 'Activity logged successfully'
-    ];
-}
 }

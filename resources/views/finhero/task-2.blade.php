@@ -1165,6 +1165,13 @@
       const completedCount = Object.keys(state.scores).length;
       if (completedCount !== 8) return;
 
+      // Tells the server this task is finished (blackboard + Engagement badge).
+      fetch("{{ route('finhero.task-complete') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+        body: JSON.stringify({ activity_key: @json($activityKey) })
+      }).catch(() => {});
+
       const totalPoints = Object.values(state.scores).reduce((a, b) => a + b, 0);
       let message;
       if (totalPoints === TASK2_TOTAL_POINTS) message = "Perfect score! You nailed every question on the first try! 🌟";

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\ClassColor;
 
 /**
  * Admin screen for the High (Spending) Budget Activity position: which
@@ -147,8 +148,9 @@ class HighBudgetActivityController extends Controller
                 ->where('id', $calendarEvent->id)
                 ->update([
                     'position' => $position,
-                    'backgroundColor' => '#0053f9',
-                    'borderColor' => '#0053f9',
+                    'activitys' => 1,
+                    'backgroundColor' => ClassColor::hex((int) $cid),
+                    'borderColor' => ClassColor::hex((int) $cid),
                     'start' => $calendarStart,
                     'end' => $calendarEnd,
                     'updated_at' => now(),
@@ -160,9 +162,10 @@ class HighBudgetActivityController extends Controller
                 'title' => 'Spending budget activity',
                 'description' => 'This is Spending budget activity',
                 'position' => $position,
+                'activitys' => 1,
                 'repeatActivity' => '0',
-                'backgroundColor' => '#0053f9',
-                'borderColor' => '#0053f9',
+                'backgroundColor' => ClassColor::hex((int) $cid),
+                'borderColor' => ClassColor::hex((int) $cid),
                 'start' => $calendarStart,
                 'end' => $calendarEnd,
                 'created_at' => now(),

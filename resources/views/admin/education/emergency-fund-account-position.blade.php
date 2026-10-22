@@ -1,11 +1,22 @@
 @extends('layouts.admin')
 
-@section('title', 'Emergency Fund Account')
+@section('title', 'Emergency Fund Position')
 
 @section('content')
     <div class="adminHeading">
-        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Emergency Fund Account</h1>
+        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Emergency Fund Position</h1>
     </div>
+    {{-- Daniel, 2026-10-21: "Emergency Fund Account should not be so
+         relevant in Admin, but in Intermediate I will make activities
+         related to using this Emergency Fund." This screen still controls
+         whether the account itself is required/optional per class - the
+         educational content he's describing belongs in Intermediate's
+         existing "Emergency Costs" curriculum category instead. --}}
+    <p class="text-muted mab-15">
+        Controls whether opening an Emergency Fund Account is required/optional per class. For activities about
+        <em>using</em> the fund, see Intermediate's "Emergency Costs" category under
+        <a href="{{ route('admin.curriculum.index') }}">Curriculum</a>.
+    </p>
     <div class="row">
         <div class="themeCard card card-custom card-stretch gutter-b mab-15">
             <div class="card-body pall-30">

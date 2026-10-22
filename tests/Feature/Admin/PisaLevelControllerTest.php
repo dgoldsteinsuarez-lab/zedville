@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\CurriculumCategory;
+use App\Models\CurriculumItem;
+use App\Models\GradeLevel;
 use App\Models\PisaProficiencyLevel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,9 +35,11 @@ class PisaLevelControllerTest extends TestCase
 
     public function test_grade_levels_are_untouched_by_the_pisa_migration(): void
     {
+        // Junior was added later (2026-10-21) by its own migration, not
+        // this one - asserting the current real list either way.
         $names = \App\Models\GradeLevel::orderBy('sort_order')->pluck('name')->all();
 
-        $this->assertSame(['Rookie', 'Intermediate', 'Advance', 'Advance Economist'], $names);
+        $this->assertSame(['Junior', 'Rookie', 'Intermediate', 'Advance', 'Advance Economist'], $names);
     }
 
     public function test_a_super_admin_can_view_the_pisa_levels_page(): void
@@ -102,5 +107,62 @@ class PisaLevelControllerTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseMissing('pisa_proficiency_levels', ['id' => $level->id]);
+    }
+
+    /**
+     * Daniel, 2026-10-21: "Check how this assessments are done and build an
+     * Activity Manager... divide in the levels you search for." The new
+     * level-first authoring screen - every write still goes through the
+     * existing, already-tested admin.curriculum.items.store route, this
+     * just proves the screen itself lists per-Grade-Level sections and that
+     * its quick-add form correctly wires pisa_proficiency_level_id.
+     */
+    /**
+     * Daniel, 2026-10-21: "for PISA i don't need to divide in Zedville
+     * levels, only the PISA levels... independent from if a student is
+     * Junior, Rookie or else, they will have the same activities." The
+     * Activity Manager is a flat list per PISA level now, not sectioned
+     * by Grade Level.
+     */
+    public function test_the_activity_manager_page_lists_activities_for_that_pisa_level(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        $level = PisaProficiencyLevel::where('name', 'Level 2')->first();
+        $pisaCategory = CurriculumCategory::where('is_pisa_practice', true)->first();
+        CurriculumItem::create([
+            'category_id' => $pisaCategory->id, 'title' => 'Existing PISA activity', 'type' => 'quiz',
+            'pisa_proficiency_level_id' => $level->id, 'sort_order' => 1,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.pisa.activities', $level));
+
+        $response->assertOk();
+        $response->assertSee('Existing PISA activity');
+    }
+
+    public function test_the_activity_managers_quick_add_form_creates_a_global_item_at_that_level(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        $level = PisaProficiencyLevel::where('name', 'Level 2')->first();
+        $pisaCategory = CurriculumCategory::where('is_pisa_practice', true)->first();
+
+        $response = $this->actingAs($admin)->post('/admin/curriculum/categories/' . $pisaCategory->id . '/items', [
+            'title' => 'Spotting a scam',
+            'description' => 'A text message asks for your bank PIN',
+            'type' => 'quiz',
+            'pisa_proficiency_level_id' => $level->id,
+            'sort_order' => 1,
+            'is_active' => '1',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('curriculum_items', [
+            'category_id' => $pisaCategory->id,
+            'title' => 'Spotting a scam',
+            'pisa_proficiency_level_id' => $level->id,
+        ]);
+
+        $this->actingAs($admin)->get(route('admin.pisa.activities', $level))
+            ->assertSee('Spotting a scam');
     }
 }

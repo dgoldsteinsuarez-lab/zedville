@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CurriculumQuestion extends Model
 {
-    protected $fillable = ['item_id', 'question_text', 'sort_order'];
+    protected $fillable = ['item_id', 'question_text', 'image', 'image_2', 'sort_order'];
 
     public function item()
     {

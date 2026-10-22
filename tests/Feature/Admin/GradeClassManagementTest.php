@@ -38,6 +38,43 @@ class GradeClassManagementTest extends TestCase
         return [$school, $grade];
     }
 
+    /**
+     * Daniel, 2026-10-21: "the school admin, tutor, can decide if the
+     * student can switch languages."
+     */
+    public function test_an_admin_can_lock_a_new_class_to_a_language(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        [$school, $grade] = $this->schoolAndGrade();
+        session(['selected_school' => $school->id]);
+
+        $this->actingAs($admin)->post('/admin/grade/add', [
+            'name' => '8A', 'grade_id' => $grade->id,
+            'default_language' => 'es', 'language_mode' => 'locked',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('classes', [
+            'name' => '8A', 'language_mode' => 'locked', 'default_language' => 'es',
+        ]);
+    }
+
+    public function test_an_unchecked_lock_on_update_leaves_the_class_free(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        [$school, $grade] = $this->schoolAndGrade();
+        $class = SchoolClass::create([
+            'sid' => $school->id, 'name' => '8A', 'grade_id' => $grade->id,
+            'language_mode' => 'locked', 'default_language' => 'es',
+        ]);
+
+        $this->actingAs($admin)->put('/admin/grade/edit/' . $class->id, [
+            'name' => '8A', 'default_language' => 'en',
+            // language_mode omitted - an unchecked "Lock" checkbox.
+        ])->assertRedirect();
+
+        $this->assertSame('free', $class->fresh()->language_mode);
+    }
+
     public function test_the_grade_page_shows_an_add_class_button_scoped_to_this_grade(): void
     {
         $admin = User::factory()->create(['role' => 1]);

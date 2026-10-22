@@ -23,6 +23,18 @@
                                     </span>
                                     <input type="text" class="form-control fs-14" placeholder="Enter Month Or Question Or School Name" name="search" value="{{ request('search') }}" />
                                 </div>
+                                <select name="level" id="filterLevel" class="form-control fs-14" aria-label="Level">
+                                    <option value="">All levels</option>
+                                    @foreach($levels as $level)
+                                        <option value="{{ $level->id }}" @selected(request('level') == $level->id)>{{ $level->name }}</option>
+                                    @endforeach
+                                </select>
+                                <select name="month" id="filterMonth" class="form-control fs-14" aria-label="Month">
+                                    <option value="">All months</option>
+                                    @foreach($months as $m)
+                                        <option value="{{ $m->id }}" @selected(request('month') == $m->id)>{{ $m->name }}</option>
+                                    @endforeach
+                                </select>
                                 <button type="submit" class="themeBtn text-white">Search</button>
                                
                                 <!-- <div class="daterangePickerField rangePicker haveicon text-nowrap" style="display: flex;">12 May 2025 - 24 May 2025</div> -->
@@ -46,6 +58,7 @@
                             <th>Level</th>
                             <th>Month</th>
                             <th>Question</th>
+                            <th>Right answer</th>
                             <!-- <th>School Name</th> -->
                             <th class="rightText">Action</th>
                         </tr>
@@ -57,6 +70,7 @@
                             <td>{{ optional($q->level)->name ?? '—' }}</td>
                             <td>{{ optional($q->month)->name ?? '—' }}</td>
                             <td>{{ $q->question }}</td>
+                            <td>{{ optional($q->options->firstWhere('is_correct', 1))->option_text ?? '—' }}</td>
                             <!-- <td>{{ optional($q->school)->school_name ?? '-' }}</td> -->
                             <td valign="middle">
                                 <div class="actionBtns d-flex align-items-center justify-content-end">

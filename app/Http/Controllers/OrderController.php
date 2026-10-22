@@ -27,6 +27,9 @@ class OrderController extends Controller
             // (e.g. "Chicken" id=47 resolving to products.id=47,
             // "Competition Basketball" - see bugs.md, 2026-10-19).
             'catalog' => 'nullable|in:products,supermarkets',
+            // Sent by the Spending Activity shops (spendingActivities/*):
+            // the activity this shopping trip is for.
+            'activity_id' => 'nullable|integer',
         ]);
 
         $catalogTable = $request->input('catalog') === 'supermarkets' ? 'supermarkets' : 'products';
@@ -155,6 +158,22 @@ class OrderController extends Controller
             DB::commit();
 
             app(ParticipationService::class)->award($user->id, 'shopping', $catalogTable);
+
+            // Checking out the Spending Activity assigned to the student's
+            // class finishes it (blackboard + Engagement badge).
+            if ($request->filled('activity_id')) {
+                $assigned = DB::table('mba_position')
+                    ->where('activity_key', 'hba_position')
+                    ->where('sid', $user->sid)
+                    ->where('cid', $user->grade)
+                    ->where('activity_id', $request->activity_id)
+                    ->exists();
+
+                if ($assigned) {
+                    app(\App\Services\ActivityCompletionService::class)
+                        ->complete($user->id, 'high_budget_activity', 'Spending budget activity');
+                }
+            }
 
             return response()->json([
                 'status' => true,

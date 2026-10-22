@@ -35,6 +35,15 @@ run on tables that already exist (they only add what is missing). They ADD: `cla
 **Critical one:** `2026_10_03_000007_backfill_civic_chamber_school` gives old petitions/referendums a school.
 If it is skipped, students will no longer see any old referendum or petition.
 
+**Learning content (Log In questions + FinHero Library):** after migrating, check hPanel -> Databases ->
+phpMyAdmin -> `login_questions`. If it already has the OLD Rookie questions, delete them first (Admin ->
+Log In Questions), otherwise students get old and new versions side by side. Then load the content:
+
+    php artisan db:seed --class=RookieLearningContentSeeder --force
+
+It only adds questions that aren't there yet, so running it twice is safe. Without it, the Library pop-up and
+the Library activity dropdown are empty.
+
 Then clear caches:
 
     php artisan config:clear && php artisan route:clear && php artisan view:clear

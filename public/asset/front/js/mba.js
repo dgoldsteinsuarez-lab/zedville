@@ -8,6 +8,13 @@ const BudgetingActivity = () => {
     const [draggedItem, setDraggedItem] = useState(null);
     const [showMessage, setShowMessage] = useState(null);
     const [hasCompleted, setHasCompleted] = useState(false);
+    // Daniel, 2026-10-21: "3 points if done all correct the first time, and
+    // let two attempts before loosing one point" - a mis-drop never lands
+    // (the drop is rejected below and the item stays in the bank), so the
+    // only measurable signal is how many wrong-category drops happened
+    // across the whole session. Sent to the server on Complete; it decides
+    // the actual FinHero point tier.
+    const [mistakes, setMistakes] = useState(0);
 
     const [budget, setBudget] = useState({
         income: [
@@ -104,14 +111,17 @@ const BudgetingActivity = () => {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
         body: JSON.stringify({
-            budget: budget
+            budget: budget,
+            mistakes: mistakes
         })
     })
     .then(res => res.json())
     .then(data => {
         setShowMessage({
             type: data.status ? 'success' : 'error',
-            text: data.message
+            text: data.pointsAwarded
+                ? `${data.message} +${data.pointsAwarded} FinHero points!`
+                : data.message
         });
 
         setTimeout(() => setShowMessage(null), 3000);
@@ -246,6 +256,7 @@ const BudgetingActivity = () => {
                     : itemCategory;
 
         if (category !== correctCategory) {
+            setMistakes(prev => prev + 1);
             setShowMessage({
                 type: 'error',
                 text: `Incorrect! "${draggedItem.name}" belongs in ${correctCategory.toUpperCase()}, not ${category.toUpperCase()}.`

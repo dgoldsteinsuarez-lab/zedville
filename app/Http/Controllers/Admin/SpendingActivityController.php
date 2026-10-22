@@ -7,6 +7,7 @@ use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\ClassColor;
 
 /**
  * Daniel, 2026-10-21: "for the spending activity, i can not see all the
@@ -156,8 +157,9 @@ class SpendingActivityController extends Controller
                 ->where('id', $calendarEvent->id)
                 ->update([
                     'position' => $position,
-                    'backgroundColor' => '#0053f9',
-                    'borderColor' => '#0053f9',
+                    'activitys' => 1,
+                    'backgroundColor' => ClassColor::hex((int) $cid),
+                    'borderColor' => ClassColor::hex((int) $cid),
                     'start' => $calendarStart,
                     'end' => $calendarEnd,
                     'updated_at' => now(),
@@ -169,9 +171,10 @@ class SpendingActivityController extends Controller
                 'title' => $calendarTitle,
                 'description' => 'This is ' . $calendarTitle,
                 'position' => $position,
+                'activitys' => 1,
                 'repeatActivity' => '0',
-                'backgroundColor' => '#0053f9',
-                'borderColor' => '#0053f9',
+                'backgroundColor' => ClassColor::hex((int) $cid),
+                'borderColor' => ClassColor::hex((int) $cid),
                 'start' => $calendarStart,
                 'end' => $calendarEnd,
                 'created_at' => now(),

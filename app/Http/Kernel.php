@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\EnsureCitizenActivation::class,
             \App\Http\Middleware\BlockWritesWhileImpersonating::class,
+            \App\Http\Middleware\SetStudentLocale::class,
         ],
 
         'api' => [

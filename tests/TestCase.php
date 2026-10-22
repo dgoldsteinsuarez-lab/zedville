@@ -22,4 +22,27 @@ abstract class TestCase extends BaseTestCase
         // back on explicitly.
         $this->withoutMiddleware(\App\Http\Middleware\EnsureCitizenActivation::class);
     }
+
+    /**
+     * Points public_path() at a fresh temporary folder for this test, so a
+     * test that uploads files doesn't leave them in the real public/uploads
+     * and doesn't depend on that folder's permissions. Deleted afterwards.
+     */
+    protected function usePublicPathInTemp(): string
+    {
+        // On Windows a fake upload stays open until the test process ends,
+        // so its folder can't always be removed in teardown - clear out
+        // earlier runs' leftovers here instead.
+        foreach (glob(sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'zedville-test-public-*', GLOB_ONLYDIR) ?: [] as $old) {
+            \Illuminate\Support\Facades\File::deleteDirectory($old);
+        }
+
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'zedville-test-public-' . uniqid();
+        mkdir($dir, 0777, true);
+
+        $this->app->instance('path.public', $dir);
+        $this->beforeApplicationDestroyed(fn () => \Illuminate\Support\Facades\File::deleteDirectory($dir));
+
+        return $dir;
+    }
 }

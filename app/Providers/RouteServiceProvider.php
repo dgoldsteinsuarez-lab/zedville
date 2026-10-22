@@ -57,6 +57,13 @@ class RouteServiceProvider extends ServiceProvider
             ->prefix('academy')
             ->name('academy.')
             ->group(base_path('routes/academy.php'));
+        // Dedicated PISA explainer + level-grouped practice - bugs.md,
+        // 2026-10-21. Separate from academy.* since PISA Practice content
+        // still lives in the same curriculum_items table underneath.
+        Route::middleware(['web', 'auth'])
+            ->prefix('pisa')
+            ->name('pisa.')
+            ->group(base_path('routes/pisa.php'));
         // NEW: Load supermarket.php with optional prefix and auth middleware
         Route::middleware(['web', 'auth'])
             ->prefix('supermarket')

@@ -227,6 +227,8 @@ public function addGrade(Request $request)
         'name' => ['required', 'string', 'max:255',
             \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $sid)],
         'grade_id' => 'nullable|integer',
+        'language_mode' => 'nullable|in:free,locked',
+        'default_language' => 'nullable|in:en,es',
     ]);
 
     // Generate unique 6-digit class code
@@ -239,6 +241,8 @@ public function addGrade(Request $request)
     $class->classCode = $classCode;
     $class->name = $request->name;
     $class->grade_id = $this->validGradeId($request->grade_id, $sid);
+    $class->language_mode = $request->input('language_mode', 'free');
+    $class->default_language = $request->input('default_language', 'en');
     $class->save();
 
     return redirect()->back()->with('success', 'Class added successfully!');
@@ -253,10 +257,19 @@ public function updateGrade(Request $request, $id)
             \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $class->sid)->ignore($class->id)],
         'classCode' => 'nullable|numeric|digits:6|unique:classes,classCode,' . $class->id,
         'grade_id' => 'nullable|integer',
+        'language_mode' => 'nullable|in:free,locked',
+        'default_language' => 'nullable|in:en,es',
     ]);
 
     $class->name = $request->name;
     $class->grade_id = $this->validGradeId($request->grade_id, $class->sid);
+    // Daniel, 2026-10-21: "the school admin, tutor, can decide if the
+    // student can switch languages... the tutor might decide to only have
+    // this in that specific language for beginners, to force the students
+    // to understand it." Omitted = unchecked "Locked" checkbox, same
+    // unchecked-means-off convention used everywhere else this week.
+    $class->language_mode = $request->input('language_mode', 'free');
+    $class->default_language = $request->input('default_language', 'en');
 
     if ($request->filled('classCode')) {
         $class->classCode = $request->classCode;
@@ -541,7 +554,16 @@ public function login_question(Request $request)
     });
 }
 
-    $questions = $query->latest()->get();
+    // Filter by Level / Month so a month's set can be reviewed and edited
+    // together (each Level has 10 questions a month).
+    if ($request->filled('level')) {
+        $query->where('grade_level_id', $request->level);
+    }
+    if ($request->filled('month')) {
+        $query->where('month_id', $request->month);
+    }
+
+    $questions = $query->orderBy('grade_level_id')->orderBy('month_id')->orderBy('id')->get();
     $schools = DB::table('school_domains')
         ->orderBy('id', 'asc')
         ->get();

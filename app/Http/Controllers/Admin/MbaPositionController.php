@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\ClassColor;
 
 /**
  * Admin screen for MBA (Monthly Budget Activity) position: which class
@@ -145,7 +146,7 @@ class MbaPositionController extends Controller
         $calendarEvent = DB::table('calendar_events')
             ->where('sid', $sid)
             ->where('classId', $cid)
-            ->where('title', 'MBA')
+            ->where('title', 'Needs, Wants & Savings Match')
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->first();
@@ -165,8 +166,8 @@ class MbaPositionController extends Controller
                 ->where('id', $calendarEvent->id)
                 ->update([
                     'position' => $position,
-                    'backgroundColor' => '#0053f9',
-                    'borderColor' => '#0053f9',
+                    'backgroundColor' => ClassColor::hex((int) $cid),
+                    'borderColor' => ClassColor::hex((int) $cid),
                     'start' => $calendarStart,
                     'end' => $calendarEnd,
                     'updated_at' => now(),
@@ -177,12 +178,12 @@ class MbaPositionController extends Controller
             DB::table('calendar_events')->insert([
                 'sid' => $sid,
                 'classId' => $cid, // Save class here too if column exists
-                'title' => 'MBA',
-                'description' => 'This is MBA',
+                'title' => 'Needs, Wants & Savings Match',
+                'description' => 'Needs, Wants & Savings Match - drag-and-drop budgeting activity',
                 'position' => $position,
                 'repeatActivity' => '0',
-                'backgroundColor' => '#0053f9',
-                'borderColor' => '#0053f9',
+                'backgroundColor' => ClassColor::hex((int) $cid),
+                'borderColor' => ClassColor::hex((int) $cid),
                 'start' => $calendarStart,
                 'end' => $calendarEnd,
                 'created_at' => now(),
@@ -210,7 +211,7 @@ class MbaPositionController extends Controller
         DB::table('calendar_events')
             ->where('sid', $position->sid)
             ->where('classId', $position->cid)
-            ->where('title', 'MBA')
+            ->where('title', 'Needs, Wants & Savings Match')
             ->delete();
 
         // Delete MBA position

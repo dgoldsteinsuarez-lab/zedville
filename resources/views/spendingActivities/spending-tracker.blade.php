@@ -1160,7 +1160,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ pin, cart, total: totalSpent })
+                body: JSON.stringify({ pin, cart, total: totalSpent, activity_id: @json($activity->id ?? null) })
             })
                 .then(res => res.json())
                 .then(res => {

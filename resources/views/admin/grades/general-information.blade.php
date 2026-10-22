@@ -135,7 +135,7 @@
         </div>
         <div class="card-body p-0">
             <table class="table mb-0">
-                <thead><tr><th>Class Code</th><th>Name</th><th>Assigned Tutor</th><th>Students</th><th class="text-end">Action</th></tr></thead>
+                <thead><tr><th>Class Code</th><th>Name</th><th>Assigned Tutor</th><th>Students</th><th>Language</th><th class="text-end">Action</th></tr></thead>
                 <tbody>
                     @forelse ($grade->classes as $class)
                         <tr>
@@ -143,10 +143,18 @@
                             <td>{{ $class->name }}</td>
                             <td>{{ $class->tutors->pluck('nickname')->filter()->implode(', ') ?: 'None assigned' }}</td>
                             <td>{{ $class->students_count }}</td>
+                            <td>
+                                @if (($class->language_mode ?? 'free') === 'locked')
+                                    <span class="badge bg-warning text-dark">&#128274; {{ strtoupper($class->default_language ?? 'en') }} only</span>
+                                @else
+                                    <span class="text-muted small">Free ({{ strtoupper($class->default_language ?? 'en') }} default)</span>
+                                @endif
+                            </td>
                             <td class="text-end">
                                 <button type="button" class="btn btn-sm btn-outline-primary edit-class-btn"
                                     data-bs-toggle="modal" data-bs-target="#editClassModal"
-                                    data-id="{{ $class->id }}" data-name="{{ $class->name }}" data-code="{{ $class->classCode }}">
+                                    data-id="{{ $class->id }}" data-name="{{ $class->name }}" data-code="{{ $class->classCode }}"
+                                    data-language-mode="{{ $class->language_mode ?? 'free' }}" data-default-language="{{ $class->default_language ?? 'en' }}">
                                     Edit
                                 </button>
                                 <form method="POST" action="{{ url('admin/grade/delete/' . $class->id) }}" class="d-inline"
@@ -157,7 +165,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-muted p-3">No Classes under this Grade yet - add the first one above.</td></tr>
+                        <tr><td colspan="6" class="text-muted p-3">No Classes under this Grade yet - add the first one above.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -189,6 +197,22 @@
                         <div class="mb-3">
                             <label class="form-label">Class name</label>
                             <input type="text" class="form-control" name="name" placeholder="e.g. 8A" required>
+                        </div>
+                        <hr>
+                        <p class="text-muted small mb-2">
+                            Language (bugs.md, 2026-10-21) - let students switch freely, or lock everyone in this
+                            class to one language (e.g. to force immersion for a language-learning class).
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Default language</label>
+                            <select name="default_language" class="form-control">
+                                <option value="en">English</option>
+                                <option value="es">Spanish (Español)</option>
+                            </select>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="language_mode" value="locked" id="newClassLocked">
+                            <label class="form-check-label" for="newClassLocked">Lock to this language (students can't switch)</label>
                         </div>
                     </div>
                     <div class="modal-footer justify-content-center">
@@ -225,6 +249,18 @@
                             <label class="form-label">Class Code</label>
                             <input type="text" class="form-control" name="classCode" id="editClassCode">
                         </div>
+                        <hr>
+                        <div class="mb-3">
+                            <label class="form-label">Default language</label>
+                            <select name="default_language" id="editClassDefaultLanguage" class="form-control">
+                                <option value="en">English</option>
+                                <option value="es">Spanish (Español)</option>
+                            </select>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="language_mode" value="locked" id="editClassLocked">
+                            <label class="form-check-label" for="editClassLocked">Lock to this language (students can't switch)</label>
+                        </div>
                     </div>
                     <div class="modal-footer justify-content-center">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -245,6 +281,8 @@ document.querySelectorAll('.edit-class-btn').forEach(function (btn) {
         document.getElementById('editClassForm').action = '{{ url('admin/grade/edit') }}/' + this.dataset.id;
         document.getElementById('editClassName').value = this.dataset.name;
         document.getElementById('editClassCode').value = this.dataset.code;
+        document.getElementById('editClassDefaultLanguage').value = this.dataset.defaultLanguage || 'en';
+        document.getElementById('editClassLocked').checked = this.dataset.languageMode === 'locked';
     });
 });
 

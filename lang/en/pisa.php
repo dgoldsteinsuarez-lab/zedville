@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'PISA',
+    'leaderboard' => 'Leaderboard',
+    'what_is_pisa' => 'What is PISA?',
+    'explainer_p1' => "PISA (the Programme for International Student Assessment) is a real international test, run by the OECD, taken by 15-year-olds in dozens of countries - that's usually :grade. It doesn't just test what you've memorized; it gives you realistic, real-life situations and checks whether you can actually use what you know to handle them.",
+    'explainer_grade' => 'Grade 10',
+    'explainer_p2' => 'One part of PISA is the :fla - money and transactions, planning and managing finances, risk and reward, and understanding the wider financial landscape. The activities here are practice for exactly that: the same kind of scenarios, the same style of questions, grouped by the same proficiency levels PISA itself uses.',
+    'financial_literacy_assessment' => 'Financial Literacy Assessment',
+    'proficiency_levels' => 'Proficiency levels',
+    'proficiency_levels_hint' => "Pick a level to practice. These aren't grades on you - they're how PISA itself describes what a student can do at each stage, from recognising a receipt to analysing a complex financial product.",
+    'no_levels_yet' => 'No PISA levels configured yet - check back soon.',
+    'activity_count' => '{0} No activities|{1} :count activity|[2,*] :count activities',
+    'no_activities_for_your_grade' => 'No activities at this level for your Grade yet - check back soon.',
+    'timed_play' => 'Play timed',
+    'leaderboard_title' => 'Leaderboard',
+    'leaderboard_explainer' => 'Your best score on each PISA activity this month, added up, ranked against your own grade at your own school. Play solo whenever you like - your score posts here automatically. The top 3 when the month ends earn a FinHero bonus.',
+    'no_one_played_yet' => 'No one has played a PISA activity this month yet - be the first.',
+    'rank' => 'Rank',
+    'student' => 'Student',
+    'score' => 'Score',
+    'you' => 'you',
+    'ranked_this_month' => "You're ranked #:rank this month.",
+    'join_leaderboard_hint' => 'Play a PISA activity this month to join the leaderboard.',
+];

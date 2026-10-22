@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\FinheroBadgeRecord;
 use App\Services\Concerns\CalculatesBadgeAccumulation;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -50,13 +51,14 @@ class FinheroBadgeCalculatorService
         $settings     = $settings     ?? $this->getMonthlySettings($month, $year);
 
         // ── Gather points ──────────────────────────────────────────
+        $assigned    = $this->assignedActivities($studentId, $month, $year);
         $quizPts     = $this->getQuizPoints($studentId, $month, $year);
-        $libraryPts  = $this->getLibraryPoints($studentId, $month, $year, $settings->active_library_module_id ?? null);
+        $libraryPts  = $this->getLibraryPoints($studentId, $month, $year, $assigned);
         $activityPts = $this->getActivityPoints($studentId, $month, $year);
 
         // ── Calculate totals ───────────────────────────────────────
         $totalEarned    = $quizPts + $libraryPts + $activityPts;
-        $totalAvailable = $this->getTotalAvailable($month, $year, $settings);
+        $totalAvailable = $this->getTotalAvailable($assigned);
         $monthlyPct     = $totalAvailable > 0 ? round(($totalEarned / $totalAvailable) * 100, 2) : 0;
 
         // ── Determine monthly badge ────────────────────────────────
@@ -113,23 +115,58 @@ class FinheroBadgeCalculatorService
     // TOTAL AVAILABLE POINTS
     // ─────────────────────────────────────────────────────────────
 
-    private function getTotalAvailable(int $month, int $year, ?object $settings): int
+    /**
+     * 10 for the Daily Quiz, 10 more if a Library module is assigned to
+     * the student that month, plus the max points of every other FinHero
+     * activity assigned to them. Only the student's own assignments count -
+     * other schools' and classes' activities aren't points they could earn.
+     */
+    private function getTotalAvailable(Collection $assigned): int
     {
-        $total = 10; // Daily Quiz always contributes max 10
+        $total = 10;
 
-        // Library module (10 pts if one is designated)
-        if (!empty($settings->active_library_module_id)) {
+        if ($assigned->contains('type', 'library')) {
             $total += 10;
         }
 
-        // Active registered activities. A row's own max_points overrides
-        // the global default for that activity_key; null falls back to it.
-        $activityTotal = DB::table('finhero_activity_registry as far')
-            ->leftJoin('finhero_activity_defaults as fad', 'fad.activity_key', '=', 'far.activity_key')
-            ->where('far.is_active', true)
-            ->sum(DB::raw('COALESCE(far.max_points, fad.max_points, 0)'));
+        return $total + (int) $assigned->where('type', '!=', 'library')->sum('max_points');
+    }
 
-        return $total + (int) $activityTotal;
+    /**
+     * FinHero activities assigned to this student's class, or to the whole
+     * grade it belongs to, that are open at some point during the month -
+     * the same rule the EFD blackboard uses to list them. Daniel,
+     * 2026-10-21: "admin is the one given the module in educational
+     * finance department" - assigning a Library module there is what makes
+     * it the student's module for the month.
+     */
+    public function assignedActivities(int $studentId, int $month, int $year): Collection
+    {
+        $student = DB::table('users')->where('id', $studentId)->first(['sid', 'grade']);
+        if (!$student || !$student->grade) {
+            return collect();
+        }
+
+        $gradeId = DB::table('classes')->where('id', $student->grade)->value('grade_id');
+        $monthStart = Carbon::create($year, $month, 1)->toDateString();
+        $monthEnd = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+
+        return DB::table('finhero_activity_registry as far')
+            ->leftJoin('finhero_activity_defaults as fad', function ($join) {
+                $join->on('fad.activity_key', '=', 'far.activity_key')->on('fad.type', '=', 'far.type');
+            })
+            ->where('far.is_active', true)
+            ->where('far.sid', $student->sid)
+            ->where(function ($q) use ($student, $gradeId) {
+                $q->where('far.cid', $student->grade);
+                if ($gradeId) {
+                    $q->orWhere('far.grade_id', $gradeId);
+                }
+            })
+            ->where(fn ($q) => $q->whereNull('far.start_date')->orWhere('far.start_date', '<=', $monthEnd))
+            ->where(fn ($q) => $q->whereNull('far.end_date')->orWhere('far.end_date', '>=', $monthStart))
+            ->select('far.type', 'far.activity_key', DB::raw('COALESCE(far.max_points, fad.max_points, 0) as max_points'))
+            ->get();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -162,46 +199,44 @@ class FinheroBadgeCalculatorService
      * Get Daily Quiz points for a student this month.
      * Rules: 1 pt per correct first attempt per login. Cap at 10.
      *
-     * TODO: change 'daily_quiz_answers' to your quiz answers table.
-     *       Columns assumed: student_id, is_correct, answered_at, login_session_id
-     *       Each row = one quiz answer in one login session.
-     *       We count rows where is_correct = true, capped at 10.
+     * Daniel, 2026-10-21: found this still pointing at a 'daily_quiz_
+     * answers' table that was never created - confirmed live, this
+     * crashed every time the command ran (finhero_badge_records had 0
+     * rows for any student, ever). LoginQuizController already logs a
+     * correct daily-quiz answer the same way every other FinHero point is
+     * logged (FinheroPointService::addPoints($id, 'quiz', 'daily_quiz',
+     * 1)) - this now reads that real table instead of the one that was
+     * never built.
      */
     private function getQuizPoints(int $studentId, int $month, int $year): int
     {
-        $raw = DB::table('daily_quiz_answers')
+        $raw = DB::table('finhero_student_points')
             ->where('student_id', $studentId)
-            ->where('is_correct', true)
-            ->whereMonth('answered_at', $month)
-            ->whereYear('answered_at', $year)
+            ->where('source_type', 'quiz')
+            ->where('source_key', 'daily_quiz')
+            ->whereMonth('earned_at', $month)
+            ->whereYear('earned_at', $year)
             ->count();
 
         return min($raw, 10); // Hard cap at 10
     }
 
     /**
-     * Get Library module points for a student this month.
-     * Only counts the designated active module.
-     * Rules: 1 pt per correct first attempt per question. Max 10.
-     *
-     * TODO: change 'library_question_answers' to your module answers table.
-     *       Columns assumed: student_id, module_id, question_id, is_correct, answered_at
-     *       Count distinct questions answered correctly for the first time.
+     * Library points for a student this month: 1 per correct answer on the
+     * first attempt at a Library module (written by FinheroStudentController::
+     * submitLibrary()), capped at 10 - counted when the student has a
+     * Library module assigned that month.
      */
-    private function getLibraryPoints(int $studentId, int $month, int $year, ?int $activeModuleId): int
+    private function getLibraryPoints(int $studentId, int $month, int $year, Collection $assigned): int
     {
-        if (!$activeModuleId) return 0;
+        if (!$assigned->contains('type', 'library')) return 0;
 
-        // Count distinct questions the student got correct (first attempt)
-        // We assume the system only logs the first correct attempt per question
-        $raw = DB::table('library_question_answers')
+        $raw = (int) DB::table('finhero_student_points')
             ->where('student_id', $studentId)
-            ->where('module_id', $activeModuleId)
-            ->where('is_correct', true)
-            ->whereMonth('answered_at', $month)
-            ->whereYear('answered_at', $year)
-            ->distinct('question_id')
-            ->count('question_id');
+            ->where('source_type', 'library')
+            ->whereMonth('earned_at', $month)
+            ->whereYear('earned_at', $year)
+            ->sum('points_earned');
 
         return min($raw, 10);
     }
@@ -221,9 +256,12 @@ class FinheroBadgeCalculatorService
     {
         // Get active activities and their max points (own value overrides
         // the global default for that activity_key; null falls back to it)
+        // Library modules are counted by getLibraryPoints() instead - and
+        // their keys (task_1...) would otherwise collide with the Tasks'.
         $activeActivities = DB::table('finhero_activity_registry as far')
             ->leftJoin('finhero_activity_defaults as fad', 'fad.activity_key', '=', 'far.activity_key')
             ->where('far.is_active', true)
+            ->where('far.type', '!=', 'library')
             ->selectRaw('far.activity_key, COALESCE(far.max_points, fad.max_points, 0) as max_points')
             ->pluck('max_points', 'activity_key');
 

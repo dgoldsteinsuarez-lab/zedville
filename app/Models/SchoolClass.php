@@ -26,6 +26,8 @@ class SchoolClass extends Model
         'description',
         'grade_id',
         'status',
+        'language_mode',
+        'default_language',
         'created_at',
         'updated_at',
     ];

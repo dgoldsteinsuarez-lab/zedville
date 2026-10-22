@@ -117,6 +117,7 @@ Route::middleware('role:super_admin')->group(function () {
     Route::post('/pisa', [\App\Http\Controllers\Admin\PisaLevelController::class, 'store'])->name('pisa.store');
     Route::put('/pisa/{pisaLevel}', [\App\Http\Controllers\Admin\PisaLevelController::class, 'update'])->name('pisa.update');
     Route::delete('/pisa/{pisaLevel}', [\App\Http\Controllers\Admin\PisaLevelController::class, 'destroy'])->name('pisa.destroy');
+    Route::get('/pisa/levels/{pisaLevel}/activities', [\App\Http\Controllers\Admin\PisaLevelController::class, 'activities'])->name('pisa.activities');
 
     // Curriculum ("Academy") authoring: Level -> Categories -> Items -> Questions
     // (bugs.md, 2026-10-20 - PISA/Grade Level curriculum).

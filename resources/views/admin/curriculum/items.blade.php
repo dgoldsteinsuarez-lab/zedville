@@ -21,7 +21,7 @@
     <div class="card mb-4">
         <div class="card-header"><strong>Add an Item</strong></div>
         <div class="card-body">
-            <form method="POST" action="{{ url('admin/curriculum/categories/' . $category->id . '/items') }}" class="row g-3">
+            <form method="POST" action="{{ url('admin/curriculum/categories/' . $category->id . '/items') }}" class="row g-3" enctype="multipart/form-data">
                 @csrf
                 <div class="col-md-4">
                     <label class="form-label">Title</label>
@@ -57,6 +57,24 @@
                         <label class="form-check-label" for="newItemActive">Active</label>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <label class="form-label">Image (stimulus/chart, optional)</label>
+                    <input type="file" name="image" class="form-control" accept="image/png,image/jpeg,image/webp">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Start date (optional)</label>
+                    <input type="date" name="start_date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">End date (optional)</label>
+                    <input type="date" name="end_date" class="form-control">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="form-check">
+                        <input type="checkbox" name="is_real_exam" value="1" class="form-check-input" id="newItemRealExam">
+                        <label class="form-check-label" for="newItemRealExam">Real exam</label>
+                    </div>
+                </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">Add</button>
                 </div>
@@ -73,7 +91,7 @@
                 @forelse ($items as $item)
                     <tr>
                         <td colspan="6" class="p-0">
-                            <form method="POST" action="{{ url('admin/curriculum/items/' . $item->id) }}" class="row g-2 align-items-center p-3">
+                            <form method="POST" action="{{ url('admin/curriculum/items/' . $item->id) }}" class="row g-2 align-items-center p-3" enctype="multipart/form-data">
                                 @csrf @method('PUT')
                                 <div class="col-md-3">
                                     <input type="text" name="title" value="{{ $item->title }}" class="form-control form-control-sm" required>
@@ -110,6 +128,23 @@
                                     <button type="submit" class="btn btn-sm btn-outline-secondary">Save</button>
                                     <button type="submit" form="del-item-{{ $item->id }}" class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('Delete this item and all its questions/results?')">Delete</button>
+                                </div>
+
+                                <div class="col-md-2 d-flex align-items-center gap-2">
+                                    @if ($item->image)
+                                        <img src="{{ asset('uploads/curriculum/' . $item->image) }}" alt="" style="width:32px;height:32px;object-fit:cover;border-radius:4px;">
+                                    @endif
+                                    <input type="file" name="image" class="form-control form-control-sm" accept="image/png,image/jpeg,image/webp" title="Replace image">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $item->start_date?->format('Y-m-d') }}" title="Start date">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" name="end_date" class="form-control form-control-sm" value="{{ $item->end_date?->format('Y-m-d') }}" title="End date">
+                                </div>
+                                <div class="col-md-2 form-check">
+                                    <input type="checkbox" name="is_real_exam" value="1" class="form-check-input" @checked($item->is_real_exam)>
+                                    <label class="form-check-label">Real exam</label>
                                 </div>
                             </form>
                             <form id="del-item-{{ $item->id }}" action="{{ url('admin/curriculum/items/' . $item->id) }}" method="post" class="d-none">@csrf @method('DELETE')</form>

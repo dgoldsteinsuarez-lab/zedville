@@ -79,6 +79,18 @@ Log in at http://zedville.local/login — admin accounts redirect to `/admin/das
 - `php artisan config:clear`
 - Apache and MySQL services were already running via the XAMPP control panel (not installed as Windows services — restart with `C:\xampp\apache_stop.bat` / `apache_start.bat` if you change vhost config)
 
+## If image uploads fail with "Unable to write in the ... directory"
+
+Windows can mark project folders read-only (the `R` flag shows in `attrib public\uploads`),
+for example after copying or unzipping the project. Windows itself ignores that flag on
+folders, but PHP doesn't, so every admin image upload fails. Clear it from the project folder:
+
+```
+attrib -R public\uploads & attrib -R public\uploads\* /S /D
+attrib -R storage & attrib -R storage\* /S /D
+attrib -R bootstrap\cache & attrib -R bootstrap\cache\* /S /D
+```
+
 ## Restarting Apache after config changes
 
 ```

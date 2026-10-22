@@ -76,7 +76,7 @@ class BadgeCalculatorService
         $academicYear = $academicYear ?? $this->getAcademicYear($month, $year);
 
         // --- Gather raw data ---
-        $requiredAssigned  = $this->getRequiredAssigned($month, $year);
+        $requiredAssigned  = $this->getRequiredAssigned($studentId, $month, $year);
         $requiredCompleted = $this->getRequiredCompleted($studentId, $month, $year);
         $optionalCompleted = $this->getOptionalCompleted($studentId, $month, $year);
         $participationPts  = $this->getParticipationPoints($studentId, $month, $year);
@@ -209,9 +209,20 @@ class BadgeCalculatorService
      * a regression from an earlier pass that copied a mistake already
      * present in other, now-corrected legacy code (bugs.md, 2026-10-20).
      */
-    private function getRequiredAssigned(int $month, int $year): int
+    private function getRequiredAssigned(int $studentId, int $month, int $year): int
     {
+        // Only the student's own class's events: calendar_events are
+        // written one row per class, so counting every class's required
+        // events made "complete 100% of Required" impossible for anyone
+        // once a second class existed.
+        $classId = DB::table('users')->where('id', $studentId)->value('grade');
+
+        if (!$classId) {
+            return 0;
+        }
+
         return DB::table('calendar_events')
+            ->where('classId', $classId)
             ->where('position', 'required')
             ->whereMonth('start', $month)
             ->whereYear('start', $year)
@@ -223,13 +234,39 @@ class BadgeCalculatorService
      */
     private function getRequiredCompleted(int $studentId, int $month, int $year): int
     {
-        return DB::table('activity_completions')
+        // Completions are recorded against the class's calendar event by
+        // ActivityCompletionService - each required event counts once.
+        $completedEventIds = DB::table('activity_completions')
             ->join('calendar_events', 'activity_completions.activity_id', '=', 'calendar_events.id')
             ->where('activity_completions.student_id', $studentId)
             ->where('calendar_events.position', 'required')
             ->whereMonth('activity_completions.completed_at', $month)
             ->whereYear('activity_completions.completed_at', $year)
-            ->count();
+            ->pluck('calendar_events.id');
+
+        // The Emergency Fund activity is "open your Emergency Fund
+        // Account": once the account is open it stays done, even if it was
+        // opened before this month's activity was assigned.
+        $fundOpen = DB::table('bank_accounts')
+            ->where('student_id', $studentId)
+            ->where('is_open_emergency_account', 1)
+            ->exists();
+
+        if ($fundOpen) {
+            $classId = DB::table('users')->where('id', $studentId)->value('grade');
+
+            $completedEventIds = $completedEventIds->merge(
+                DB::table('calendar_events')
+                    ->where('classId', $classId)
+                    ->where('title', 'Emergency Fund')
+                    ->where('position', 'required')
+                    ->whereMonth('start', $month)
+                    ->whereYear('start', $year)
+                    ->pluck('id')
+            );
+        }
+
+        return $completedEventIds->unique()->count();
     }
 
     /**
@@ -238,11 +275,20 @@ class BadgeCalculatorService
      */
     private function getOptionalCompleted(int $studentId, int $month, int $year): int
     {
+        // Completions record the activity's own key in activity_type (the
+        // EFD blackboard uses it to hide done activities), so "optional"
+        // comes from the calendar event they point at, the same way
+        // getRequiredCompleted() reads "required". Rows that literally say
+        // 'optional' still count.
         return DB::table('activity_completions')
-            ->where('student_id', $studentId)
-            ->where('activity_type', 'optional')
-            ->whereMonth('completed_at', $month)
-            ->whereYear('completed_at', $year)
+            ->leftJoin('calendar_events', 'activity_completions.activity_id', '=', 'calendar_events.id')
+            ->where('activity_completions.student_id', $studentId)
+            ->where(function ($q) {
+                $q->where('calendar_events.position', 'optional')
+                  ->orWhere('activity_completions.activity_type', 'optional');
+            })
+            ->whereMonth('activity_completions.completed_at', $month)
+            ->whereYear('activity_completions.completed_at', $year)
             ->count();
     }
 

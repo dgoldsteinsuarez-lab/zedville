@@ -170,9 +170,32 @@
                 $selectedAvatar = $avatar->firstWhere('id', $user->avatar);
                 use App\Models\BankAccount;
                 $bankAccounts = BankAccount::where('student_id', auth()->id())->get();
+                $studentClass = $user->gradeRelation;
+                $languageLocked = $studentClass && $studentClass->language_mode === 'locked';
+                $currentLocale = app()->getLocale();
                 @endphp
                 <!-- Navbar right -->
                 <div class="relative flex items-center space-x-3">
+                    <!-- Language switcher (bugs.md, 2026-10-21) -->
+                    @if ($languageLocked)
+                        <span class="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500" title="{{ __('messages.language_locked') }}">
+                            &#128274; {{ strtoupper($currentLocale) }}
+                        </span>
+                    @else
+                        <div class="flex items-center border rounded-lg overflow-hidden text-xs font-semibold">
+                            @foreach (['en' => 'EN', 'es' => 'ES'] as $code => $label)
+                                <form action="{{ route('language.switch') }}" method="post" class="m-0">
+                                    @csrf
+                                    <input type="hidden" name="language" value="{{ $code }}">
+                                    <button type="submit"
+                                        class="px-2.5 py-1.5 {{ $currentLocale === $code ? 'bg-themegreen text-white' : 'text-gray-500 hover:bg-themegreen/10' }}"
+                                        @if ($currentLocale === $code) disabled @endif>
+                                        {{ $label }}
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+                    @endif
                     <!-- Notification -->
                     <div class="relative">
                         <button @click="notificationDrawer = true" class="relative px-3 py-2.5 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-themegreen/10 transition-colors">

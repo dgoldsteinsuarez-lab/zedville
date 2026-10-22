@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\FinheroBadgeRecord;
+use App\Models\FinheroLibraryModule;
 use App\Services\FinheroBadgeCalculatorService;
+use App\Services\FinheroPointService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -192,6 +194,148 @@ class FinheroStudentController extends Controller
             ?? 0;
 
         return view($viewPath, compact('salary', 'activityKey'));
+    }
+
+    /**
+     * The current student's assignment of a FinHero activity (Task or
+     * Library) - scoped the same way the Required Activities list is
+     * (EFDController): assigned directly to the student's class, or to the
+     * whole Grade it belongs to.
+     */
+    private function assignedActivityForStudent(string $type, string $activityKey)
+    {
+        $user = Auth::user();
+        $userGradeId = DB::table('classes')->where('id', $user->grade)->value('grade_id');
+
+        return DB::table('finhero_activity_registry')
+            ->where('activity_key', $activityKey)
+            ->where('type', $type)
+            ->where('sid', $user->sid)
+            ->where('is_active', 1)
+            ->where(function ($q) use ($user, $userGradeId) {
+                $q->where('cid', $user->grade);
+                if ($userGradeId) {
+                    $q->orWhere('grade_id', $userGradeId);
+                }
+            })
+            ->first();
+    }
+
+    private function libraryActivityForStudent(string $activityKey)
+    {
+        return $this->assignedActivityForStudent('library', $activityKey);
+    }
+
+    /**
+     * POST /finhero/task-complete - a Task page reached its "all questions
+     * done" screen. Records the Task as finished for this student (EFD
+     * blackboard + Engagement badge), against their class's calendar event.
+     */
+    public function completeTask(Request $request): JsonResponse
+    {
+        $request->validate(['activity_key' => ['required', 'string', 'regex:/^task_\d+$/']]);
+
+        $task = $this->assignedActivityForStudent('task', $request->activity_key);
+
+        if (!$task) {
+            return response()->json(['success' => false, 'message' => 'This task is not assigned to your class.'], 404);
+        }
+
+        $recorded = app(\App\Services\ActivityCompletionService::class)
+            ->complete(Auth::id(), $task->activity_key, 'task-' . $task->activity_name);
+
+        return response()->json(['success' => true, 'recorded' => $recorded]);
+    }
+
+    /**
+     * GET /finhero/library/{key} - an assigned Library module: its lesson,
+     * then its quiz. The lesson and questions belong to the module
+     * (finhero_library_modules), shared by every class it's assigned to.
+     */
+    public function libraryPage($key)
+    {
+        $activityKey = str_replace('-', '_', $key);
+        $activity = $this->libraryActivityForStudent($activityKey);
+        abort_unless($activity, 404);
+
+        $module = FinheroLibraryModule::where('module_key', $activityKey)->firstOrFail();
+        $questions = $module->questions()->with('options')->get();
+
+        return view('finhero.library', compact('activity', 'module', 'questions'));
+    }
+
+    /**
+     * POST /finhero/library/{key}/submit - grades an assigned Library
+     * module on the server. Used by the Library page and, as JSON, by the
+     * Library pop-up on the EFD blackboard, so both credit the same way:
+     *
+     * - FinHero badge: 1 point per correct answer on the student's first
+     *   attempt at the module (max 10), source_type 'library'.
+     * - Engagement badge: once every question is answered, the activity is
+     *   completed - linked to this class's calendar event, which is how the
+     *   Engagement badge tells required from optional.
+     */
+    public function submitLibrary(Request $request, $key)
+    {
+        $activityKey = str_replace('-', '_', $key);
+        $activity = $this->libraryActivityForStudent($activityKey);
+        abort_unless($activity, 404);
+
+        $user = Auth::user();
+        $module = FinheroLibraryModule::where('module_key', $activityKey)->firstOrFail();
+        $questions = $module->questions()->with('options')->get();
+
+        $answers = $request->input('answers', []);
+        $correct = 0;
+        $answered = 0;
+
+        foreach ($questions as $question) {
+            $selectedOptionId = (int) ($answers[$question->id] ?? 0);
+            $correctOption = $question->options->firstWhere('is_correct', true);
+
+            if ($question->options->contains('id', $selectedOptionId)) {
+                $answered++;
+            }
+            if ($correctOption && $selectedOptionId === $correctOption->id) {
+                $correct++;
+            }
+        }
+
+        $total = $questions->count();
+        $completed = $total > 0 && $answered === $total;
+        $pointsEarned = 0;
+
+        $firstAttempt = !DB::table('finhero_student_points')
+            ->where('student_id', $user->id)
+            ->where('source_type', 'library')
+            ->where('source_key', (string) $module->id)
+            ->exists();
+
+        if ($completed && $firstAttempt) {
+            // A 0-point row is still written: it marks the first attempt as used.
+            $pointsEarned = min($correct, 10);
+            app(FinheroPointService::class)->addPoints($user->id, 'library', (string) $module->id, $pointsEarned);
+        }
+
+        if ($completed) {
+            // Its own prefix: Library and Task keys overlap (both use task_1...),
+            // and the blackboard hides finished activities by this value.
+            app(\App\Services\ActivityCompletionService::class)
+                ->complete($user->id, 'library_' . $activity->activity_key, 'library-' . $activity->activity_name);
+        }
+
+        $score = ['correct' => $correct, 'total' => $total, 'completed' => $completed, 'points' => $pointsEarned, 'first_attempt' => $firstAttempt];
+
+        if ($request->expectsJson()) {
+            return response()->json($score);
+        }
+
+        return view('finhero.library', [
+            'activity' => $activity,
+            'module' => $module,
+            'questions' => $questions,
+            'score' => $score,
+        ]);
     }
     public function savePoints(Request $request)
     {

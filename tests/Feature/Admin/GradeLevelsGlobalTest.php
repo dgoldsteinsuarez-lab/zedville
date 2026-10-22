@@ -22,11 +22,15 @@ class GradeLevelsGlobalTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_all_four_levels_exist_globally_after_migration(): void
+    public function test_all_levels_exist_globally_after_migration(): void
     {
+        // Junior was added 2026-10-21 (see 2026_10_21_180000_add_junior_
+        // grade_level.php) - this asserts the current real list, not a
+        // historical snapshot of the 2026-10-19 migration this test was
+        // originally written against.
         $names = GradeLevel::orderBy('sort_order')->pluck('name');
 
-        $this->assertSame(['Rookie', 'Intermediate', 'Advance', 'Advance Economist'], $names->all());
+        $this->assertSame(['Junior', 'Rookie', 'Intermediate', 'Advance', 'Advance Economist'], $names->all());
     }
 
     public function test_two_different_schools_can_both_assign_the_same_global_level(): void

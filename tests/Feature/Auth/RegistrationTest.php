@@ -2,7 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Providers\RouteServiceProvider;
+use App\Models\SchoolClass;
+use App\Models\SchoolDomain;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -35,16 +36,59 @@ class RegistrationTest extends TestCase
         $this->assertGreaterThanOrEqual(100, (int) $matches[1]);
     }
 
-    public function test_new_users_can_register(): void
+    /**
+     * Zedville's sign-up (RegisteredUserController::store): a one-word
+     * nickname, an email from an approved school domain and that school's
+     * class code. The student then logs in themselves - they aren't signed
+     * in automatically. Claiming an admin-created account is covered by
+     * ClaimStagedAccountTest.
+     */
+    public function test_a_student_can_sign_up_with_a_school_email_and_class_code(): void
     {
+        [$school, $class] = $this->schoolWithClass();
+
         $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Esperanza Gold',
+            'nickname' => 'Esperanza',
+            'email' => 'esperanza@zedville-school.test',
+            'classCode' => 'ZV8A01',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('success');
+        $this->assertGuest();
+        $this->assertDatabaseHas('users', [
+            'email' => 'esperanza@zedville-school.test', 'nickname' => 'Esperanza',
+            'role' => '4', 'sid' => (string) $school->id, 'grade' => $class->id,
+        ]);
+    }
+
+    public function test_an_email_from_an_unapproved_school_domain_cannot_sign_up(): void
+    {
+        $this->schoolWithClass();
+
+        $response = $this->from('/register')->post('/register', [
+            'name' => 'Someone Else',
+            'nickname' => 'Someone',
+            'email' => 'someone@gmail.com',
+            'classCode' => 'ZV8A01',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertDatabaseMissing('users', ['email' => 'someone@gmail.com']);
+    }
+
+    private function schoolWithClass(): array
+    {
+        $school = SchoolDomain::create([
+            'school_name' => 'Zedville School', 'school_code' => 'ZS-' . uniqid(), 'school_domain' => 'zedville-school.test',
+        ]);
+        $class = SchoolClass::create(['sid' => (string) $school->id, 'name' => '8A', 'classCode' => 'ZV8A01']);
+
+        return [$school, $class];
     }
 }

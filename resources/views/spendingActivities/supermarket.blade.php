@@ -1316,7 +1316,8 @@
                     pin: pin,
                     cart: cart,
                     total: totalSpent,
-                    catalog: 'supermarkets'
+                    catalog: 'supermarkets',
+                    activity_id: @json($activity->id ?? null)
                 })
             })
                 .then(res => res.json())

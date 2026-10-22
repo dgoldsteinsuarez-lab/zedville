@@ -1,6 +1,6 @@
 @extends('layouts.profile')
 
-@section('title', 'Home')
+@section('title', __('dashboard.title'))
 
 @section('content')
     @push('styles')
@@ -44,8 +44,8 @@
         {{-- Header --}}
         <div class="flex flex-col items-start justify-between pb-6 space-y-2 lg:flex-row lg:items-baseline lg:space-y-0">
             <div>
-                <h1 class="text-xl font-bold whitespace-nowrap">Welcome, {{ $studentName }}</h1>
-                <p class="text-sm text-gray-500 mt-1">Citizen of Zedville · {{ $className }}</p>
+                <h1 class="text-xl font-bold whitespace-nowrap">{{ __('dashboard.welcome', ['name' => $studentName]) }}</h1>
+                <p class="text-sm text-gray-500 mt-1">{{ __('dashboard.citizen_of_zedville') }} · {{ $className }}</p>
             </div>
         </div>
 
@@ -54,20 +54,20 @@
             <div
                 class="rounded-xl border border-[#B7E3D6] bg-[#EEF9F5] px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-[#014A38]">Enter Zedville</h2>
-                    <p class="text-sm text-[#016950] mt-1">Explore the city and visit its buildings</p>
+                    <h2 class="text-lg font-bold text-[#014A38]">{{ __('dashboard.enter_zedville') }}</h2>
+                    <p class="text-sm text-[#016950] mt-1">{{ __('dashboard.enter_zedville_sub') }}</p>
                 </div>
                 <a href="{{ url('education/city-hall') }}" class="themeBtn inline-flex items-center justify-center text-sm">
-                    Go to the city
+                    {{ __('dashboard.go_to_the_city') }}
                 </a>
             </div>
 
             <nav aria-label="Building quick links" class="flex flex-wrap gap-2 mt-3">
-                <a href="{{ url('education/city-mall') }}" class="whiteBtn zv-quicklink text-sm">🏬 City Mall</a>
-                <a href="{{ url('supermarket') }}" class="whiteBtn zv-quicklink text-sm">🛒 Supermarket</a>
-                <a href="{{ route('bank.index') }}" class="whiteBtn zv-quicklink text-sm">🏦 Bank</a>
+                <a href="{{ url('education/city-mall') }}" class="whiteBtn zv-quicklink text-sm">🏬 {{ __('dashboard.city_mall') }}</a>
+                <a href="{{ url('supermarket') }}" class="whiteBtn zv-quicklink text-sm">🛒 {{ __('dashboard.supermarket') }}</a>
+                <a href="{{ route('bank.index') }}" class="whiteBtn zv-quicklink text-sm">🏦 {{ __('dashboard.bank') }}</a>
                 <a href="{{ route('education.educational_finance_department') }}" class="whiteBtn zv-quicklink text-sm">🎓
-                    Education Finance Department</a>
+                    {{ __('dashboard.education_finance_department') }}</a>
             </nav>
         </section>
 
@@ -76,7 +76,7 @@
 
             {{-- Activities to do --}}
             <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">Activities to do</h2>
+                <h2 class="zv-section-label mb-3">{{ __('dashboard.activities_to_do') }}</h2>
                 @if(count($activities))
                     <ul class="divide-y divide-gray-100">
                         @foreach($activities as $a)
@@ -86,9 +86,9 @@
                                     $d = \Carbon\Carbon::parse($a['date'])->startOfDay();
                                     $diff = now()->startOfDay()->diffInDays($d, false);
                                     if ($diff < 0) {
-                                        $due = ['Overdue', 'text-red-600'];
+                                        $due = [__('dashboard.overdue'), 'text-red-600'];
                                     } elseif ($diff <= 3) {
-                                        $due = ['Due ' . $d->format('D'), 'text-red-600'];
+                                        $due = [__('dashboard.due', ['day' => $d->format('D')]), 'text-red-600'];
                                     } else {
                                         $due = [$d->format('M j'), 'text-gray-400'];
                                     }
@@ -104,25 +104,25 @@
                     </ul>
                 @else
                     <div class="text-center py-6">
-                        <p class="text-sm font-medium text-gray-700">No activities right now</p>
-                        <p class="text-sm text-gray-500 mt-1">When your tutor assigns a new activity, it will appear here.</p>
+                        <p class="text-sm font-medium text-gray-700">{{ __('dashboard.no_activities_right_now') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('dashboard.no_activities_hint') }}</p>
                     </div>
                 @endif
             </div>
 
             {{-- My bank --}}
             <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">My bank</h2>
+                <h2 class="zv-section-label mb-3">{{ __('dashboard.my_bank') }}</h2>
 
                 @if(!empty($bank['has_account']))
                     <div class="flex gap-8">
                         <div>
-                            <p class="text-xs text-gray-500 mb-0.5">Balance</p>
-                            <p class="text-2xl font-bold">{{ number_format($bank['balance']) }} zeds</p>
+                            <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.balance') }}</p>
+                            <p class="text-2xl font-bold">{{ number_format($bank['balance']) }} {{ __('dashboard.zeds') }}</p>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-500 mb-0.5">Savings</p>
-                            <p class="text-2xl font-bold text-[#016950]">{{ number_format($bank['savings']) }} zeds</p>
+                            <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.savings') }}</p>
+                            <p class="text-2xl font-bold text-[#016950]">{{ number_format($bank['savings']) }} {{ __('dashboard.zeds') }}</p>
                         </div>
                     </div>
 
@@ -132,12 +132,12 @@
                             <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
                                 <div class="h-2 rounded-full bg-[#00A47D]" style="width: {{ $pct }}%"></div>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1.5">{{ $pct }}% of monthly savings goal</p>
+                            <p class="text-xs text-gray-500 mt-1.5">{{ __('dashboard.savings_goal_pct', ['pct' => $pct]) }}</p>
                         </div>
                     @endif
 
                     <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
-                        <label for="zv-statement-month" class="sr-only">Choose a month</label>
+                        <label for="zv-statement-month" class="sr-only">{{ __('dashboard.choose_a_month') }}</label>
                         <select id="zv-statement-month"
                             class="flex-1 rounded-lg border border-[#D2DDDB] text-sm px-3 py-2 bg-white">
                             @foreach($months as $m)
@@ -150,13 +150,13 @@
                         </select>
                         <a id="zv-view-statement" href="{{ route('bank.bank_statement_show') }}"
                             class="themeBtn text-sm whitespace-nowrap">
-                            View statement
+                            {{ __('dashboard.view_statement') }}
                         </a>
                     </div>
                 @else
                     <div class="text-center py-6">
-                        <p class="text-sm font-medium text-gray-700">No bank account yet</p>
-                        <p class="text-sm text-gray-500 mt-1">Complete your Citizen Activation to open your account.</p>
+                        <p class="text-sm font-medium text-gray-700">{{ __('dashboard.no_bank_account_yet') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('dashboard.no_bank_account_hint') }}</p>
                     </div>
                 @endif
             </div>
@@ -167,7 +167,7 @@
 
             {{-- My badges --}}
             <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">My badges</h2>
+                <h2 class="zv-section-label mb-3">{{ __('dashboard.my_badges') }}</h2>
                 @if(count($badges))
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach($badges as $b)
@@ -183,15 +183,15 @@
                     </div>
                 @else
                     <div class="text-center py-6">
-                        <p class="text-sm font-medium text-gray-700">No badges yet</p>
-                        <p class="text-sm text-gray-500 mt-1">Your story is just beginning. Step into the city and make your mark.</p>
+                        <p class="text-sm font-medium text-gray-700">{{ __('dashboard.no_badges_yet') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('dashboard.no_badges_hint') }}</p>
                     </div>
                 @endif
             </div>
 
             {{-- Mood this month --}}
             <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">Mood this month</h2>
+                <h2 class="zv-section-label mb-3">{{ __('dashboard.mood_this_month') }}</h2>
                 @if($mood)
                     @php
                         $getMoodIcon = function($moodId, $size = 44) {
@@ -239,7 +239,7 @@
                         <div class="flex-1 flex items-center gap-3">
                             {!! $getMoodIcon($mood['my_mood']['mood'] ?? $mood['my_mood']['label'], 44) !!}
                             <div>
-                                <p class="text-xs text-gray-500 mb-0.5">My mood</p>
+                                <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.my_mood') }}</p>
                                 <p class="text-xl font-bold">{{ $mood['my_mood']['label'] }}</p>
                                 <p class="text-xs text-gray-500 mt-1">{{ $mood['my_mood']['detail'] }}</p>
                             </div>
@@ -247,7 +247,7 @@
                         <div class="flex-1 border-l border-gray-100 pl-6 flex items-center gap-3">
                             {!! $getMoodIcon($mood['city_mood']['mood'] ?? $mood['city_mood']['label'], 44) !!}
                             <div>
-                                <p class="text-xs text-gray-500 mb-0.5">City mood</p>
+                                <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.city_mood') }}</p>
                                 <p class="text-xl font-bold">{{ $mood['city_mood']['label'] }}</p>
                                 <p class="text-xs text-gray-500 mt-1">{{ $mood['city_mood']['detail'] }}</p>
                             </div>
@@ -255,8 +255,8 @@
                     </div>
                 @else
                     <div class="text-center py-6">
-                        <p class="text-sm font-medium text-gray-700">No mood logged this month</p>
-                        <p class="text-sm text-gray-500 mt-1">Log your mood when you enter Zedville to see your monthly average.</p>
+                        <p class="text-sm font-medium text-gray-700">{{ __('dashboard.no_mood_logged') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('dashboard.no_mood_hint') }}</p>
                     </div>
                 @endif
             </div>
@@ -268,14 +268,13 @@
                 <span aria-hidden="true">✉️</span>
                 <p class="flex-1 text-sm text-[#7A5B12]">
                     @if(!empty($mailbox['unread']))
-                        Mailbox · {{ $mailbox['unread'] }} new
-                        message{{ $mailbox['unread'] > 1 ? 's' : '' }}@if(!empty($mailbox['latest'])) —
+                        {{ trans_choice('dashboard.mailbox_new_messages', $mailbox['unread'], ['count' => $mailbox['unread']]) }}@if(!empty($mailbox['latest'])) —
                         {{ $mailbox['latest'] }}@endif
                     @else
-                        Mailbox · no new messages
+                        {{ __('dashboard.mailbox_no_new') }}
                     @endif
                 </p>
-                <a href="{{ route('profile.mailbox') }}" class="secondaryBtn text-sm">Open</a>
+                <a href="{{ route('profile.mailbox') }}" class="secondaryBtn text-sm">{{ __('dashboard.open') }}</a>
             </div>
         </section>
 

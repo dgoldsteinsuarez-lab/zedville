@@ -1,6 +1,6 @@
 @extends('layouts.profile')
 
-@section('title', 'Monthly Budget Activity')
+@section('title', 'Needs, Wants & Savings Match')
 
 @section('content')
 @push('styles')
@@ -9,7 +9,7 @@
 
 <div class="flex items-center justify-between pb-6">
     <h1 class="text-xl font-bold whitespace-nowrap">
-        Monthly Budget Activity
+        Needs, Wants &amp; Savings Match
     </h1>
 
     <a href="{{ url()->previous() }}"

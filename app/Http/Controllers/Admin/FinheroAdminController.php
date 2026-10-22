@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Support\ClassColor;
 class FinheroAdminController extends Controller
 {
     public function __construct(private FinheroBadgeCalculatorService $calculator)
@@ -51,7 +52,8 @@ class FinheroAdminController extends Controller
 
         $query = DB::table('finhero_activity_registry as far')
             ->leftJoin('classes as c', 'far.cid', '=', 'c.id')
-            ->select('far.*', 'c.name as class_name')
+            ->leftJoin('grades as g', 'far.grade_id', '=', 'g.id')
+            ->select('far.*', 'c.name as class_name', 'g.name as grade_name')
             ->where('far.type', 'task');
 
         if (session()->has('selected_school')) {
@@ -61,21 +63,36 @@ class FinheroAdminController extends Controller
         $activities = $query
             ->orderBy('created_at')
             ->get();
-        // Get classes
-        $classQuery = DB::table('classes');
 
-        // If school selected, show only classes of that school
-        if (session()->has('selected_school')) {
-            $classQuery->where('sid', session('selected_school'));
-        }
+        [$classes, $grades] = $this->classesAndGrades();
 
-        $classes = $classQuery
-            ->orderBy('id')
-            ->get();
+        $libraryModules = collect();
 
         $type = 'task';
 
-        return view('admin.finhero.activities', compact('activities', 'type', 'classes'));
+        return view('admin.finhero.activities', compact('activities', 'type', 'classes', 'grades', 'libraryModules'));
+    }
+
+    /**
+     * Shared by listActivities()/taskActivities() - the "Grade" select
+     * (default, applies to every class under it) and the "Class" select
+     * (the explicit per-class override), both scoped to the current
+     * school like every other list here.
+     */
+    private function classesAndGrades(): array
+    {
+        $classQuery = DB::table('classes');
+        $gradeQuery = DB::table('grades');
+
+        if (session()->has('selected_school')) {
+            $classQuery->where('sid', session('selected_school'));
+            $gradeQuery->where('sid', session('selected_school'));
+        }
+
+        return [
+            $classQuery->orderBy('id')->get(),
+            $gradeQuery->orderBy('id')->get(),
+        ];
     }
     public function taskActivities()
     {
@@ -91,7 +108,8 @@ class FinheroAdminController extends Controller
         //->where('type', 'library');
         $query = DB::table('finhero_activity_registry as far')
             ->leftJoin('classes as c', 'far.cid', '=', 'c.id')
-            ->select('far.*', 'c.name as class_name')
+            ->leftJoin('grades as g', 'far.grade_id', '=', 'g.id')
+            ->select('far.*', 'c.name as class_name', 'g.name as grade_name')
             ->where('far.type', 'library');
 
         if (session()->has('selected_school')) {
@@ -102,21 +120,13 @@ class FinheroAdminController extends Controller
             ->orderBy('created_at')
             ->get();
 
-        // Get classes
-        $classQuery = DB::table('classes');
+        [$classes, $grades] = $this->classesAndGrades();
 
-        // If school selected, show only classes of that school
-        if (session()->has('selected_school')) {
-            $classQuery->where('sid', session('selected_school'));
-        }
-
-        $classes = $classQuery
-            ->orderBy('id')
-            ->get();
+        $libraryModules = \App\Models\FinheroLibraryModule::orderBy('sort_order')->get();
 
         $type = 'library';
 
-        return view('admin.finhero.activities', compact('activities', 'type', 'classes'));
+        return view('admin.finhero.activities', compact('activities', 'type', 'classes', 'grades', 'libraryModules'));
     }
     /**
      * POST /admin/finhero/activities — register a new activity
@@ -223,24 +233,44 @@ class FinheroAdminController extends Controller
     public function addActivity(Request $request)
     {
         $selectedSchool = session('selected_school') ?: null;
+
+        // Daniel, 2026-10-21: "classes have the same tasks, should be for
+        // grade, the selection, by default, in case its not, there could
+        // be an option extra for selecting only per class. One grade can
+        // have many classes." A grade is the default scope (every class
+        // under it gets the activity); picking a specific class is the
+        // explicit override. Exactly one of grade_id/cid ends up set.
         $classId = $request->classId ?: null;
+        $gradeId = $classId ? null : ($request->grade_id ?: null);
 
         $validated = $request->validate([
 
-            // Activity key must be unique per school + class + type
+            // Activity key must be unique per school + scope (grade OR
+            // class) + type.
             'activity_key' => [
                 'required',
                 'string',
                 Rule::unique('finhero_activity_registry')
-                    ->where(function ($query) use ($request, $selectedSchool, $classId) {
-                        return $query
-                            ->where('type', $request->type)
-                            ->where('sid', $selectedSchool)
-                            ->where('cid', $classId);
+                    ->where(function ($query) use ($request, $selectedSchool, $classId, $gradeId) {
+                        $query->where('type', $request->type)->where('sid', $selectedSchool);
+
+                        return $classId
+                            ? $query->where('cid', $classId)
+                            : $query->whereNull('cid')->where('grade_id', $gradeId);
                     }),
             ],
 
-            'cid' => 'nullable|exists:classes,id',
+            'grade_id' => 'required_without:classId|nullable|exists:grades,id',
+            'classId' => [
+                'nullable',
+                'exists:classes,id',
+                function ($attribute, $value, $fail) use ($request) {
+                    $class = DB::table('classes')->where('id', $value)->first();
+                    if ($class && $request->grade_id && (int) $class->grade_id !== (int) $request->grade_id) {
+                        $fail('The selected class does not belong to the selected grade.');
+                    }
+                },
+            ],
 
             // Daniel, 2026-10-21: "Name, points, status are not required.
             // For name, just add the name of the activity." - left blank,
@@ -273,13 +303,13 @@ class FinheroAdminController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Check duplicate activity name by SCHOOL + CLASS + TYPE
+        | Check duplicate activity name by SCHOOL + SCOPE + TYPE
         |--------------------------------------------------------------------------
         */
 
         $activityExists = DB::table('finhero_activity_registry')
             ->where('sid', $selectedSchool)
-            ->where('cid', $classId)
+            ->when($classId, fn ($q) => $q->where('cid', $classId), fn ($q) => $q->whereNull('cid')->where('grade_id', $gradeId))
             ->where('type', $validated['type'])
             ->where('activity_name', $validated['activity_name'])
             ->exists();
@@ -289,7 +319,7 @@ class FinheroAdminController extends Controller
                 ->withInput()
                 ->withErrors([
                     'activity_name' =>
-                        'This activity already exists for the selected class.'
+                        'This activity already exists for the selected ' . ($classId ? 'class' : 'grade') . '.'
                 ]);
         }
 
@@ -324,6 +354,7 @@ class FinheroAdminController extends Controller
             'sid' => $selectedSchool,
 
             'cid' => $classId,
+            'grade_id' => $gradeId,
 
             // Salary only for task - not required, falls back to the
             // global default for this activity_key (FinheroActivityDefault,
@@ -353,49 +384,16 @@ class FinheroAdminController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $calendarEvent = DB::table('calendar_events')
-            ->where('sid', $selectedSchool)
-            ->where('classId', $classId)
-            ->where('title', $validated['type'] . '-' . $validated['activity_name'])
-            ->whereYear('created_at', now()->year)
-            ->whereMonth('created_at', now()->month)
-            ->first();
-
-        // See MbaPositionController - FullCalendar's end is exclusive, +1
-        // day so an admin-picked end_date is still shown as included.
-        $calendarStart = !empty($validated['start_date']) ? \Carbon\Carbon::parse($validated['start_date'])->startOfDay() : now();
-        $calendarEnd = !empty($validated['end_date']) ? \Carbon\Carbon::parse($validated['end_date'])->addDay()->startOfDay() : now();
-
-        if ($calendarEvent) {
-
-            DB::table('calendar_events')
-                ->where('id', $calendarEvent->id)
-                ->update([
-                    'position' => $validated['position'],
-                    'backgroundColor' => '#0053f9',
-                    'borderColor' => '#0053f9',
-                    'start' => $calendarStart,
-                    'end' => $calendarEnd,
-                    'updated_at' => now(),
-                ]);
-
-        } else {
-
-            DB::table('calendar_events')->insert([
-                'sid' => $selectedSchool,
-                'classId' => $classId,
-                'title' => $validated['type'] . '-' . $validated['activity_name'],
-                'description' => $validated['description'] ?? '',
-                'position' => $validated['position'],
-                'repeatActivity' => '0',
-                'backgroundColor' => '#0053f9',
-                'borderColor' => '#0053f9',
-                'start' => $calendarStart,
-                'end' => $calendarEnd,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+        $this->syncFinheroActivityCalendar(
+            title: $validated['type'] . '-' . $validated['activity_name'],
+            position: $validated['position'],
+            description: $validated['description'] ?? '',
+            startDate: $validated['start_date'] ?? null,
+            endDate: $validated['end_date'] ?? null,
+            sid: $selectedSchool,
+            classId: $classId,
+            gradeId: $gradeId,
+        );
 
 
         /*
@@ -410,6 +408,74 @@ class FinheroAdminController extends Controller
 
         return redirect($route)
             ->with('success', 'Activity added successfully.');
+    }
+
+    /**
+     * One calendar_events row per affected class - a single row when a
+     * specific class was picked, one row per class under the grade
+     * otherwise (same fan-out shape as
+     * Admin\CurriculumController::syncRealExamCalendar()).
+     */
+    private function syncFinheroActivityCalendar(
+        string $title,
+        string $position,
+        ?string $description,
+        ?string $startDate,
+        ?string $endDate,
+        ?string $sid,
+        ?int $classId,
+        ?int $gradeId,
+    ): void {
+        $classIds = $classId
+            ? [$classId]
+            : DB::table('classes')->where('grade_id', $gradeId)->pluck('id')->all();
+
+        // Editing an activity from "whole grade" down to one class (or
+        // vice versa) must drop calendar rows for classes no longer in
+        // scope - including a row with no class at all, left by activities
+        // saved before a class/grade was required.
+        DB::table('calendar_events')
+            ->where('sid', $sid)
+            ->where('title', $title)
+            ->where(fn ($q) => $q->whereNotIn('classId', $classIds)->orWhereNull('classId'))
+            ->delete();
+
+        // See MbaPositionController - FullCalendar's end is exclusive, +1
+        // day so an admin-picked end_date is still shown as included.
+        $calendarStart = !empty($startDate) ? \Carbon\Carbon::parse($startDate)->startOfDay() : now();
+        $calendarEnd = !empty($endDate) ? \Carbon\Carbon::parse($endDate)->addDay()->startOfDay() : now();
+
+        foreach ($classIds as $id) {
+            $calendarEvent = DB::table('calendar_events')
+                ->where('sid', $sid)
+                ->where('classId', $id)
+                ->where('title', $title)
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->first();
+
+            $fields = [
+                'position' => $position,
+                'backgroundColor' => ClassColor::hex($id),
+                'borderColor' => ClassColor::hex($id),
+                'start' => $calendarStart,
+                'end' => $calendarEnd,
+                'updated_at' => now(),
+            ];
+
+            if ($calendarEvent) {
+                DB::table('calendar_events')->where('id', $calendarEvent->id)->update($fields);
+            } else {
+                DB::table('calendar_events')->insert($fields + [
+                    'sid' => $sid,
+                    'classId' => $id,
+                    'title' => $title,
+                    'description' => $description ?? '',
+                    'repeatActivity' => '0',
+                    'created_at' => now(),
+                ]);
+            }
+        }
     }
 
     /**
@@ -462,6 +528,9 @@ class FinheroAdminController extends Controller
             return redirect()->back()->with('error', 'Activity not found.');
         }
 
+        $classId = $request->classId ?: null;
+        $gradeId = $classId ? null : ($request->grade_id ?: null);
+
         $validated = $request->validate([
             'activity_name' => 'sometimes|string|max:255',
             'position' => 'sometimes|in:required,optional,free',
@@ -474,6 +543,21 @@ class FinheroAdminController extends Controller
             'is_active' => 'sometimes|boolean',
             'description' => 'nullable|string',
 
+            // Daniel, 2026-10-21: "classes have the same tasks, should be
+            // for grade... option extra for selecting only per class" -
+            // same grade-default/class-override scope as addActivity().
+            'grade_id' => 'required_without:classId|nullable|exists:grades,id',
+            'classId' => [
+                'nullable',
+                'exists:classes,id',
+                function ($attribute, $value, $fail) use ($request) {
+                    $class = DB::table('classes')->where('id', $value)->first();
+                    if ($class && $request->grade_id && (int) $class->grade_id !== (int) $request->grade_id) {
+                        $fail('The selected class does not belong to the selected grade.');
+                    }
+                },
+            ],
+
             // Daniel, 2026-10-21: "i need to be able to add start and due
             // date in all activities, including the tasks, library and so
             // on."
@@ -484,7 +568,8 @@ class FinheroAdminController extends Controller
 
         // Prepare update data
         $updateData = array_merge($validated, [
-            'cid' => $request->classId ?: null,
+            'cid' => $classId,
+            'grade_id' => $gradeId,
             // Daniel, 2026-10-21: "i can still see all the unnecesarry
             // settings here" - Max Points no longer collected per-activity
             // (see addActivity()); always cleared here too so an existing
@@ -493,6 +578,7 @@ class FinheroAdminController extends Controller
             'max_points' => null,
             'updated_at' => now()
         ]);
+        unset($updateData['classId']);
         // Remove salary for library type
         if ($activity->type != 'task') {
             unset($updateData['salary']);
@@ -501,50 +587,18 @@ class FinheroAdminController extends Controller
         DB::table('finhero_activity_registry')
             ->where('id', $id)
             ->update($updateData);
-        // Calendar Event Insert / Update
-        $calendarEvent = DB::table('calendar_events')
-            ->where('sid', session('selected_school') ?: null, )
-            ->where('title', $activity->type . '-' . $validated['activity_name'])
-            ->whereYear('created_at', now()->year)
-            ->whereMonth('created_at', now()->month)
-            ->first();
 
-        // See MbaPositionController - FullCalendar's end is exclusive, +1
-        // day so an admin-picked end_date is still shown as included.
-        $calendarStart = !empty($validated['start_date']) ? \Carbon\Carbon::parse($validated['start_date'])->startOfDay() : now();
-        $calendarEnd = !empty($validated['end_date']) ? \Carbon\Carbon::parse($validated['end_date'])->addDay()->startOfDay() : now();
+        $this->syncFinheroActivityCalendar(
+            title: $activity->type . '-' . $validated['activity_name'],
+            position: $validated['position'],
+            description: $validated['description'] ?? '',
+            startDate: $validated['start_date'] ?? null,
+            endDate: $validated['end_date'] ?? null,
+            sid: session('selected_school') ?: null,
+            classId: $classId,
+            gradeId: $gradeId,
+        );
 
-        if ($calendarEvent) {
-
-            DB::table('calendar_events')
-                ->where('id', $calendarEvent->id)
-                ->update([
-                    'classId' => $request->classId ?: null,
-                    'position' => $validated['position'],
-                    'backgroundColor' => '#0053f9',
-                    'borderColor' => '#0053f9',
-                    'start' => $calendarStart,
-                    'end' => $calendarEnd,
-                    'updated_at' => now(),
-                ]);
-
-        } else {
-
-            DB::table('calendar_events')->insert([
-                'sid' => session('selected_school') ?: null,
-                'classId' => $request->classId ?: null,
-                'title' => $activity->type . '-' . $validated['activity_name'],
-                'description' => $validated['description'] ?? '',
-                'position' => $validated['position'],
-                'repeatActivity' => '0',
-                'backgroundColor' => '#0053f9',
-                'borderColor' => '#0053f9',
-                'start' => $calendarStart,
-                'end' => $calendarEnd,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
         $route = $activity->type == 'task'
             ? '/admin/finhero/activities'
             : '/admin/finhero/task-activities';
@@ -810,5 +864,121 @@ class FinheroAdminController extends Controller
             'success' => true,
             'message' => "Academic year reset. New year: {$v['new_academic_year']}. Accumulated points restart from 0.",
         ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // LIBRARY QUESTIONS
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Questions for one Library module. A module's questions are shared by
+     * every school/grade/class it's assigned to, so this is Super Admin
+     * only (see routes/web.php). Mirrors Admin\CurriculumController::
+     * questions()/saveQuestion(): create-or-update by optional id, options
+     * matched back by index via option_ids[], at least 2 options and one
+     * marked correct.
+     */
+    public function libraryQuestions(int $moduleId)
+    {
+        $module = \App\Models\FinheroLibraryModule::findOrFail($moduleId);
+
+        $questions = $module->questions()->with('options')->get();
+
+        return view('admin.finhero.library-questions', compact('module', 'questions'));
+    }
+
+    private function uploadFinheroLibraryImage(Request $request): ?string
+    {
+        if (!$request->hasFile('image')) {
+            return null;
+        }
+
+        $file = $request->file('image');
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('uploads/finhero'), $filename);
+
+        return $filename;
+    }
+
+    public function saveLibraryQuestion(Request $request, int $moduleId)
+    {
+        $module = \App\Models\FinheroLibraryModule::findOrFail($moduleId);
+
+        $data = $request->validate([
+            'id' => 'nullable|integer',
+            'question_text' => 'required|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
+            'sort_order' => 'required|integer|min:1',
+            'options' => 'required|array|min:2|max:4',
+            'options.*' => 'nullable|string|max:255',
+            'option_ids' => 'nullable|array',
+            'correct' => 'required|integer',
+        ]);
+
+        $correctIndex = (int) $data['correct'];
+        $nonEmptyOptions = array_filter($data['options'], fn ($o) => trim((string) $o) !== '');
+        abort_unless(count($nonEmptyOptions) >= 2, 422, 'A question needs at least 2 options.');
+        abort_unless(
+            array_key_exists($correctIndex, $data['options']) && trim((string) $data['options'][$correctIndex]) !== '',
+            422,
+            'Pick which option is correct.'
+        );
+
+        $image = $this->uploadFinheroLibraryImage($request);
+
+        DB::transaction(function () use ($data, $correctIndex, $module, $image) {
+            if (!empty($data['id'])) {
+                $question = \App\Models\FinheroLibraryQuestion::where('module_id', $module->id)
+                    ->findOrFail($data['id']);
+                $fields = [
+                    'question_text' => $data['question_text'],
+                    'sort_order' => $data['sort_order'],
+                ];
+                if ($image !== null) {
+                    $fields['image'] = $image;
+                }
+                $question->update($fields);
+            } else {
+                $question = \App\Models\FinheroLibraryQuestion::create([
+                    'module_id' => $module->id,
+                    'question_text' => $data['question_text'],
+                    'image' => $image,
+                    'sort_order' => $data['sort_order'],
+                ]);
+            }
+
+            foreach ($data['options'] as $key => $optionText) {
+                if (trim((string) $optionText) === '') {
+                    continue;
+                }
+
+                $optionId = $data['option_ids'][$key] ?? null;
+                $fields = [
+                    'question_id' => $question->id,
+                    'option_text' => $optionText,
+                    'is_correct' => $key === $correctIndex,
+                    'sort_order' => $key + 1,
+                ];
+
+                if ($optionId) {
+                    \App\Models\FinheroLibraryOption::where('id', $optionId)
+                        ->where('question_id', $question->id)
+                        ->update($fields);
+                } else {
+                    \App\Models\FinheroLibraryOption::create($fields);
+                }
+            }
+        });
+
+        return redirect()->back()->with('success', 'Question saved.');
+    }
+
+    public function deleteLibraryQuestion(int $moduleId, int $questionId)
+    {
+        \App\Models\FinheroLibraryQuestion::where('module_id', $moduleId)
+            ->where('id', $questionId)
+            ->delete();
+
+        return redirect()->back()->with('success', 'Question deleted.');
     }
 }

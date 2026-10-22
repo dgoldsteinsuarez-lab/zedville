@@ -456,7 +456,7 @@
                             @if(optional($mbaPosition)->required == 1 && !in_array('mba', $completedActivities))
                               <a href="{{ route('education.index') }}">
                                 <div class="blackboardFiled">
-                                  <div style="font-size: 14px; text-align: center; ">Monthly Budget Activity</div>
+                                  <div style="font-size: 14px; text-align: center; ">Needs, Wants &amp; Savings Match</div>
                                 </div>
                               </a>
                             @endif
@@ -474,6 +474,18 @@
                                   <div class="blackboardFiled">
                                     <div style="font-size: 14px; text-align: center;">
                                       {{ $task->activity_name }}
+                                    </div>
+                                  </div>
+                                </a>
+                              @endif
+                            @endforeach
+                            @foreach($libraryActivities as $library)
+                              @if($library->position == 'required' && !in_array('library_' . $library->activity_key, $completedActivities))
+
+                                <a href="{{ route('library.page', ['key' => str_replace('_', '-', $library->activity_key)]) }}">
+                                  <div class="blackboardFiled">
+                                    <div style="font-size: 14px; text-align: center;">
+                                      {{ $library->activity_name }}
                                     </div>
                                   </div>
                                 </a>
@@ -541,7 +553,7 @@
                             @if(optional($mbaPosition)->optional == 1 && !in_array('mba', $completedActivities))
                               <a href="{{ route('education.index') }}">
                                 <div class="blackboardFiled">
-                                  <div style="font-size: 14px; text-align: center; ">Monthly Budget Activity</div>
+                                  <div style="font-size: 14px; text-align: center; ">Needs, Wants &amp; Savings Match</div>
                                 </div>
                               </a>
                             @endif
@@ -559,6 +571,18 @@
                                   <div class="blackboardFiled">
                                     <div style="font-size: 14px; text-align: center;">
                                       {{ $task->activity_name }}
+                                    </div>
+                                  </div>
+                                </a>
+                              @endif
+                            @endforeach
+                            @foreach($libraryActivities as $library)
+                              @if($library->position == 'optional' && !in_array('library_' . $library->activity_key, $completedActivities))
+
+                                <a href="{{ route('library.page', ['key' => str_replace('_', '-', $library->activity_key)]) }}">
+                                  <div class="blackboardFiled">
+                                    <div style="font-size: 14px; text-align: center;">
+                                      {{ $library->activity_name }}
                                     </div>
                                   </div>
                                 </a>
@@ -1117,7 +1141,7 @@
     window.citizenName = "{{ auth()->user()->nickname }}";
   </script>
   <script src="{{ asset('asset/front/js/efd.js') }}?ver={{ rand(111, 999) }}"></script>
-  <script src="{{ asset('asset/front/js/modules.js') }}?ver={{ rand(111, 999) }}"></script>
+  <script>const modules = @json($libraryModalModules);</script>
   <script>
     /* ==========================================================================
        FINANCIAL LITERACY APP — Loads ONLY When Modal Opens
@@ -1335,7 +1359,7 @@
 
                   <div class="mt-6 border-t pt-4 button-group">
                     ${showResults[m.id]
-            ? `<button onclick="retry(${m.id})" class="themeBtn">Try Again</button> <button  onclick="goBack()" class="themeBtn">Next Module</button>`
+            ? `<button onclick="retry(${m.id})" class="themeBtn">Try Again</button> <button  onclick="goBack()" class="themeBtn">Next Module</button>${libraryResultNote(m)}`
             : `<button type="button" onclick="checkAnswers(${m.id})"
                                  class="themeBtn"
                                  title="${allAnswered ? 'Check your answers' : 'Answer all ' + total + ' questions before checking'}">
@@ -1389,33 +1413,45 @@
          CONTROLLERS
       ====================================================================== */
       window.selectAnswer = function (moduleId, qIndex, optIndex) {
-        const module = modules.find(m => m.id === moduleId);
-        const question = module.content.questions[qIndex];
         answers[`${moduleId}-${qIndex}`] = optIndex;
-        //fineHero
-        // ✅ Only call API if correct
-        if (optIndex === question.correct) {
-
-          fetch('/finhero/award-points', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-              activity_key: module.activity_key, // ✅ REQUIRED
-              points: 1                           // ✅ REQUIRED
-            })
-          })
-            .then(res => res.json())
-            .then(data => {
-              console.log('Response:', data);
-            })
-            .catch(err => console.error('Error:', err));
-        }
-        //fineHero
         renderModule();
       };
+
+      // FinHero/Engagement credit: the server grades the whole module when
+      // the student checks their answers (same endpoint as the Library page),
+      // and only for modules assigned to their class or grade.
+      window.libraryResult = window.libraryResult ?? {};
+
+      function sendLibraryAnswers(module) {
+        if (!module.assigned) {
+          libraryResult[module.id] = { practice: true };
+          return;
+        }
+
+        const payload = {};
+        module.content.questions.forEach((q, i) => {
+          payload[q.qid] = q.option_ids[answers[`${module.id}-${i}`]];
+        });
+
+        fetch('/finhero/library/' + module.activity_key.replace(/_/g, '-') + '/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ answers: payload })
+        })
+          .then(res => res.ok ? res.json() : Promise.reject(res.status))
+          .then(data => {
+            libraryResult[module.id] = data;
+            if (currentModule === module.id) renderModule();
+          })
+          .catch(() => {
+            libraryResult[module.id] = { error: true };
+            if (currentModule === module.id) renderModule();
+          });
+      }
 
       window.checkAnswers = function (moduleId) {
         const module = modules.find(m => m.id === moduleId);
@@ -1435,6 +1471,8 @@
         }
 
         showResults[moduleId] = true;
+        delete libraryResult[moduleId];
+        sendLibraryAnswers(module);
         renderModule();
       };
 
@@ -1444,8 +1482,25 @@
           delete answers[`${moduleId}-${i}`];
         });
         showResults[moduleId] = false;
+        delete libraryResult[moduleId];
         renderModule();
       };
+
+      function libraryResultNote(m) {
+        const r = libraryResult[m.id];
+        if (!r) return '';
+        let text;
+        if (r.practice) {
+          text = 'Practice only: this module isn\'t assigned to your class yet, so it doesn\'t earn points.';
+        } else if (r.error) {
+          text = 'Your answers couldn\'t be saved. Please try again.';
+        } else if (r.first_attempt) {
+          text = `Saved! You earned ${r.points} FinHero ${r.points === 1 ? 'point' : 'points'}.`;
+        } else {
+          text = 'Saved. FinHero points only count on your first try, so this one was practice.';
+        }
+        return `<p class="text-sm mt-3" style="color:#1B6B3A">${text}</p>`;
+      }
 
       window.goBack = function () {
         currentModule = null;

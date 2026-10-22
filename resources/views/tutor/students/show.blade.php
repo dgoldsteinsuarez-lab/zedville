@@ -137,6 +137,28 @@
     </div>
 
     <div class="card mb-4">
+        <div class="card-header">Exam evidence</div>
+        <div class="card-body p-0">
+            @if ($realExamAttempts->isEmpty())
+                <p class="text-muted p-3 mb-0">No real exams completed yet.</p>
+            @else
+                <table class="table mb-0">
+                    <thead><tr><th>Exam</th><th>Score</th><th>Completed</th></tr></thead>
+                    <tbody>
+                        @foreach ($realExamAttempts as $attempt)
+                            <tr>
+                                <td>{{ $attempt->item->title ?? '(exam removed)' }}</td>
+                                <td>{{ $attempt->score }}/{{ $attempt->total_questions }}</td>
+                                <td>{{ $attempt->completed_at?->format('d M Y') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    </div>
+
+    <div class="card mb-4">
         <div class="card-header">Recent mood (last {{ $moodHistory->count() }} entries)</div>
         <div class="card-body">
             @if ($moodHistory->isEmpty())

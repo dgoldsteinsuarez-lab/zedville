@@ -27,41 +27,7 @@ class LoginQuizController extends Controller
         return response()->json(['show' => false]);
     }
 
-    // Get answered question IDs
-    $answeredIds = LoginQuizAttempt::where('user_id', $userId)
-        ->pluck('question_id');
-
-    // Doc: "a monthly set of questions, determined by that month's School
-    // Month Settings" - resolve the student's Level (Class -> Grade ->
-    // Level) and the school's current progression month (start_month +
-    // elapsed calendar months), then only pick from questions that match
-    // both. sid is an optional override (a question with sid set only
-    // applies to that one school); sid null applies to every school at
-    // that Level/month.
-    $gradeLevelId = optional(optional(optional($user->gradeRelation)->grade)->level)->id;
-    $progressionMonth = SchoolMonthSetting::currentProgressionMonthNumber($user->sid);
-    $monthId = $progressionMonth ? Month::where('name', "Month {$progressionMonth}")->value('id') : null;
-
-    $query = LoginQuestion::with('options')->whereNotIn('id', $answeredIds);
-
-    if ($gradeLevelId && $monthId) {
-        $question = (clone $query)
-            ->where('grade_level_id', $gradeLevelId)
-            ->where('month_id', $monthId)
-            ->where(fn ($q) => $q->whereNull('sid')->orWhere('sid', $user->sid))
-            ->inRandomOrder()
-            ->first();
-    } else {
-        $question = null;
-    }
-
-    // Fall back to any unanswered question if nothing matches the
-    // Level/month yet (e.g. content hasn't been entered for it) - keeps
-    // the feature from going silent rather than leaving students with
-    // nothing, until real content exists for every Level/month.
-    if (!$question) {
-        $question = $query->inRandomOrder()->first();
-    }
+    $question = $this->pickQuestion($user);
 
     if (!$question) {
         return response()->json(['show' => false]);
@@ -82,6 +48,57 @@ class LoginQuizController extends Controller
         }),
     ]);
 }
+
+    /**
+     * Doc: "a monthly set of questions, determined by that month's School
+     * Month Settings" - the student's Level (Class -> Grade -> Level) and
+     * the school's current progression month (start_month + elapsed
+     * calendar months). sid null applies to every school; a question with
+     * sid set only applies to that school.
+     *
+     * Daniel, 2026-10-21: questions should match the activity students are
+     * doing that month. A month has 10 questions but more school days, so
+     * once they're used up this stays on the student's own Level and on
+     * months they've already reached - catch-up on earlier months first,
+     * then re-ask ones they got wrong, then review - instead of jumping to
+     * future months' topics.
+     */
+    private function pickQuestion($user): ?LoginQuestion
+    {
+        $answeredIds = LoginQuizAttempt::where('user_id', $user->id)->pluck('question_id');
+
+        $gradeLevelId = optional(optional(optional($user->gradeRelation)->grade)->level)->id;
+        $progressionMonth = SchoolMonthSetting::currentProgressionMonthNumber($user->sid);
+
+        if ($gradeLevelId && $progressionMonth) {
+            $reachedMonthIds = Month::whereIn('name', array_map(fn ($n) => "Month {$n}", range(1, $progressionMonth)))
+                ->pluck('id', 'name');
+            $currentMonthId = $reachedMonthIds["Month {$progressionMonth}"] ?? null;
+
+            $forLevel = fn () => LoginQuestion::with('options')
+                ->where('grade_level_id', $gradeLevelId)
+                ->where(fn ($q) => $q->whereNull('sid')->orWhere('sid', $user->sid));
+
+            $correctIds = LoginQuizAttempt::where('user_id', $user->id)->where('is_correct', true)->pluck('question_id');
+            $neverRightIds = LoginQuizAttempt::where('user_id', $user->id)->where('is_correct', false)
+                ->pluck('question_id')->diff($correctIds);
+
+            $question = $forLevel()->where('month_id', $currentMonthId)->whereNotIn('id', $answeredIds)->inRandomOrder()->first()
+                ?? $forLevel()->whereIn('month_id', $reachedMonthIds)->whereNotIn('id', $answeredIds)->inRandomOrder()->first()
+                ?? $forLevel()->whereIn('month_id', $reachedMonthIds)->whereIn('id', $neverRightIds)->inRandomOrder()->first()
+                ?? $forLevel()->where('month_id', $currentMonthId)->inRandomOrder()->first()
+                ?? $forLevel()->whereIn('month_id', $reachedMonthIds)->inRandomOrder()->first();
+
+            if ($question) {
+                return $question;
+            }
+        }
+
+        // Nothing written for this Level yet - any unanswered question, so
+        // the feature doesn't go silent until every Level has content.
+        return LoginQuestion::with('options')->whereNotIn('id', $answeredIds)->inRandomOrder()->first();
+    }
+
     public function submit(Request $request)
     {
         $request->validate([
@@ -104,6 +121,12 @@ class LoginQuizController extends Controller
 
         $isCorrect = (bool) $selected->is_correct;
 
+        // FinHero Point Values doc: "1 pt per correct first attempt" - a
+        // question re-asked for review doesn't earn the point again.
+        $firstAttempt = !LoginQuizAttempt::where('user_id', Auth::id())
+            ->where('question_id', $request->question_id)
+            ->exists();
+
         LoginQuizAttempt::create([
             'user_id'     => Auth::id(),
             'question_id' => $request->question_id,
@@ -111,8 +134,7 @@ class LoginQuizController extends Controller
             'is_correct'  => $isCorrect,
         ]);
 
-         // ✅ ADD POINT ONLY IF CORRECT
-        if ($isCorrect) {
+        if ($isCorrect && $firstAttempt) {
             app(FinheroPointService::class)->addPoints(auth()->id(), 'quiz', 'daily_quiz', 1);
         }
 

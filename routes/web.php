@@ -10,6 +10,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LoginQuizController;
 use App\Http\Controllers\Admin\FinheroAdminController;
 use App\Http\Controllers\Student\FinheroStudentController;
+use App\Http\Controllers\Student\LanguageController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,12 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+// Student language switcher (bugs.md, 2026-10-21) - SetStudentLocale
+// middleware (global on the web group) reads what this writes.
+Route::post('/language/switch', [LanguageController::class, 'switch'])
+    ->middleware(['auth'])
+    ->name('language.switch');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -171,6 +178,15 @@ Route::middleware(['auth'])->group(function () {
         // Save task points
     Route::post('/finhero/save-points', [FinheroStudentController::class, 'savePoints'])
         ->name('finhero.save-points')->middleware('throttle:20,1');
+    // A Task page reached its "all questions done" screen
+    Route::post('/finhero/task-complete', [FinheroStudentController::class, 'completeTask'])
+        ->name('finhero.task-complete')->middleware('throttle:20,1');
+
+    // Library activity reading/quiz page (Daniel, 2026-10-21: "5. do it")
+    Route::get('/finhero/library/{key}', [FinheroStudentController::class, 'libraryPage'])
+        ->name('library.page');
+    Route::post('/finhero/library/{key}/submit', [FinheroStudentController::class, 'submitLibrary'])
+        ->name('library.submit')->middleware('throttle:20,1');
 
 });
 
@@ -210,6 +226,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function ()
     // school. Super Admin only: it is a platform-wide setting, not a
     // single-school one.
     Route::middleware('role:super_admin')->group(function () {
+        // A Library module's questions are shared by every school it's
+        // assigned to, so editing them is platform-wide too.
+        Route::get   ('/library-modules/{moduleId}/questions',              [FinheroAdminController::class, 'libraryQuestions']);
+        Route::post  ('/library-modules/{moduleId}/questions/save',         [FinheroAdminController::class, 'saveLibraryQuestion']);
+        Route::delete('/library-modules/{moduleId}/questions/{questionId}', [FinheroAdminController::class, 'deleteLibraryQuestion']);
+
         Route::get ('/point-defaults',       [FinheroAdminController::class, 'pointDefaultsIndex'])->name('finhero.point-defaults.index');
         Route::post('/point-defaults',       [FinheroAdminController::class, 'pointDefaultsStore'])->name('finhero.point-defaults.store');
         Route::put ('/point-defaults/{id}',  [FinheroAdminController::class, 'pointDefaultsUpdate'])->name('finhero.point-defaults.update');

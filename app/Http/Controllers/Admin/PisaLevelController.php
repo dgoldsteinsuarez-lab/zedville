@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CurriculumCategory;
+use App\Models\CurriculumItem;
 use App\Models\PisaProficiencyLevel;
 use Illuminate\Http\Request;
 
@@ -66,5 +68,39 @@ class PisaLevelController extends Controller
         $pisaLevel->delete();
 
         return back()->with('success', 'PISA level deleted.');
+    }
+
+    /**
+     * Daniel, 2026-10-21: "Check how this assessments are done and build an
+     * Activity Manager... divide in the levels you search for, and they
+     * would be able to make the activities for each level." Organizes
+     * authoring by PisaProficiencyLevel (the only axis now - see the
+     * 2026-10-21 revision below).
+     *
+     * Revised the same day: "for PISA i don't need to divide in Zedville
+     * levels, only the PISA levels... independent from if a student is
+     * Junior, Rookie or else, they will have the same activities." PISA
+     * Practice is one single global CurriculumCategory now (not one per
+     * Grade Level - see the make_pisa_practice_global migration), so this
+     * is a flat item list per PISA level, no Grade Level sections.
+     *
+     * Every write (add/edit/delete item, manage its questions) still
+     * reuses the existing admin.curriculum.* routes/controller methods
+     * unchanged - this page is a level-first read view + a quick-add
+     * form, not a parallel authoring implementation.
+     */
+    public function activities(PisaProficiencyLevel $pisaLevel)
+    {
+        $pisaCategory = CurriculumCategory::where('is_pisa_practice', true)->first();
+
+        $items = $pisaCategory
+            ? CurriculumItem::where('category_id', $pisaCategory->id)
+                ->where('pisa_proficiency_level_id', $pisaLevel->id)
+                ->withCount('questions')
+                ->orderBy('sort_order')
+                ->get()
+            : collect();
+
+        return view('admin.pisa.activities', compact('pisaLevel', 'pisaCategory', 'items'));
     }
 }

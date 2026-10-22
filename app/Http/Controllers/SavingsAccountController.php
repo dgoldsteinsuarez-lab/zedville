@@ -56,6 +56,7 @@ class SavingsAccountController extends Controller
         );
 
         app(ParticipationService::class)->award($user->id, 'emergency_fund_open');
+        app(\App\Services\ActivityCompletionService::class)->complete($user->id, 'emergency_fund', 'Emergency Fund');
 
         if ($updated) {
             return redirect()->back()->with('success', '

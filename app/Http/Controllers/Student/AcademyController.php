@@ -7,6 +7,7 @@ use App\Models\CurriculumAttempt;
 use App\Models\CurriculumAttemptAnswer;
 use App\Models\CurriculumCategory;
 use App\Models\CurriculumItem;
+use App\Services\FinheroPointService;
 use App\Services\ParticipationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,30 +21,62 @@ use Illuminate\Support\Facades\DB;
  */
 class AcademyController extends Controller
 {
-    private function studentGradeLevelId(): ?int
+    private function studentGradeLevel()
     {
         $user = Auth::user();
 
-        return optional(optional(optional($user->gradeRelation)->grade)->level)->id;
+        return optional(optional($user->gradeRelation)->grade)->level;
     }
 
+    private function studentGradeLevelId(): ?int
+    {
+        return optional($this->studentGradeLevel())->id;
+    }
+
+    /**
+     * Daniel, 2026-10-21: "for PISA i don't need to divide in Zedville
+     * levels, only the PISA levels... independent from if a student is
+     * Junior, Rookie or else, they will have the same activities." A
+     * category with a null grade_level_id is global (PISA Practice,
+     * consolidated into one category regardless of Zedville Level) - every
+     * authenticated student can reach it. Every other category is still
+     * gated to the student's own Grade Level exactly as before.
+     */
+    private function canAccessCategory(CurriculumCategory $category): bool
+    {
+        return $category->grade_level_id === null || $category->grade_level_id === $this->studentGradeLevelId();
+    }
+
+    /**
+     * Daniel, 2026-10-21: "Pisa should not be there. Pisa should only be in
+     * PISA" - the PISA Practice category still exists underneath (its
+     * CurriculumItems are now reached via the dedicated Student\PisaController/
+     * routes/pisa.php instead), it's just excluded from this generic grid so
+     * it isn't offered as a second, redundant entry point.
+     */
     public function index()
     {
-        $gradeLevelId = $this->studentGradeLevelId();
+        $gradeLevel = $this->studentGradeLevel();
+        $gradeLevelId = optional($gradeLevel)->id;
 
         $categories = $gradeLevelId
             ? CurriculumCategory::where('grade_level_id', $gradeLevelId)
+                ->where('is_pisa_practice', false)
                 ->withCount('items')
                 ->orderBy('sort_order')
                 ->get()
             : collect();
 
-        return view('education.academy.index', compact('categories', 'gradeLevelId'));
+        // The Log In questions, practised month by month (MonthlyQuestionsController).
+        $hasMonthlyQuestions = $gradeLevelId
+            && \App\Models\LoginQuestion::where('grade_level_id', $gradeLevelId)->exists();
+
+        return view('education.academy.index', compact('categories', 'gradeLevel', 'hasMonthlyQuestions'));
     }
 
     public function category(CurriculumCategory $category)
     {
-        abort_unless($category->grade_level_id === $this->studentGradeLevelId(), 403);
+        abort_unless($this->canAccessCategory($category), 403);
 
         $studentId = Auth::id();
         $items = $category->items()
@@ -64,10 +97,24 @@ class AcademyController extends Controller
 
     public function item(CurriculumItem $item)
     {
-        abort_unless($item->category->grade_level_id === $this->studentGradeLevelId(), 403);
+        abort_unless($this->canAccessCategory($item->category), 403);
 
         if ($item->type !== 'quiz') {
             return view('education.academy.content', compact('item'));
+        }
+
+        // A real exam only gets one completed attempt (bugs.md, 2026-10-21
+        // - "evidence of learning" reads oddly if it can be retaken to
+        // 100%). Land back on the existing result instead of the quiz form.
+        if ($item->is_real_exam) {
+            $existingAttempt = CurriculumAttempt::where('item_id', $item->id)
+                ->where('student_id', Auth::id())
+                ->with('answers.question', 'answers.option')
+                ->first();
+
+            if ($existingAttempt) {
+                return view('education.academy.results', ['item' => $item, 'attempt' => $existingAttempt]);
+            }
         }
 
         $questions = $item->questions()->with('options')->get()->map(function ($question) {
@@ -83,8 +130,15 @@ class AcademyController extends Controller
 
     public function submit(Request $request, CurriculumItem $item)
     {
-        abort_unless($item->category->grade_level_id === $this->studentGradeLevelId(), 403);
+        abort_unless($this->canAccessCategory($item->category), 403);
         abort_unless($item->type === 'quiz', 404);
+
+        if ($item->is_real_exam) {
+            $alreadyCompleted = CurriculumAttempt::where('item_id', $item->id)
+                ->where('student_id', Auth::id())
+                ->exists();
+            abort_if($alreadyCompleted, 403, "You've already completed this exam.");
+        }
 
         $questions = $item->questions()->with('options')->get();
         $answers = $request->input('answers', []);
@@ -129,23 +183,65 @@ class AcademyController extends Controller
         // award()/alreadyEarned(), mirroring the street_sign_press case).
         app(ParticipationService::class)->award(Auth::id(), 'curriculum_item_complete', (string) $item->id);
 
+        // A real exam is on the calendar (CurriculumController::
+        // syncRealExamCalendar) - taking it finishes that activity.
+        if ($item->is_real_exam) {
+            app(\App\Services\ActivityCompletionService::class)
+                ->complete(Auth::id(), 'exam_' . $item->id, 'exam-' . $item->title);
+        }
+
+        // Daniel, 2026-10-21, revising the flat "1 point/month" version:
+        // "1 point might be little, as there are many... one point for
+        // each category, for example, the question (multiple choice), the
+        // graphic and exam, one point each if done it... if he has done
+        // more than 4, he already gets one point, and thats it."
+        //
+        // Per category (not hardcoded to Activities/Graphics/Exams - the
+        // same rule applies uniformly to any category, including PISA
+        // Practice and the level-specific extras like Insurance/Credit,
+        // since there's no principled reason those should behave
+        // differently and no stable "this is one of the 3 examples"
+        // signal to gate on anyway): once a student has more than 4
+        // perfect-scored, *distinct* items completed in that category this
+        // month, award 1 FinHero point for it - capped there ("that's
+        // it"), not re-awarded for a 5th, 6th, etc. Real exams don't
+        // count - they're not voluntary practice, and already have their
+        // own locked, one-attempt evidence-of-learning treatment.
+        //
+        // Reads "done" as "done correctly," carrying over the original
+        // request's "if right" - flagging this plainly since this message
+        // described a volume threshold without repeating that condition,
+        // so it's a real assumption, not a certainty.
+        if ($score === $questions->count() && $questions->count() > 0 && !$item->is_real_exam) {
+            $categoryKey = 'academy_cat_' . $item->category_id;
+
+            $alreadyAwardedThisMonth = DB::table('finhero_student_points')
+                ->where('student_id', Auth::id())
+                ->where('source_type', 'activity')
+                ->where('source_key', $categoryKey)
+                ->where('month', now()->month)
+                ->where('year', now()->year)
+                ->exists();
+
+            if (!$alreadyAwardedThisMonth) {
+                $perfectItemsThisCategoryThisMonth = CurriculumAttempt::query()
+                    ->join('curriculum_items', 'curriculum_items.id', '=', 'curriculum_attempts.item_id')
+                    ->where('curriculum_attempts.student_id', Auth::id())
+                    ->where('curriculum_items.category_id', $item->category_id)
+                    ->whereColumn('curriculum_attempts.score', 'curriculum_attempts.total_questions')
+                    ->whereYear('curriculum_attempts.completed_at', now()->year)
+                    ->whereMonth('curriculum_attempts.completed_at', now()->month)
+                    ->distinct()
+                    ->count('curriculum_attempts.item_id');
+
+                if ($perfectItemsThisCategoryThisMonth > 4) {
+                    app(FinheroPointService::class)->addPoints(Auth::id(), 'activity', $categoryKey, 1);
+                }
+            }
+        }
+
         $attempt->load('answers.question', 'answers.option');
 
         return view('education.academy.results', compact('item', 'attempt'));
-    }
-
-    public function pisaShortcut()
-    {
-        $gradeLevelId = $this->studentGradeLevelId();
-
-        $category = $gradeLevelId
-            ? CurriculumCategory::where('grade_level_id', $gradeLevelId)->where('is_pisa_practice', true)->first()
-            : null;
-
-        if (!$category) {
-            return view('education.academy.pisa-empty');
-        }
-
-        return redirect()->route('academy.category', $category);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\ClassColor;
 
 /**
  * Admin screen for the Emergency Fund Account activity position: which
@@ -147,8 +148,8 @@ class EmergencyFundPositionController extends Controller
                 ->where('id', $calendarEvent->id)
                 ->update([
                     'position' => $position,
-                    'backgroundColor' => '#0053f9',
-                    'borderColor' => '#0053f9',
+                    'backgroundColor' => ClassColor::hex((int) $cid),
+                    'borderColor' => ClassColor::hex((int) $cid),
                     'start' => $calendarStart,
                     'end' => $calendarEnd,
                     'updated_at' => now(),
@@ -161,8 +162,8 @@ class EmergencyFundPositionController extends Controller
                 'description' => 'This is Emergency Fund',
                 'position' => $position,
                 'repeatActivity' => '0',
-                'backgroundColor' => '#0053f9',
-                'borderColor' => '#0053f9',
+                'backgroundColor' => ClassColor::hex((int) $cid),
+                'borderColor' => ClassColor::hex((int) $cid),
                 'start' => $calendarStart,
                 'end' => $calendarEnd,
                 'created_at' => now(),

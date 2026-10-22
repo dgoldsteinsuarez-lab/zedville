@@ -870,6 +870,13 @@
     }
 
     function showCompletion() {
+      // Tells the server this task is finished (blackboard + Engagement badge).
+      fetch("{{ route('finhero.task-complete') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+        body: JSON.stringify({ activity_key: @json($activityKey) })
+      }).catch(() => {});
+
       const correctLevel = state.correctLevel;
       $("completion-text").innerHTML =
         `Your income of <strong>${state.salary.toLocaleString()} zeds</strong> is ` +

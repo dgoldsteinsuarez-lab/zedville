@@ -25,10 +25,14 @@ class DashboardEngagementBadgeTest extends TestCase
     public function test_dashboard_shows_a_real_earned_engagement_badge(): void
     {
         $student = User::factory()->create(['role' => 4]);
+        // Required events are counted per class, so the student needs one.
+        $class = \App\Models\SchoolClass::create(['sid' => $student->sid ?? '1', 'name' => 'Class ' . uniqid()]);
+        $student->forceFill(['grade' => $class->id])->save();
         $now = now();
 
         $eventId = DB::table('calendar_events')->insertGetId([
             'title'      => 'Required Activity',
+            'classId'      => $class->id,
             'position'   => 'required',
             'start'      => $now->toDateTimeString(),
             'created_at' => $now,

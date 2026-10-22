@@ -20,6 +20,7 @@ class CityMapAdminTest extends TestCase
 
     public function test_super_admin_can_upload_the_city_map_image(): void
     {
+        $this->usePublicPathInTemp();
         $admin = User::factory()->create(['role' => 1]);
         // GD isn't available in this environment's PHP CLI, so
         // UploadedFile::fake()->image() (which renders real pixels) can't

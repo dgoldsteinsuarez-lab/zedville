@@ -23,6 +23,7 @@ use App\Models\Petition;
 use App\Models\ReferendumVote;
 use App\Models\PetitionSignature;
 use App\Models\CityProposal;
+use App\Services\FinheroPointService;
 
 
 class EFDController extends Controller
@@ -148,13 +149,40 @@ class EFDController extends Controller
             //->orderBy('transaction_date', 'desc') // latest first
             ->get();
         //Select fin hero Task
+        // Daniel, 2026-10-21: "classes have the same tasks, should be for
+        // grade... one grade can have many classes" - a task assigned to
+        // the whole grade (grade_id set, cid null) must reach every
+        // class under it, not just an exact class-id match.
+        $userGradeId = DB::table('classes')->where('id', $user->grade)->value('grade_id');
         $taskActivities = DB::table('finhero_activity_registry')
             ->where('type', 'task')
             ->where('sid', $user->sid)
-            ->where('cid', $user->grade)
+            ->where(function ($q) use ($user, $userGradeId) {
+                $q->where('cid', $user->grade);
+                if ($userGradeId) {
+                    $q->orWhere('grade_id', $userGradeId);
+                }
+            })
             ->where('is_active', 1)
             ->orderBy('id', 'ASC')
             ->get();
+        // Daniel, 2026-10-21: "5. do it" - FinHero Library activities were
+        // never read here at all before (only type='task' was), so an
+        // admin-created Library item had nowhere to show up as a Required
+        // Activity. Same scope rule as taskActivities above.
+        $libraryActivities = DB::table('finhero_activity_registry')
+            ->where('type', 'library')
+            ->where('sid', $user->sid)
+            ->where(function ($q) use ($user, $userGradeId) {
+                $q->where('cid', $user->grade);
+                if ($userGradeId) {
+                    $q->orWhere('grade_id', $userGradeId);
+                }
+            })
+            ->where('is_active', 1)
+            ->orderBy('id', 'ASC')
+            ->get();
+        $libraryModalModules = $this->libraryModalModules($libraryActivities->pluck('activity_key')->all());
         //Complease activity
         $completedActivities = DB::table('activity_completions')
             ->where('student_id', $user->id)
@@ -162,7 +190,48 @@ class EFDController extends Controller
             ->whereMonth('completed_at', now()->month)
             ->pluck('activity_type')
             ->toArray();
-        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'bankAccount', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'taskActivities', 'completedActivities'));
+        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'bankAccount', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'taskActivities', 'libraryActivities', 'libraryModalModules', 'completedActivities'));
+    }
+
+    /**
+     * The Library pop-up's data, in the shape the old hardcoded
+     * public/asset/front/js/modules.js had, plus question/option ids so
+     * "Check Answers" can send the answers to the server, and whether the
+     * module is assigned to this student (only assigned modules earn
+     * points). The pop-up writes these strings into innerHTML, so every
+     * piece of text is HTML-escaped here.
+     */
+    private function libraryModalModules(array $assignedKeys): array
+    {
+        $subtopic = fn (array $section) => [
+            'title' => e($section['title'] ?? ''),
+            'text' => array_map(fn ($line) => e($line), $section['lines'] ?? []),
+        ];
+
+        return \App\Models\FinheroLibraryModule::with('questions.options')
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn ($module) => [
+                'id' => $module->id,
+                'activity_key' => $module->module_key,
+                'assigned' => in_array($module->module_key, $assignedKeys, true),
+                'title' => e($module->title),
+                'icon' => e($module->icon),
+                'color' => 'from-emerald-400 to-teal-500',
+                'content' => [
+                    'subtopic1' => $subtopic($module->lesson[0] ?? []),
+                    'subtopic2' => $subtopic($module->lesson[1] ?? []),
+                    'questions' => $module->questions->map(fn ($question) => [
+                        'qid' => $question->id,
+                        'q' => e($question->question_text),
+                        'options' => $question->options->map(fn ($option) => e($option->option_text))->values()->all(),
+                        'option_ids' => $question->options->pluck('id')->values()->all(),
+                        'correct' => $question->options->search(fn ($option) => $option->is_correct),
+                    ])->values()->all(),
+                ],
+            ])
+            ->values()
+            ->all();
     }
     public function emergencyFundInterest($userId)
     {
@@ -222,28 +291,62 @@ class EFDController extends Controller
     {
         return view('education.budget-quiz-2');
     }
+    /**
+     * Daniel, 2026-10-21: "the Match Needs and Wants, is the one called
+     * Monthly Budget Activity. You can move it to Finhero Badge Activity...
+     * 3 points if done all correct the first time, and let two attempts
+     * before loosing one point."
+     *
+     * This game never lets a wrong drop land (see mba.js's handleDrop) -
+     * there's no single "submit and grade" moment, so "first time" is
+     * measured as the total count of wrong-category drops across the whole
+     * session, sent as `mistakes`. Tiered (stated explicitly since the
+     * exact thresholds were my call, not spelled out): 0 mistakes = 3
+     * points, 1-2 mistakes ("two attempts" of leeway) = 2 points, 3+ = 1
+     * point - never zero for actually finishing the activity.
+     *
+     * Only the first completion each month earns FinHero points (explicit
+     * month/year check, not FinheroPointService's own per-day dedup, which
+     * would let a same-month replay re-award) - re-saving later the same
+     * month still updates the stored layout, just doesn't pay out again.
+     */
     public function storemba(Request $request)
     {
         $userId = Auth::id();
 
-        // Validate that we receive a JSON object
-        $request->validate([
-            'budget' => 'required|array'
+        $validated = $request->validate([
+            'budget' => 'required|array',
+            'mistakes' => 'nullable|integer|min:0',
         ]);
-
 
         // Save or update the record for this user
         $mba = UserMba::updateOrCreate(
             ['user_id' => $userId],     // condition (update if exists)
-            ['budget' => $request->budget] // data to save
+            ['budget' => $validated['budget']] // data to save
         );
-        //Cal Point under participation_logs
-        $eventId = 1;
-        app(ParticipationService::class)->handleActivity($userId, 'mba', $eventId);
+        // Completion (against this class's calendar event) + participation point.
+        app(ParticipationService::class)->handleActivity($userId, 'mba', 'Needs, Wants & Savings Match');
+
+        $pointsAwarded = 0;
+        $alreadyAwardedThisMonth = DB::table('finhero_student_points')
+            ->where('student_id', $userId)
+            ->where('source_type', 'activity')
+            ->where('source_key', 'needs_wants_savings_match')
+            ->where('month', now()->month)
+            ->where('year', now()->year)
+            ->exists();
+
+        if (!$alreadyAwardedThisMonth) {
+            $mistakes = (int) ($validated['mistakes'] ?? 0);
+            $pointsAwarded = $mistakes === 0 ? 3 : ($mistakes <= 2 ? 2 : 1);
+            app(FinheroPointService::class)->addPoints($userId, 'activity', 'needs_wants_savings_match', $pointsAwarded);
+        }
+
         return response()->json([
             'status' => true,
-            'message' => 'MBA budget saved successfully!',
-            'data' => $mba
+            'message' => 'Needs, Wants & Savings Match saved successfully!',
+            'data' => $mba,
+            'pointsAwarded' => $pointsAwarded,
         ]);
     }
     public function getMbaData(Request $request)

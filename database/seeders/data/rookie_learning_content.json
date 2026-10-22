@@ -1,0 +1,493 @@
+{
+  "level": "Rookie",
+  "login_months": [
+    {
+      "month": 1,
+      "theme": "Setting up your money",
+      "activities": [
+        "Citizen Activation: open a current account at Universal Bank",
+        "Sign the direct deposit authorisation (salary)",
+        "Set up auto-debit for bills (School Fees, utilities)",
+        "Consumer profile survey (personal monthly expenses)",
+        "First monthly bank statement",
+        "Open the Emergency Fund Account (20% of salary every month)"
+      ],
+      "library_module_id": 5,
+      "changes": "Rebuilt around the six Citizen Activation steps students actually complete in their first month. The original Month 1 never asked about direct deposit, and half of it was general budgeting, which now lives in Month 2.",
+      "questions": [
+        {"type": "mcq", "question": "You just opened your account at Universal Bank. What is a current account mainly used for?", "options": ["Everyday money — receiving your salary and paying your bills", "Locking money away so you can't touch it for years", "Borrowing money from the bank", "Saving only for emergencies"], "correct": 0, "origin": "improved", "note": "From Log In M1 Q1, now about the exact account students open in Citizen Activation (Step 2)."},
+        {"type": "mcq", "question": "What does a direct deposit do?", "options": ["Pays your bills automatically each month", "Sends your salary straight into your bank account on payday", "Lets you take cash out of the bank", "Moves money into your Emergency Fund Account"], "correct": 1, "origin": "new", "note": "Citizen Activation Step 3 (salary setup). The original set never asked about direct deposit."},
+        {"type": "mcq", "question": "During Citizen Activation you signed a direct deposit authorisation. What did it give permission for?", "options": ["For City Hall to see everything you buy", "For your monthly bills to be paid automatically", "For your salary to be paid electronically into your account", "For the bank to open a second account for you"], "correct": 2, "origin": "new", "note": "Explains the form students sign in Step 3."},
+        {"type": "mcq", "question": "Which sentence about direct deposit and auto-debit is correct?", "options": ["They are two names for the same thing", "Both only happen when you click “pay”", "Direct deposit takes money out; auto-debit puts money in", "Direct deposit puts money in; auto-debit takes money out"], "correct": 3, "origin": "new", "note": "The key idea of the onboarding: direct deposit = money in, auto-debit = money out."},
+        {"type": "mcq", "question": "Your School Fees are on auto-debit. What happens every month?", "options": ["The agreed amount is taken from your account automatically on a set date", "You must remember to pay the school yourself", "The school sends money to your account", "The fee is added to your salary"], "correct": 0, "origin": "new", "note": "Citizen Activation Step 4 (School Fees auto-debit)."},
+        {"type": "true_false", "question": "Setting up auto-debit for your bills helps you avoid late payments and late fees.", "options": ["True", "False"], "correct": 0, "origin": "improved", "note": "From Log In M1 Q5, now True/False."},
+        {"type": "mcq", "question": "What did your answers in the consumer profile survey decide?", "options": ["How much salary you earn", "Your personal monthly expenses in Zedville", "Which bank you are allowed to use", "Your FinHero badge"], "correct": 1, "origin": "new", "note": "Citizen Activation Step 5."},
+        {"type": "mcq", "question": "What is your monthly bank statement for?", "options": ["To advertise new bank products", "To apply for a loan", "To show the money that came in, the money that went out, and your balance", "To change your bank PIN"], "correct": 2, "origin": "improved", "note": "From Log In M1 Q2: clearer wording and realistic wrong answers."},
+        {"type": "mcq", "question": "Every month, right after payday, 20% of your salary moves to your Emergency Fund Account. Why is this a smart setup?", "options": ["It makes your salary bigger", "It pays your bills for you", "It lets you spend more on wants", "You save every month without having to remember"], "correct": 3, "origin": "improved", "note": "From Log In M1 Q6. Removed a wrong answer that was partly true (“blocks you from spending”) and the word “allowance” — Zedville pays a salary."},
+        {"type": "true_false", "question": "Money in your Emergency Fund Account is meant for fun purchases, like concert tickets.", "options": ["True", "False"], "correct": 1, "origin": "new", "note": "What the Emergency Fund Account opened this month is for."}
+      ]
+    },
+    {
+      "month": 2,
+      "theme": "What is a budget?",
+      "activities": [
+        "Needs, Wants & Savings Match",
+        "FinHero Task 1 — Classify Your Salary",
+        "Library: Introduction to Budget"
+      ],
+      "library_module_id": 1,
+      "changes": "The original Month 2 was about income and expenses while the Library module for Month 2 was Introduction to Budget. Both now cover budgeting, and the income/expenses questions moved to Month 3 with their Library module.",
+      "questions": [
+        {"type": "mcq", "question": "What is a budget?", "options": ["A plan for how you will use your money", "A type of bank account", "A way to earn more money", "A list of things you want to buy"], "correct": 0, "origin": "improved", "note": "From Introduction to Budget Q1; “a guide” became “a plan” and the answer moved from b) to a)."},
+        {"type": "mcq", "question": "What is the first step in making a budget?", "options": ["Choosing what to buy first", "Knowing how much money is coming in", "Opening a second bank account", "Borrowing extra money"], "correct": 1, "origin": "improved", "note": "From Introduction to Budget Q4 with realistic wrong answers."},
+        {"type": "mcq", "question": "In the Needs, Wants & Savings Match, where does a school backpack belong?", "options": ["Wants", "Savings", "Needs", "It doesn't belong in a budget"], "correct": 2, "origin": "new", "note": "Ties to the Needs, Wants & Savings Match activity."},
+        {"type": "mcq", "question": "Which of these is a want, not a need?", "options": ["Lunch at school", "Bus fare to school", "Electricity at home", "A new video game"], "correct": 3, "origin": "improved", "note": "From Log In M2 Q8 with a clearer want."},
+        {"type": "true_false", "question": "Having a budget means you can never spend money on things you enjoy.", "options": ["True", "False"], "correct": 1, "origin": "new", "note": "Common misconception: a budget includes wants."},
+        {"type": "mcq", "question": "Why is it important to budget your salary?", "options": ["Because money is limited, so you need to choose what matters most", "Because the bank requires it", "So you can spend it all in the first week", "So you never have to pay bills"], "correct": 0, "origin": "improved", "note": "From Introduction to Budget Q3."},
+        {"type": "mcq", "question": "You want headphones that cost 300 zeds. How can a budget help?", "options": ["It gives you the headphones for free", "It helps you set aside a little each month until you have enough", "It lets you borrow the money", "It tells you to stop saving"], "correct": 1, "origin": "improved", "note": "From Introduction to Budget Q7, now a concrete goal in zeds."},
+        {"type": "true_false", "question": "Spending more than you earn can lead to money problems, like debt.", "options": ["True", "False"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "Which situation shows good budgeting?", "options": ["Spending all your salary the day it arrives", "Borrowing money every week", "Saving part of your salary every month", "Ignoring your expenses"], "correct": 2, "origin": "improved", "note": "From Log In M1 Q8, moved to the budget month; “allowance” became “salary”."},
+        {"type": "true_false", "question": "Once you have a budget and a savings goal, you should check your progress regularly to see if you're on track.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From Log In M1 Q10, moved to the budget month."}
+      ]
+    },
+    {
+      "month": 3,
+      "theme": "Income and expenses",
+      "activities": [
+        "Spending Activity (Supermarket, spending tracker)",
+        "FinHero Task 2 — Budget Calculations",
+        "Reading the monthly statement",
+        "Library: Tracking Income & Expenses"
+      ],
+      "library_module_id": 2,
+      "changes": "Uses the student's own salary, bills and statement instead of allowance and paper-route examples, and adds surplus/deficit calculations in zeds.",
+      "questions": [
+        {"type": "mcq", "question": "What is income?", "options": ["Money you spend on things you need", "Money you receive, like your salary", "Money you owe the bank", "Money you lose"], "correct": 1, "origin": "improved", "note": "From Log In M2 Q1, using the Zedville salary."},
+        {"type": "mcq", "question": "Which of these is an expense?", "options": ["Your monthly salary", "A gift of money from your aunt", "Interest the bank pays you", "Your monthly School Fees"], "correct": 3, "origin": "new", "note": "Uses a real Zedville bill."},
+        {"type": "mcq", "question": "On your bank statement, your salary appears as…", "options": ["Money coming in", "Money going out", "A bill to pay", "A loan"], "correct": 0, "origin": "new", "note": "Reading the statement."},
+        {"type": "mcq", "question": "This month your income is 4,000 zeds and your expenses are 3,600 zeds. What do you have?", "options": ["A deficit of 400 zeds", "A surplus of 400 zeds", "A balanced budget", "A surplus of 7,600 zeds"], "correct": 1, "origin": "new", "note": "Surplus calculation."},
+        {"type": "mcq", "question": "Your income is 3,000 zeds and your expenses are 3,200 zeds. What does that mean?", "options": ["You saved 200 zeds", "Your budget is balanced", "You spent 200 zeds more than you earned — a deficit", "The bank owes you 200 zeds"], "correct": 2, "origin": "improved", "note": "From Log In M2 Q9."},
+        {"type": "true_false", "question": "Tracking every purchase helps you see where your money really goes.", "options": ["True", "False"], "correct": 0, "origin": "new", "note": "Matches the Spending Activity."},
+        {"type": "mcq", "question": "Which is the best example of a need?", "options": ["Groceries for your meals", "A designer hoodie", "Movie tickets", "A new phone case"], "correct": 0, "origin": "improved", "note": "From Log In M2 Q5."},
+        {"type": "mcq", "question": "Why should you pay for needs before wants?", "options": ["Wants are always cheaper", "Needs are optional", "Needs keep you safe and healthy, so they come first", "The bank charges extra for wants"], "correct": 2, "origin": "improved", "note": "From Log In M2 Q3."},
+        {"type": "true_false", "question": "Money you move into savings counts as money you have spent.", "options": ["True", "False"], "correct": 1, "origin": "new", "note": "Savings are not an expense."},
+        {"type": "true_false", "question": "Income is money coming in, and expenses are money going out.", "options": ["True", "False"], "correct": 0, "origin": "improved", "note": "From Log In M2 Q10, now True/False."}
+      ]
+    },
+    {
+      "month": 4,
+      "theme": "Saving",
+      "activities": [
+        "Emergency Fund Account growing every payday",
+        "Setting a personal savings goal",
+        "Library: Savings — Why Save?"
+      ],
+      "library_module_id": 3,
+      "changes": "Connects saving to the 20% that already moves into each student's Emergency Fund Account, and adds simple calculations so students see savings grow.",
+      "questions": [
+        {"type": "mcq", "question": "What does saving mean?", "options": ["Spending all your money right away", "Keeping part of your money for later instead of spending it now", "Borrowing money from friends", "Only paying with cash"], "correct": 1, "origin": "improved", "note": "From Log In M3 Q1."},
+        {"type": "mcq", "question": "Every month 20% of your salary goes to your Emergency Fund Account. If your salary were 4,000 zeds, how much would be saved each month?", "options": ["400 zeds", "2,000 zeds", "800 zeds", "80 zeds"], "correct": 2, "origin": "new", "note": "The student's own Emergency Fund transfer as a calculation."},
+        {"type": "mcq", "question": "Which is the best reason to save?", "options": ["To be ready for future goals and unexpected costs", "To never use your money at all", "To make your bills disappear", "Because spending is always bad"], "correct": 0, "origin": "improved", "note": "From Log In M3 Q2, asked positively instead of “Which is NOT…”."},
+        {"type": "true_false", "question": "Saving only works if you save big amounts at once.", "options": ["True", "False"], "correct": 1, "origin": "improved", "note": "From Log In M3 Q8, flipped to test the misconception."},
+        {"type": "mcq", "question": "You save 100 zeds every month. How much will you have after 6 months, not counting interest?", "options": ["106 zeds", "160 zeds", "1,000 zeds", "600 zeds"], "correct": 3, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "If you save the same amount each month, which goal takes the longest to reach?", "options": ["30 zeds for a hoodie", "60 zeds for concert tickets", "400 zeds for a gaming console", "20 zeds for a birthday gift"], "correct": 2, "origin": "kept", "note": "From Log In M3 Q9."},
+        {"type": "mcq", "question": "What is one easy way to save more each month?", "options": ["Spend less on things you don't really need", "Stop checking your balance", "Borrow money for wants", "Skip paying your bills"], "correct": 0, "origin": "improved", "note": "From Savings Q7."},
+        {"type": "true_false", "question": "If you don't save, an unexpected cost could force you to borrow money.", "options": ["True", "False"], "correct": 0, "origin": "improved", "note": "From Savings Q5."},
+        {"type": "mcq", "question": "Why does a clear savings goal (like “a new bike”) help?", "options": ["It makes saving pointless", "It keeps you motivated and shows how much to save", "It means you must spend more", "Only adults can have savings goals"], "correct": 1, "origin": "improved", "note": "From Savings Q9."},
+        {"type": "true_false", "question": "Saving 10 zeds every week adds up to more than 500 zeds in a year.", "options": ["True", "False"], "correct": 0, "origin": "new", "note": "52 weeks × 10 zeds = 520 zeds."}
+      ]
+    },
+    {
+      "month": 5,
+      "theme": "Emergency fund and the 50-30-20 rule",
+      "activities": [
+        "Emergency Fund Account",
+        "FinHero Task 3 — 50/30/20 Rule",
+        "Library: Emergency Fund"
+      ],
+      "library_module_id": 4,
+      "changes": "Links the 20% savings part of the rule to the student's own Emergency Fund transfer, fixes the “safe than” typo, and replaces $ with zeds.",
+      "questions": [
+        {"type": "mcq", "question": "What is an emergency fund?", "options": ["Money saved for a vacation", "Money set aside for unexpected costs, like a broken phone", "Money borrowed from the bank", "Money for weekend outings"], "correct": 1, "origin": "improved", "note": "From Log In M4 Q1."},
+        {"type": "mcq", "question": "Which is the best use of your Emergency Fund Account?", "options": ["A new pair of sneakers", "A school trip planned months ago", "Fixing your bike after an unexpected flat tire", "A birthday gift"], "correct": 2, "origin": "kept", "note": "From Log In M4 Q3, tidied."},
+        {"type": "mcq", "question": "Ideally, how much should an emergency fund cover?", "options": ["3–6 months of living expenses", "One week of expenses", "One day's salary", "Exactly 100 zeds"], "correct": 0, "origin": "improved", "note": "From Log In M3 Q5: a full question instead of “Ideal emergency savings:”, and zeds instead of $100,000."},
+        {"type": "mcq", "question": "Why do experts suggest saving 3–6 months of expenses?", "options": ["To pay for a big vacation", "To buy new clothes every season", "To invest for quick profits", "To be ready if a family member loses a job or a big surprise bill arrives"], "correct": 3, "origin": "kept", "note": "From Log In M4 Q5."},
+        {"type": "mcq", "question": "In the 50-30-20 rule, what does the 50% go to?", "options": ["Wants", "Needs", "Savings", "Gifts"], "correct": 1, "origin": "improved", "note": "From Log In M4 Q2."},
+        {"type": "mcq", "question": "Zedville moves 20% of your salary into your Emergency Fund Account. Which part of the 50-30-20 rule is that?", "options": ["The 50% for needs", "The 30% for wants", "The 20% for savings", "It isn't part of the rule"], "correct": 2, "origin": "improved", "note": "From Log In M4 Q6, linked to the student's own Emergency Fund transfer."},
+        {"type": "mcq", "question": "Using the 50-30-20 rule, how much of a 4,000-zed salary goes to wants?", "options": ["1,200 zeds", "2,000 zeds", "800 zeds", "400 zeds"], "correct": 0, "origin": "new", "note": "Calculation."},
+        {"type": "true_false", "question": "In the 50-30-20 rule, wants get the largest share of your income.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M4 Q7."},
+        {"type": "true_false", "question": "Keeping your emergency fund in a bank account means you can reach it quickly when something unexpected happens.", "options": ["True", "False"], "correct": 0, "origin": "improved", "note": "From Log In M4 Q4/Q10; fixes “safe than” and the confusing mattress wording."},
+        {"type": "true_false", "question": "Using your emergency fund for planned purchases, like birthday gifts, is a good idea.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M3 Q10."}
+      ]
+    },
+    {
+      "month": 6,
+      "theme": "Interest",
+      "activities": [
+        "Emergency Fund Account earns 2% per year",
+        "Money Market Account earns 4% per year",
+        "Library: Simple Interest"
+      ],
+      "library_module_id": 6,
+      "changes": "Fixes a contradiction between two original questions about time and interest (see Q7 and Q8) and uses the real Universal Bank interest rates.",
+      "questions": [
+        {"type": "mcq", "question": "What is simple interest?", "options": ["A fee the bank charges you every month", "Extra money the bank pays you, based only on the amount you first saved", "Money the government gives every saver", "Interest that also grows on your earlier interest"], "correct": 1, "origin": "improved", "note": "From Log In M6 Q3."},
+        {"type": "mcq", "question": "In simple interest, what is the “principal”?", "options": ["The money you originally saved", "The bank manager", "The interest you earned", "Your monthly salary"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "You save 200 zeds at 5% simple interest per year. How much interest do you earn in one year?", "options": ["5 zeds", "20 zeds", "10 zeds", "205 zeds"], "correct": 2, "origin": "kept", "note": "From Log In M6 Q4; answer moved from b) to c)."},
+        {"type": "mcq", "question": "Your Emergency Fund Account earns 2% per year. If it holds 1,000 zeds for a whole year, about how much interest does it earn?", "options": ["2 zeds", "200 zeds", "102 zeds", "20 zeds"], "correct": 3, "origin": "new", "note": "Uses the real Emergency Fund rate (2%)."},
+        {"type": "mcq", "question": "Which three things decide how much simple interest you earn?", "options": ["The principal, the interest rate, and how long you save", "Only how much you deposit", "Only the interest rate", "How many times you check your balance"], "correct": 0, "origin": "improved", "note": "From Log In M6 Q2; fixed broken punctuation."},
+        {"type": "true_false", "question": "With simple interest, you also earn interest on the interest you already earned.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M6 Q6."},
+        {"type": "true_false", "question": "With simple interest, the interest you earn each year stays the same if your principal and rate don't change.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From Log In M6 Q7."},
+        {"type": "true_false", "question": "The longer you keep your money saved, the more total simple interest you earn.", "options": ["True", "False"], "correct": 0, "origin": "fixed", "note": "Log In M6 Q1 marked “stays the same every year” as wrong, while Library Simple Interest Q10 marked it as right. Both ideas are true — each year's interest is the same, the total grows — so Q7 and Q8 now test them separately."},
+        {"type": "mcq", "question": "Your Money Market Account pays 4% per year and your Emergency Fund Account pays 2%. With the same amount in each for a year, which earns more interest?", "options": ["The Emergency Fund Account", "The Money Market Account", "They earn the same", "Neither earns interest"], "correct": 1, "origin": "new", "note": "Compares the two Universal Bank savings accounts."},
+        {"type": "mcq", "question": "If you double your principal and keep the same rate, what happens to a year's simple interest?", "options": ["It stays the same", "It is cut in half", "It triples", "It doubles"], "correct": 3, "origin": "kept", "note": "From Log In M6 Q9."}
+      ]
+    },
+    {
+      "month": 7,
+      "theme": "Paying bills",
+      "activities": [
+        "Pay Bills page (manual payments)",
+        "Auto-debit authorisations",
+        "Debit payments at the Supermarket and City Mall",
+        "Checking (reconciling) the monthly statement",
+        "Library: Paying Your Bills (new module)"
+      ],
+      "library_module_id": 8,
+      "changes": "New month. The original set jumped from Month 6 to Month 8; this fills the gap using the unused “Auto-debit and Manual Payment” questions and the payment questions from the old Month 5.",
+      "questions": [
+        {"type": "mcq", "question": "You open the Pay Bills page and pay your water bill yourself. What kind of payment is that?", "options": ["An auto-debit", "A manual payment", "A direct deposit", "A transfer to a friend"], "correct": 1, "origin": "improved", "note": "From “Auto-debit and Manual Payment” Q1, as a Zedville scenario."},
+        {"type": "mcq", "question": "Which bill is the best fit for auto-debit?", "options": ["A one-time concert ticket", "A gift for a friend", "School Fees that are the same every month", "Snacks you buy now and then"], "correct": 2, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "You tap your debit card at the City Mall. Where does the money come from?", "options": ["Straight from your bank account", "From the bank, and you pay it back later", "From City Hall", "From next month's salary"], "correct": 0, "origin": "improved", "note": "From Log In M5 Q2; replaced joke answers (“time travel”, “confetti”)."},
+        {"type": "true_false", "question": "Even with auto-debit, you should check your statement to make sure the right amount was taken.", "options": ["True", "False"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "What can happen if you forget to pay a bill on time?", "options": ["The bill disappears", "The company pays it for you", "Your salary goes up", "You may be charged a late fee"], "correct": 3, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "You buy groceries at the Zedville Supermarket and the money comes straight out of your bank account. What kind of payment is that?", "options": ["A direct deposit", "A debit payment", "An auto-debit", "A loan"], "correct": 1, "origin": "new", "note": "Ties to Supermarket purchases."},
+        {"type": "mcq", "question": "Comparing your own records with your bank statement is called…", "options": ["Withdrawing", "Depositing", "Reconciling", "Borrowing"], "correct": 2, "origin": "improved", "note": "From Log In M5 Q6."},
+        {"type": "true_false", "question": "A debit payment lets you spend more money than you have in your account.", "options": ["True", "False"], "correct": 1, "origin": "improved", "note": "From Log In M5 Q9, flipped."},
+        {"type": "mcq", "question": "You see a payment on your statement that you don't recognise. What should you do first?", "options": ["Ask the bank about it — it could be a mistake or fraud", "Ignore it", "Pay it again", "Close all your accounts"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "true_false", "question": "Direct deposit is a way to pay your bills automatically.", "options": ["True", "False"], "correct": 1, "origin": "new", "note": "The most common mix-up: direct deposit is money in."}
+      ]
+    },
+    {
+      "month": 8,
+      "theme": "Fixed and variable expenses",
+      "activities": [
+        "FinHero Task 4 — Budget Reality Check",
+        "Reviewing which bills are on auto-debit",
+        "Library: Fixed vs Variable Expenses"
+      ],
+      "library_module_id": 7,
+      "changes": "Uses the student's real bills (School Fees, Supermarket spending), puts every amount in zeds (one was in $), and adds a question showing that a bill can be on auto-debit and still vary.",
+      "questions": [
+        {"type": "mcq", "question": "Your family's water bill was 40, 55 and 35 zeds in the last three months. What kind of expense is it?", "options": ["Variable", "Fixed", "Income", "Savings"], "correct": 0, "origin": "new", "note": "Shows a bill can be paid automatically and still change in amount."},
+        {"type": "mcq", "question": "Your School Fees are 1,000 zeds every month. What type of expense is that?", "options": ["Variable", "Fixed", "Income", "Savings"], "correct": 1, "origin": "new", "note": "Uses a real Zedville bill."},
+        {"type": "mcq", "question": "Which is the best example of a variable expense?", "options": ["A monthly bus pass that always costs 25 zeds", "An app subscription of 5 zeds every month", "Snacks that cost 5, 8 or 12 zeds depending on the week", "Your School Fees"], "correct": 2, "origin": "improved", "note": "From Log In M8 Q4; every amount in zeds (one was in $)."},
+        {"type": "true_false", "question": "Auto-debit is especially useful for bills that are the same amount every month, like a streaming subscription.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From Log In M8 Q1."},
+        {"type": "mcq", "question": "Why is it helpful to know which expenses are fixed and which are variable?", "options": ["Fixed costs are the only ones that matter", "Variable costs never need planning", "Everyone's expenses are the same", "You can plan fixed costs exactly and stay flexible with variable ones"], "correct": 3, "origin": "improved", "note": "From Log In M8 Q5."},
+        {"type": "mcq", "question": "Which of these is a variable expense in Zedville?", "options": ["What you spend at the Supermarket, which changes each time", "Your monthly School Fees", "Your monthly rent", "A monthly subscription"], "correct": 0, "origin": "new", "note": "Ties to the Spending Activity."},
+        {"type": "true_false", "question": "Variable expenses are impossible to predict, so they don't belong in a budget.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M8 Q7."},
+        {"type": "true_false", "question": "A weekly bus pass that costs the same every week is a variable expense.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M8 Q9."},
+        {"type": "mcq", "question": "On your bank statement, which of these would you expect to be the same amount every month?", "options": ["Your Supermarket purchases", "Your movie tickets", "Your School Fees auto-debit", "Gifts for friends"], "correct": 2, "origin": "new", "note": "Reading the statement."},
+        {"type": "mcq", "question": "What is a smart way to plan your variable expenses?", "options": ["Ignore them until the end of the month", "Look at past statements, set an estimated amount, and track it", "Assume they will be zero", "Treat them all as fixed"], "correct": 1, "origin": "new", "note": ""}
+      ]
+    }
+  ],
+  "library_modules": [
+    {
+      "id": 5,
+      "key": "task_5",
+      "title": "Introduction to Banking",
+      "icon": "🏦",
+      "month": 1,
+      "changes": "Recommended for Month 1, when students open their account. The second lesson now explains the student's own Universal Bank setup; the payment and reconciling part moved to the new Paying Your Bills module. Joke answers (“burns it for energy”, “turns it into toys”) replaced.",
+      "lesson": [
+        {"title": "What's a Bank?", "lines": [
+          "A bank is like a giant, super-strong safe for your money. In Zedville, every citizen banks at Universal Bank.",
+          "A bank helps people and businesses to:",
+          "• Keep money safe — your money is protected in your account",
+          "• Pay and move money — paying bills, buying things and sending money to others",
+          "• Borrow money — a loan has to be paid back, usually with interest",
+          "Three things you can do with your account:",
+          "• Deposit — putting money into your account",
+          "• Withdraw — taking money out of your account",
+          "• Transfer — moving money to another account, for example to a friend"
+        ]},
+        {"title": "Your Universal Bank Account", "lines": [
+          "Your current account is your everyday account: your salary arrives here and your bills are paid from here.",
+          "• Direct deposit — City Hall sends your salary straight into your account on payday (money in)",
+          "• Auto-debit — a company you've authorised takes an agreed amount on a set date, like your School Fees (money out)",
+          "• Emergency Fund Account — a separate savings account; 20% of your salary moves into it every month and it earns interest",
+          "• Monthly statement — a list of all the money that came in and went out, and your balance",
+          "Check your statement every month and make sure you recognise every transaction."
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "What is the main job of a bank?", "options": ["Selling groceries", "Keeping money safe and helping people make payments", "Deciding what you can spend on wants", "Paying everyone the same salary"], "correct": 1, "origin": "improved", "note": "From Banking Q1."},
+        {"type": "mcq", "question": "Putting money into your bank account is called a…", "options": ["Deposit", "Withdrawal", "Transfer", "Loan"], "correct": 0, "origin": "improved", "note": "From Banking Q3 (“burns it for energy”, “turns it into toys” removed)."},
+        {"type": "mcq", "question": "What is a withdrawal?", "options": ["Adding money to your account", "Moving money into savings", "Taking money out of your account", "A bill the bank sends you"], "correct": 2, "origin": "kept", "note": "From Banking Q4; answer moved from b) to c)."},
+        {"type": "mcq", "question": "You want to send 15 zeds to a friend for a birthday gift. Which transaction do you use?", "options": ["Deposit", "Withdrawal", "Loan", "Transfer"], "correct": 3, "origin": "kept", "note": "From Log In M5 Q5."},
+        {"type": "mcq", "question": "Which of these is NOT something a bank does?", "options": ["Keeps money in accounts", "Lends money", "Moves money between accounts", "Guarantees you will never run out of money"], "correct": 3, "origin": "improved", "note": "From Banking Q2 and Log In M5 Q7."},
+        {"type": "mcq", "question": "When you borrow money from a bank, what do you usually have to do?", "options": ["Nothing — it's free money", "Give the bank your salary forever", "Pay it back, usually with interest", "Open a new account every month"], "correct": 2, "origin": "new", "note": "The lesson mentions borrowing, but no question checked it."},
+        {"type": "true_false", "question": "Your salary arriving by direct deposit is a deposit into your account.", "options": ["True", "False"], "correct": 0, "origin": "new", "note": "Links the word “deposit” to the student's own salary."},
+        {"type": "mcq", "question": "Which account is the best place for money you're keeping for emergencies?", "options": ["Your current account, mixed with your spending money", "Your Emergency Fund Account", "A loan", "Cash in your backpack"], "correct": 1, "origin": "new", "note": "The Emergency Fund Account is opened in Month 1."},
+        {"type": "true_false", "question": "Kids and teenagers can't have bank accounts — banks only serve adults.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M5 Q10."},
+        {"type": "mcq", "question": "What does the “balance” on your bank statement show?", "options": ["How much money is in your account right now", "How much you spent last year", "How much salary you'll get next month", "How much the bank owes City Hall"], "correct": 0, "origin": "new", "note": "Replaces the reconciling question, which moved to Paying Your Bills."}
+      ]
+    },
+    {
+      "id": 1,
+      "key": "task_1",
+      "title": "Introduction to Budget",
+      "icon": "🐷",
+      "month": 2,
+      "changes": "8 of the 10 original answers were b), so students could guess. Answers are now spread across a–d, near-duplicate questions (Q5/Q7 and Q9/Q10) were merged, and a first budget calculation was added.",
+      "lesson": [
+        {"title": "What's a Budget?", "lines": [
+          "A budget is a plan for your money. It helps you:",
+          "• Know your money — how much is coming in",
+          "• See where it goes — what you spend it on",
+          "• Plan to save — set some aside for things you want later",
+          "Why do we have to choose? The money we have is limited. Whether it's your Zedville salary, an allowance or a gift, there's only so much of it — so we have to decide what matters most. A budget helps us make those choices wisely."
+        ]},
+        {"title": "Why Have a Budget?", "lines": [
+          "• Track your spending — see exactly how much you have and where it goes",
+          "• Save for goals — put a little aside each month for something special",
+          "• Avoid money problems — spending more than you have leads to trouble; a budget keeps you within your limits",
+          "In Zedville, your salary is your income. Your bills, your everyday expenses and your 20% Emergency Fund transfer all have to fit inside it."
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "A budget helps you with three things. Which is one of them?", "options": ["Knowing how much money is coming in", "Earning a higher salary", "Never paying bills", "Getting money without working"], "correct": 0, "origin": "improved", "note": "From Introduction to Budget Q2."},
+        {"type": "mcq", "question": "Why do we need to make choices about how we use money?", "options": ["Because banks tell us to", "Because money is limited — there's only so much of it", "Because prices never change", "Because saving is against the rules"], "correct": 1, "origin": "improved", "note": "From Introduction to Budget Q3."},
+        {"type": "mcq", "question": "Which of these has to fit inside your Zedville budget?", "options": ["Only your wants", "Only your bills", "Your bills, your everyday expenses and your savings", "Nothing — your salary covers everything automatically"], "correct": 2, "origin": "new", "note": "Ties the budget to the student's own salary."},
+        {"type": "mcq", "question": "What is a common result of NOT having a budget?", "options": ["Always having extra money", "Better control of spending", "Your salary goes up", "Running out of money and possibly going into debt"], "correct": 3, "origin": "kept", "note": "From Introduction to Budget Q8."},
+        {"type": "true_false", "question": "A budget is only useful for people who have a lot of money.", "options": ["True", "False"], "correct": 1, "origin": "new", "note": "Common misconception."},
+        {"type": "mcq", "question": "Your salary is 4,000 zeds. You plan 2,000 for needs, 1,200 for wants and 800 for savings. How much is left without a plan?", "options": ["0 zeds — every zed has a job", "400 zeds", "800 zeds", "1,200 zeds"], "correct": 0, "origin": "new", "note": "A first budget calculation."},
+        {"type": "mcq", "question": "What is the smartest order for planning your monthly budget?", "options": ["Wants first, then needs, then savings", "Needs and savings first, then wants with what's left", "Only wants", "Whatever you feel like each day"], "correct": 1, "origin": "new", "note": "Replaces Q5 and Q7, which asked the same thing about saving for goals."},
+        {"type": "mcq", "question": "Which habit shows you're sticking to your budget?", "options": ["Buying extras whenever there's a sale", "Ignoring your statement", "Comparing what you spent with what you planned", "Borrowing when you run out"], "correct": 2, "origin": "improved", "note": "From Introduction to Budget Q6."},
+        {"type": "true_false", "question": "If you overspend on wants, you may not have enough left for needs or savings.", "options": ["True", "False"], "correct": 0, "origin": "improved", "note": "Merges Introduction to Budget Q9 and Q10, which asked the same thing."},
+        {"type": "mcq", "question": "Your spending went over your plan this month. What should you do?", "options": ["Stop budgeting", "Hide it and hope it fixes itself", "Borrow money every month", "Find where you went over and adjust next month's plan"], "correct": 3, "origin": "new", "note": ""}
+      ]
+    },
+    {
+      "id": 2,
+      "key": "task_2",
+      "title": "Tracking Income & Expenses",
+      "icon": "📊",
+      "month": 3,
+      "changes": "Q3 and Q10 in the original were the same question with the same answers, and Q1/Q6 overlapped. Replaced with surplus/deficit questions and the student's own statement. The lesson now explains surplus and deficit.",
+      "lesson": [
+        {"title": "Income and Expenses", "lines": [
+          "Income is the money you receive. In Zedville, your main income is your monthly salary, paid by direct deposit. In real life, income can also come from:",
+          "• Allowance from parents",
+          "• Gifts",
+          "• Jobs, like babysitting or dog walking",
+          "• Selling things you no longer need",
+          "Expenses are the things you spend money on:",
+          "• Needs — things you must have for daily life and school, like meals, School Fees and transport",
+          "• Wants — things that are nice to have but you could live without, like games, treats or designer clothes",
+          "Savings are not an expense: instead of spending the money, you set it aside for later."
+        ]},
+        {"title": "The Flow of Money", "lines": [
+          "Income flows in and expenses flow out. Comparing the two tells you where you stand:",
+          "• Surplus — income is bigger than expenses, so you have money left to save",
+          "• Balanced — income and expenses are the same",
+          "• Deficit — expenses are bigger than income, so you're spending money you don't have",
+          "Your bank statement shows every amount that came in and went out. Track your spending — small purchases add up!"
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "Which of these is NOT a source of income?", "options": ["Allowance from parents", "Money from selling old toys", "Buying a video game", "Pay for walking a neighbour's dog"], "correct": 2, "origin": "kept", "note": "From Tracking Q2."},
+        {"type": "mcq", "question": "What is your main source of income in Zedville?", "options": ["Your monthly salary", "Your School Fees", "Your Emergency Fund Account", "The Supermarket"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "Which pair shows a need first and then a want?", "options": ["A movie ticket, then bus fare", "School lunch, then a new video game", "Candy, then concert tickets", "Electricity, then water"], "correct": 1, "origin": "new", "note": "Replaces the duplicate “What is an expense?” questions (original Q3 and Q10 were identical)."},
+        {"type": "mcq", "question": "What is the key difference between a need and a want?", "options": ["Needs always cost more", "Wants are things you must have", "Needs are only for adults", "Needs are essential for daily life; wants are nice to have"], "correct": 3, "origin": "kept", "note": "From Tracking Q7."},
+        {"type": "mcq", "question": "Which situation shows a surplus?", "options": ["Earning 50 zeds and spending 60", "Earning 50 zeds and spending 50", "Earning 50 zeds and spending 40", "Earning nothing and spending 10"], "correct": 2, "origin": "improved", "note": "From Log In M2 Q4."},
+        {"type": "mcq", "question": "Your income is 3,900 zeds and your expenses are 3,200 zeds. What can you do with the difference?", "options": ["Nothing — it disappears", "Pay it back to the bank", "Nothing — it's a deficit", "Save the 700-zed surplus or put it toward a goal"], "correct": 3, "origin": "new", "note": ""},
+        {"type": "true_false", "question": "Small purchases matter, because lots of small expenses can add up to a big amount.", "options": ["True", "False"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "Where can you see every amount that came into and went out of your Universal Bank account?", "options": ["Your monthly bank statement", "Your consumer profile", "The City Mall", "Your FinHero badge"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "Why is tracking your expenses important?", "options": ["So you can spend faster", "So you know where your money goes and can spot problems early", "Only businesses need to do it", "So you never have to pay bills"], "correct": 1, "origin": "improved", "note": "From Tracking Q9."},
+        {"type": "true_false", "question": "If you have a surplus, you should always spend it right away on something fun.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M2 Q7."}
+      ]
+    },
+    {
+      "id": 3,
+      "key": "task_3",
+      "title": "Savings — Why Save?",
+      "icon": "💰",
+      "month": 4,
+      "changes": "9 of 10 original answers were b). Added “pay yourself first” (the idea behind the automatic Emergency Fund transfer) and a goal calculation; removed the “gambling all your savings” answer; a bank account is no longer presented as equal to a piggy bank.",
+      "lesson": [
+        {"title": "What is Saving?", "lines": [
+          "Saving means keeping some of your money for later instead of spending it all now.",
+          "Why save?",
+          "• For emergencies — like a broken bike or a sudden bill",
+          "• For goals — a new game, a school trip, or even college",
+          "• To avoid borrowing — borrowing too much can lead to debt"
+        ]},
+        {"title": "How to Save", "lines": [
+          "• Pay yourself first — move money into savings as soon as you get paid. Zedville does this for you: 20% of your salary goes into your Emergency Fund Account every payday.",
+          "• Keep savings in a bank account — it's safe and it can earn interest",
+          "• Spend less on things you don't really need",
+          "• Earn extra money, like doing chores or a small job",
+          "Set a clear goal — what you're saving for, how much, and by when. It keeps you motivated."
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "What does “pay yourself first” mean?", "options": ["Buy something for yourself before paying bills", "Spend your salary on wants first", "Ask for your salary early", "Move money into savings as soon as you get paid"], "correct": 3, "origin": "new", "note": "The habit behind the automatic Emergency Fund transfer."},
+        {"type": "mcq", "question": "How does Zedville help you pay yourself first?", "options": ["It moves 20% of your salary into your Emergency Fund Account automatically", "It pays your bills for you", "It gives you extra salary", "It stops you from spending"], "correct": 0, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "Which is the clearest savings goal?", "options": ["Save some money someday", "Save 300 zeds for a bike in 6 months", "Spend less, maybe", "Never spend anything"], "correct": 1, "origin": "improved", "note": "From Savings Q9."},
+        {"type": "mcq", "question": "You want a 300-zed bike in 6 months. How much should you save each month?", "options": ["30 zeds", "60 zeds", "50 zeds", "100 zeds"], "correct": 2, "origin": "new", "note": "Goal calculation."},
+        {"type": "mcq", "question": "How does saving help you avoid debt?", "options": ["It makes banks lend you more", "It has no effect on debt", "It forces you to borrow", "You can pay for surprises without borrowing"], "correct": 3, "origin": "improved", "note": "From Savings Q4."},
+        {"type": "mcq", "question": "Why is a bank account a better place for savings than a piggy bank?", "options": ["It's safe and can earn interest", "You can spend it faster", "It hides money from your family", "The bank doubles your money every month"], "correct": 0, "origin": "improved", "note": "From Savings Q6, which treated a piggy bank and a bank account as equally good."},
+        {"type": "true_false", "question": "Saving means having a little less to spend now, but more for later.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From Log In M3 Q7."},
+        {"type": "mcq", "question": "Which is a good way to earn extra money to save?", "options": ["Waiting for someone to give you money", "Doing chores or a small job", "Borrowing from friends", "Skipping your bills"], "correct": 1, "origin": "kept", "note": "From Savings Q8; removed the “gambling” answer."},
+        {"type": "mcq", "question": "Which choice helps you save more each month?", "options": ["Buying snacks every day", "Upgrading your phone every year", "Bringing lunch from home instead of buying it", "Ignoring your statement"], "correct": 2, "origin": "new", "note": ""},
+        {"type": "true_false", "question": "Saving is only for adults with big salaries.", "options": ["True", "False"], "correct": 1, "origin": "new", "note": ""}
+      ]
+    },
+    {
+      "id": 4,
+      "key": "task_4",
+      "title": "Emergency Fund",
+      "icon": "🛟",
+      "month": 5,
+      "changes": "Fixed two salary-based questions: the 3–6 month guideline is about expenses, not salary. Three “which percentage?” questions became one calculation. Wrong answers like “diet plan” and “organizing a closet” replaced.",
+      "lesson": [
+        {"title": "What is an Emergency Fund?", "lines": [
+          "An emergency fund is money you save for unexpected problems — like when your phone breaks, your pet gets sick, or your family gets a surprise bill.",
+          "How big should it be? Aim for 3 to 6 months of your living expenses.",
+          "• Security — a cushion when something goes wrong",
+          "• No debt — you can pay for surprises without borrowing",
+          "Your Emergency Fund Account at Universal Bank grows by 20% of your salary every month and earns 2% interest per year."
+        ]},
+        {"title": "Building It with the 50-30-20 Rule", "lines": [
+          "• 50% Needs — essentials like School Fees, lunch, transport and bills",
+          "• 30% Wants — things you enjoy, like games, treats or movie tickets",
+          "• 20% Savings — including your emergency fund and other goals",
+          "Keep it somewhere safe that you can reach quickly — like a bank savings account, not under your mattress.",
+          "Only use it for real emergencies: unexpected, necessary and urgent. If you use some, build it back up."
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "Which three words describe a real emergency?", "options": ["Fun, planned and cheap", "Unexpected, necessary and urgent", "Expensive, popular and new", "Weekly, small and optional"], "correct": 1, "origin": "new", "note": "Gives students a simple test for “is this an emergency?”."},
+        {"type": "mcq", "question": "Which of these is NOT an emergency?", "options": ["A sudden medical bill", "Losing a job unexpectedly", "Planning a birthday party", "A broken refrigerator"], "correct": 2, "origin": "kept", "note": "From Emergency Fund Q5."},
+        {"type": "mcq", "question": "Your monthly living expenses are 2,000 zeds. Which emergency fund goal meets the 3–6 month guideline?", "options": ["1,000 zeds", "2,000 zeds", "4,000 zeds", "6,000 zeds"], "correct": 3, "origin": "fixed", "note": "The old version worked the goal out from salary; the guideline is based on expenses."},
+        {"type": "mcq", "question": "Why should your emergency fund be somewhere you can reach quickly?", "options": ["So you can pay for a surprise right away", "So you remember to spend it", "So it earns the most interest", "So nobody knows it exists"], "correct": 0, "origin": "kept", "note": "From Log In M4 Q4."},
+        {"type": "mcq", "question": "What is the 50-30-20 rule used for?", "options": ["Deciding your salary", "Splitting your income into needs, wants and savings", "Calculating interest", "Choosing which bills to skip"], "correct": 1, "origin": "improved", "note": "From Emergency Fund Q6."},
+        {"type": "mcq", "question": "With a 3,000-zed salary, how much goes to savings under the 50-30-20 rule?", "options": ["300 zeds", "900 zeds", "600 zeds", "1,500 zeds"], "correct": 2, "origin": "new", "note": "Replaces three “which percentage?” recall questions."},
+        {"type": "mcq", "question": "Which of these belongs in the 50% for needs?", "options": ["Concert tickets", "A new game", "Designer sneakers", "Bus fare to school"], "correct": 3, "origin": "new", "note": ""},
+        {"type": "true_false", "question": "Without an emergency fund, a small surprise cost could force you to borrow from friends or family.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From Log In M4 Q8."},
+        {"type": "mcq", "question": "20% of a 4,000-zed salary goes to your Emergency Fund Account every month. How much is saved after 3 months, not counting interest?", "options": ["2,400 zeds", "800 zeds", "1,200 zeds", "12,000 zeds"], "correct": 0, "origin": "new", "note": "The student's own Emergency Fund growth."},
+        {"type": "true_false", "question": "If you use money from your emergency fund, you should build it back up.", "options": ["True", "False"], "correct": 0, "origin": "new", "note": ""}
+      ]
+    },
+    {
+      "id": 6,
+      "key": "task_6",
+      "title": "Simple Interest",
+      "icon": "📈",
+      "month": 6,
+      "changes": "Removed the three questions about the “money seed”, “gardener” and “growth boost” analogy (they tested the story, not the maths). Added the formula, calculations, and the compound-interest trap (121 zeds). Uses Universal Bank's real rates.",
+      "lesson": [
+        {"title": "What is Simple Interest?", "lines": [
+          "When you keep savings in a bank, the bank pays you a little extra for keeping your money there. That extra money is called interest.",
+          "Simple interest is always worked out on the amount you first saved — the principal.",
+          "Example: you save 100 zeds at 10% simple interest per year.",
+          "• After 1 year: 10% of 100 = 10 zeds of interest, so you have 110 zeds",
+          "• After 2 years: another 10 zeds, so you have 120 zeds",
+          "• The interest is the same 10 zeds every year, because it's always based on the original 100 zeds"
+        ]},
+        {"title": "Working It Out", "lines": [
+          "Simple interest = principal × rate × time (in years)",
+          "• Principal — the money you saved",
+          "• Rate — the percentage the bank pays per year",
+          "• Time — how many years your money stays saved",
+          "At Universal Bank, the Emergency Fund Account pays 2% per year and the Money Market Account pays 4% per year. Save more, or save for longer, and you earn more interest."
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "What is interest on savings?", "options": ["A fee you pay to open an account", "Extra money the bank pays you for keeping your money there", "Money you borrow", "A tax on your salary"], "correct": 1, "origin": "improved", "note": "From Simple Interest Q6."},
+        {"type": "mcq", "question": "Which is the simple interest formula?", "options": ["Principal + rate + time", "Principal ÷ rate", "Principal × rate × time", "Rate × time"], "correct": 2, "origin": "new", "note": "Lets students calculate, not only define."},
+        {"type": "mcq", "question": "You save 100 zeds at 10% simple interest per year. How much do you have after 2 years?", "options": ["120 zeds", "110 zeds", "121 zeds", "200 zeds"], "correct": 0, "origin": "new", "note": "121 is the compound-interest trap."},
+        {"type": "mcq", "question": "You save 300 zeds at 2% per year for 3 years. How much simple interest do you earn?", "options": ["6 zeds", "9 zeds", "30 zeds", "18 zeds"], "correct": 3, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "Which savings plan earns the MOST simple interest?", "options": ["200 zeds at 4% for 5 years", "250 zeds at 3% for 4 years", "300 zeds at 2% for 5 years", "400 zeds at 1% for 6 years"], "correct": 0, "origin": "kept", "note": "From Log In M6 Q8 (40, 30, 30 and 24 zeds)."},
+        {"type": "mcq", "question": "If the interest rate goes up and nothing else changes, what happens to your interest?", "options": ["It goes down", "It goes up", "It stays the same", "It disappears"], "correct": 1, "origin": "improved", "note": "From Log In M6 Q5."},
+        {"type": "true_false", "question": "If you save for half a year, you earn half of one year's simple interest.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From Log In M6 Q10."},
+        {"type": "mcq", "question": "What makes simple interest different from compound interest?", "options": ["Simple interest is always higher", "Simple interest changes with the stock market", "Simple interest is worked out only on the original principal", "Simple interest is a fee"], "correct": 2, "origin": "improved", "note": "From Simple Interest Q4."},
+        {"type": "mcq", "question": "How much simple interest does 500 zeds earn at 4% per year over 2 years?", "options": ["20 zeds", "4 zeds", "400 zeds", "40 zeds"], "correct": 3, "origin": "new", "note": ""},
+        {"type": "true_false", "question": "Simple interest means your money doubles every year.", "options": ["True", "False"], "correct": 1, "origin": "new", "note": ""}
+      ]
+    },
+    {
+      "id": 8,
+      "key": "task_8",
+      "title": "Paying Your Bills",
+      "icon": "💳",
+      "month": 7,
+      "changes": "New module built from the original “Auto-debit and Manual Payment” questions (which had no module) and the payments half of the old banking lesson. Uses Zedville's words “auto-debit” and “Pay Bills” instead of “direct authorization”, and fixes the debit-payment answer.",
+      "lesson": [
+        {"title": "Different Ways to Pay", "lines": [
+          "• Manual payment — you start each payment yourself: paying cash, using the Pay Bills page, or tapping your card",
+          "• Debit payment — paying with a debit card or phone; the money comes straight out of your bank account, so you can only spend what you have",
+          "• Auto-debit (also called direct debit) — you authorise a company to take an agreed amount on a set date every month. Great for regular bills like School Fees, internet or subscriptions.",
+          "Remember: direct deposit = money in (your salary). Auto-debit = money out (your bills)."
+        ]},
+        {"title": "Keeping Track of Your Payments", "lines": [
+          "Every payment shows up on your monthly bank statement.",
+          "• Keep a record of what you pay and when",
+          "• Compare your records with your statement — this is called reconciling",
+          "• Ask the bank about anything you don't recognise — it could be a mistake or fraud",
+          "Paying on time avoids late fees and keeps your budget on track."
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "What is a manual payment?", "options": ["A payment that happens automatically every month", "A payment only adults can make", "A payment you start yourself each time", "A payment that is always free"], "correct": 2, "origin": "improved", "note": "From “Auto-debit and Manual Payment” Q1, with a fourth option."},
+        {"type": "mcq", "question": "What does an auto-debit authorisation allow a company to do?", "options": ["Take an agreed amount from your account on a set date", "Put your salary into your account", "Read your messages", "Change your bank PIN"], "correct": 0, "origin": "improved", "note": "From “Auto-debit and Manual Payment” Q3; uses Zedville's word “auto-debit” instead of “direct authorization”."},
+        {"type": "mcq", "question": "What is a key feature of debit payments?", "options": ["You must write a cheque", "They only work in physical shops", "They are always free", "The money is taken straight from your bank account"], "correct": 3, "origin": "fixed", "note": "Banking Q7's answer (“digital transactions using a card or phone”) missed the key idea."},
+        {"type": "mcq", "question": "Why are auto-debits useful for regular bills?", "options": ["They make bills cheaper", "They pay on time automatically, so you avoid late fees", "They let you skip budgeting", "They add money to your account"], "correct": 1, "origin": "new", "note": ""},
+        {"type": "true_false", "question": "Manual payments require you to start each transaction yourself.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From “Auto-debit and Manual Payment” Q4."},
+        {"type": "true_false", "question": "Debit payments can only be made with a physical card, not a phone.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From “Auto-debit and Manual Payment” Q5."},
+        {"type": "mcq", "question": "Which pairing is correct?", "options": ["Both bring money in", "Direct deposit = money out; auto-debit = money in", "Direct deposit = money in; auto-debit = money out", "Both take money out"], "correct": 2, "origin": "new", "note": ""},
+        {"type": "mcq", "question": "Why should you reconcile your transactions every month?", "options": ["To earn more interest", "To catch mistakes and spot fraud early", "To delete old transactions", "To avoid paying bills"], "correct": 1, "origin": "kept", "note": "From Banking Q10."},
+        {"type": "mcq", "question": "Your internet auto-debit should be 50 zeds, but your statement shows 80 zeds. What does that tell you?", "options": ["Everything is fine", "You should pay 80 zeds again", "Your salary was too high", "There's a 30-zed mismatch you should ask about"], "correct": 3, "origin": "new", "note": "Reconciling with a real example."},
+        {"type": "mcq", "question": "Which payment is LEAST suitable for auto-debit?", "options": ["A one-time birthday gift", "School Fees", "A monthly internet plan", "A gym membership"], "correct": 0, "origin": "new", "note": ""}
+      ]
+    },
+    {
+      "id": 7,
+      "key": "task_7",
+      "title": "Fixed vs Variable Expenses",
+      "icon": "⚖️",
+      "month": 8,
+      "changes": "The original asked “what are variable expenses?” three different ways (Q6, Q8, Q9). Merged into one and added planning questions: budgeting a variable cost from past months and choosing what to cut.",
+      "lesson": [
+        {"title": "Fixed Expenses", "lines": [
+          "Some expenses cost the same amount every time. These are fixed expenses — you can count on them.",
+          "• School Fees — the same amount every month",
+          "• A monthly bus pass",
+          "• A subscription for a game or streaming app",
+          "Fixed bills are perfect for auto-debit, because the amount doesn't change."
+        ]},
+        {"title": "Variable Expenses", "lines": [
+          "Other expenses change from week to week. These are variable expenses.",
+          "• Snacks — it depends on how hungry you are",
+          "• Entertainment — movies or games cost different amounts each time",
+          "• Gifts — it depends on who you're buying for",
+          "You can predict fixed costs exactly; for variable costs, plan a sensible amount and stay flexible. And remember: fixed doesn't always mean “need”, and variable doesn't always mean “want”."
+        ]}
+      ],
+      "questions": [
+        {"type": "mcq", "question": "What are fixed expenses?", "options": ["Costs that change often", "Costs that happen only once a year", "Costs that are unnecessary", "Costs that stay the same each time"], "correct": 3, "origin": "kept", "note": "From Fixed vs Variable Q1; answer moved from b) to d)."},
+        {"type": "mcq", "question": "Why are fixed expenses easier to plan for?", "options": ["They change every month", "They cost the same amount each time", "They are always cheap", "They are rarely paid"], "correct": 1, "origin": "kept", "note": "From Fixed vs Variable Q2."},
+        {"type": "mcq", "question": "What makes a subscription a fixed expense?", "options": ["The same amount is charged every billing cycle", "It depends on how much you use it", "It's paid only once", "It's optional"], "correct": 0, "origin": "kept", "note": "From Fixed vs Variable Q3."},
+        {"type": "mcq", "question": "What are variable expenses?", "options": ["Costs that never change", "Costs paid once a year", "Costs that change depending on what you do or need", "Costs that are always wants"], "correct": 2, "origin": "improved", "note": "Merges Fixed vs Variable Q6, Q8 and Q9."},
+        {"type": "mcq", "question": "Which list has only variable expenses?", "options": ["School Fees, rent, bus pass", "Rent, snacks, subscription", "School Fees, gifts, rent", "Snacks, movie tickets, gifts"], "correct": 3, "origin": "new", "note": ""},
+        {"type": "true_false", "question": "Knowing the difference between fixed and variable expenses helps you avoid money surprises.", "options": ["True", "False"], "correct": 0, "origin": "kept", "note": "From Log In M8 Q8."},
+        {"type": "mcq", "question": "Your snack spending was 40, 25 and 55 zeds in the last three months. What's a sensible amount to budget next month?", "options": ["0 zeds", "About 40 zeds, and then track it", "120 zeds", "5 zeds"], "correct": 1, "origin": "new", "note": "Planning a variable cost from past months."},
+        {"type": "mcq", "question": "Why is it important to track variable expenses?", "options": ["They never change", "They don't affect your budget", "They can creep up without you noticing", "They are paid automatically"], "correct": 2, "origin": "improved", "note": "From Fixed vs Variable Q10."},
+        {"type": "true_false", "question": "Fixed expenses are always needs, and variable expenses are always wants.", "options": ["True", "False"], "correct": 1, "origin": "kept", "note": "From Log In M8 Q10."},
+        {"type": "mcq", "question": "You want to save more this month. Which expenses are usually easiest to cut?", "options": ["Variable ones, like entertainment and snacks", "Fixed bills like School Fees", "Rent", "Your Emergency Fund transfer"], "correct": 0, "origin": "new", "note": ""}
+      ]
+    }
+  ]
+}

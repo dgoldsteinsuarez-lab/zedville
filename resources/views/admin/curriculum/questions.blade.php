@@ -21,11 +21,19 @@
     <div class="card mb-4">
         <div class="card-header"><strong>Add a Question</strong></div>
         <div class="card-body">
-            <form method="POST" action="{{ url('admin/curriculum/items/' . $item->id . '/questions/save') }}">
+            <form method="POST" action="{{ url('admin/curriculum/items/' . $item->id . '/questions/save') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
                     <label class="form-label">Question</label>
                     <textarea name="question_text" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image (chart/graphic, optional)</label>
+                    <input type="file" name="image" class="form-control" accept="image/png,image/jpeg,image/webp">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Second image (optional - only when comparing two graphics)</label>
+                    <input type="file" name="image_2" class="form-control" accept="image/png,image/jpeg,image/webp">
                 </div>
                 <input type="hidden" name="sort_order" value="{{ $questions->count() + 1 }}">
                 <div class="row g-2">
@@ -49,12 +57,24 @@
         <div class="card-header"><strong>Existing Questions</strong></div>
         <div class="card-body p-0">
             @forelse ($questions as $question)
-                <form method="POST" action="{{ url('admin/curriculum/items/' . $item->id . '/questions/save') }}" class="p-3 border-bottom">
+                <form method="POST" action="{{ url('admin/curriculum/items/' . $item->id . '/questions/save') }}" class="p-3 border-bottom" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="id" value="{{ $question->id }}">
                     <input type="hidden" name="sort_order" value="{{ $question->sort_order }}">
                     <div class="mb-2">
                         <textarea name="question_text" class="form-control" rows="2" required>{{ $question->question_text }}</textarea>
+                    </div>
+                    <div class="mb-2 d-flex align-items-center gap-2">
+                        @if ($question->image)
+                            <img src="{{ asset('uploads/curriculum/' . $question->image) }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                        @endif
+                        <input type="file" name="image" class="form-control form-control-sm" accept="image/png,image/jpeg,image/webp" title="{{ $question->image ? 'Replace image' : 'Add image' }}">
+                    </div>
+                    <div class="mb-2 d-flex align-items-center gap-2">
+                        @if ($question->image_2)
+                            <img src="{{ asset('uploads/curriculum/' . $question->image_2) }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                        @endif
+                        <input type="file" name="image_2" class="form-control form-control-sm" accept="image/png,image/jpeg,image/webp" title="{{ $question->image_2 ? 'Replace second image' : 'Add second image (comparison)' }}">
                     </div>
                     <div class="row g-2">
                         @for ($i = 0; $i < 4; $i++)

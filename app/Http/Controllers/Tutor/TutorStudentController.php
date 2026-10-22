@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tutor;
 
 use App\Http\Controllers\Controller;
 use App\Models\BankStatement;
+use App\Models\CurriculumAttempt;
 use App\Models\FinheroBadgeRecord;
 use App\Models\MoodLog;
 use App\Models\StudentBadgeRecord;
@@ -101,6 +102,15 @@ class TutorStudentController extends Controller
         $latestStatement = BankStatement::where('user_id', $studentId)->latest('year')->latest('month')->first();
         $budget = $latestStatement->statement_data['summary'] ?? null;
 
+        // "Evidence of learning" (bugs.md, 2026-10-21) - a real exam locks
+        // to one attempt (AcademyController::submit()), so this is always
+        // the student's one and only result for that exam, not a "best of."
+        $realExamAttempts = CurriculumAttempt::whereHas('item', fn ($q) => $q->where('is_real_exam', true))
+            ->where('student_id', $studentId)
+            ->with('item')
+            ->orderByDesc('completed_at')
+            ->get();
+
         return view('tutor.students.show', compact(
             'student',
             'engagementHistory',
@@ -108,7 +118,8 @@ class TutorStudentController extends Controller
             'activitiesThisMonth',
             'moodHistory',
             'balance',
-            'budget'
+            'budget',
+            'realExamAttempts'
         ));
     }
 

@@ -122,124 +122,25 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) {}
 
-        // FinHero: unchanged ad-hoc calculation, with its own table-record
-        // fallback - no longer gated behind whether Engagement found
-        // anything, same reasoning as above.
-        $finBadge = null;
+        // FinHero: the latest record from FinheroBadgeCalculatorService (the
+        // same source as the profile page), which counts Daily Quiz,
+        // Library and Task points.
         try {
-            $finBadge = $this->calculateFinHeroBadge($user->id);
+            $fin = FinheroBadgeRecord::where('student_id', $user->id)
+                ->orderBy('year')->orderBy('month')->get()->last();
+            $finBadge = $fin ? strtoupper((string) $fin->effective_monthly_badge) : 'NONE';
+
+            if ($finBadge !== '' && $finBadge !== 'NONE') {
+                $out[] = [
+                    'type'    => 'finhero',
+                    'name'    => 'FinHero (' . ucfirst(strtolower($finBadge)) . ')',
+                    'icon'    => '🛡️',
+                    'message' => 'You kept your needs, wants and savings in balance.',
+                ];
+            }
         } catch (\Throwable $e) {}
 
-        if ($finBadge && $finBadge !== 'NONE') {
-            $out[] = [
-                'type'    => 'finhero',
-                'name'    => 'FinHero (' . ucfirst(strtolower($finBadge)) . ')',
-                'icon'    => '🛡️',
-                'message' => 'You kept your needs, wants and savings in balance.',
-            ];
-        } else {
-            try {
-                $fin = FinheroBadgeRecord::where('student_id', $user->id)
-                    ->orderBy('year')->orderBy('month')->get()->last();
-
-                if ($fin && $fin->monthly_badge && strtoupper($fin->monthly_badge) !== 'NONE') {
-                    $out[] = [
-                        'type'    => 'finhero',
-                        'name'    => 'FinHero (' . ucfirst(strtolower($fin->monthly_badge)) . ')',
-                        'icon'    => '🛡️',
-                        'message' => 'You kept your needs, wants and savings in balance.',
-                    ];
-                }
-            } catch (\Throwable $e) {}
-        }
-
         return $out;
-    }
-
-    private function calculateFinHeroBadge($studentId): string
-    {
-        $now = now();
-        $month = $now->month - 1;
-        $year = $now->year;
-
-        if ($now->day < 31) {
-            $month--;
-            if ($month < 0) {
-                $month = 11;
-                $year--;
-            }
-        }
-
-        $settings = DB::table('finhero_monthly_settings')
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('badge_active', 1)
-            ->first();
-
-        if (!$settings || !$settings->badge_active) {
-            return 'NONE';
-        }
-
-        $quizPts = DB::table('finhero_student_points')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('source_type', 'quiz')
-            ->sum('points_earned');
-        $quizPts = min($quizPts, 10);
-
-        $libraryPts = 0;
-        if ($settings->active_library_module_id) {
-            $libraryPts = DB::table('finhero_student_points')
-                ->where('student_id', $studentId)
-                ->where('month', $month)
-                ->where('year', $year)
-                ->where('source_type', 'library')
-                ->where('source_key', $settings->active_library_module_id)
-                ->sum('points_earned');
-            $libraryPts = min($libraryPts, 10);
-        }
-
-        $activeActivities = DB::table('finhero_activity_registry')
-            ->where('is_active', 1)
-            ->pluck('max_points', 'activity_key');
-
-        $activityPts = 0;
-        $totalActivityMax = 0;
-
-        foreach ($activeActivities as $key => $maxPoints) {
-            $earned = DB::table('finhero_student_points')
-                ->where('student_id', $studentId)
-                ->where('month', $month)
-                ->where('year', $year)
-                ->where('source_type', 'activity')
-                ->where('source_key', $key)
-                ->sum('points_earned');
-
-            $activityPts += min($earned, $maxPoints);
-            $totalActivityMax += $maxPoints;
-        }
-
-        $totalEarned = $quizPts + $libraryPts + $activityPts;
-        $totalAvailable = 10 + ($settings->active_library_module_id ? 10 : 0) + $totalActivityMax;
-
-        if ($totalAvailable == 0) {
-            return 'NONE';
-        }
-
-        $pct = ($totalEarned / $totalAvailable) * 100;
-
-        if ($pct >= $settings->threshold_legend) {
-            return 'LEGEND';
-        } elseif ($pct >= $settings->threshold_champion) {
-            return 'CHAMPION';
-        } elseif ($pct >= $settings->threshold_finhero) {
-            return 'FINHERO';
-        } elseif ($pct >= $settings->threshold_rookie) {
-            return 'ROOKIE';
-        }
-
-        return 'NONE';
     }
 
     private function moodSummary($user): ?array

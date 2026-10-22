@@ -3,6 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\FinheroActivityDefault;
+use App\Models\Grade;
+use App\Models\GradeLevel;
+use App\Models\SchoolClass;
 use App\Models\User;
 use App\Services\FinheroBadgeCalculatorService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,12 +37,12 @@ class FinheroPointDefaultsTest extends TestCase
     public function test_editing_a_default_changes_effective_points_for_rows_with_no_override(): void
     {
         $superAdmin = User::factory()->create(['role' => 1]);
-        $student = User::factory()->create(['role' => 4]);
+        $student = $this->studentInAClass();
 
         FinheroActivityDefault::create(['activity_key' => 'task_test_x', 'type' => 'task', 'max_points' => 1]);
 
         DB::table('finhero_activity_registry')->insert([
-            'sid' => $student->sid, 'cid' => null, 'type' => 'task',
+            'sid' => $student->sid, 'cid' => $student->grade, 'type' => 'task',
             'activity_key' => 'task_test_x', 'activity_name' => 'Task 1',
             'max_points' => null, // no override - inherits the default
             'position' => 'required', 'is_active' => 1,
@@ -53,21 +56,21 @@ class FinheroPointDefaultsTest extends TestCase
         ])->assertRedirect();
 
         $calculator = app(FinheroBadgeCalculatorService::class);
-        $total = $this->invokePrivate($calculator, 'getTotalAvailable', [now()->month, now()->year, null]);
+        $total = $calculator->calculateForStudent($student->id, now()->month, now()->year)->total_available;
 
-        // 10 (quiz; no settings row so library adds 0) + 3 (updated task_1 default)
+        // 10 (quiz; no Library module assigned, so library adds 0) + 3 (updated default)
         $this->assertSame(13, $total);
     }
 
     public function test_a_row_with_its_own_max_points_ignores_default_changes(): void
     {
         $superAdmin = User::factory()->create(['role' => 1]);
-        $student = User::factory()->create(['role' => 4]);
+        $student = $this->studentInAClass();
 
         FinheroActivityDefault::create(['activity_key' => 'task_test_x', 'type' => 'task', 'max_points' => 1]);
 
         DB::table('finhero_activity_registry')->insert([
-            'sid' => $student->sid, 'cid' => null, 'type' => 'task',
+            'sid' => $student->sid, 'cid' => $student->grade, 'type' => 'task',
             'activity_key' => 'task_test_x', 'activity_name' => 'Task 1',
             'max_points' => 5, // explicit override
             'position' => 'required', 'is_active' => 1,
@@ -78,7 +81,7 @@ class FinheroPointDefaultsTest extends TestCase
         $this->actingAs($superAdmin)->put(route('finhero.point-defaults.update', $default->id), ['max_points' => 50]);
 
         $calculator = app(FinheroBadgeCalculatorService::class);
-        $total = $this->invokePrivate($calculator, 'getTotalAvailable', [now()->month, now()->year, null]);
+        $total = $calculator->calculateForStudent($student->id, now()->month, now()->year)->total_available;
 
         // 10 (quiz) + row's own override (5), not the new default (50)
         $this->assertSame(15, $total);
@@ -103,10 +106,13 @@ class FinheroPointDefaultsTest extends TestCase
         $response->assertJson(['success' => true, 'points_awarded' => 7]);
     }
 
-    private function invokePrivate(object $object, string $method, array $args)
+    /** The total only counts activities assigned to the student's own class or grade. */
+    private function studentInAClass(): User
     {
-        $m = (new \ReflectionClass($object))->getMethod($method);
-        $m->setAccessible(true);
-        return $m->invoke($object, ...$args);
+        $level = GradeLevel::first();
+        $grade = Grade::create(['sid' => 1, 'name' => 'Grade ' . uniqid(), 'grade_level_id' => $level->id]);
+        $class = SchoolClass::create(['sid' => 1, 'grade_id' => $grade->id, 'name' => 'Class ' . uniqid()]);
+
+        return User::factory()->create(['role' => 4, 'sid' => 1, 'grade' => $class->id]);
     }
 }

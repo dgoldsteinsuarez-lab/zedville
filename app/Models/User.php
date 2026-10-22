@@ -36,6 +36,7 @@ class User extends Authenticatable
         'password_changed_at',
         'autopilot_enabled',
         'anonymized_at',
+        'preferred_language',
     ];
 
     /**

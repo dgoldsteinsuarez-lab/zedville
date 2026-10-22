@@ -313,124 +313,32 @@ class ProfileController extends Controller
             'currentYear' => $currentYear,
         ];
     }
-    private function calculateMonthlyFinHero($studentId, $month, $year)
-    {
-        // 🔹 GET MONTH SETTINGS (thresholds + active module)
-        $settings = DB::table('finhero_monthly_settings')
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('badge_active', 1)
-            ->first();
-
-        if (!$settings || !$settings->badge_active) {
-            return 'NONE';
-        }
-
-        // 🔹 QUIZ POINTS (MAX 10)
-        $quizPts = DB::table('finhero_student_points')
-            ->where('student_id', $studentId)
-            ->where('month', $month)
-            ->where('year', $year)
-            ->where('source_type', 'quiz')
-            ->sum('points_earned');
-
-        $quizPts = min($quizPts, 10);
-
-        // 🔹 LIBRARY POINTS (MAX 10, ONLY ACTIVE MODULE)
-        $libraryPts = 0;
-
-        if ($settings->active_library_module_id) {
-            $libraryPts = DB::table('finhero_student_points')
-                ->where('student_id', $studentId)
-                ->where('month', $month)
-                ->where('year', $year)
-                ->where('source_type', 'library')
-                ->where('source_key', $settings->active_library_module_id)
-                ->sum('points_earned');
-
-            $libraryPts = min($libraryPts, 10);
-        }
-
-        // 🔹 ACTIVITY POINTS (ONLY ACTIVE ACTIVITIES)
-        $activeActivities = DB::table('finhero_activity_registry')
-            ->where('is_active', 1)
-            ->pluck('max_points', 'activity_key');
-
-        $activityPts = 0;
-        $totalActivityMax = 0;
-
-        foreach ($activeActivities as $key => $maxPoints) {
-
-            $earned = DB::table('finhero_student_points')
-                ->where('student_id', $studentId)
-                ->where('month', $month)
-                ->where('year', $year)
-                ->where('source_type', 'activity')
-                ->where('source_key', $key)
-                ->sum('points_earned');
-
-            $activityPts += min($earned, $maxPoints);
-            $totalActivityMax += $maxPoints;
-        }
-
-        // 🔹 TOTALS
-        $totalEarned = $quizPts + $libraryPts + $activityPts;
-
-        $totalAvailable = 10 + ($settings->active_library_module_id ? 10 : 0) + $totalActivityMax;
-        /*$totalAvailable = 10
-            + ($settings->active_library_module_id ? 10 : 0)
-            + ($activityPts > 0 ? $totalActivityMax : 0);*/
-
-        if ($totalAvailable == 0) {
-            return 'NONE';
-        }
-
-        $pct = ($totalEarned / $totalAvailable) * 100;
-
-        // 🔹 BADGE LOGIC (FROM SETTINGS)
-        if ($pct >= $settings->threshold_legend) {
-            return 'LEGEND';
-        } elseif ($pct >= $settings->threshold_champion) {
-            return 'CHAMPION';
-        } elseif ($pct >= $settings->threshold_finhero) {
-            return 'FINHERO';
-        } elseif ($pct >= $settings->threshold_rookie) {
-            return 'ROOKIE';
-        }
-        /*if ($month == 6) {
-            dd([
-                'quizPts' => $quizPts,
-                'libraryPts' => $libraryPts,
-                'activityPts' => $activityPts,
-                'totalEarned' => $totalEarned,
-                'totalAvailable' => $totalAvailable,
-                'percentage' => $pct,
-                'thresholds' => [
-                    'legend' => $settings->threshold_legend,
-                    'champion' => $settings->threshold_champion,
-                    'finhero' => $settings->threshold_finhero,
-                    'rookie' => $settings->threshold_rookie,
-                ]
-            ]);
-        }*/
-        return 'NONE';
-    }
+    /**
+     * Settings page FinHero badge data - from FinheroBadgeCalculatorService/
+     * finhero_badge_records, the same way getEngagementData() reads the
+     * Engagement badge. This replaces an inline recalculation that only
+     * counted Library points through a "module of the month" setting
+     * nothing in admin fills in, and compared 0-based months against the
+     * 1-based months points are stored with. Same return shape
+     * student-badges.blade.php's JS expects (0-based months).
+     */
     private function getFinHeroData($studentId)
     {
         $now = now();
+        $calculator = app(\App\Services\FinheroBadgeCalculatorService::class);
 
-        // Academic year starts September
+        // Keep the current month's record fresh on every page view.
+        $calculator->calculateForStudent($studentId, $now->month, $now->year);
+
         $academicYearStartMonth1Based = config('zedville.academic_year_start_month', 4);
         $academicStartMonth = $academicYearStartMonth1Based - 1; // JS style (0-based)
         $academicStartYear = $now->month >= $academicYearStartMonth1Based ? $now->year : $now->year - 1;
+        $academicYear = $calculator->getAcademicYear($now->month, $now->year);
 
-        $pointsMap = [
-            'LEGEND' => 4,
-            'CHAMPION' => 3,
-            'FINHERO' => 2,
-            'ROOKIE' => 1,
-            'NONE' => 0
-        ];
+        $records = \App\Models\FinheroBadgeRecord::where('student_id', $studentId)
+            ->where('academic_year', $academicYear)
+            ->get()
+            ->keyBy(fn ($r) => $r->month - 1);
 
         $history = [];
         $totalPts = 0;
@@ -438,13 +346,12 @@ class ProfileController extends Controller
         $month = $academicStartMonth;
         $year = $academicStartYear;
 
-        // 🔹 LOOP 10 MONTHS
         for ($i = 0; $i < 10; $i++) {
-
-            $badge = $this->calculateMonthlyFinHero($studentId, $month, $year);
+            $record = $records->get($month);
+            $badge = $record ? $record->effective_monthly_badge : 'NONE';
 
             $history[$month] = $badge;
-            $totalPts += $pointsMap[$badge];
+            $totalPts += \App\Models\FinheroBadgeRecord::BADGE_POINTS[$badge] ?? 0;
 
             $month++;
             if ($month > 11) {
@@ -453,61 +360,17 @@ class ProfileController extends Controller
             }
         }
 
-        // 🔹 CURRENT MONTH
-        /*$currentMonth = $now->month - 1;
-        $currentYear = $now->year;
+        $currentMonth = $now->month - 1; // 0-based
+        $currentRecord = $records->get($currentMonth);
 
-        $monthly = $this->calculateMonthlyFinHero($studentId, $currentMonth, $currentYear);*/
-        // 🔹 LAST COMPLETED MONTH
-        // 🔹 CURRENT MONTH (DB uses 0-11 format)
-        // Current month according to database (0 based)
-        $currentMonth = $now->month - 1;
-        $currentYear = $now->year;
-
-
-        // If current month is not completed,
-// show previous month badge
-        if ($now->day < 31) {
-            $currentMonth--;
-
-            if ($currentMonth < 0) {
-                $currentMonth = 11;
-                $currentYear--;
-            }
-        }
-
-
-        $monthly = $this->calculateMonthlyFinHero(
-            $studentId,
-            $currentMonth,
-            $currentYear
-        );
-        // 🔹 YEARLY BADGE (ACCORDING TO YOUR TABLE)
-        if ($totalPts >= 32)
-            $yearly = 'LEGEND';
-        elseif ($totalPts >= 24)
-            $yearly = 'CHAMPION';
-        elseif ($totalPts >= 16)
-            $yearly = 'FINHERO';
-        elseif ($totalPts >= 8)
-            $yearly = 'ROOKIE';
-        else
-            $yearly = 'NONE';
-
-        /*return [
-            'monthly' => $monthly,
-            'yearly' => $yearly,
-            'history' => $history,
-            'academicStartYear' => $academicStartYear
-        ];*/
         return [
-            'monthly' => $monthly,
-            'yearly' => $yearly,
+            'monthly' => $currentRecord ? $currentRecord->effective_monthly_badge : 'NONE',
+            'yearly' => $currentRecord ? $currentRecord->accumulated_badge : $calculator->determineAccumulatedBadge($totalPts),
             'history' => $history,
             'academicStartYear' => $academicStartYear,
             'academicStartMonth' => $academicStartMonth,
-            'currentMonth' => $currentMonth - 1,
-            'currentYear' => $currentYear,
+            'currentMonth' => $currentMonth,
+            'currentYear' => $now->year,
         ];
     }
 }

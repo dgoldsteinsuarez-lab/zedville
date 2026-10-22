@@ -316,12 +316,12 @@
                                             <ul class="subnav">
                                                 <li class="nav-item {{ request()->is('admin/education/monthly-budget-activity') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/education/monthly-budget-activity') }}">
-                                                        <span class="navTxt">Monthly Budget Activity Position</span>
+                                                        <span class="navTxt">Needs, Wants &amp; Savings Match Position</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item {{ request()->is('admin/education/emergency-fund-account') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/education/emergency-fund-account') }}">
-                                                        <span class="navTxt">Emergency Fund Account Position</span>
+                                                        <span class="navTxt">Emergency Fund Position</span>
                                                     </a>
                                                 </li>
                                                 <li class="nav-item {{ request()->is('admin/education/poster') ? 'active' : '' }}">

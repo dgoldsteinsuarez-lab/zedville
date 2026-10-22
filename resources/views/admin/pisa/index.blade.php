@@ -7,8 +7,8 @@
     <h2 class="mb-2">PISA</h2>
     <p class="text-muted">
         PISA's own official proficiency/difficulty levels (an international standard, the same for every school
-        and every Grade Level) - not tied to Rookie/Intermediate/Advance/Advance Economist. Shown here as a
-        reference catalog to build PISA-practice assignments against later.
+        and every Grade Level) - not tied to any one Grade Level. Shown here as a reference catalog to build
+        PISA-practice assignments against later.
     </p>
 
     @if (session('success'))
@@ -90,7 +90,10 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="6" class="pt-0 pb-2 ps-3">
+                        <td colspan="6" class="pt-0 pb-2 ps-3 d-flex gap-2">
+                            <a href="{{ route('admin.pisa.activities', $level) }}" class="btn btn-sm btn-primary">
+                                Manage activities
+                            </a>
                             <form method="POST" action="{{ url('admin/pisa/' . $level->id) }}" onsubmit="return confirm('Delete this PISA level?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>

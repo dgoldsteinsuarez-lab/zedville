@@ -11,15 +11,27 @@ class FinheroPointService
         string $sourceType,   // quiz | library | activity
         string $sourceKey,    // daily_quiz, module_id, activity_key
         int $points = 1,
-        ?string $academicYear = null
+        ?string $academicYear = null,
+        // Daniel, 2026-10-21: the PISA leaderboard month-end bonus command
+        // needs to attribute points to the month it's scoring, which isn't
+        // necessarily the real calendar month the command happens to run
+        // in (a manual --month= backfill for a past month, in particular).
+        // Both optional and default to now()'s own month/year, so every
+        // pre-existing caller (which never passed these) behaves exactly
+        // as before.
+        ?int $month = null,
+        ?int $year = null
     ): void {
         $now = now();
+        $month = $month ?? $now->month;
+        $year = $year ?? $now->year;
 
-        // Auto academic year if not passed
+        // Auto academic year if not passed - derived from the target
+        // month/year, not necessarily $now, so a backfilled past month
+        // still lands in the right academic year.
         if (!$academicYear) {
-            $year = $now->year;
             $startMonth = config('zedville.academic_year_start_month', 4);
-            $academicYear = ($now->month >= $startMonth)
+            $academicYear = ($month >= $startMonth)
                 ? $year . '-' . ($year + 1)
                 : ($year - 1) . '-' . $year;
         }
@@ -36,8 +48,8 @@ class FinheroPointService
         }
         DB::table('finhero_student_points')->insert([
             'student_id'    => $studentId,
-            'month'         => $now->month,
-            'year'          => $now->year,
+            'month'         => $month,
+            'year'          => $year,
             'academic_year' => $academicYear,
             'source_type'   => $sourceType,
             'source_key'    => $sourceKey,
