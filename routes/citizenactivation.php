@@ -7,6 +7,8 @@ Route::controller(CitizenActivationController::class)->group(function () {
 
     Route::get('/', 'index')->name('index');
 
+    Route::post('/welcome', 'acceptWelcome')->name('welcome.accept');
+
     Route::get('/bank-account', 'bankAccount')->name('bankAccount');
     Route::post('/store', 'store')->name('store');
 

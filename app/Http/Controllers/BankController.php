@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Jobs\ProcessScheduledTransfer;
-use App\Jobs\ProcessScheduledBillPayment;
 use App\Services\ParticipationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -21,81 +19,84 @@ use Illuminate\Http\Request;
 use App\Helpers\MailboxScheduler;
 use Illuminate\Support\Facades\Auth;
 use App\Services\StatementGenerator;
+use App\Services\BankTransferService;
+use App\Services\DonationService;
+use App\Services\EasyActivityService;
+use App\Services\SaverService;
+use App\Support\Level;
+use App\Services\LedgerService;
+use App\Services\SavingsLedger;
+use App\Services\BankStatementService;
+use App\Services\WantsPlanService;
+use App\Support\BankLevel;
 use App\Models\BankStatement;
 use App\Models\ManagePayeeBiller;
 
 
 class BankController extends Controller
 {
-    public function index()
+    /** The day the monthly salary comes in, Berlin time (creditMonthlySalary). */
+    public const SALARY_DAY = 6;
+
+    /**
+     * The bank's Overview: the three accounts with what each is for, this
+     * month's money, the bills, the latest movements (bank review, 2026-10-29).
+     * Before the bank is set up: the steps of setting it up.
+     */
+    public function index(BankStatementService $statements)
     {
         $user = auth()->user();
-        // Check if this student already has a bank account
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
         if (!$bankAccount) {
             return view('bank.bank', compact('user'));
         }
-
-
-        // ❌ 2. Bank account created BUT primary savings account balance is ZERO
         if ($bankAccount->primary_savings_account_amount <= 0) {
             return view('bank.form.bank-direct-deposite-message', compact('user'));
         }
-        $autoDebitExists = AutoDebitRequest::where('user_id', $user->id)
-            //->where('status', 1) // adjust if status is 'approved'
-            ->exists();
-
-        // 👉 adjust column/table name if needed
-        if (!$autoDebitExists) {
+        if (!AutoDebitRequest::where('user_id', $user->id)->exists()) {
             return view('bank.form.auto-debit-authorization-message', compact('user'));
         }
-        /*$transactions = \App\Models\Transaction1::where('user_id', $user->id)
-                    ->orderBy('id', 'desc') // latest first
-                    ->get();*/
-        $transactions = \App\Models\Transaction1::where('user_id', $user->id)
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
-            ->orderBy('id', 'desc') // latest first
-            ->get();
 
-        // ✅ Get latest balance from transactions
-        /*$availableBalance = Transaction::where('user_id', $user->id)
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;*/
-        $latestTxn = Transaction1::where('user_id', $user->id)
-            ->latest('id') // or latest('created_at') if you track timestamps
-            ->first();
-        $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-        $salaryamount = config('zedville.monthly_salary', 3952.40);
-        $emmsavingsPct = config('zedville.emargency_fund_persentage', 20);
-        $emmsavingsAmount = round($salaryamount * ($emmsavingsPct / 100), 2);
-        $emergencyFundInterest = app(\App\Http\Controllers\SavingsAccountController::class)->emergencyFundInterest($user->id);
-        $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
-            ->where(function ($q) {
-                $q->where('description', 'Auto Transfer to Savings Account')
-                    ->orWhere('description', 'Auto Transfer to Emergency Fund');
-            })
-            //->orderBy('transaction_date', 'desc') // latest first
-            ->get();
-        $moneymarketintrest = app(\App\Http\Controllers\SavingsAccountController::class)->moneymarketintrest($user->id);
-        $moneymarkettransactions = \App\Models\Transaction1::where('user_id', $user->id)
-            ->where('description', 'Auto Transfer to Money Market Account')
-            //->orderBy('transaction_date', 'desc') // latest first
-            ->get();
-        $bankUserName = $user->nickname;
-        if ($bankAccount) {
-            $this->creditMonthlySalary($user->id);
-            $this->ensureMonthlyBills($user);
-            // If bank account exists → load welcome view
-            return view('bank.bank-account', compact('user', 'bankAccount', 'transactions', 'lastBalance', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'moneymarketintrest', 'moneymarkettransactions', 'bankUserName'));
-        }
-        return view('bank.bank', compact('user'));
+        // this month's salary and bills first, so the page already shows them
+        // (it read the balance before them: the first visit showed last month's)
+        $this->creditMonthlySalary($user->id);
+        $this->ensureMonthlyBills($user);
+        WantsPlanService::chargeDue($user->id); // a plan payment waiting for money, once there is
+        // the month's unexpected expense after the salary and the bills, if it is due (App\Services\EmergencyService)
+        \App\Services\EmergencyService::chargeDue($user);
+        \App\Services\EmergencyService::arrive($user);
+        $bankAccount->refresh();
+        $savings = app(SavingsAccountController::class);
+
+        return view('bank.overview', [
+            'user' => $user,
+            'bankAccount' => $bankAccount,
+            'current' => BankTransferService::balance($bankAccount, BankTransferService::CURRENT),
+            'interest' => [
+                BankTransferService::EMERGENCY => $savings->emergencyFundInterest($user->id),
+                BankTransferService::MONEY_MARKET => $savings->moneymarketintrest($user->id),
+            ],
+            'summary' => $statements->summary($bankAccount),
+            'bills' => $statements->bills($bankAccount),
+            'recent' => $statements->recent($bankAccount),
+            // the account-opening pop-ups
+            'emmsavingsAmount' => round(config('zedville.monthly_salary', 3952.40) * SaverService::fundPercent($user, $bankAccount) / 100, 2),
+            // the Intermediate and after: what they saved this month and their share for the fund
+            'saver' => Level::saver($user),
+            'saved' => SaverService::savedThisMonth($user->id),
+            'fundPercent' => SaverService::fundPercent($user, $bankAccount),
+            'bankUserName' => $user->name,
+            'easyActivities' => app(EasyActivityService::class)->forStudent($user, 'bank_transfer'),
+        ]);
     }
     public function store(Request $request, StatementGenerator $generator)
     {
         $user = auth()->user();
         if (!$user) {
             return redirect()->back()->withErrors('You must be logged in.');
+        }
+        if (BankAccount::where('student_id', $user->id)->exists()) {
+            return redirect()->route('bank.index');
         }
 
         //$salary=3952.40; // Set your salary amount here
@@ -112,6 +113,11 @@ class BankController extends Controller
             'rcvaccemail' => 'nullable|string',
             'tandc' => 'nullable|string',
         ]);
+        // A student's address is their street and number in Zedville (same
+        // as the activation form, Daniel 2026-10-25); typed only without a Class.
+        if ($user->isStudent() && ($cityAddress = \App\Services\AddressService::assignForStudent($user))) {
+            $validated['homeAddress'] = $cityAddress->load('street')->label();
+        }
         // ✅ Update user address if not already set
         if (empty($user->address) && !empty($validated['homeAddress'])) {
             $user->address = $validated['homeAddress'];
@@ -164,7 +170,7 @@ class BankController extends Controller
 
         $bankAccount = BankAccount::create($data);
 
-        return redirect()->route('bank.direct_deposite_message')->with('success', 'Bank account created successfully!');
+        return redirect()->route('bank.direct_deposite_message')->with('success', __('flash.bank_created'));
     }
     public function direct_deposite_message()
     {
@@ -172,881 +178,413 @@ class BankController extends Controller
         $bankAccount = \App\Models\BankAccount::where('student_id', $user->id)->first();
         return view('bank.form.bank-direct-deposite-message', compact('user', 'bankAccount'));
     }
+    /** Card & details: the card, the PIN, and the details a friend needs to send the student money. */
     public function my_account()
     {
         $user = auth()->user();
-        // Check if this student already has a bank account
-        $bankAccount = \App\Models\BankAccount::where('student_id', $user->id)->first();
-        if ($bankAccount) {
-            $this->creditMonthlySalary($user->id);
-            $this->ensureMonthlyBills($user);
+        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        if (!$bankAccount) {
+            return redirect()->route('bank.index');
         }
-        $transactions = \App\Models\Transaction1::where('user_id', $user->id)
-            //->orderBy('transaction_date', 'desc') // latest first
-            ->get();
-        $latestTxn = Transaction1::where('user_id', $user->id)
-            ->latest('id') // or latest('created_at') if you track timestamps
-            ->first();
-        $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-        $emergencyFundInterest = app(\App\Http\Controllers\SavingsAccountController::class)->emergencyFundInterest($user->id);
-        $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
-            ->where(function ($q) {
-                $q->where('description', 'Auto Transfer to Savings Account')
-                    ->orWhere('description', 'Auto Transfer to Emergency Fund');
-            })
-            //->orderBy('transaction_date', 'desc') // latest first
-            ->get();
-        $moneymarketintrest = app(\App\Http\Controllers\SavingsAccountController::class)->moneymarketintrest($user->id);
-        $moneymarkettransactions = \App\Models\Transaction1::where('user_id', $user->id)
-            ->where('description', 'Auto Transfer to Money Market Account')
-            //->orderBy('transaction_date', 'desc') // latest first
-            ->get();
-        //Emmargency Fund
-        $salaryamount = config('zedville.monthly_salary', 3952.40);
-        $emmsavingsPct = config('zedville.emargency_fund_persentage', 20);
-        ;
-        $emmsavingsAmount = round($salaryamount * ($emmsavingsPct / 100), 2);
-        $bankUserName = $user->nickname;
-        return view('bank.bank-my-account', compact('user', 'bankAccount', 'transactions', 'lastBalance', 'moneymarketintrest', 'emergencyFundInterest', 'emmengercyfundtransactions', 'moneymarkettransactions', 'emmsavingsAmount', 'bankUserName'));
+
+        return view('bank.details', compact('user', 'bankAccount'));
     }
-    public function transfer()
+
+    /**
+     * Pay & transfer: to a friend (their account number or IBAN and name), between
+     * the student's own accounts, a bill, or the monthly donation to a charity
+     * (every level: DonationService) - and the scheduled ones still to run.
+     * Later dates and standing orders to friends for the older students (BankLevel).
+     */
+    public function transfer(Request $request, BankTransferService $bank)
     {
-        $transfer = Transfer::where('user_id', auth()->id())->get();
-        $scheduledTransfers = Transfer::where('user_id', auth()->id())
-            ->where(function ($q) {
-                $q->where('type', 'later')
-                    ->orWhere('type', 'recurring')
-                    ->orWhereNotNull('scheduled_at');
-            })
-            ->orderBy('scheduled_at', 'asc')
-            ->get();
-        $bankaccountdetails = BankAccount::where('student_id', auth()->id())->first();
+        $user = auth()->user();
+        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        if (!$bankAccount) {
+            return redirect()->route('bank.index');
+        }
+        $to = in_array($request->query('to'), ['friend', 'own', 'bill', 'donation'], true) ? $request->query('to') : 'friend';
+        $saved = Beneficiary::where('user_id', $user->id)->orderBy('name')->get();
+        $charities = DonationService::saved($user->id);
+        $accounts = collect(BankTransferService::FROM_LABELS)
+            ->filter(fn ($label, $key) => $key === BankTransferService::CURRENT || SavingsLedger::isOpen($bankAccount, $key))
+            ->map(fn ($label, $key) => [
+                'from' => $label,
+                'name' => __('bank_ui.' . $key),
+                'balance' => BankTransferService::balance($bankAccount, $key),
+            ])->all();
 
-        $beneficiaries = Beneficiary::where('user_id', auth()->id())->get();
-
-        return view('bank.bank-transfer', compact('transfer', 'scheduledTransfers', 'bankaccountdetails', 'beneficiaries'));
+        return view('bank.pay', [
+            'bankAccount' => $bankAccount,
+            'to' => $to,
+            'accounts' => $accounts,
+            // friends here; the saved charities go with the donation
+            'beneficiaries' => $saved->reject(fn ($b) => $charities->contains('id', $b->id))->values(),
+            'charities' => $charities,
+            'donation' => $donation = DonationService::active($user->id),
+            // last school year's, to keep or change when it's set up again
+            'lastDonation' => $donation ? null : DonationService::last($user->id),
+            'donationRange' => DonationService::range(),
+            'billers' => ManagePayeeBiller::where('status', 1)->orderBy('name')->get(),
+            'orders' => Transfer::where('user_id', $user->id)->where('status', 'scheduled')->orderBy('next_run_at')->get(),
+            'advanced' => BankLevel::advanced($user),
+            'mmLock' => $bank->moneyMarketLock($user),
+            'easyActivities' => $to === 'friend' ? app(EasyActivityService::class)->forStudent($user, 'bank_transfer') : collect(),
+        ]);
     }
-    /*public function transfer_store(Request $request)
+
+    public function transfer_store(Request $request, BankTransferService $bank)
     {
-        $data = $request->validate([
-            'from_account'     => 'required|string',
-            'account_number'   => 'required|string',
-            'sort_code'        => 'nullable|string',
-            'beneficiary_name' => 'required|string',
-            'amount'           => 'required|numeric|min:0.01',
-            'memo'             => 'nullable|string',
-            'type'             => 'required|in:now,later,recurring',
-            'scheduled_at'     => 'nullable|date',
-            'saveAsBeneficiary'=> 'sometimes|accepted'
-        ]);
-
-        $sender = auth()->user();
-
-        // Find recipient bank account
-        $recipientBankAccount = BankAccount::where('primary_savings_account_number', $request->account_number)
-            ->where('student_name', $request->beneficiary_name)
-            ->first();
-
-        if (!$recipientBankAccount) {
-            return redirect()
-                ->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Bank account number and beneficiary name not available.');
-        }
-
-        // ✅ Find the recipient user by student_id
-        $recipientUser = \App\Models\User::find($recipientBankAccount->student_id);
-        if (!$recipientUser) {
-            return redirect()
-                ->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Recipient user not found.');
-        }
-
-        // Check sender's balance
-        $latestTxnSender = Transaction::where('user_id', $sender->id)->latest()->first();
-        $senderBalance = $latestTxnSender ? $latestTxnSender->balance : 0;
-
-        if ($senderBalance < $request->amount) {
-            return redirect()
-                ->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Insufficient balance.');
-        }
-
-        // Create transfer
-        $data['user_id'] = $sender->id;
-        $transfer = Transfer::create($data);
-
-        // 1️⃣ Debit from sender
-        $newSenderBalance = $senderBalance - $request->amount;
-        Transaction::create([
-            'user_id'     => $sender->id,
-            'type'        => 'Fund Transfer Debit',
-            'txn_date'    => now()->toDateString(),
-            'value_date'  => now()->toDateString(),
-            'description' => "Transfer to {$request->beneficiary_name} ({$request->account_number})",
-            'ref_no'      => 'TRANSFER-' . strtoupper(uniqid()),
-            'debit'       => $request->amount,
-            'credit'      => 0,
-            'balance'     => $newSenderBalance,
-        ]);
-
-        // 2️⃣ Credit to recipient
-        $latestTxnRecipient = Transaction::where('user_id', $recipientUser->id)->latest()->first();
-        $recipientBalance   = $latestTxnRecipient ? $latestTxnRecipient->balance : 0;
-        $newRecipientBalance = $recipientBalance + $request->amount;
-
-        // ✅ fetch sender’s primary savings account number from bank_accounts
-        $senderBankAccount   = BankAccount::where('student_id', $sender->id)->first();
-        $senderAccountNumber = $senderBankAccount?->primary_savings_account_number ?? '';
-
-        Transaction::create([
-            'user_id'     => $recipientUser->id,
-            'type'        => 'Fund Transfer Credit',
-            'txn_date'    => now()->toDateString(),
-            'value_date'  => now()->toDateString(),
-            'description' => "Received from {$sender->nickname} ({$senderAccountNumber})",
-            'ref_no'      => 'TRANSFER-' . strtoupper(uniqid()),
-            'debit'       => 0,
-            'credit'      => $request->amount,
-            'balance'     => $newRecipientBalance,
-        ]);
-
-
-        // Optional: save as beneficiary
-        if ($request->filled('saveAsBeneficiary')) {
-            Beneficiary::create([
-                'user_id'        => $sender->id,
-                'name'           => $request->beneficiary_name,
-                'bank'           => $request->from_account,
-                'account_number' => $request->account_number,
-            ]);
-        }
-
-        return redirect()
-            ->route('bank.transfer')
-            ->with('success', 'Transfer completed successfully!');
-    }*/
-    /*public function transfer_store(Request $request)
-    {
-        //Log::info('transfer_store called', ['payload' => $request->all()]);
-
-        $data = $request->validate([
-            'from_account'      => 'required|string',
-            'account_number'    => 'required|string',
-            'sort_code'         => 'nullable|string',
-            'beneficiary_name'  => 'required|string',
-            'amount'            => 'required|numeric|min:0.01',
-            'memo'              => 'nullable|string',
-            'type'              => 'required|in:now,later,recurring',
-            'scheduled_at'      => 'nullable|date',
-            'saveAsBeneficiary' => 'sometimes|accepted'
-        ]);
-
-        $sender = auth()->user();
-        //Log::info('Authenticated sender', ['id' => $sender->id]);
-
-        // ✅ Find recipient bank account
-        $recipientBankAccount = BankAccount::where('primary_savings_account_number', $request->account_number)
-            ->where('student_name', $request->beneficiary_name)
-            ->first();
-
-        if (!$recipientBankAccount) {
-            //Log::error('Recipient bank account not found', ['account_number' => $request->account_number]);
-            return redirect()->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Bank account number and beneficiary name not available.');
-        }
-        //Log::info('Recipient bank account found', ['id' => $recipientBankAccount->id]);
-
-        // ✅ Recipient user
-        $recipientUser = User::find($recipientBankAccount->student_id);
-        if (!$recipientUser) {
-            //Log::error('Recipient user not found', ['student_id' => $recipientBankAccount->student_id]);
-            return redirect()->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Recipient user not found.');
-        }
-        Log::info('Recipient user found', ['id' => $recipientUser->id]);
-
-        // ✅ Sender bank account
-        $senderBankAccount = BankAccount::where('student_id', $sender->id)->first();
-        $senderBankAccountId = $senderBankAccount?->id;
-        //Log::info('Sender bank account', ['id' => $senderBankAccountId]);
-
-        // ✅ Sender balance
-        $latestTxnSender = Transaction1::where('user_id', $sender->id)
-            ->latest('transaction_date')
-            ->first();
-        $senderBalance = $latestTxnSender?->balance ?? 0;
-        //Log::info('Sender balance', ['balance' => $senderBalance]);
-
-        if ($senderBalance < $request->amount) {
-
-            return redirect()->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Insufficient balance.');
-        }
-
-        // Create Transfer record
-        $data['user_id'] = $sender->id;
-        $transfer = Transfer::create($data);
-        //Log::info('Transfer record created', ['transfer_id' => $transfer->id]);
-
-        // ----- 1️⃣ Debit sender -----
-        $newSenderBalance = $senderBalance - $request->amount;
-        $debit = Transaction1::create([
-            'user_id'          => $sender->id,
-            'bank_account_id'  => $senderBankAccountId,
-            'transaction_date' => now(),
-            'description'      => "Transfer to {$request->beneficiary_name} ({$request->account_number})",
-            'type'             => 'debit',
-            'category'         => 'Fund Transfer',
-            'amount'           => $request->amount,
-            'balance'          => $newSenderBalance,
-            'is_penalty'       => 0,
-        ]);
-        //Log::info('Sender debit transaction created', ['id' => $debit->id]);
-
-        // ----- 2️⃣ Credit recipient -----
-        $latestTxnRecipient = Transaction1::where('user_id', $recipientUser->id)
-            ->latest('transaction_date')
-            ->first();
-        $recipientBalance = $latestTxnRecipient?->balance ?? 0;
-        $newRecipientBalance = $recipientBalance + $request->amount;
-
-        $credit = Transaction1::create([
-            'user_id'          => $recipientUser->id,
-            'bank_account_id'  => $recipientBankAccount->id,
-            'transaction_date' => now(),
-            'description'      => "Received from {$sender->nickname} ({$senderBankAccount?->primary_savings_account_number})",
-            'type'             => 'credit',
-            'category'         => 'Fund Transfer',
-            'amount'           => $request->amount,
-            'balance'          => $newRecipientBalance,
-            'is_penalty'       => 0,
-        ]);
-        //Log::info('Recipient credit transaction created', ['id' => $credit->id]);
-
-        // Optional: save as beneficiary
-        if ($request->filled('saveAsBeneficiary')) {
-            $beneficiary = Beneficiary::create([
-                'user_id'        => $sender->id,
-                'name'           => $request->beneficiary_name,
-                'bank'           => $request->from_account,
-                'account_number' => $request->account_number,
-            ]);
-            //Log::info('Beneficiary saved', ['id' => $beneficiary->id]);
-        }
-
-        //Log::info('Transfer completed successfully', ['transfer_id' => $transfer->id]);
-
-        return redirect()
-            ->route('bank.transfer')
-            ->with('success', 'Transfer completed successfully!');
-    }*/
-    public function transfer_store(Request $request)
-    {
-        // 1️⃣ Validate request
         $data = $request->validate([
             'from_account' => 'required|string',
-            'account_number' => 'required|string',
-            'sort_code' => 'nullable|string',
-            'beneficiary_name' => 'required|string',
-            'amount' => 'required|numeric|min:0.01',
-            'memo' => 'nullable|string',
+            'to' => 'required|in:friend,own',
+            'own_to' => 'nullable|required_if:to,own|in:current,emergency,money_market',
+            'account_number' => 'nullable|required_if:to,friend|string|max:40',
+            'beneficiary_name' => 'nullable|required_if:to,friend|string|max:120',
+            'amount' => 'required|numeric|min:0.01|max:1000000',
+            'memo' => 'nullable|string|max:140',
             'type' => 'nullable|in:now,later,recurring',
-            'paydate' => 'required_if:type,later|nullable|date',
-            'start_date' => 'required_if:type,recurring|nullable|date',
-            'end_date' => 'required_if:type,recurring|nullable|date|after_or_equal:start_date',
-            'frequency' => 'required_if:type,recurring|nullable|in:daily,weekly,monthly',
-            'saveAsBeneficiary' => 'nullable|boolean', // new field
+            'paydate' => 'nullable|required_if:type,later|date|after_or_equal:today',
+            'start_date' => 'nullable|required_if:type,recurring|date|after_or_equal:today',
+            'end_date' => 'nullable|required_if:type,recurring|date|after:start_date',
+            'frequency' => 'nullable|required_if:type,recurring|in:weekly,monthly,yearly',
+            'saveAsBeneficiary' => 'nullable|boolean',
         ]);
-        // ✅ ADD THIS LINE HERE
-        $selectedOption = $request->input('own_account_option', null);
-        $sender = auth()->user();
 
-        //Check is account is open or not
-        if ($request->has('own_account_option')) {
-            $senderBankAccount = BankAccount::where('student_id', $sender->id)->first();
+        // No card PIN (Daniel, 2026-10-29: "better no pin for transfer"): online
+        // banking confirms a transfer on a check step; the PIN is for card payments.
+        $user = $request->user();
+        $back = fn (string $error) => redirect()->route('bank.transfer', ['to' => $data['to']])
+            ->withInput()->with('error', __('flash.' . $error));
 
-            if (
-                $senderBankAccount->is_open_emergency_account == 0 &&
-                $senderBankAccount->is_open_money_market_account == 0
-            ) {
-                return redirect()->back()->with('error', 'You don’t have any active account. Please open at least one account before transferring money.');
+        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        if (!$bankAccount) {
+            return redirect()->route('bank.index');
+        }
+        $from = BankTransferService::key($data['from_account']);
+        if (!$from) {
+            return $back('transfer_failed');
+        }
+        if ($data['to'] === 'own') {
+            $data['account_number'] = BankTransferService::numberOf($bankAccount, $data['own_to']);
+            $data['beneficiary_name'] = $bankAccount->student_name;
+        } else {
+            $found = $bank->findAccount($data['account_number']);
+            if (!$found || !BankTransferService::sameName($data['beneficiary_name'], $found[0]->student_name)) {
+                return $back('no_beneficiary');
             }
-
-            //$selectedOption = $request->input('own_account_option');
-
-            if ($selectedOption === 'Emergency Fund Account' && $senderBankAccount->is_open_emergency_account == 0) {
-                return redirect()->back()->with('error', 'Your Emergency Fund Account is not active yet. Please open it before transferring money.');
-            }
-
-            if ($selectedOption === 'Money Market Account' && $senderBankAccount->is_open_money_market_account == 0) {
-                return redirect()->back()->with('error', 'Your Money Market Account is not active yet. Please open it before transferring money.');
-            }
-        }
-
-
-
-        // 🧠 Step 2: Money Market Lock Check
-        if ($selectedOption === 'Money Market Account') {
-            //Before 26 access money market account
-            $today = now();
-            $dayOfMonth = (int) $today->format('d');
-            if ($dayOfMonth < 26) {
-                return back()->with('error', "
-                    <strong>Money Market Locked</strong><br>
-                    You can access your <strong>Money Market Account</strong> only from the <strong>26th</strong> of each month onward.<br><br>
-                    💡 Use this time to manage your expenses and budgeting activities first!
-                ");
-            }
-            // Get user's total monthly spending
-            //$generator = app(\App\Services\StatementGenerator::class);
-            //$monthlySalary = $generator->getActiveBudgetConfig()->monthly_salary ?? 3952.40;
-            $monthlySalary = config('zedville.monthly_salary', 3952.40);
-
-            $totalExpenses = Transaction1::where('user_id', $sender->id)
-                ->where('type', 'debit')
-                ->whereYear('transaction_date', now()->year)
-                ->whereMonth('transaction_date', now()->month)
-                ->sum('amount');
-
-            $minThreshold = $monthlySalary * 0.91; // 91%
-
-            // ❌ Not spent 91% — LOCKED
-            if ($totalExpenses < $minThreshold) {
-                return back()->with('error', "
-                <strong>Transfer Not Allowed</strong><br>
-                You cannot transfer money to your <strong>Money Market Account</strong> yet.<br><br>
-                <strong>Why?</strong> You need to spend at least <strong>91%</strong> of this month's salary first (on expenses, bills, and budgeting activities).<br><br>
-                💡 Remember: Money Market Accounts are for extra funds after covering essentials!
-            ");
-            }
-
-            // ✅ Spent 91% or more — UNLOCK temporarily
-            //$bankAccount->update(['is_money_market_locked' => false]);
-        }
-
-        //dd('test');
-        //Check is account is open or not
-
-
-        // 2️⃣ Find recipient bank account
-        $recipientBankAccount = BankAccount::where('student_name', $request->beneficiary_name)
-            ->where(function ($query) use ($request) {
-                $query->where('primary_savings_account_number', $request->account_number)
-                    ->orWhere('emergency_fund_account_number', $request->account_number)
-                    ->orWhere('money_market_account_number', $request->account_number);
-            })
-            ->first();
-
-
-        if (!$recipientBankAccount) {
-            return redirect()->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Bank account number and beneficiary name not available.');
-        }
-
-        // 3️⃣ Check sender balance
-        /*$latestTxnSender = Transaction1::where('user_id', $sender->id)
-            //->latest('transaction_date')
-             ->orderBy('transaction_date', 'desc')
-             ->orderBy('id', 'desc')
-            ->first();*/
-
-        /*$latestTxnSender = Transaction1::where('user_id', $sender->id)
-            ->latest('id') // or latest('created_at') if you track timestamps
-            ->first();
-        $senderBalance = $latestTxnSender?->balance ?? 0;*/
-        $senderBank = BankAccount::where('student_id', $sender->id)->first();
-
-        switch ($request->from_account) {
-
-            case 'Primary Savings Account':
-
-                $latestTxnSender = Transaction1::where('user_id', $sender->id)
-                    ->latest('id')
-                    ->first();
-
-                $senderBalance = $latestTxnSender?->balance ?? 0;
-                break;
-
-            case 'Emergency Fund Account':
-
-                $senderBalance = $senderBank->emergency_fund_account_amount ?? 0;
-                break;
-
-            case 'Money Market Account':
-
-                $senderBalance = $senderBank->money_market_account_amount ?? 0;
-                break;
-
-            default:
-
-                $senderBalance = 0;
-        }
-        //dd($senderBalance);
-
-        if ($senderBalance < $request->amount) {
-            /*if ($selectedOption === 'Emergency Fund Account') {
-                return redirect()->route('bank.transfer')
-                ->withInput()
-                ->with('error', "<strong>Insufficient Balance</strong><br>
-                    Insufficient funds. The payment will automatically be deducted next month on the same day, after your monthly statement is sent (1st–5th).");
-            }*/
-            return redirect()->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Insufficient Balance.');
-        }
-
-        // 4️⃣ Map form fields to DB
-        $data['user_id'] = $sender->id;
-        $data['sid'] = session()->get('sid');
-        $data['scheduled_at'] = isset($data['paydate']) ? Carbon::parse($data['paydate']) : null;
-        unset($data['paydate']);
-
-        if (isset($data['start_date'])) {
-            $data['start_date'] = Carbon::parse($data['start_date']);
-        }
-        if (isset($data['end_date'])) {
-            $data['end_date'] = Carbon::parse($data['end_date']);
-        }
-
-        // 5️⃣ Create transfer record
-        $transfer = Transfer::create($data);
-        // 2️⃣ Save as beneficiary if checkbox is checked
-        if ($request->boolean('saveAsBeneficiary')) {
-            // Check if beneficiary already exists to avoid duplicates
-            $existing = Beneficiary::where('user_id', auth()->id())
-                ->where('name', $data['beneficiary_name'])
-                ->where('account_number', $data['account_number'])
-                ->first();
-
-            if (!$existing) {
-                Beneficiary::create([
-                    'user_id' => auth()->id(),
-                    'sid' => session()->get('sid'),
-                    'name' => $data['beneficiary_name'],
-                    'bank' => $data['from_account'],
-                    'account_number' => $data['account_number'],
-                    'sort_code' => $data['sort_code'] ?? null,
-                ]);
+            if ((int) $found[0]->student_id !== (int) $user->id && !BankTransferService::sameClass($user, (int) $found[0]->student_id)) {
+                return $back('other_class');
             }
         }
 
-        // 6️⃣ Dispatch transfer based on type
-        switch ($request->type) {
-            case 'now':
-                $this->processTransfer($transfer->id, now());
-                break;
+        $type = $data['type'] ?? 'now';
+        $first = match ($type) {
+            'later' => Carbon::parse($data['paydate'])->startOfDay(),
+            'recurring' => Carbon::parse($data['start_date'])->startOfDay(),
+            default => null,
+        };
+        $transfer = Transfer::create([
+            'user_id' => $user->id,
+            'sid' => $bankAccount->sid,
+            'from_account' => BankTransferService::FROM_LABELS[$from],
+            'account_number' => trim($data['account_number']),
+            'beneficiary_name' => trim($data['beneficiary_name']),
+            'amount' => round((float) $data['amount'], 2),
+            'memo' => $data['memo'] ?? null,
+            'type' => $type,
+            'kind' => 'transfer',
+            'status' => 'done',
+            'scheduled_at' => $type === 'later' ? $first : null,
+            'start_date' => $type === 'recurring' ? $first : null,
+            'end_date' => $type === 'recurring' ? Carbon::parse($data['end_date'])->endOfDay() : null,
+            'frequency' => $type === 'recurring' ? $data['frequency'] : null,
+        ]);
 
-            case 'later':
-                if ($transfer->scheduled_at) {
-                    ProcessScheduledTransfer::dispatch($transfer->id)
-                        ->delay($transfer->scheduled_at->diffInSeconds(now()));
-                }
-                break;
+        $result = $first ? $bank->schedule($transfer, $first) : $bank->execute($transfer);
+        if (!$result['ok']) {
+            $transfer->update(['status' => 'failed', 'failure' => $result['error']]);
 
-            case 'recurring':
-                if ($transfer->start_date) {
-                    // Dispatch first occurrence
-                    ProcessScheduledTransfer::dispatch($transfer->id)
-                        ->delay($transfer->start_date->diffInSeconds(now()));
-                }
-                break;
+            return $back($result['error']);
         }
-        /*if (isset($selectedOption) && $selectedOption === 'Money Market Account') {
-            $bankAccount->update(['is_money_market_locked' => true]);
-        }*/
-        return redirect()->route('bank.transfer')->with('success', 'Transfer successfully!');
+
+        if ($data['to'] === 'friend' && $request->boolean('saveAsBeneficiary')) {
+            Beneficiary::firstOrCreate(
+                ['user_id' => $user->id, 'name' => trim($data['beneficiary_name']), 'account_number' => trim($data['account_number'])],
+                ['sid' => $bankAccount->sid, 'bank' => 'Universal Bank']
+            );
+        }
+
+        $message = $first && $first->gt(now())
+            ? __('flash.transfer_scheduled', ['date' => $first->locale(app()->getLocale())->isoFormat('LL')])
+            : __('flash.transfer_done');
+        // out of the Money Market: what its early withdrawal fee was
+        if (!empty($result['fee'])) {
+            $message .= ' ' . __('flash.mm_fee_charged', ['fee' => zeds($result['fee'])]);
+        }
+
+        return redirect()->route('bank.transfer', ['to' => $data['to']])->with('success', e($message));
     }
 
-
-    // Process single transfer transaction
-    public function processTransfer($transferId, $transactionDate)
+    /** Runs one transfer now (kept for callers of the old method; BankTransferService does it). */
+    public function processTransfer($transferId, $transactionDate = null)
     {
-        DB::transaction(function () use ($transferId, $transactionDate) {
-            $transfer = Transfer::find($transferId);
-            if (!$transfer)
-                return;
+        $transfer = Transfer::find($transferId);
 
-            $sender = User::find($transfer->user_id);
-            $recipientBank = BankAccount::where('student_name', $transfer->beneficiary_name)
-                ->where(function ($query) use ($transfer) {
-                    $query->where('primary_savings_account_number', $transfer->account_number)
-                        ->orWhere('emergency_fund_account_number', $transfer->account_number)
-                        ->orWhere('money_market_account_number', $transfer->account_number);
-                })
-                ->first();
-
-            //Check Recived account
-            $recipientAccountType = null;
-            if ($recipientBank->primary_savings_account_number === $transfer->account_number) {
-                $recipientAccountType = 'primary';
-            } elseif ($recipientBank->emergency_fund_account_number === $transfer->account_number) {
-                $recipientAccountType = 'emergency';
-            } elseif ($recipientBank->money_market_account_number === $transfer->account_number) {
-                $recipientAccountType = 'money_market';
-            }
-
-            $recipient = User::find($recipientBank->student_id);
-
-            $senderBank = BankAccount::where('student_id', $sender->id)->first();
-
-            switch ($transfer->from_account) {
-
-                case 'Primary Savings Account':
-
-                    $senderAccountNumber = $senderBank->primary_savings_account_number;
-
-                    break;
-
-
-                case 'Emergency Fund Account':
-
-                    $senderBalance = $senderBank->emergency_fund_account_amount;
-
-                    $newSenderBalance = $senderBalance - $transfer->amount;
-
-                    $senderBank->emergency_fund_account_amount = $newSenderBalance;
-
-                    $senderBank->save();
-
-                    $senderAccountNumber = $senderBank->emergency_fund_account_number;
-
-                    break;
-
-
-                case 'Money Market Account':
-
-                    $senderBalance = $senderBank->money_market_account_amount;
-
-                    $newSenderBalance = $senderBalance - $transfer->amount;
-
-                    $senderBank->money_market_account_amount = $newSenderBalance;
-
-                    $senderBank->save();
-
-                    $senderAccountNumber = $senderBank->money_market_account_number;
-
-                    break;
-            }
-            if ($transfer->from_account === 'Primary Savings Account') {
-                \App\Services\LedgerService::post(
-                    $sender->id,
-                    'debit',
-                    'Fund Transfer',
-                    (float) $transfer->amount,
-                    "Transfer to {$transfer->beneficiary_name} ({$transfer->account_number})",
-                    [
-                        'sid' => $sender->sid,
-                        'bank_account_id' => $senderBank?->id,
-                        'transaction_date' => $transactionDate,
-                    ]
-                );
-            }
-
-            switch ($recipientAccountType) {
-
-                case 'primary':
-                    // Handled below via LedgerService, which re-reads the
-                    // balance itself rather than trusting a value computed
-                    // here - no $newRecipientBalance needed in this branch.
-                    break;
-
-
-                case 'emergency':
-
-                    $recipientBalance = $recipientBank->emergency_fund_account_amount;
-
-                    $newRecipientBalance = $recipientBalance + $transfer->amount;
-
-                    $recipientBank->emergency_fund_account_amount = $newRecipientBalance;
-
-                    $recipientBank->save();
-
-                    break;
-
-
-                case 'money_market':
-
-                    $recipientBalance = $recipientBank->money_market_account_amount;
-
-                    $newRecipientBalance = $recipientBalance + $transfer->amount;
-
-                    $recipientBank->money_market_account_amount = $newRecipientBalance;
-
-                    $recipientBank->save();
-
-                    break;
-            }
-            if ($recipientAccountType === 'primary') {
-                \App\Services\LedgerService::post(
-                    $recipient->id,
-                    'credit',
-                    'Fund Transfer',
-                    (float) $transfer->amount,
-                    "Received from {$sender->nickname} ({$senderAccountNumber})",
-                    [
-                        'sid' => $recipient->sid,
-                        'bank_account_id' => $recipientBank->id,
-                        'transaction_date' => $transactionDate,
-                    ]
-                );
-            }
-            app(ParticipationService::class)->award($sender->id, 'transfer');
-        });
-
+        return $transfer ? app(BankTransferService::class)->execute($transfer) : ['ok' => false, 'error' => 'transfer_failed'];
     }
-    public function beneficiary_store(Request $request)
+
+    /**
+     * Cancels a scheduled or recurring transfer or bill of the student's that
+     * hasn't run (out). Not the monthly donation: it can only move to another
+     * charity (Daniel, 2026-11-08).
+     */
+    public function transfer_cancel(Transfer $transfer)
+    {
+        abort_unless((int) $transfer->user_id === (int) auth()->id(), 404);
+        if ($transfer->kind === DonationService::KIND) {
+            return redirect()->route('bank.transfer', ['to' => 'donation'])->with('error', __('flash.donation_no_cancel'));
+        }
+        if ($transfer->status === 'scheduled') {
+            $transfer->update(['status' => 'cancelled', 'next_run_at' => null]);
+        }
+
+        return back()->with('success', e(__('flash.transfer_cancelled')));
+    }
+
+    /**
+     * Saves a friend to send money to: their account number (or IBAN) and their
+     * name must belong to the same account, as a bank checks it. Before, it
+     * looked for a field the form doesn't send and always said "not found".
+     */
+    public function beneficiary_store(Request $request, BankTransferService $bank)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'bank' => 'required|string|max:255',
-            'account_number' => 'required|string|max:255',
-            'sort_code' => 'nullable|string|max:255',
+            'name' => 'required|string|max:120',
+            'account_number' => 'required|string|max:40',
+            'for' => 'nullable|in:friend,donation',
         ]);
-        // Check if bank account exists
-        $accountExists = BankAccount::where('primary_savings_account_number', $request->account_number)->exists();
-        $nameExists = BankAccount::where('student_name', $request->beneficiary_name)->exists();
+        $tab = $data['for'] ?? 'friend';
+        $back = fn (string $error) => redirect()->route('bank.transfer', ['to' => $tab])->withInput()->with('error', __('flash.' . $error));
 
-        // Prepare error messages
-        // Prepare error message
-        if (!$nameExists && !$accountExists) {
-            return redirect()
-                ->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Bank account number and beneficiary name not available in our database.');
-        } elseif (!$nameExists) {
-            return redirect()
-                ->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Beneficiary name not available in our database.');
-        } elseif (!$accountExists) {
-            return redirect()
-                ->route('bank.transfer')
-                ->withInput()
-                ->with('error', 'Bank account number not available in our database.');
+        // a charity, for the monthly donation: its name and account number from the Donation Center
+        if ($tab === 'donation') {
+            $npo = DonationService::npo($data['account_number']);
+            if (!$npo || !DonationService::sameName($data['name'], $npo)) {
+                return $back('not_a_charity');
+            }
+            Beneficiary::firstOrCreate(
+                ['user_id' => auth()->id(), 'account_number' => trim($data['account_number'])],
+                ['name' => trim($data['name']), 'sid' => auth()->user()->sid, 'bank' => 'Charity']
+            );
+
+            return redirect()->route('bank.transfer', ['to' => 'donation'])->with('success', e(__('flash.charity_saved')));
         }
-        $data['user_id'] = auth()->id();
-        $data['sid'] = session()->get('sid');
-        Beneficiary::create($data);
-        return redirect()
-            ->route('bank.transfer')
-            ->with('success', 'Beneficiary saved!');
-        //return back()->with('success','Beneficiary saved!');
+
+        $found = $bank->findAccount($data['account_number']);
+        if (!$found || !BankTransferService::sameName($data['name'], $found[0]->student_name)) {
+            return $back('no_beneficiary');
+        }
+        if ((int) $found[0]->student_id === (int) auth()->id()) {
+            return $back('beneficiary_is_you');
+        }
+        if (!BankTransferService::sameClass(auth()->user(), (int) $found[0]->student_id)) {
+            return $back('other_class');
+        }
+        Beneficiary::firstOrCreate(
+            ['user_id' => auth()->id(), 'name' => trim($data['name']), 'account_number' => trim($data['account_number'])],
+            ['sid' => $found[0]->sid, 'bank' => 'Universal Bank']
+        );
+
+        return redirect()->route('bank.transfer', ['to' => 'friend'])->with('success', e(__('flash.beneficiary_saved')));
     }
+
+    public function beneficiary_delete(Beneficiary $beneficiary)
+    {
+        abort_unless((int) $beneficiary->user_id === (int) auth()->id(), 404);
+        $tab = DonationService::npo($beneficiary->account_number) ? 'donation' : 'friend';
+        $beneficiary->delete();
+
+        return redirect()->route('bank.transfer', ['to' => $tab])->with('success', e(__('flash.beneficiary_removed')));
+    }
+
+    /**
+     * Sets up the monthly donation: a standing order to a saved charity, 4-6%
+     * of the salary, every month from the first date, no end (DonationService).
+     */
+    public function donation_store(Request $request, DonationService $donations)
+    {
+        $data = $request->validate([
+            'beneficiary' => 'required|integer',
+            'amount' => 'required|numeric|min:0.01|max:1000000',
+            'start_date' => 'required|date|after_or_equal:today',
+        ]);
+        $user = $request->user();
+        [$min, $max] = DonationService::range();
+        $back = fn (string $error) => redirect()->route('bank.transfer', ['to' => 'donation'])->withInput()
+            ->with('error', __('flash.' . $error, ['min' => zeds($min), 'max' => zeds($max)]));
+
+        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        if (!$bankAccount) {
+            return redirect()->route('bank.index');
+        }
+        $saved = Beneficiary::where('user_id', $user->id)->find($data['beneficiary']);
+        $npo = $saved ? DonationService::npo($saved->account_number) : null;
+        if (!$npo) {
+            return $back('not_a_charity');
+        }
+
+        $first = Carbon::parse($data['start_date'])->startOfDay();
+        $result = $donations->start($user, $bankAccount, $npo, round((float) $data['amount'], 2), $first);
+        if (!isset($result['transfer'])) {
+            return $back($result['error']);
+        }
+
+        $message = match (true) {
+            $first->gt(now()) => __('flash.donation_scheduled', ['date' => $first->locale(app()->getLocale())->isoFormat('LL')]),
+            $result['ok'] => __('flash.donation_paid'),
+            default => __('flash.donation_first_failed'),
+        };
+
+        return redirect()->route('bank.transfer', ['to' => 'donation'])->with($result['ok'] || $first->gt(now()) ? 'success' : 'error', e($message));
+    }
+
+    /**
+     * The share of the salary that goes to the Emergency Fund, from the next
+     * payday: the Intermediate and after choose it every month (SaverService).
+     */
+    public function fund_percent(Request $request)
+    {
+        $data = $request->validate(['percent' => ['required', 'integer', 'in:' . implode(',', SaverService::OPTIONS)]]);
+        $user = $request->user();
+        abort_unless(Level::saver($user), 403);
+
+        $account = BankAccount::where('student_id', $user->id)->firstOrFail();
+        $account->emergency_fund_percent = (int) $data['percent'];
+        $account->save();
+
+        return redirect()->route('bank.index')->with('success', e(__('flash.fund_percent_saved', ['percent' => $data['percent']])));
+    }
+
+    /** Moves the monthly donation to another saved charity: it can't be cancelled. */
+    public function donation_change(Request $request, DonationService $donations)
+    {
+        $data = $request->validate(['beneficiary' => 'required|integer']);
+        $user = $request->user();
+        $donation = DonationService::active($user->id);
+        $saved = Beneficiary::where('user_id', $user->id)->find($data['beneficiary']);
+        $npo = $saved ? DonationService::npo($saved->account_number) : null;
+        if (!$donation || !$npo) {
+            return redirect()->route('bank.transfer', ['to' => 'donation'])->with('error', __('flash.not_a_charity'));
+        }
+        $donations->moveTo($donation, $npo);
+
+        return redirect()->route('bank.transfer', ['to' => 'donation'])
+            ->with('success', e(__('flash.donation_moved', ['name' => ct('activities', $npo->name)])));
+    }
+
+    /** Paying a bill is on Pay & transfer now. */
     public function pay_bills()
     {
-        $getAllbiller = ManagePayeeBiller::where('status', '1')->get();
-        $transactions = Transaction1::where('user_id', Auth::id())
-            ->where('type', 'debit')                 // ✅ exclude 0.00 or NULL
-            ->orderBy('id', 'DESC')
-            ->paginate(20);
-        $scheduledTransfers = Transfer::where('user_id', auth()->id())
-            ->where(function ($q) {
-                $q->where('type', 'later')
-                    ->orWhere('type', 'recurring')
-                    ->orWhereNotNull('scheduled_at');
-            })
-            ->orderBy('scheduled_at', 'asc')
-            ->get();
-        return view('bank.bank-pay-bills', compact('getAllbiller', 'transactions', 'scheduledTransfers'));
+        return redirect()->route('bank.transfer', ['to' => 'bill']);
     }
-    public function store_pay_bill(Request $request)
-    {
 
-        $validated = $request->validate([
-            'from_account' => 'required|string|max:191',
+    public function store_pay_bill(Request $request, BankTransferService $bank)
+    {
+        $data = $request->validate([
             'beneficiary_name' => 'required|string|max:191',
             'account_number' => 'required|string|max:100',
-            'amount' => 'required|numeric|min:0.01',
-            'type' => 'required|in:now,later,recurring',
-            'paydate' => 'nullable|date',
-            'frequency' => 'nullable|in:weekly,monthly,yearly',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'amount' => 'required|numeric|min:0.01|max:1000000',
+            'type' => 'nullable|in:now,later,recurring',
+            'paydate' => 'nullable|required_if:type,later|date|after_or_equal:today',
+            'start_date' => 'nullable|required_if:type,recurring|date|after_or_equal:today',
+            'end_date' => 'nullable|required_if:type,recurring|date|after:start_date',
+            'frequency' => 'nullable|required_if:type,recurring|in:weekly,monthly,yearly',
         ]);
+        $back = fn (string $error) => redirect()->route('bank.transfer', ['to' => 'bill'])
+            ->withInput()->with('error', __('flash.' . $error));
 
         $userId = auth()->id();
-        $validated['user_id'] = $userId;
-
-
         $bankAccount = BankAccount::where('student_id', $userId)->first();
         if (!$bankAccount) {
-            return back()->with('error', 'Bank account not found.');
+            return $back('account_not_found');
         }
 
-        //$latestTxn = Transaction1::where('user_id', $userId)->latest('transaction_date')->first();
-        $latestTxn = Transaction1::where('user_id', $userId)
-            //->latest('transaction_date')
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('id', 'desc')
-            ->first();
-        $balance = $latestTxn?->balance ?? 0;
-        if ($balance < $request->amount) {
-            return redirect()->route('bank.pay_bills')->with('error', 'Insufficient balance.');
+        $type = $data['type'] ?? 'now';
+        $first = match ($type) {
+            'later' => Carbon::parse($data['paydate'])->startOfDay(),
+            'recurring' => Carbon::parse($data['start_date'])->startOfDay(),
+            default => null,
+        };
+        $transfer = Transfer::create([
+            'user_id' => $userId,
+            'sid' => $bankAccount->sid,
+            'from_account' => BankTransferService::FROM_LABELS[BankTransferService::CURRENT],
+            'account_number' => trim($data['account_number']),
+            'beneficiary_name' => trim($data['beneficiary_name']),
+            'amount' => round((float) $data['amount'], 2),
+            'type' => $type,
+            'kind' => 'bill',
+            'status' => 'done',
+            'scheduled_at' => $type === 'later' ? $first : null,
+            'start_date' => $type === 'recurring' ? $first : null,
+            'end_date' => $type === 'recurring' ? Carbon::parse($data['end_date'])->endOfDay() : null,
+            'frequency' => $type === 'recurring' ? $data['frequency'] : null,
+        ]);
+
+        $result = $first ? $bank->schedule($transfer, $first) : $bank->execute($transfer);
+        if (!$result['ok']) {
+            $transfer->update(['status' => 'failed', 'failure' => $result['error']]);
+
+            return $back($result['error']);
         }
 
-        // ✅ Prepare transfer data
-        $data = $validated;
-        $data['scheduled_at'] = isset($validated['paydate']) && $validated['paydate'] !== 'now'
-            ? Carbon::parse($validated['paydate'])
-            : null;
-        unset($data['paydate']);
+        $message = $first && $first->gt(now())
+            ? __('flash.bill_scheduled_on', ['date' => $first->locale(app()->getLocale())->isoFormat('LL')])
+            : __('flash.bill_paid');
 
-        if (isset($validated['start_date'])) {
-            $data['start_date'] = Carbon::parse($validated['start_date']);
-        }
-        if (isset($validated['end_date'])) {
-            $data['end_date'] = Carbon::parse($validated['end_date']);
-        }
-        $data['sid'] = session()->get('sid');
-        \Log::info('Creating transfer', $data);
-        $transfer = Transfer::create($data);
-
-        switch ($request->type) {
-            case 'now':
-                $this->processBillPayment($userId, $request->amount, $request->beneficiary_name, $request->account_number);
-                break;
-
-            case 'schedule':
-                if ($transfer->scheduled_at) {
-                    ProcessScheduledBillPayment::dispatch($transfer->id)
-                        ->delay($transfer->scheduled_at->diffInSeconds(now()));
-                }
-                break;
-
-            case 'recurring':
-                if ($transfer->start_date) {
-                    ProcessScheduledBillPayment::dispatch($transfer->id)
-                        ->delay($transfer->start_date->diffInSeconds(now()));
-                }
-                break;
-        }
-
-        return redirect()->route('bank.pay_bills')->with('success', 'Bill payment scheduled successfully!');
-    }
-
-    public function processBillPayment($userId, $amount, $beneficiaryName, $accountNumber)
-    {
-        DB::transaction(function () use ($userId, $amount, $beneficiaryName, $accountNumber) {
-            $senderBank = BankAccount::where('student_id', $userId)->first();
-            if (!$senderBank)
-                return;
-
-            // Record debit for sender (no recipient)
-            \App\Services\LedgerService::post(
-                $userId,
-                'debit',
-                'Bill Payment',
-                (float) $amount,
-                "Bill payment to {$beneficiaryName} ({$accountNumber})",
-                [
-                    'sid' => $senderBank->sid,
-                    'bank_account_id' => $senderBank->id,
-                    'transaction_date' => now(),
-                    'floor_at_zero' => true,
-                ]
-            );
-        });
+        return redirect()->route('bank.transfer', ['to' => 'bill'])->with('success', e($message));
     }
 
 
+    /** The old statement pages read a table nothing writes to (always "no statements"): the statement page. */
     public function bank_statements(Request $request)
     {
-        $query = Transaction::where('user_id', auth()->id());
-
-        // Optional date filters from form
-        if ($request->filled('start_date')) {
-            $query->whereDate('txn_date', '>=', $request->start_date);
-        }
-        if ($request->filled('end_date')) {
-            $query->whereDate('txn_date', '<=', $request->end_date);
-        }
-
-        // Optional account filter if you have multiple accounts
-        if ($request->filled('account')) {
-            $query->where('type', $request->account);
-        }
-
-        $transactions = $query->orderBy('txn_date', 'desc')->get();
-        return view('bank.bank-statements', compact('transactions'));
+        return redirect()->route('bank.bank_statement_show');
     }
 
     public function viewStatement($year, $month)
     {
-        $start = Carbon::create($year, $month, 1)->startOfMonth();
-        $end = Carbon::create($year, $month, 1)->endOfMonth();
+        $valid = ctype_digit((string) $year) && ctype_digit((string) $month) && (int) $month >= 1 && (int) $month <= 12;
 
-        $transactions = Transaction::where('user_id', auth()->id())
-            ->whereBetween('txn_date', [$start, $end])
-            ->orderBy('txn_date')
-            ->get();
-
-        // Calculate summary
-        $openingBalance = Transaction::where('user_id', auth()->id())
-            ->whereDate('txn_date', '<', $start)
-            ->orderBy('txn_date', 'desc')
-            ->value('balance') ?? 0;
-
-        $totalCredits = $transactions->sum('credit');
-        $totalDebits = $transactions->sum('debit');
-
-        // If your transactions table keeps running balance:
-        $closingBalance = $transactions->last()->balance ?? $openingBalance + $totalCredits - $totalDebits;
-
-        return view('bank.view-statement', [
-            'year' => $year,
-            'month' => $month,
-            'start' => $start,
-            'end' => $end,
-            'openingBalance' => $openingBalance,
-            'totalCredits' => $totalCredits,
-            'totalDebits' => $totalDebits,
-            'closingBalance' => $closingBalance,
-            'transactions' => $transactions,
-        ]);
+        return redirect()->route('bank.bank_statement_show', $valid ? ['month' => sprintf('%04d-%02d', $year, $month)] : []);
     }
+
     public function help()
     {
         return view('bank.bank-help');
     }
+    /** These pages showed sample data (a "John Smith", buttons that did nothing): their real versions. */
     public function manage_payee()
     {
-        $userId = auth()->id();
-
-        // Fetch pay bills for logged-in user
-        $payBills = PayBill::where('user_id', $userId)->get();
-        $getAllbiller = ManagePayeeBiller::where('status', '1')->get();
-
-        // Example: transfer recipients could be another table, for now static or leave empty
-        $transferRecipients = [
-            ['name' => 'John Smith', 'bank' => 'Global Trust Bank', 'account_number' => '1234567890', 'amount' => '125.30 ZEDS'],
-            ['name' => 'Sarah Johnson', 'bank' => 'Global Trust Bank', 'account_number' => '1234567890', 'amount' => '125.30 ZEDS'],
-        ];
-
-        return view('bank.bank-manage-payee', compact('payBills', 'transferRecipients', 'getAllbiller'));
+        return redirect()->route('bank.transfer', ['to' => 'bill']);
     }
+
     public function schedule_transfers()
     {
-        return view('bank.bank-schedule-transfers');
+        return redirect()->route('bank.transfer');
     }
+
     public function recurring_payment()
     {
-        return view('bank.bank-recurring-payment');
+        return redirect()->route('bank.transfer');
     }
+
     public function payment_history()
     {
-        $transactions = Transaction1::where('user_id', Auth::id())
-            ->where('type', 'debit')                 // ✅ exclude 0.00 or NULL
-            ->orderBy('id', 'ASC')
-            ->get();
-        return view('bank.bank-payment-history', compact('transactions'));
+        return redirect()->route('bank.bank_statement_show');
     }
+
     public function direct_deposite()
     {
         $user = Auth::user();
@@ -1057,6 +595,11 @@ class BankController extends Controller
     public function authorize_direct_deposit(Request $request, StatementGenerator $generator)
     {
         $user = Auth::user();
+        // Sent again (the old mail's link, a stale tab): the bank is running
+        // already - it paid a second salary and started the balance again from 0.
+        if (Transaction1::where('user_id', $user->id)->exists()) {
+            return redirect()->route('bank.index')->with('success', e(__('flash.direct_deposit_already')));
+        }
         // 💰 Update bank account amount
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
 
@@ -1085,7 +628,7 @@ class BankController extends Controller
         ]);*/
         return redirect()
             ->route('bank.auto_debit_authorization_message')
-            ->with('success', 'Salary Created Sucessfully');
+            ->with('success', __('flash.salary_created'));
         // ✅ Redirect to mailbox page with success message
         /*return redirect()
             ->route('profile.mailbox') // change to your actual mailbox route name
@@ -1105,7 +648,7 @@ class BankController extends Controller
         $exists = DirectDeposite::where('user_id', $user->id)->exists();
 
         if ($exists) {
-            return redirect()->back()->with('error', 'You have already submitted.');
+            return redirect()->back()->with('error', __('flash.already_submitted'));
         }
 
         // Validate request
@@ -1133,7 +676,7 @@ class BankController extends Controller
 
         DirectDeposite::create($validated);
 
-        return redirect()->back()->with('success', 'Form submitted successfully.');
+        return redirect()->back()->with('success', __('flash.form_submitted'));
 
     }
     public function creditMonthlySalary($userId)
@@ -1147,7 +690,7 @@ class BankController extends Controller
         $businessNow = Carbon::now('Europe/Berlin');
 
         // Salary can only be credited from the 6th onward
-        if ($businessNow->day < 6) {
+        if ($businessNow->day < self::SALARY_DAY) {
             return;
         }
 
@@ -1172,7 +715,7 @@ class BankController extends Controller
         $salaryDate = Carbon::create(
             $businessNow->year,
             $businessNow->month,
-            6,
+            self::SALARY_DAY,
             8,
             0,
             0,
@@ -1183,70 +726,68 @@ class BankController extends Controller
         // Prevent duplicate salary for the same month
         // =========================================================
 
-        $alreadyCredited = Transaction1::where('user_id', $userId)
-            ->where(function ($query) {
-                $query->where('category', 'Income')
-                    ->orWhere('description', 'LIKE', '%Salary%');
-            })
-            ->whereMonth('transaction_date', $businessNow->month)
-            ->whereYear('transaction_date', $businessNow->year)
-            ->exists();
-
-        if ($alreadyCredited) {
+        if (self::salaryCredited($userId, $businessNow)) {
             return;
         }
 
         // =========================================================
-        // Monthly salary amount
+        // Monthly salary, then the Emergency Fund's share (bank review,
+        // 2026-10-29): under a lock on the bank account so two page loads at
+        // once can't pay it twice, and on top of the latest line - the
+        // balance every screen shows - so no line drops out of it.
         // =========================================================
 
-        $amount = config('zedville.monthly_salary', 3952.40);
+        $amount = (float) config('zedville.monthly_salary', 3952.40);
 
-        // =========================================================
-        // IMPORTANT:
-        // Get the balance from the latest transaction BEFORE
-        // the salary transaction date.
-        //
-        // We do NOT use orderBy('id', 'desc') alone because the
-        // highest transaction ID is not always the transaction
-        // that represents the balance immediately before salary.
-        // =========================================================
+        $transaction = DB::transaction(function () use ($userId, $account, $amount, $salaryDate, $businessNow) {
+            $locked = BankAccount::whereKey($account->id)->lockForUpdate()->first();
+            if (self::salaryCredited($userId, $businessNow)) {
+                return null;
+            }
 
-        $lastBalance = Transaction1::where('user_id', $userId)
-            ->where('transaction_date', '<', $salaryDate)
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;
+            $salary = LedgerService::post($userId, 'credit', 'Income', $amount, 'Monthly Salary Credit - ' . $businessNow->format('F Y'), [
+                'sid' => $locked->sid,
+                'bank_account_id' => $locked->id,
+                'transaction_date' => $salaryDate,
+            ]);
 
-        // Make sure the balance is numeric
-        $lastBalance = (float) $lastBalance;
+            // Auto Transfer to the Emergency Fund: 20%, or from the Intermediate
+            // on the share the student chose (SaverService; 0% sends nothing)
+            $fundPercent = SaverService::fundPercent(User::find($userId), $locked);
+            if (SavingsLedger::isOpen($locked, 'emergency') && $fundPercent > 0) {
+                $alreadyTransferred = Transaction1::where('user_id', $userId)
+                    ->where(fn ($q) => $q->where('description', 'LIKE', '%Emergency Fund%')->orWhere('description', 'LIKE', '%Savings Account%'))
+                    ->where('category', 'Savings')
+                    ->whereMonth('transaction_date', $businessNow->month)
+                    ->whereYear('transaction_date', $businessNow->year)
+                    ->exists();
+                $savingsAmount = round($amount * $fundPercent / 100, 2);
 
-        // =========================================================
-        // Add monthly salary to previous balance
-        // Example:
-        // Previous balance = €70.00
-        // Salary           = €3952.40
-        // New balance      = €4022.40
-        // =========================================================
+                if (!$alreadyTransferred && (float) $salary->balance >= $savingsAmount) {
+                    $when = $salaryDate->copy()->addMinutes(5);
+                    LedgerService::post($userId, 'debit', 'Savings', $savingsAmount, 'Auto Transfer to Emergency Fund', [
+                        'sid' => $locked->sid,
+                        'bank_account_id' => $locked->id,
+                        'transaction_date' => $when,
+                    ]);
+                    SavingsLedger::post($locked, 'emergency', 'credit', 'Monthly transfer', $savingsAmount, 'Monthly transfer from your current account', null, $when);
+                }
+            }
 
-        $newBalance = round($lastBalance + $amount, 2);
+            // A plan of the month waiting for money is paid right after it, after
+            // the Emergency Fund's share (Daniel, 2026-11-02: "si el salario no ha
+            // llegado aún, se descuenta justo cuando llegue el salario").
+            WantsPlanService::chargeDue($userId, $salaryDate->copy()->addMinutes(10)->max($businessNow));
 
-        // =========================================================
-        // Create Salary Transaction
-        // =========================================================
+            return $salary;
+        });
 
-        $transaction = Transaction1::create([
-            'user_id' => $userId,
-            'sid' => $account->sid,
-            'bank_account_id' => $account->id,
-            'transaction_date' => $salaryDate,
-            'description' => 'Monthly Salary Credit - ' . $businessNow->format('F Y'),
-            'type' => 'credit',
-            'category' => 'Income',
-            'amount' => $amount,
-            'balance' => $newBalance,
-            'is_penalty' => false,
-        ]);
+        if (!$transaction) {
+            return;
+        }
+
+        // the Intermediate's saver bonus comes with the salary (App\Services\SaverBonus)
+        \App\Services\SaverBonus::payDue(User::find($userId));
 
         // =========================================================
         // Trigger mailbox notification
@@ -1258,93 +799,71 @@ class BankController extends Controller
             [
                 'transaction_id' => $transaction->id,
                 'amount' => $amount,
-                'balance' => $newBalance,
+                'balance' => (float) $transaction->balance,
                 'month' => $businessNow->format('F Y'),
             ]
         );
-
-        // =========================================================
-        // Auto Transfer 20% to Emergency Fund
-        // =========================================================
-
-        if ($account->is_open_emergency_account == 1) {
-
-            // Prevent duplicate Emergency Fund transfer
-            $alreadyTransferred = Transaction1::where('user_id', $userId)
-                ->where(function ($q) {
-                    $q->where('description', 'LIKE', '%Emergency Fund%')
-                        ->orWhere('description', 'LIKE', '%Savings Account%');
-                })
-                ->where('category', 'Savings')
-                ->whereMonth('transaction_date', $businessNow->month)
-                ->whereYear('transaction_date', $businessNow->year)
-                ->exists();
-
-            if (!$alreadyTransferred) {
-
-                $emmsavingsPct = config(
-                    'zedville.emargency_fund_persentage',
-                    20
-                );
-
-                $savingsAmount = round(
-                    $amount * ($emmsavingsPct / 100),
-                    2
-                );
-
-                // Make sure there is enough balance
-                if ($newBalance >= $savingsAmount) {
-
-                    // Deduct Emergency Fund amount from running balance
-                    $newBalance = round(
-                        $newBalance - $savingsAmount,
-                        2
-                    );
-
-                    // Update Emergency Fund account balance
-                    $account->emergency_fund_account_amount =
-                        ($account->emergency_fund_account_amount ?? 0)
-                        + $savingsAmount;
-
-                    $account->save();
-
-                    // =================================================
-                    // Create Emergency Fund Debit Transaction
-                    // =================================================
-
-                    Transaction1::create([
-                        'user_id' => $userId,
-                        'sid' => $account->sid,
-                        'bank_account_id' => $account->id,
-                        'transaction_date' => $salaryDate->copy()->addMinutes(5),
-                        'description' => 'Auto Transfer to Emergency Fund',
-                        'type' => 'debit',
-                        'category' => 'Savings',
-                        'amount' => $savingsAmount,
-                        'balance' => $newBalance,
-                        'is_penalty' => false,
-                    ]);
-                }
-            }
-        }
     }
+
+    /** Whether the salary of $month (Berlin's month, like the credit) is in. */
+    public static function salaryCredited(int $userId, Carbon $month): bool
+    {
+        return Transaction1::where('user_id', $userId)
+            ->where(fn ($q) => $q->where('category', 'Income')->orWhere('description', 'LIKE', '%Salary%'))
+            ->whereMonth('transaction_date', $month->month)
+            ->whereYear('transaction_date', $month->year)
+            ->exists();
+    }
+
+    /**
+     * The bills of the 7th and what each costs, [lowest, highest]: the
+     * utilities change every month. In the Intermediate's second month they
+     * rise (App\Services\PriceRise::BILLS).
+     */
+    public static function billAmounts(): array
+    {
+        $rent = (float) config('zedville.rent', 300);
+        $school = (float) config('zedville.school_fees', 1000);
+
+        return [
+            'Utility - Electricity' => [60, 90],
+            'Utility - Water' => [30, 60],
+            'Internet' => [20, 20],
+            'Rent' => [$rent, $rent],
+            'School Fees' => [$school, $school],
+        ];
+    }
+
     public function ensureMonthlyBills(User $user)
     {
-        // 🔒 Only generate bills on or after the 7th of the month
-        if (now()->day < 7) {
+        // the City Hall's letter about the new prices comes before the bills that have them;
+        // in the third month, the bank's and Zed Directo's
+        \App\Services\PriceRise::announce($user);
+        \App\Services\ZedDirecto::announce($user);
+        // loan instalments due (the 7th), and late ones as soon as there is money (App\Services\LoanService)
+        \App\Services\LoanService::chargeDue($user);
+        // the credit card's statement, paid from the 7th as the student chose (App\Services\CreditCardService)
+        \App\Services\CreditCardService::settle($user);
+
+        // 🔒 Only generate bills on or after the 7th of the month (Berlin's day,
+        // like the scheduler that also calls this)
+        if (Carbon::now('Europe/Berlin')->day < 7) {
             return;
         }
 
-        $fixedTransactions = [
-            ['day' => 7, 'description' => 'Utility - Electricity', 'amount' => rand(60, 90)],
-            ['day' => 7, 'description' => 'Utility - Water', 'amount' => rand(30, 60)],
-            ['day' => 7, 'description' => 'Internet', 'amount' => 20],
-            ['day' => 7, 'description' => 'Rent', 'amount' => config('zedville.rent', 300)],
-            ['day' => 7, 'description' => 'School Fees', 'amount' => config('zedville.school_fees', 1000)],
-        ];
+        $fixedTransactions = [];
+        foreach (self::billAmounts() as $description => [$low, $high]) {
+            $amount = $low == $high ? $low : rand((int) $low, (int) $high);
+            $fixedTransactions[] = ['day' => 7, 'description' => $description,
+                'amount' => \App\Services\PriceRise::price($user, (float) $amount, \App\Services\PriceRise::BILLS[$description])];
+        }
 
         $today = now();
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        // no bank yet: its bills start with it (a line before it blocked that month's real bills)
+        if (!$bankAccount) {
+            return;
+        }
 
         foreach ($fixedTransactions as $item) {
             $billDay = $item['day'] ?? 7;
@@ -1364,7 +883,9 @@ class BankController extends Controller
                 continue;
             }
 
-            $txnDate = Carbon::create($today->year, $today->month, $billDay, 9, 0, 0);
+            // tried again every day until the money is there (no balance below
+            // zero): a bill paid after its day is dated the day it is paid
+            $txnDate = $today->day > $billDay ? now() : Carbon::create($today->year, $today->month, $billDay, 9, 0, 0);
 
             // ✅ CATEGORY RULE
             $needsItems = [
@@ -1377,7 +898,16 @@ class BankController extends Controller
 
             $category = in_array($item['description'], $needsItems) ? 'Needs' : 'Wants';
 
-            DB::transaction(function () use ($user, $bankAccount, $txnDate, $item, $category) {
+            DB::transaction(function () use ($user, $bankAccount, $txnDate, $item, $category, $today) {
+                BankAccount::whereKey($bankAccount->id)->lockForUpdate()->first();
+                $again = Transaction1::where('user_id', $user->id)
+                    ->where('description', $item['description'])
+                    ->whereYear('transaction_date', $today->year)
+                    ->whereMonth('transaction_date', $today->month)
+                    ->exists();
+                if ($again) {
+                    return;
+                }
                 \App\Services\LedgerService::post(
                     $user->id,
                     'debit',
@@ -1388,196 +918,115 @@ class BankController extends Controller
                         'sid' => $user->sid,
                         'bank_account_id' => $bankAccount->id ?? null,
                         'transaction_date' => $txnDate,
-                        'floor_at_zero' => true,
+                        'only_if_enough' => true,
                     ]
                 );
             });
         }
+
+        // the health insurance's premium, from the Intermediate (App\Services\InsuranceService);
+        // whoever ended their first month without a plan gets Basic first
+        \App\Services\InsuranceService::assignDefault($user);
+        \App\Services\InsuranceService::chargePremium($user);
+
+        // The month's shopping from the student's consumer survey, with the bills
+        // (Daniel, 2026-11-08): it was only charged the month the survey was first
+        // filled, so nobody reached the 91% the Spending activities are made for.
+        $this->chargeMonthlyShopping($user, $bankAccount, $today);
     }
 
-    public function bank_statement_show(StatementGenerator $generator, Request $request)
+    /**
+     * The habits of the survey in effect (App\Models\ConsumerSurvey: one a
+     * month, applied from the next), charged as the survey's first month was
+     * (ConsumerSurveyController): each line once a month - the month of a first
+     * survey already has them - waiting for the money like a bill.
+     */
+    private function chargeMonthlyShopping(User $user, BankAccount $bankAccount, Carbon $today): void
     {
-        $user = Auth::user();
-        $this->creditMonthlySalary($user->id);
-        $this->ensureMonthlyBills($user);
-
-        $today = now();
-
-        // 🔹 Check last day of current month
-        $isLastDayOfMonth = $today->isLastOfMonth();
-
-        // 🔹 Penalty already applied this month?
-        $penaltyExists = Transaction1::where('user_id', $user->id)
-            ->where('category', 'Penalty')
-            ->whereYear('transaction_date', $today->year)
-            ->whereMonth('transaction_date', $today->month)
-            ->exists();
-
-        // ✅ APPLY PENALTY ONLY ON LAST DAY OF MONTH
-        if ($isLastDayOfMonth && !$penaltyExists) {
-            $this->banks_penalty($generator, $user);
+        $survey = \App\Models\ConsumerSurvey::inEffect($user->id);
+        if (!$survey || $survey->isSkipped()) {
+            return;
         }
 
-
-        // ✅ Date range filter
-        $startDate = $request->input('from_date')
-            ? Carbon::parse($request->input('from_date'))->startOfDay()
-            : now()->startOfMonth();
-
-        $endDate = $request->input('to_date')
-            ? Carbon::parse($request->input('to_date'))->endOfDay()
-            : now()->endOfMonth();
-
-        $statement = BankStatement::where('user_id', $user->id)
-            ->where('month', now()->month)
-            ->where('year', now()->year)
-            ->first();
-
-        if (!$statement) {
-            $data = [
-                'month' => now()->month,
-                'year' => now()->year,
-                'transactions' => [],
-                'summary' => [
-                    'totalIncome' => 0,
-                    'totalExpense' => 0,
-                    'closingBalance' => 0,
-                    'totalNeeds' => 0,
-                    'totalWants' => 0,
-                ]
-            ];
-        } else {
-            $data = json_decode($statement->statement_data, true);
-
-            // Ensure required keys exist
-            $data['month'] = $data['month'] ?? now()->month;
-            $data['year'] = $data['year'] ?? now()->year;
-            $data['transactions'] = $data['transactions'] ?? [];
-            $data['summary'] = $data['summary'] ?? [
-                'totalIncome' => 0,
-                'totalExpense' => 0,
-                'closingBalance' => 0,
-                'totalNeeds' => 0,
-                'totalWants' => 0,
-            ];
-        }
-
-
-
-        // ✅ Filter statement transactions by selected date range
-        $data['transactions'] = collect($data['transactions'])
-            ->filter(function ($txn) use ($startDate, $endDate) {
-                $txnDate = Carbon::parse($txn['date']);
-                return $txnDate->between($startDate, $endDate);
-            })
-            ->values()
-            ->toArray();
-
-        // ✅ Sort by type (credit before debit)
-        usort($data['transactions'], function ($a, $b) {
-            $typeCompare = strcmp($a['type'], $b['type']);
-            if ($typeCompare !== 0)
-                return $typeCompare;
-            return strtotime($a['date']) <=> strtotime($b['date']);
-        });
-
-        // ✅ Running balance
-        $runningBalance = 0.0;
-        foreach ($data['transactions'] as &$txn) {
-            $amount = (float) $txn['amount'];
-            $runningBalance += strtolower($txn['type']) === 'credit' ? $amount : -$amount;
-            $txn['balance'] = $runningBalance;
-        }
-        unset($txn);
-
-        // ✅ Filter Transactions Based on Date Range
-        $transactions = Transaction1::where('user_id', $user->id)
-            ->whereBetween('transaction_date', [$startDate, $endDate])
-            //->whereNotIn('category', ['Income', 'Savings', 'Needs'])
-            //->whereNotIn('category', ['Income', 'Needs'])
-            //->whereNotIn('category', ['Income'])
-            //->whereNotIn('description', ['GroceriesOmnivore', 'GroceriesPescatarian', 'GroceriesVegan', 'GroceriesVegetarian'])
-            //->orderBy('transaction_date', 'asc')
-            ->orderBy('id', 'DESC')
-            ->get();
-        /* ============================
-            📊 RE-CALCULATE SUMMARY
-            ============================ */
-
-        $totalIncome = 0;
-        $totalNeeds = 0;
-        $totalWants = 0;
-        $totalSavings = 0;
-
-        foreach ($transactions as $txn) {
-
-            if (strtolower($txn->type) === 'credit') {
-
-                $totalIncome += $txn->amount;
-
-            } else {
-
-                switch (strtolower($txn->category)) {
-
-                    case 'needs':
-                        $totalNeeds += $txn->amount;
-                        break;
-
-                    case 'wants':
-                    case 'penalty': // ✅ penalty counted under wants
-                        $totalWants += $txn->amount;
-                        break;
-
-                    case 'savings':
-                        $totalSavings += $txn->amount;
-                        break;
-                }
+        $groceries = (float) ($survey->basket_cost ?: collect($survey->groceries ?? [])->sum('total_price'));
+        $amounts = ['groceries' => $groceries, 'lunch' => (float) $survey->lunch, 'transport' => (float) $survey->transport,
+            'activities' => (float) $survey->activities, 'restaurants' => (float) $survey->restaurants];
+        // the Intermediate's new prices (App\Services\PriceRise): the survey keeps the old ones
+        if (\App\Services\PriceRise::on($user)) {
+            foreach (\App\Services\PriceRise::basket($survey)['lines'] as $field => $line) {
+                $amounts[$field] = $line['after'];
             }
         }
+        $lines = [
+            ['Grocery – ' . ucfirst((string) $survey->diet), 'Grocery – %', $amounts['groceries'], 'Needs'],
+            ['School Lunch', 'School Lunch', $amounts['lunch'], 'Needs'],
+            ['Transportation', 'Transportation', $amounts['transport'], 'Needs'],
+            ['Activities & Hobbies', 'Activities & Hobbies', $amounts['activities'], 'Wants'],
+            ['Eating Out', 'Eating Out', $amounts['restaurants'], 'Wants'],
+        ];
+        $txnDate = $today->day > 7 ? now() : Carbon::create($today->year, $today->month, 7, 9, 0, 0);
 
+        foreach ($lines as [$description, $match, $amount, $category]) {
+            if ($amount <= 0) {
+                continue;
+            }
+            DB::transaction(function () use ($user, $bankAccount, $today, $txnDate, $description, $match, $amount, $category) {
+                BankAccount::whereKey($bankAccount->id)->lockForUpdate()->first();
+                $charged = Transaction1::where('user_id', $user->id)->where('description', 'like', $match)
+                    ->whereYear('transaction_date', $today->year)->whereMonth('transaction_date', $today->month)->exists();
+                if ($charged) {
+                    return;
+                }
+                LedgerService::post($user->id, 'debit', $category, $amount, $description, [
+                    'sid' => $user->sid,
+                    'bank_account_id' => $bankAccount->id,
+                    'transaction_date' => $txnDate,
+                    'only_if_enough' => true,
+                ]);
+            });
+        }
+    }
 
-        /*$latestTxn = Transaction1::where('user_id', $user->id)
-        ->latest('id') // or latest('created_at') if you track timestamps
-        ->first();
-        $lastBalance = $latestTxn ? $latestTxn->balance : 0;*/
-        /*$latestTxn = Transaction1::where('user_id', $user->id)
-            ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $lastBalance = $latestTxn ? $latestTxn->balance : 0;*/
-        if ($request->filled('from_date') && $request->filled('to_date')) {
-            $latestTxn = Transaction1::where('user_id', $user->id)
-                ->whereBetween('transaction_date', [$startDate, $endDate])
-                ->latest('id') // or latest('created_at') if you track timestamps
-                ->first();
-            $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-        } else {
-            $latestTxn = Transaction1::where('user_id', $user->id)
-                ->latest('id') // or latest('created_at') if you track timestamps
-                ->first();
-            $lastBalance = $latestTxn ? $latestTxn->balance : 0;
+    /**
+     * The statement of one account for one month: opening balance, every line,
+     * closing balance, and where the money went (bank review, 2026-10-29: three
+     * statement pages, two always empty, the third with "Total Savings" showing
+     * the current account and the heading always this month). ?month=YYYY-MM and
+     * ?account=current|emergency|money_market; ?from_date= (the dashboard and the
+     * monthly mail) picks that date's month.
+     */
+    public function bank_statement_show(Request $request, BankStatementService $statements)
+    {
+        $user = auth()->user();
+        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        if (!$bankAccount) {
+            return redirect()->route('bank.index');
         }
 
+        $months = $statements->months($bankAccount);
+        $month = $months[0];
+        foreach ([[$request->query('month'), '!Y-m'], [$request->query('from_date'), '!Y-m-d']] as [$value, $format]) {
+            if (is_string($value) && $value !== '') {
+                try {
+                    $picked = Carbon::createFromFormat($format, $value)->startOfMonth();
+                    $month = $picked->gt(now()) ? $month : $picked;
+                } catch (\Throwable $e) {
+                    // not a date: the latest month
+                }
+                break;
+            }
+        }
+        $accounts = $statements->accounts($bankAccount);
+        $key = in_array($request->query('account'), $accounts, true) ? $request->query('account') : BankTransferService::CURRENT;
 
-        $existingPenalty = Transaction1::where('user_id', $user->id)
-            ->where('category', 'Penalty')
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
-            ->first();
-        // ✅ Override statement summary with filtered values
-        $data['summary']['totalIncome'] = $totalIncome;
-        $data['summary']['totalNeeds'] = $totalNeeds;
-        $data['summary']['totalWants'] = $totalWants;
-        $data['summary']['totalSavings'] = $totalSavings;
-
-        return view('bank.statement', [
+        return view('bank.statement-page', [
             'user' => $user,
-            'statement' => $data,
-            'transactions' => $transactions,
-            'totalsaving' => $lastBalance,
-            'existingPenalty' => $existingPenalty,
+            'bankAccount' => $bankAccount,
+            'months' => $months,
+            'month' => $month,
+            'accounts' => $accounts,
+            'key' => $key,
+            'statement' => $statements->month($bankAccount, $key, $month),
         ]);
     }
 
@@ -1591,7 +1040,7 @@ class BankController extends Controller
             if (!app()->runningInConsole() && request()->routeIs('bank.banks_penalty')) {
                 return redirect()
                     ->route('bank.bank_statement_show')
-                    ->with('error', 'Penalty can only be applied on the last day of the month.');
+                    ->with('error', __('flash.penalty_last_day'));
             }
         }
 
@@ -1600,107 +1049,17 @@ class BankController extends Controller
             return redirect()->route('login');
         }
 
-        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        // Only a student who never chose the plan of the month pays it: the City
+        // Hall's fine, up to 99% of the salary spent, with its letter - at most
+        // once a month, never on Autopilot (App\Services\MonthEndPenaltyService,
+        // Daniel 2026-11-07). It used to charge everyone who had spent less than
+        // 91% of the salary.
+        $charged = app(\App\Services\MonthEndPenaltyService::class)->apply($user);
 
-        // STEP 1: GATHER INPUTS
-        $monthlySalary = $generator->getActiveBudgetConfig()->monthly_salary ?? config('zedville.monthly_salary', 3952.40);
-        $minThreshold = $monthlySalary * 0.91; // 91%
-        $targetAmount = $monthlySalary * 0.99; // 99%
-
-        // STEP 2: CALCULATE TOTAL EXPENSES (Debits, excluding existing penalty transactions)
-        $totalExpenses = Transaction1::where('user_id', $user->id)
-            ->where('type', 'debit')
-            ->where('category', '!=', 'Penalty')
-            ->where('is_penalty', 0)
-            ->whereYear('transaction_date', now()->year)
-            ->whereMonth('transaction_date', now()->month)
-            ->sum('amount');
-
-        // STEP 3: CHECK IF PENALTY APPLIES
-        if ($totalExpenses >= $minThreshold) {
-            if (request()->routeIs('bank.banks_penalty')) {
-                return redirect()->route('bank.bank_statement_show');
-            }
-            return;
-        }
-
-        // STEP 4: PENALTY APPLIES - CALCULATE PENALTY AMOUNT
-        $penaltyAmount = max(0, $targetAmount - $totalExpenses);
-
-        // safety cap with available balance
-        $latestTxn = Transaction1::where('user_id', $user->id)->latest('id')->first();
-        $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-        $penaltyAmount = min($penaltyAmount, max(0, $lastBalance));
-
-        if ($penaltyAmount <= 0) {
-            if (request()->routeIs('bank.banks_penalty')) {
-                return redirect()->route('bank.bank_statement_show');
-            }
-            return;
-        }
-
-        // STEP 4B: SELECT RANDOM PENALTY ITEMS FROM penalty_wants_items TABLE
-        $selectedItems = [];
-        try {
-            $wantsItems = DB::table('penalty_wants_items')->inRandomOrder()->get(['item_name', 'price']);
-            $accumulated = 0;
-
-            foreach ($wantsItems as $item) {
-                if ($accumulated + $item->price > $penaltyAmount) {
-                    break;
-                }
-
-                $selectedItems[] = [
-                    'name' => $item->item_name,
-                    'price' => $item->price
-                ];
-                $accumulated += $item->price;
-            }
-
-            // Add a filler if remaining small amount
-            if ($accumulated < $penaltyAmount && $wantsItems->count() > 0) {
-                $remaining = $penaltyAmount - $accumulated;
-                $selectedItems[] = [
-                    'name' => 'More items',
-                    'price' => round($remaining, 2)
-                ];
-                $accumulated += $remaining;
-            }
-        } catch (\Exception $e) {
-            Log::warning('penalty_wants_items query failed or table missing: ' . $e->getMessage());
-        }
-
-        // Fallback: If table has no items or nothing was selected, add standard penalty item
-        if (empty($selectedItems) && $penaltyAmount > 0) {
-            $selectedItems[] = [
-                'name' => 'Monthly Budget Penalty (Expenses < 91%)',
-                'price' => round($penaltyAmount, 2),
-            ];
-        }
-
-        // STEP 4C: APPLY PENALTY TRANSACTIONS
-        foreach ($selectedItems as $item) {
-            DB::transaction(function () use ($user, $bankAccount, $item) {
-                \App\Services\LedgerService::post(
-                    $user->id,
-                    'debit',
-                    'Penalty',
-                    (float) $item['price'],
-                    'Penalty Item: ' . $item['name'],
-                    [
-                        'sid' => $user->sid,
-                        'bank_account_id' => $bankAccount->id ?? null,
-                        'transaction_date' => now(),
-                        'is_penalty' => true,
-                        'floor_at_zero' => true,
-                    ]
-                );
-            });
-        }
-
-        // STEP 5: REDIRECT TO STATEMENT IF DIRECT WEB REQUEST
         if (request()->routeIs('bank.banks_penalty')) {
-            return redirect()->route('bank.bank_statement_show')->with('success', 'Monthly penalty applied successfully.');
+            return $charged
+                ? redirect()->route('bank.bank_statement_show')->with('success', __('flash.penalty_applied'))
+                : redirect()->route('bank.bank_statement_show');
         }
     }
 
@@ -1709,7 +1068,7 @@ class BankController extends Controller
         $request->validate([
             'bank_account_id' => 'required|exists:bank_accounts,id',
             'security_answer' => 'required|in:-1',
-            'new_pin' => 'required|digits:4|regex:/^[1-9]{4}$/',
+            'new_pin' => 'required|digits:4',
             'confirm_pin' => 'same:new_pin',
         ]);
 
@@ -1722,7 +1081,7 @@ class BankController extends Controller
             'card_pin' => $request->new_pin,
         ]);
 
-        return back()->with('success', 'PIN updated successfully');
+        return back()->with('success', __('flash.pin_updated'));
     }
 
 }

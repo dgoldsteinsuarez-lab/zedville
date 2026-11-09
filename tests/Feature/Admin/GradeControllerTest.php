@@ -58,4 +58,31 @@ class GradeControllerTest extends TestCase
         $response->assertRedirect(route('admin.dashboard'));
         $this->assertDatabaseMissing('grades', ['name' => 'Grade 6']);
     }
+
+    /**
+     * Daniel, 2026-10-25: "I want to add a Class here that runs in Spanish,
+     * but I don't see where" - the language is now chosen when adding the
+     * Grade, which then opens on its "Add Class" form.
+     */
+    public function test_a_grade_can_be_added_in_spanish_and_opens_on_its_add_class_form(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        $school = SchoolDomain::create(['school_name' => 'Zedville Academy', 'school_code' => 'ZEDS', 'school_domain' => 'zeds.test']);
+        session(['selected_school' => $school->id]);
+
+        $this->actingAs($admin)->get('/admin/grades')->assertOk()->assertSee('newGradeLanguage', false)->assertSee('+ Add Class');
+
+        $response = $this->actingAs($admin)->post('/admin/grades', ['name' => '10 Spanish', 'default_language' => 'es']);
+
+        $grade = Grade::where('name', '10 Spanish')->firstOrFail();
+        $this->assertSame('es', $grade->default_language);
+        $this->assertSame('free', $grade->language_mode);
+        $response->assertRedirect(route('admin.grades.general-information', $grade->id) . '#add-class');
+
+        // The Add Class form starts in the Grade's language.
+        $this->actingAs($admin)->get(route('admin.grades.general-information', $grade->id))
+            ->assertOk()
+            ->assertSee('Which language does this class run in?')
+            ->assertSee('<option value="es" selected', false);
+    }
 }

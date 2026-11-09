@@ -19,6 +19,12 @@ document.querySelectorAll('.accordion-toggle').forEach(button => {
 
 // Admin Script
 const setup = () => {
+  // Below Tailwind's lg (1024px) the sidebar is a drawer over the page, not a
+  // column beside it: there it starts closed, whatever was remembered on a wide
+  // screen, and opening/closing it isn't remembered (Daniel, 2026-10-27: made
+  // narrower, the browser showed the sidebar over half the page).
+  const wide = window.matchMedia('(min-width: 1024px)')
+
   function getSidebarStateFromLocalStorage() {
     // if it already there, use it
     if (window.localStorage.getItem('isSidebarOpen')) {
@@ -37,10 +43,15 @@ const setup = () => {
 
 return {
       loading: true,
-      isSidebarOpen: getSidebarStateFromLocalStorage(),
+      isSidebarOpen: wide.matches && getSidebarStateFromLocalStorage(),
+      init() {
+        wide.addEventListener('change', () => {
+          this.isSidebarOpen = wide.matches && getSidebarStateFromLocalStorage()
+        })
+      },
       toggleSidbarMenu() {
         this.isSidebarOpen = !this.isSidebarOpen
-        setSidebarStateToLocalStorage(this.isSidebarOpen)
+        if (wide.matches) setSidebarStateToLocalStorage(this.isSidebarOpen)
       },
       isSettingsPanelOpen: false,
       isSearchBoxOpen: false,

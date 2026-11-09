@@ -23,7 +23,25 @@ class Grade extends Model
         'name',
         'grade_level_id',
         'max_addresses',
+        'language_mode',
+        'default_language',
+        'language_level',
+        'start_month',
     ];
+
+    protected $casts = [
+        'start_month' => 'integer',
+    ];
+
+    /** The Grade's language choice, as SchoolClass language columns. */
+    public function languageSettings(): array
+    {
+        return [
+            'language_mode' => $this->language_mode ?? 'free',
+            'default_language' => $this->default_language ?? 'en',
+            'language_level' => $this->language_level ?? 'standard',
+        ];
+    }
 
     public function level()
     {

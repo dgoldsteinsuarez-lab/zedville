@@ -4,11 +4,11 @@
         if ($mail) {
         $mailDate = $mail->created_at;
         if ($mailDate->isToday()) {
-            $displayDate = 'Today, ' . $mailDate->format('jS F Y, h:i A');
+            $displayDate = __('mailbox.today', ['date' => $mailDate->isoFormat('LLL')]);
         } elseif ($mailDate->isYesterday()) {
-            $displayDate = 'Yesterday, ' . $mailDate->format('jS F Y, h:i A');
+            $displayDate = __('mailbox.yesterday', ['date' => $mailDate->isoFormat('LLL')]);
         } else {
-            $displayDate = $mailDate->format('jS F Y, h:i A');
+            $displayDate = $mailDate->isoFormat('LLL');
         }
     @endphp
     
@@ -21,15 +21,15 @@
             {!! $mail->content !!}
         </div>
     </div>
-    <div class="sendBy mt-16">
+    <!--<div class="sendBy mt-16">
         <div class="flex w-fit items-center space-x-2 bg-[#EDF4F3] border border-[#D2DDDB] rounded-md py-1 px-3">
             <span class="icon">[SVG ICON]</span>
             <span class="stxt font-medium">Sent by :</span>
             <span class="stxtname font-semibold">Administrator</span>
         </div>
-    </div>
+    </div>-->
     <div class="actionsBtns flex flex-wrap gap-x-3 gap-y-2 mt-12">
-        <button class="whiteBtn" onclick="updateemailstatus({{ $mail->id }}, 'primary')">Restore</button>
+        <button class="whiteBtn" onclick="updateemailstatus({{ $mail->id }}, 'primary')">{{ __('mailbox.restore') }}</button>
     </div>
-    @php }else{ echo "No mail found";} @endphp
+    @php }else{ echo e(__('mailbox.no_mail'));} @endphp
 </article>

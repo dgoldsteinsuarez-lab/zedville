@@ -14,6 +14,22 @@ class Street extends Model
 {
     protected $fillable = ['name', 'tier', 'bio', 'sort_order'];
 
+    /**
+     * The bio in the student's language (lang/<code>/streets.php). English
+     * shows the database text, so edits made in Admin > City Map show
+     * straight away; the other languages fall back to it when untranslated.
+     */
+    public function getLocalizedBioAttribute(): string
+    {
+        $key = "streets.bios.{$this->id}";
+
+        if (app()->getLocale() !== 'en' && \Illuminate\Support\Facades\Lang::has($key, null, false)) {
+            return __($key);
+        }
+
+        return $this->bio;
+    }
+
     public function addresses()
     {
         return $this->hasMany(Address::class);

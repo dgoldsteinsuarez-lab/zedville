@@ -1,54 +1,43 @@
+{{-- Rendered in the reader's language when the message is opened (App\Models\Mailbox). --}}
 @php
-use App\Models\BankAccount;
-$bankAccount = BankAccount::find($bank_account_id ?? null);
+    $bankAccount = \App\Models\BankAccount::find($bank_account_id ?? null) ?? \App\Models\BankAccount::where('student_id', $user->id)->first();
 @endphp
-
-<p>Great news! Your Universal Bank account is ready to use. </p>
-<p>Visit the "Universal Bank" tab in your profile to access:</p>
+<p>{{ __('mail.bank-account-ready.intro') }}</p>
+<p>{{ __('mail.bank-account-ready.visit') }}</p>
 <ul style="list-style: none;">
-    <li> - Account summary & balance</li>
-    <li> - Debit card details</li>
-    <li> - Transaction history</li>
-    <li> - Bill payments</li>
-    <li> - Savings tools</li>
-    <li> - Account alerts</li>
+    @foreach (__('mail.bank-account-ready.features') as $feature)
+        <li> - {{ $feature }}</li>
+    @endforeach
 </ul>
-<p>Your banking journey starts now!</p>
-<p><strong>Banco Nacional Joven - Online Banking</strong></p>
-<p><strong>Welcome, {{ $user->nickname }}</strong></p>
-<p><strong>Account:</strong> Student</p>
-<p><strong>Account Name:</strong></p>
-<p><strong>Account Summary</strong></p>
+<p>{{ __('mail.bank-account-ready.starts') }}</p>
+<p><strong>{{ __('mail.bank-account-ready.online') }}</strong></p>
+<p><strong>{{ __('mail.bank-account-ready.welcome', ['name' => $user->nickname ?: $user->name]) }}</strong></p>
+<p><strong>{{ __('mail.bank-account-ready.account') }}</strong> {{ __('mail.bank-account-ready.student') }}</p>
+@if ($bankAccount)
+    <p><strong>{{ __('mail.bank-account-ready.summary') }}</strong></p>
+    <ul>
+        <li><strong>{{ __('mail.bank-account-ready.balance') }}</strong> Ƶ{{ number_format((float) $bankAccount->primary_savings_account_amount, 2) }}</li>
+        <li><strong>{{ __('mail.bank-account-ready.number') }}</strong> XXXX-XXXX-XXXX-{{ substr((string) $bankAccount->primary_savings_account_number, -4) }}</li>
+        <li><strong>{{ __('mail.bank-account-ready.card') }}</strong> XXXX-XXXX-XXXX-{{ substr((string) $bankAccount->card_number, -4) }}</li>
+        <li><strong>{{ __('mail.bank-account-ready.latest') }}</strong> {{ __('mail.bank-account-ready.none') }}</li>
+    </ul>
+@endif
+<p><strong>{{ __('mail.bank-account-ready.available') }}</strong></p>
+<p><strong>{{ __('mail.bank-account-ready.statement_title') }}</strong></p>
+<ul><li>{{ __('mail.bank-account-ready.statement') }}</li></ul>
+<p><strong>{{ __('mail.bank-account-ready.card_title') }}</strong></p>
 <ul>
-    <li><strong>Available Balance:</strong> ${{ $bankAccount->primary_savings_account_amount }}</li>
-    <li><strong>Account number:</strong> XXXX-XXXX-XXXX-{{ substr($bankAccount->primary_savings_account_number, -4) }}</li>
-    <li><strong>Debit Card:</strong>  XXXX-XXXX-XXXX-{{ substr($bankAccount->card_number, -4) }}</li>
-    <li><strong>Latest Activity:</strong> N/A</li>
+    @foreach (__('mail.bank-account-ready.card_items') as $line)<li>{{ $line }}</li>@endforeach
 </ul>
-<p><strong>Available Features</strong></p>
-<p><strong>View Account Statement</strong></p>
+<p><strong>{{ __('mail.bank-account-ready.transfers_title') }}</strong></p>
 <ul>
-    <ol>Check the movement history and download it in PDF.</ol>
+    @foreach (__('mail.bank-account-ready.transfers') as $line)<li>{{ $line }}</li>@endforeach
 </ul>
-<p><strong>Debit Card Management</strong></p>
+<p><strong>{{ __('mail.bank-account-ready.savings_title') }}</strong></p>
 <ul>
-    <ol>Activate/Deactivate Card</ol>
-    <ol>Change PIN</ol>
-    <ol>Block Card in case of loss</ol>
+    @foreach (__('mail.bank-account-ready.savings') as $line)<li>{{ $line }}</li>@endforeach
 </ul>
-<p><strong>Transfers</strong></p>
-<ul>
-    <ol>Internal and external transfers</ol>
-    <ol>Payment of services (electricity, water, telephone)</ol>
-</ul>
-<p><strong>Savings Tools</strong></p>
-<ul>
-    <ol>Set savings goals</ol>
-    <ol>Set automatic reminders</ol>
-</ul>
-<p><strong>Notifications and Alerts</strong></p>
-<ul>
-    <ol>Set up balance notifications and activity alerts</ol>
-</ul>
-<p>Got questions? Visit our FAQ at <strong><a href="https://universalbank.com/faq" target="_blank">universalbank.com/faq</a></strong></p>
-<p><strong>Thank you for being part of Universal Bank</strong></p>
+<p><strong>{{ __('mail.bank-account-ready.alerts_title') }}</strong></p>
+<ul><li>{{ __('mail.bank-account-ready.alerts') }}</li></ul>
+<p>{{ __('mail.bank-account-ready.questions') }}</p>
+<p><strong>{{ __('mail.bank-account-ready.thanks') }}</strong></p>

@@ -4,11 +4,11 @@
         if ($mail) {
         $mailDate = $mail->created_at;
         if ($mailDate->isToday()) {
-            $displayDate = 'Today, ' . $mailDate->format('jS F Y, h:i A');
+            $displayDate = __('mailbox.today', ['date' => $mailDate->isoFormat('LLL')]);
         } elseif ($mailDate->isYesterday()) {
-            $displayDate = 'Yesterday, ' . $mailDate->format('jS F Y, h:i A');
+            $displayDate = __('mailbox.yesterday', ['date' => $mailDate->isoFormat('LLL')]);
         } else {
-            $displayDate = $mailDate->format('jS F Y, h:i A');
+            $displayDate = $mailDate->isoFormat('LLL');
         }
     @endphp
     
@@ -29,9 +29,9 @@
         </div>
     </div>-->
     <div class="actionsBtns flex flex-wrap gap-x-3 gap-y-2 mt-12">
-        <button class="themeBtn"  onclick="updateemailstatus({{ $mail->id }}, 'starred')">Starred</button>
-        <button class="whiteBtn" onclick="printDiv('primaryDiv')">Print</button>
-        <button class="dangerBtn"  onclick="updateemailstatus({{ $mail->id }}, 'deleted')">Delete</button>
+        <button class="themeBtn"  onclick="updateemailstatus({{ $mail->id }}, 'starred')">{{ __('mailbox.starred') }}</button>
+        <button class="whiteBtn" onclick="printDiv('primaryDiv')">{{ __('mailbox.print') }}</button>
+        <button class="dangerBtn"  onclick="updateemailstatus({{ $mail->id }}, 'deleted')">{{ __('mailbox.delete') }}</button>
     </div>
-    @php }else{ echo "No mail found";} @endphp
+    @php }else{ echo e(__('mailbox.no_mail'));} @endphp
 </article>

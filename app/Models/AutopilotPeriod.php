@@ -6,13 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class AutopilotPeriod extends Model
 {
-    protected $fillable = ['sid', 'student_id', 'class_id', 'start_date', 'end_date', 'reason', 'created_by', 'status'];
+    protected $fillable = ['sid', 'student_id', 'class_id', 'grade_id', 'batch_id', 'start_date', 'end_date', 'reason', 'created_by', 'status'];
 
     protected $casts = ['start_date' => 'date', 'end_date' => 'date'];
 
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function grade()
+    {
+        return $this->belongsTo(Grade::class, 'grade_id');
     }
 
     public function creator()

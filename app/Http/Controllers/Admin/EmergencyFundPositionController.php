@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\ClassActivityAssigner;
+use App\Support\AdminLevel;
+use App\Support\AssignmentScope;
+use App\Support\ClassLabel;
 use App\Support\ClassColor;
 
 /**
@@ -35,11 +39,7 @@ class EmergencyFundPositionController extends Controller
 
         $position = $positionQuery->first();
 
-        $classes = DB::table('classes')
-            ->when($sid, function ($q) use ($sid) {
-                $q->where('sid', $sid);
-            })
-            ->get();
+        $classes = ClassLabel::classes($sid);
 
         $mbaList = DB::table('mba_position as mp')
             ->leftJoin('school_domains as sd', 'mp.sid', '=', 'sd.id')
@@ -47,18 +47,21 @@ class EmergencyFundPositionController extends Controller
                 $join->on('mp.cid', '=', 'c.id')
                     ->on('mp.sid', '=', 'c.sid');
             })
-            ->where('mp.user_id', $userId)
+            ->leftJoin('grades as cg', 'cg.id', '=', 'c.grade_id')
+            // Every class's assignment, whoever made it: a position belongs
+            // to the class (2026-10-26).
             ->where('mp.activity_key', 'emeaccount')
             ->when($sid, function ($q) use ($sid) {
                 $q->where('mp.sid', $sid);
-            }, function ($q) {
-                $q->whereNull('mp.sid');
             })
+            // the level being worked on (the menu by level): its classes only
+            ->when(AdminLevel::id(), fn ($q, $level) => $q->where('cg.grade_level_id', $level))
             ->select(
                 'mp.*',
                 'sd.school_name',
                 'sd.id as school_id',
                 'c.name as class_name',
+                'cg.name as class_grade_name',
                 'c.classCode'
             )
             ->orderByDesc('mp.id')
@@ -81,19 +84,36 @@ class EmergencyFundPositionController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
+        // "All classes" (of this school, or of every school): the same
+        // assignment for each class, updating the ones that have it.
+        if (AssignmentScope::isMany($cid)) {
+            if ($id) {
+                return back()->with('error', 'To give it to many classes, add it as a new assignment instead of editing this one.');
+            }
+            $classes = AssignmentScope::classes($cid, session('selected_school'));
+            if ($classes->isEmpty()) {
+                return back()->with('error', 'There are no classes to assign this to.');
+            }
+            foreach ($classes as $class) {
+                ClassActivityAssigner::assign($class, [
+                    'key' => 'emeaccount', 'title' => 'Emergency Fund', 'description' => 'This is Emergency Fund',
+                    'position' => $position, 'start_date' => $startDate, 'end_date' => $endDate,
+                ]);
+            }
+
+            return back()->with('success', 'Emergency Fund assigned to ' . $classes->count() . ' classes.');
+        }
+
         $required = $position === 'required' ? 1 : 0;
         $optional = $position === 'optional' ? 1 : 0;
-        $sid = session()->has('selected_school') ? session('selected_school') : null;
+        // The class's own school: students only see an assignment of their
+        // school, so one saved while managing "all schools" (no school)
+        // never reached anyone (2026-10-26).
+        $sid = session('selected_school') ?: DB::table('classes')->where('id', $cid)->value('sid');
 
         $duplicate = DB::table('mba_position')
-            ->where('user_id', $userId)
             ->where('activity_key', 'emeaccount')
             ->where('cid', $cid)
-            ->when($sid, function ($q) use ($sid) {
-                $q->where('sid', $sid);
-            }, function ($q) {
-                $q->whereNull('sid');
-            })
             ->when($id, function ($q) use ($id) {
                 $q->where('id', '!=', $id);
             })
@@ -130,8 +150,12 @@ class EmergencyFundPositionController extends Controller
             ]);
         }
 
+        // The event belongs to the class's own school - saving while managing
+        // "all schools" used to add a second copy of it (2026-10-25).
+        $eventSid = $sid ?: DB::table('classes')->where('id', $cid)->value('sid');
+
         $calendarEvent = DB::table('calendar_events')
-            ->where('sid', $sid)
+            ->where('sid', $eventSid)
             ->where('classId', $cid)
             ->where('title', 'Emergency Fund')
             ->whereYear('created_at', now()->year)
@@ -156,7 +180,7 @@ class EmergencyFundPositionController extends Controller
                 ]);
         } else {
             DB::table('calendar_events')->insert([
-                'sid' => $sid,
+                'sid' => $eventSid,
                 'classId' => $cid,
                 'title' => 'Emergency Fund',
                 'description' => 'This is Emergency Fund',

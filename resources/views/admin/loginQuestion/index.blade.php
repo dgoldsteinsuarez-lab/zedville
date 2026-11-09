@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="adminHeading">
-    <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Login Question</h1>
+    <h1 class="d-flex align-items-center gap-2 theme-text-dark fw-500 fs-16 mab-20">Daily questions @include('admin.partials.level-badge')</h1>
 </div>
 <!-- Body Widget -->
 <div class="themeCard card card-custom card-stretch gutter-b mab-15">
@@ -26,7 +26,7 @@
                                 <select name="level" id="filterLevel" class="form-control fs-14" aria-label="Level">
                                     <option value="">All levels</option>
                                     @foreach($levels as $level)
-                                        <option value="{{ $level->id }}" @selected(request('level') == $level->id)>{{ $level->name }}</option>
+                                        <option value="{{ $level->id }}" @selected((request('level') ?? \App\Support\AdminLevel::id()) == $level->id)>{{ $level->name }}</option>
                                     @endforeach
                                 </select>
                                 <select name="month" id="filterMonth" class="form-control fs-14" aria-label="Month">
@@ -163,7 +163,7 @@
                                                     <select id="grade_level_id" name="grade_level_id" class="form-control" required>
                                                         <option value="">Select Level</option>
                                                         @foreach($levels as $level)
-                                                        <option value="{{ $level->id }}">{{ $level->name }}</option>
+                                                        <option value="{{ $level->id }}" @selected(\App\Support\AdminLevel::id() === (int) $level->id)>{{ $level->name }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>

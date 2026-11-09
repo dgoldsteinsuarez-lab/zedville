@@ -1,6 +1,7 @@
 @extends('layouts.profile')
 
 @section('title', 'Supermarket ')
+@section('no_page_back', '1'){{-- Back is on the picture --}}
 
 @section('content')
 @push('styles')
@@ -52,17 +53,10 @@
 .s10 { --poly: polygon(83% 48%, 100% 39%, 100% 98%, 83% 87%); top: 20%;}
 </style>
 @endpush
-<div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">Supermarket</h1>
-</div>
-<div class="grid grid-cols-1 gap-5 ">
-    <div class="themeTabspills">
-        <div class="w-full " style="position: relative;">
-            <div class="mall-map">
-                <a href="{{ route('supermarket.market-list') }}"><img src="{{ asset('asset/front/images/supermarket.png') }}" alt="City Mall" class="mall-img rounded-lg "></a>
-            
-            </div>
-      </div>
-    </div>
-</div>
+{{-- The whole supermarket fits the screen, its name on the picture, Back beside it (x-city-scene);
+     the picture itself is the way in. Most of the sky and the street are cut off. --}}
+<x-city-scene :image="asset('asset/front/images/supermarket.png')" :width="2368" :height="1728" :crop-top="236" :crop-bottom="120" hide-title
+    :title="__('messages.nav_supermarket')" :hint="__('city.scene.hint_supermarket')" :fallback="route('education.city')">
+    <a href="{{ route('supermarket.market-list') }}" class="absolute inset-0" aria-label="{{ __('city.scene.go_shopping') }}"></a>
+</x-city-scene>
 @endsection

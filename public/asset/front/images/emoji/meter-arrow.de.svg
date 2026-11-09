@@ -1,0 +1,12 @@
+<svg width="338" height="329" viewBox="0 0 338 329" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+<path d="M316 168H328V164.435C328 164.264 328.2 164.172 328.33 164.283L335 170L328.33 175.717C328.2 175.828 328 175.736 328 175.565V172H316" stroke="#222222"/>
+
+<path d="M170 22L170 10L166.435 10C166.264 10 166.172 9.79958 166.283 9.66984L172 3L177.717 9.66984C177.828 9.79958 177.736 10 177.565 10L174 10L174 22" stroke="#222222"/>
+
+<path d="M172 307L172 319L175.565 319C175.736 319 175.828 319.2 175.717 319.33L170 326L164.283 319.33C164.172 319.2 164.264 319 164.435 319L168 319L168 307" stroke="#222222"/>
+
+<path d="M22 170L10 170L10 173.565C10 173.736 9.79958 173.828 9.66984 173.717L3 168L9.66984 162.283C9.79958 162.172 10 162.264 10 162.435L10 166L22 166" stroke="#222222"/>
+<line x1="170.5" y1="124" x2="170.5" y2="215" stroke="black"/>
+<path d="M126.5 169.5H217.5" stroke="black"/>
+<text font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="12" fill="#222222" text-anchor="start" transform="translate(226 173) rotate(0)">Angenehm</text><text font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="12" fill="#222222" text-anchor="end" transform="translate(121 173) rotate(0)">Unangenehm</text><text font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="12" fill="#222222" text-anchor="middle" transform="translate(175.2 72) rotate(-90)">Viel Energie</text><text font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10.5" fill="#222222" text-anchor="middle" transform="translate(166.6 262) rotate(90)">Wenig Energie</text></svg>

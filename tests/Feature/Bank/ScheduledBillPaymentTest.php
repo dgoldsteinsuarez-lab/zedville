@@ -62,9 +62,16 @@ class ScheduledBillPaymentTest extends TestCase
             'beneficiary_name' => 'Test Biller',
             'amount' => 40,
             'type' => 'later',
+            'kind' => 'bill',
+            // due now (bank review, 2026-10-29: the job pays a bill still
+            // waiting, once - the scheduler's transfers:run-due pays it too)
+            'status' => 'scheduled',
+            'next_run_at' => now()->subMinute(),
         ]);
 
         (new \App\Jobs\ProcessScheduledBillPayment($transfer->id))->handle();
+        (new \App\Jobs\ProcessScheduledBillPayment($transfer->id))->handle();
+        $this->assertSame(1, Transaction1::where('user_id', $user->id)->where('category', 'Bill Payment')->count());
 
         $txn = Transaction1::where('user_id', $user->id)->where('category', 'Bill Payment')->first();
         $this->assertNotNull($txn, 'Expected a Bill Payment transaction to be created.');

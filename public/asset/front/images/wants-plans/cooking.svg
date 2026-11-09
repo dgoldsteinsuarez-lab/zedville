@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE0B2"/><stop offset="1" stop-color="#FFB74D"/></linearGradient></defs><rect width="400" height="250" fill="url(#bg)"/>
+<rect x="0" y="176" width="400" height="74" fill="#A1887F"/><rect x="0" y="176" width="400" height="10" fill="#8D6E63"/>
+<g transform="translate(130 70)">
+ <path d="M20 30 C14 10 30 -4 46 6 C52 -10 80 -10 86 6 C102 -4 118 10 112 30 Z" fill="#fff"/><rect x="26" y="26" width="80" height="24" rx="4" fill="#fff" stroke="#EEE"/>
+</g>
+<g transform="translate(120 112)">
+ <path d="M0 10 H140 V58 Q140 72 126 72 H14 Q0 72 0 58 Z" fill="#455A64"/><rect x="-10" y="4" width="160" height="12" rx="6" fill="#607D8B"/>
+ <rect x="-26" y="22" width="26" height="8" rx="4" fill="#37474F"/><rect x="140" y="22" width="26" height="8" rx="4" fill="#37474F"/>
+ <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"><path d="M40 -6 C30 -20 50 -30 40 -46"/><path d="M70 -6 C60 -22 80 -32 70 -50"/><path d="M100 -6 C90 -20 110 -30 100 -46"/></g>
+</g>
+<g transform="translate(300 138)"><circle cx="20" cy="22" r="20" fill="#E53935"/><path d="M14 4 Q20 -4 26 4" stroke="#43A047" stroke-width="4" fill="none"/></g>
+<g transform="translate(330 150)"><circle cx="18" cy="18" r="16" fill="#E53935"/></g>
+<g transform="translate(40 120) rotate(-30)"><rect x="0" y="0" width="12" height="80" rx="6" fill="#8D6E63"/><ellipse cx="6" cy="-8" rx="14" ry="20" fill="#A1887F"/></g></svg>

@@ -1,0 +1,50 @@
+<?php
+
+// Retos de participación - actualización de la cesta (bienes sustitutivos).
+return [
+    'substitute_goods_title' => 'Bienes sustitutos: mi cesta de la compra',
+    'shopping_basket_update' => 'Bienes sustitutos: mi cesta de la compra',
+    'special_challenge_shopping_basket_update' => '🛒 Alerta en la tienda: ¡hay productos agotados!',
+    'a_few_items_in_your_shopping' => '¡Vaya! Algunos productos de tu cesta están <strong>agotados</strong> en el supermercado este mes. En la vida real pasa todo el tiempo: a los proveedores se les acaba el producto, los precios suben o un producto desaparece de las estanterías. ¡Quien compra con cabeza se adapta! Un producto que puede cumplir la misma función que otro se llama <strong>bien sustituto</strong> (piensa en el pollo y el tofu, o la mantequilla y la margarina).',
+    'your_challenge' => 'Tu misión:',
+    'look_at_your_current_shopping_basket' => 'Ve al supermercado, a la sección de tu dieta, y busca "Mi cesta de la compra".',
+    'unavailable_rule' => 'Cada producto marcado como <strong>"Agotado"</strong> necesita un sustituto.',
+    'choose_a_replacement_from_the_other' => 'Cámbialo por otro producto de la sección de tu dieta.',
+    'keep_your_basket_at_the_same' => 'Es un cambio directo: sale uno y entra otro. Tu cesta mantiene el mismo número de productos.',
+    'substitution_strategy' => 'Consejos para un buen cambio:',
+    'try_to_replace_an_item_with' => 'Elige algo que cumpla la misma función: una proteína por otra proteína, una verdura por otra verdura.',
+    'consider_the_cost_difference_your_swap' => 'Mira el precio: tu cambio modifica lo que cuesta tu cesta.',
+    'think_about_how_the_replacement_affects' => 'Piensa por qué elegiste el primer producto y mantén ese objetivo.',
+    'choose_the_best_alternative_available_not' => 'Lo más barato no siempre es lo mejor: busca la mejor relación calidad-precio.',
+    'checking_your_basket' => 'Revisando tu cesta…',
+    'one_item_needs' => ':count producto todavía necesita un sustituto.',
+    'items_need' => ':count productos todavía necesitan un sustituto.',
+    'nothing_in_your_basket_needs_a' => '✅ ¡Listo! Ahora mismo ningún producto de tu cesta necesita un sustituto.',
+    'not_assigned' => 'Esta actividad todavía no ha empezado para tu clase: tu profesor o profesora la activará.',
+    'go_to_my_supermarket' => 'Ir a mi supermercado →',
+
+    // Actividades fáciles (Admin > Engagement > Easy Activities, 2026-10-29).
+    'easy_tag' => 'Actividad fácil',
+    'easy_required' => 'Obligatoria',
+    'easy_optional' => 'Opcional',
+    'easy_badge' => 'Cuenta para tu insignia de :badge',
+    'easy_until' => 'Hasta el :date',
+    'easy_done' => '¡Hecho! Tu transferencia ha llegado.',
+    'easy_start' => 'Hacer la transferencia',
+    'easy_transfer_step1' => 'Pide a un compañero o compañera de clase su número de cuenta (o IBAN) y su nombre tal como aparece en su cuenta. Los dos datos están en Banco → «Tarjeta y datos».',
+    'easy_transfer_step2' => 'Ve a «Transferencias y pagos» → «Enviar a un amigo o amiga». Rellena sus datos y el importe, y en «Concepto» escribe para qué es el dinero.',
+    'easy_transfer_step2_min' => 'Ve a «Transferencias y pagos» → «Enviar a un amigo o amiga». Envíale al menos :amount y en «Concepto» escribe para qué es el dinero.',
+    'easy_transfer_step3' => 'Revisa el resumen y confirma. La actividad queda hecha cuando el dinero llega a su cuenta.',
+
+    // Match the words (Hybrid Classes > Language Activities, 2026-10-29).
+    'words_intro' => 'Une cada palabra con su significado en inglés.',
+    'words_how' => 'Toca una palabra y después su significado.',
+    'words_word' => 'Palabra',
+    'words_meaning' => 'Significado',
+    'words_try_again' => 'Casi: prueba con otro significado.',
+    'words_pick_first' => 'Primero toca una palabra de la izquierda.',
+    'words_done' => '¡Muy bien! Has unido todas las palabras.',
+    'words_counted' => 'Cuenta para tu insignia de Participación.',
+    'words_already' => 'Ya has hecho esta actividad. Puedes volver a jugar para practicar.',
+    'words_practice' => 'Esta actividad no está activa ahora para tu clase: puedes practicar, pero no cuenta.',
+];

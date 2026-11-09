@@ -31,33 +31,15 @@
 .toast-message {
     white-space: nowrap !important;
 }
-/* Submenu hover on minimized sidebar */
-.aside-minimize .navbar-nav.sidenavigation > li {
-    position: relative;
-}
-.aside-minimize .navbar-nav.sidenavigation > li > .collapseNavItems {
-    display: none !important;
-    position: absolute !important;
-    left: 27px !important;
-    top: 0 !important;
-    min-width: 200px !important;
-    background: #fff !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    border-radius: 8px !important;
-    padding: 8px 0 !important;
-    z-index: 1000 !important;
-    margin-left: 8px !important;
-    height: auto !important;
-    overflow: visible !important;
-}
-.aside-minimize .navbar-nav.sidenavigation > li:hover > .collapseNavItems {
-    display: block !important;
-}
-.aside-minimize .navbar-nav.sidenavigation > li > .collapseNavItems:hover {
-    display: block !important;
-}
-.aside-minimize .sidebarnavTop {
-    overflow: visible !important;
+/* No submenu pops out on hover: a menu section opens when you click it, its
+   arrow when the menu shows names (Daniel, 2026-10-28: "Remove the automatic
+   pop up feature when the cursor is on it ... I want to click the arrow"). */
+/* The sidebar arrow points the way the menu will go. Below 1200px the menu
+   starts hidden and the same button slides it in, so the arrow is the other
+   way round there: › to open it, ‹ to close it (Daniel, 2026-10-28). */
+@media (max-width: 1199px) {
+    body .navToggleBtn svg { transform: rotate(180deg); }
+    body.aside-minimize .navToggleBtn svg { transform: none; }
 }
 </style>
     @stack('styles')
@@ -159,7 +141,7 @@
                                                         <span class="navTxt">Students</span>
                                                     </a>
                                                 </li>
-                                                <li class="subnav-label px-3 pt-2 pb-1 text-uppercase" style="font-size:.7rem; letter-spacing:.05em; color:#9CA3AF;">Staff &amp; Access</li>
+                                                <li class="subnav-label px-3 pt-2 pb-1 text-uppercase" style="font-size:.75rem; letter-spacing:.05em; color:#9CA3AF;">Staff &amp; Access</li>
                                                 <li class="nav-item">
                                                     <a class="nav-link" href="{{ url('admin/staff') }}">
                                                         <span class="navTxt">School User</span>
@@ -225,6 +207,10 @@
                                             'admin/accounts*',
                                             'admin/ledger*',
                                             'admin/salary-bonuses*',
+                                            'admin/loans*',
+                                            'admin/health-insurance*',
+                                            'admin/credit-cards*',
+                                            'admin/activity-fines*',
                                         );
                                     @endphp
                                     @if($navBank)
@@ -264,6 +250,26 @@
                                                         <span class="navTxt">Salary Bonuses</span>
                                                     </a>
                                                 </li>
+                                                <li class="nav-item {{ request()->is('admin/loans*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/loans') }}">
+                                                        <span class="navTxt">Loans</span>
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item {{ request()->is('admin/health-insurance*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/health-insurance') }}">
+                                                        <span class="navTxt">Health Insurance</span>
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item {{ request()->is('admin/credit-cards*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/credit-cards') }}">
+                                                        <span class="navTxt">Credit Cards</span>
+                                                    </a>
+                                                </li>
+                                                <li class="nav-item {{ request()->is('admin/activity-fines*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/activity-fines') }}">
+                                                        <span class="navTxt">Activity Fines</span>
+                                                    </a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </li>
@@ -278,103 +284,55 @@
                                         </a>
                                     </li>
                                     @endif
-                                    @if($navSuper)
-                                    <li class="nav-item {{ request()->is('admin/curriculum*') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Curriculum">
-                                        <a class="nav-link" href="{{ url('admin/curriculum') }}">
+                                    <li class="nav-item {{ request()->is('admin/exam-results*') ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Exam Results">
+                                        <a class="nav-link" href="{{ url('admin/exam-results') }}">
                                             <span class="navIcon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#65A30D"/><rect x="7" y="3" width="10" height="3" rx="1" fill="#fff"/><rect x="5" y="5" width="14" height="16" rx="2" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8.5 13l2.5 2.5 5-5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#DC2626"/><path d="M7 17V12M12 17V8M17 17v-6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
                                             </span>
-                                            <span class="navTxt">Curriculum</span>
+                                            <span class="navTxt">Exam Results</span>
                                         </a>
                                     </li>
-                                    @endif
-                                    @php
-                                        $usersMenuActive3 = request()->is(
-                                            'admin/education/monthly-budget-activity*',
-                                            'admin/education/poster*',
-                                            'admin/education/spending-activity*',
-                                            'admin/login-question',
-                                            'admin/finhero/activities',
-                                            'admin/finhero/task-activities',
-                                            'admin/finhero/point-defaults',
-                                        );
-                                    @endphp
+                                    {{-- The activities, one group per level (Daniel, 2026-11-02: a menu by level) -
+                                         layouts/partials/admin-level-menu. It replaced the Spending Activity,
+                                         Education, Engagement, Hybrid Classes and Curriculum groups. --}}
+                                    @include('layouts.partials.admin-level-menu')
+                                    {{-- What every level shares: the room posters, the curriculum overview and the FinHero points. --}}
+                                    @php $sharedMenuActive = request()->is('admin/education/poster*', 'admin/finhero/point-defaults*', 'admin/curriculum'); @endphp
                                     @if($navOrg)
-                                     <li class="nav-item {{ $usersMenuActive3 ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Variable - set per Grade">
-                                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#education" aria-expanded="{{ $usersMenuActive3 ? 'true' : 'false' }}" aria-controls="sideNavbar">
+                                    <li class="nav-item {{ $sharedMenuActive ? 'active' : '' }}" data-bs-toggle="tooltip" data-bs-custom-class="sidebarTooltip" data-bs-placement="right" data-bs-title="Every level">
+                                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#education" aria-expanded="{{ $sharedMenuActive ? 'true' : 'false' }}" aria-controls="sideNavbar">
                                             <span class="navIcon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><rect x="0" y="-960" width="960" height="960" rx="200" fill="#F97316"/><path fill="#fff" d="M478.46-210.77q-48.77-33.38-104-51.31Q319.23-280 260-280q-31.23 0-61.35 5.23Q168.54-269.54 140-258q-21.77 8.69-40.88-4.85Q80-276.38 80-300.15v-385.08q0-14.85 8.19-26.77t21.5-16.92q35.23-15.54 73.31-23.31 38.08-7.77 77-7.77 58.77 0 113.88 18.08Q429-723.85 480-693.85v434.77q50.23-32 106.62-46.46Q643-320 700-320q32.92 0 59.73 3.69 26.81 3.69 57.19 12.62 8.46 2.31 15.77.38Q840-305.23 840-316v-418.46q5.77 1.15 11.04 3.19t10.04 5.42q9.46 5 14.19 14.23 4.73 9.24 4.73 20.24v389.69q0 23.77-20.27 36.92-20.27 13.16-44.35 5.23-27.76-10.77-56.73-15.61Q729.69-280 700-280q-60 0-116.77 16.77-56.77 16.77-104.77 52.46ZM560-360v-340l200-200v360L560-360Zm-120 81.92v-392.15q-42.23-23.23-87.35-36.5Q307.54-720 260-720q-37 0-68.54 6.62-31.54 6.61-56.84 16.76-6.16 2.31-10.39 6.54T120-679.69v365.46q0 10.77 7.31 12.69t15.77-1.15q24.23-8.39 52.57-12.85Q224-320 260-320q53.69 0 100.88 12.54 47.2 12.54 79.12 29.38Zm0 0v-392.15 392.15Z"/></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#F97316"/><path d="M12 5l7 3.5-7 3.5-7-3.5L12 5zm-7 7l7 3.5 7-3.5M5 15.5l7 3.5 7-3.5" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
                                             </span>
-                                            <span class="navTxt">Education (per Grade)</span>
+                                            <span class="navTxt">Every level</span>
                                             <span class="nav-arrow">
                                                 <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M1.07129 1.62756L6.00033 6.55661L10.9294 1.62756" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
                                                 </svg>
                                             </span>
                                         </a>
-                                        <div id="education" class="collapse {{ $usersMenuActive3 ? 'show' : '' }} collapseNavItems" data-bs-parent="#toggleNavsubnav">
+                                        <div id="education" class="collapse {{ $sharedMenuActive ? 'show' : '' }} collapseNavItems" data-bs-parent="#toggleNavsubnav">
                                             <ul class="subnav">
-                                                <li class="nav-item {{ request()->is('admin/education/monthly-budget-activity') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/education/monthly-budget-activity') }}">
-                                                        <span class="navTxt">Needs, Wants &amp; Savings Match Position</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item {{ request()->is('admin/education/emergency-fund-account') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/education/emergency-fund-account') }}">
-                                                        <span class="navTxt">Emergency Fund Position</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item {{ request()->is('admin/education/poster') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/education/poster') }}">
-                                                        <span class="navTxt">Room Poster</span>
-                                                    </a>
-                                                </li>
-                                                {{-- One unified "Spending Activity" screen with an Activity
-                                                     (High/Low) dropdown - Daniel, 2026-10-21: "I can not see all
-                                                     the spending activities... I can not select any," confirmed
-                                                     via AskUserQuestion he wanted one page, not two separate nav
-                                                     entries. The two underlying position screens/routes still
-                                                     exist and work (just unlinked from nav now) - see bugs.md. --}}
-                                                <li class="nav-item {{ request()->is('admin/education/spending-activity') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/education/spending-activity') }}">
-                                                        <span class="navTxt">Spending Activity</span>
-                                                    </a>
-                                                </li>
-                                                {{-- School Month Settings moved to the Dashboard (Daniel,
-                                                     2026-10-21: "Its better to add the school month settings in
-                                                     Dashboard") - same existing page, just surfaced from there
-                                                     instead of this dropdown. --}}
-                                                <li class="nav-item {{ request()->is('admin/login-question') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/login-question') }}">
-                                                        <span class="navTxt">Login Question</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item {{ request()->is('admin/finhero/activities') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/finhero/activities') }}">
-                                                        <span class="navTxt">FinHero Task Activity</span>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item {{ request()->is('admin/finhero/task-activities') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/finhero/task-activities') }}">
-                                                        <span class="navTxt">FinHero Library Activity</span>
-                                                    </a>
+                                                <li class="nav-item {{ request()->is('admin/education/poster*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/education/poster') }}"><span class="navTxt">Room Poster</span></a>
                                                 </li>
                                                 @if($navSuper)
-                                                <li class="nav-item {{ request()->is('admin/finhero/point-defaults') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/finhero/point-defaults') }}">
-                                                        <span class="navTxt">FinHero Point Defaults</span>
-                                                    </a>
+                                                <li class="nav-item {{ request()->is('admin/curriculum') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/curriculum') }}"><span class="navTxt">Curriculum: every level</span></a>
+                                                </li>
+                                                <li class="nav-item {{ request()->is('admin/finhero/point-defaults*') ? 'active' : '' }}">
+                                                    <a class="nav-link" href="{{ url('admin/finhero/point-defaults') }}"><span class="navTxt">FinHero Point Defaults</span></a>
                                                 </li>
                                                 @endif
                                             </ul>
                                         </div>
                                     </li>
+                                    {{-- (this @if($navOrg) closes after "Fix for All Schools", like the Education group's did) --}}
                                     @php
                                         $usersMenuActive4 = request()->is(
                                             'admin/education/city-mall*',
                                             'admin/education/city-mall-store*',
                                             'admin/education/supermarket*',
-                                            'admin/education/wants-iteams*',
                                             'admin/npos*',
                                             'admin/city-map*',
                                         );
@@ -420,11 +378,7 @@
                                                         <span class="navTxt">Supermarket Products</span>
                                                     </a>
                                                 </li>
-                                                <li class="nav-item {{ request()->is('admin/education/wants-iteams') ? 'active' : '' }}">
-                                                    <a class="nav-link" href="{{ url('admin/education/wants-iteams') }}">
-                                                        <span class="navTxt">Wants Items</span>
-                                                    </a>
-                                                </li>
+                                                {{-- (Wants Items is gone: it named the old month-end penalty's lines, MonthEndPenaltyService - 2026-11-03) --}}
                                                 <li class="nav-item {{ request()->is('admin/npos') ? 'active' : '' }}">
                                                     <a class="nav-link" href="{{ url('admin/npos') }}">
                                                         <span class="navTxt">NPOs</span>
@@ -569,6 +523,14 @@
         </a>
     </div>
 @endif
+
+@unless (request()->routeIs('admin.dashboard') || View::hasSection('no_page_back'))
+    @include('partials.page-back', [
+        'fallback' => url('admin/dashboard'),
+        'label' => 'Back',
+        'buttonClass' => 'btn btn-sm btn-outline-secondary mb-3',
+    ])
+@endunless
 
      @yield('content')
 

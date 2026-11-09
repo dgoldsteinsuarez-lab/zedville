@@ -34,11 +34,16 @@ class LedgerService
     }
 
     /**
-     * @param array{sid?: mixed, bank_account_id?: ?int, transaction_date?: mixed, is_penalty?: bool, meta?: ?array, floor_at_zero?: bool} $extra
-     *   floor_at_zero: clamp a debit's resulting balance at 0 instead of
-     *   letting it go negative - matches the existing fixed-bill/penalty
-     *   behavior, which silently absorbs a shortfall rather than reject it
-     *   (unlike transfers/orders/donations, which reject outright).
+     * No balance goes below zero (Daniel, 2026-10-30: "we don't allow minus
+     * balance"), and a line always says what really moved - before, a bill
+     * bigger than the balance was written in full while the balance stopped
+     * at 0, so the statement didn't add up.
+     *
+     * @param array{sid?: mixed, bank_account_id?: ?int, transaction_date?: mixed, is_penalty?: bool, meta?: ?array, floor_at_zero?: bool, only_if_enough?: bool} $extra
+     *   only_if_enough: a debit only when the money is there, else nothing is
+     *     written (null) - a bill is then tried again later;
+     *   floor_at_zero: a debit takes at most what is there (the penalty), the
+     *     line saying the amount taken; nothing there, nothing written (null).
      */
     public static function post(
         int $userId,
@@ -47,13 +52,22 @@ class LedgerService
         float $amount,
         string $description,
         array $extra = []
-    ): Transaction1 {
+    ): ?Transaction1 {
         $balance = self::lockedBalance($userId);
-        $newBalance = $type === 'credit' ? $balance + $amount : $balance - $amount;
 
-        if (($extra['floor_at_zero'] ?? false) && $newBalance < 0) {
-            $newBalance = 0.0;
+        if ($type === 'debit') {
+            if (($extra['only_if_enough'] ?? false) && round($balance, 2) < round($amount, 2)) {
+                return null;
+            }
+            if (($extra['floor_at_zero'] ?? false) && $amount > $balance) {
+                $amount = round(max(0.0, $balance), 2);
+                if ($amount <= 0) {
+                    return null;
+                }
+            }
         }
+
+        $newBalance = $type === 'credit' ? $balance + $amount : $balance - $amount;
 
         return Transaction1::create([
             'user_id' => $userId,

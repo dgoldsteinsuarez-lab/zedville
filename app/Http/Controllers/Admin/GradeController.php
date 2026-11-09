@@ -40,8 +40,9 @@ class GradeController extends Controller
         // Economist), same for every school - only which Level a given
         // Grade is assigned is per-school.
         $levels = GradeLevel::orderBy('sort_order')->get();
+        $schoolStart = \App\Models\SchoolMonthSetting::schoolStartMonth($sid);
 
-        return view('admin.grades.index', compact('grades', 'levels'));
+        return view('admin.grades.index', compact('grades', 'levels', 'schoolStart'));
     }
 
     public function store(Request $request)
@@ -55,15 +56,29 @@ class GradeController extends Controller
             'name' => ['required', 'string', 'max:255',
                 \Illuminate\Validation\Rule::unique('grades', 'name')->where('sid', (string) $sid)],
             'grade_level_id' => 'nullable|integer',
+            'default_language' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(config('zedville.languages')))],
+            'language_mode' => 'nullable|in:free,locked',
+            'language_level' => 'nullable|in:standard,beginner,hybrid',
+            'start_month' => 'nullable|integer|between:1,12',
         ]);
 
-        Grade::create([
+        // Daniel, 2026-10-25: the language is picked right here (he couldn't
+        // find where to make a Spanish class), and the new Grade opens with
+        // its "Add Class" form ready - its Classes start in this language.
+        $grade = Grade::create([
             'sid' => $sid,
             'name' => $request->name,
             'grade_level_id' => $this->validLevelId($request->grade_level_id),
+            'default_language' => $request->input('default_language', 'en'),
+            'language_mode' => $request->input('language_mode', 'free'),
+            // and its level (Daniel, 2026-10-31): Beginner A2/B1 or Hybrid
+            'language_level' => $request->input('language_level', 'standard'),
+            // and the month it starts, if not the school's (Daniel, 2026-10-31)
+            'start_month' => $request->filled('start_month') ? (int) $request->start_month : null,
         ]);
 
-        return redirect()->back()->with('success', 'Grade added successfully!');
+        return redirect(route('admin.grades.general-information', $grade->id) . '#add-class')
+            ->with('success', "Grade \"{$grade->name}\" added. Now add its first Class.");
     }
 
     public function update(Request $request, $id)

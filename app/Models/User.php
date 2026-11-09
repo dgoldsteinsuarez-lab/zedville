@@ -37,6 +37,7 @@ class User extends Authenticatable
         'autopilot_enabled',
         'anonymized_at',
         'preferred_language',
+        'welcome_seen_at',
     ];
 
     /**
@@ -58,6 +59,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'autopilot_enabled' => 'boolean',
         'anonymized_at' => 'datetime',
+        'welcome_seen_at' => 'datetime',
     ];
 
     /**
@@ -186,6 +188,18 @@ class User extends Authenticatable
             4       => 'Student',
             default => 'Unknown',
         };
+    }
+
+    /**
+     * The name students see - their own and their classmates': the nickname
+     * they chose, or the account's name while there is none, as for an
+     * account an admin created and the student never claimed (Daniel,
+     * 2026-11-07: "put the name of the account where it is visible, in the
+     * Good morning and maybe somewhere else").
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return (string) ($this->nickname ?: $this->name);
     }
 
     /**

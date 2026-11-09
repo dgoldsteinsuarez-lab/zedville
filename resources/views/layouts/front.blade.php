@@ -181,7 +181,7 @@
 
 
     </footer>
-    <main class="bg-white flex-1 max-h-full py-10 px-8 overflow-hidden overflow-y-auto">
+    <main class="zv-main bg-white flex-1 max-h-full pt-5 pb-6 px-6 overflow-hidden overflow-y-auto">
 
         @if(session('success'))
             <div

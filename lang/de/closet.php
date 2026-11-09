@@ -1,0 +1,42 @@
+<?php
+
+// Mein Kleiderschrank (Profil-Tab und Kleiderschrank-Seite) - Gebrauchsgüter des Schülers.
+return [
+    'my_closet_zedville' => 'Mein Kleiderschrank — Zedville',
+    'durable_goods' => 'Gebrauchsgüter',
+    'used_over_time' => 'Werden lange genutzt',
+    'physical_items_that_last_3_or' => 'Dinge, die 3 Jahre oder länger halten und nicht bei einer einzigen Nutzung verbraucht werden. Sie verlieren durch Abschreibung nach und nach an Wert.',
+    'no_durable_goods_purchased' => 'Keine Gebrauchsgüter gekauft',
+    'non_durable_goods' => 'Verbrauchsgüter',
+    'consumed_quickly' => 'Werden schnell verbraucht',
+    'items_used_up_in_less_than' => 'Dinge, die in weniger als 3 Jahren verbraucht sind — oft schon bei einer Nutzung. Danach sind sie weg und müssen ersetzt werden.',
+    'no_non_durable_goods_purchased' => 'Keine Verbrauchsgüter gekauft',
+    'only_durable_goods_appear_in_your' => 'In deinem Kleiderschrank erscheinen nur Gebrauchsgüter',
+    'my_closet' => 'Mein Kleiderschrank',
+    'n0_items' => '0 Gegenstände',
+    'items_owned' => 'Gegenstände im Besitz',
+    'total_value' => 'Gesamtwert',
+    'oldest_item' => 'Ältester Gegenstand',
+    'loading_closet' => 'Kleiderschrank wird geladen…',
+    'no_durable_goods_yet_start_spending' => 'Noch keine Gebrauchsgüter. Fang an einzukaufen, um deinen Kleiderschrank zu füllen!',
+    'no_items_in_this_category_yet' => 'In dieser Kategorie gibt es noch nichts.',
+    'js' => [
+        'student_closet' => 'Kleiderschrank des Schülers',
+        'load_error' => 'Der Kleiderschrank konnte nicht geladen werden. Bitte versuche es noch einmal.',
+        'item' => ':count Gegenstand',
+        'items' => ':count Gegenstände',
+        'zeds' => ':amount Zeds',
+        'all' => 'Alle',
+        'age' => 'Alter: :years J.',
+        'life' => 'Lebensdauer: :years J.',
+        'per_year' => ':amount Zeds/Jahr',
+        'categories' => [
+            'tech' => 'Technik',
+            'transport' => 'Mobilität',
+            'home' => 'Zuhause',
+            'clothing' => 'Kleidung',
+            'tools' => 'Werkzeuge',
+            'other' => 'Sonstiges',
+        ],
+    ],
+];

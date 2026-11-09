@@ -1,6 +1,7 @@
 @extends('layouts.profile')
 
 @section('title', 'City Mall - Educational Finance Department')
+@section('no_page_back', '1'){{-- Back is on the picture --}}
 
 @section('content')
 @push('styles')
@@ -133,14 +134,10 @@
 
     </style>
   @endpush
-<div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">City Mall</h1>
-</div>
-<div class="grid grid-cols-1 gap-5 ">
-    <div class="themeTabspills">
-        <div class="w-full " style="position: relative;">
-      <div class="mall-map">
-        <img src="{{ asset('asset/front/images/citymall.png') }}" alt="City Mall" class="mall-img rounded-lg ">
+{{-- The whole mall fits the screen, its name on the picture, Back beside it (x-city-scene).
+     The top of the dome and the bottom of the floor are cut off. --}}
+<x-city-scene :image="asset('asset/front/images/citymall.png')" :width="3344" :height="2496" :crop-top="238" :crop-bottom="165"
+    :title="__('messages.nav_city_mall')" :hint="__('city.scene.hint_city_mall')" :fallback="route('education.city')">
        <a class="store s1" href="{{ route('education.spending-tracker', ['type' => 'basicco']) }}"><span>The Basics Co</span></a>
   <a class="store s2" href="{{ route('education.spending-tracker', ['type' => 'stationery-store']) }}"><span>Stationery Store</span></a>
   <a class="store s3" href="{{ route('education.spending-tracker', ['type' => 'daily-essentials']) }}"><span>Daily Essentials (L)</span></a>
@@ -151,10 +148,7 @@
   <a class="store s8" href="{{ route('education.spending-tracker', ['type' => 'accessories']) }}"><span>Accessories</span></a>
   <a class="store s9" href="{{ route('education.spending-tracker', ['type' => 'bespirit-sport-shop']) }}"><span>BeSpint-Sport Shop</span></a>
   <a class="store s10" href="{{ route('education.spending-tracker', ['type' => 'beats-music-store']) }}"><span>Beats-Music Store</span></a>
-       </div>
-                   </div>
-    </div>
-</div>
+</x-city-scene>
 <script>
 function enterShop(storeType) {
     const baseUrl = "{{ url('/education/spending-tracker') }}";

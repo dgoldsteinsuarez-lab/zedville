@@ -1,11 +1,12 @@
 @extends('layouts.profile')
+@section('no_page_back', '1'){{-- has its own back link at the top --}}
 
 @section('title', __('pisa.leaderboard_title'))
 
 @section('content')
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
     <div>
-        <a href="{{ route('pisa.index') }}" class="text-sm text-gray-500">&larr; {{ __('pisa.title') }}</a>
+        <a href="{{ route('pisa.index') }}" class="zvBackBtn inline-flex items-center gap-2 py-2 px-4 mb-3 text-sm">&larr; {{ __('pisa.title') }}</a>
         <h1 class="text-xl font-bold whitespace-nowrap mt-1">&#127942; {{ __('pisa.leaderboard_title') }}</h1>
     </div>
 </div>
@@ -41,7 +42,7 @@
                             @endif
                         </td>
                         <td class="px-5 py-3">
-                            {{ $row['student']->nickname }}
+                            {{ $row['student']->display_name }}
                             @if ($row['student']->id === auth()->id())
                                 <span class="text-xs text-green-700 font-semibold">({{ __('pisa.you') }})</span>
                             @endif

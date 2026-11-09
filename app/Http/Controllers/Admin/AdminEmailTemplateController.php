@@ -41,6 +41,7 @@ class AdminEmailTemplateController extends Controller
         return view('admin.email-template.template-form', [
             'template' => new EmailTemplate(),
             'schools' => $schools,
+            'languages' => self::otherLanguages(),
         ]);
     }
 
@@ -57,8 +58,9 @@ class AdminEmailTemplateController extends Controller
     {
         $template = EmailTemplate::findOrFail($id);
         $schools = SchoolDomain::orderBy('school_name')->get();
+        $languages = self::otherLanguages();
 
-        return view('admin.email-template.template-form', compact('template', 'schools'));
+        return view('admin.email-template.template-form', compact('template', 'schools', 'languages'));
     }
 
     public function updateTemplate(Request $request, int $id)
@@ -84,13 +86,24 @@ class AdminEmailTemplateController extends Controller
 
     private function validatedTemplate(Request $request): array
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'subject' => 'required|string|max:255',
             'content' => 'required|string',
             'sid' => 'nullable|exists:school_domains,id',
             'trigger_event' => 'nullable|string|max:100',
+        ];
+        // The same message in the other languages (optional): a language
+        // left empty gets the main (English) version.
+        foreach (self::otherLanguages() as $locale => $language) {
+            $rules["translations.$locale.subject"] = "nullable|string|max:255|required_with:translations.$locale.content";
+            $rules["translations.$locale.content"] = "nullable|string|required_with:translations.$locale.subject";
+        }
+        $validated = $request->validate($rules, [
+            'translations.*.subject.required_with' => 'Write a subject for every language that has content.',
+            'translations.*.content.required_with' => 'Write the content for every language that has a subject.',
         ]);
+        $validated['translations'] = array_filter($validated['translations'] ?? [], fn ($v) => filled($v['subject'] ?? null)) ?: null;
 
         // Blank select -> "every school" (nullable sid), not the literal
         // empty string the <select> posts. `nullable` validation only
@@ -101,6 +114,12 @@ class AdminEmailTemplateController extends Controller
         $validated['trigger_event'] = ($validated['trigger_event'] ?? '') ?: null;
 
         return $validated;
+    }
+
+    /** The app's languages besides English, e.g. ['es' => 'Español', ...]. */
+    public static function otherLanguages(): array
+    {
+        return array_diff_key(config('zedville.languages'), ['en' => true]);
     }
 
     // =========================================================================

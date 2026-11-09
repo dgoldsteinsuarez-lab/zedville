@@ -4,16 +4,16 @@
 
 @section('content')
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap">City Mailbox</h1>
+    <h1 class="text-xl font-bold whitespace-nowrap">{{ __('mailbox.title') }}</h1>
 </div>
 <div class="grid grid-cols-1 gap-5 mt-6">
     <div class="themeTabspills">
         <div class="w-full">
             <!-- Tabs Header -->
             <div class="flex menus overborderleftright border-b border-[#D2DDDB]">
-                <button class="tabitems tab-button inactive" data-tab="tab1">Primary @if($primaryMailboxcount > 0)<span class="numbers" id="primaryUnreadBadge">{{$primaryMailboxcount}}</span>@endif</button>
-                <button class="tabitems tab-button inactive" data-tab="tab2">Starred</button>
-                <button class="tabitems tab-button inactive" data-tab="tab3">Deleted</button>
+                <button class="tabitems tab-button inactive" data-tab="tab1">{{ __('mailbox.primary') }} @if($primaryMailboxcount > 0)<span class="numbers" id="primaryUnreadBadge">{{$primaryMailboxcount}}</span>@endif</button>
+                <button class="tabitems tab-button inactive" data-tab="tab2">{{ __('mailbox.starred') }}</button>
+                <button class="tabitems tab-button inactive" data-tab="tab3">{{ __('mailbox.deleted') }}</button>
             </div>
             <!-- Tabs Content -->
             <div class="tailCard w-full mt-4">
@@ -51,8 +51,8 @@
                                                     <p class="text-xs leading-[18px] singlelineTxt">{{ Str::limit(strip_tags($mail->content), 100) }}</p>
                                                 </div>
                                                 <div class="datepanel text-xs text-[#5C5C5C]">
-                                                    <span class="time block">{{ $mail->created_at->format('h:i A') }}</span>
-                                                    <span class="date block">{{ $mail->created_at->format('jS M') }}</span>
+                                                    <span class="time block">{{ $mail->created_at->isoFormat('LT') }}</span>
+                                                    <span class="date block">{{ $mail->created_at->isoFormat('D MMM') }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -178,6 +178,8 @@
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Texts in the student's language (lang/<language>/mailbox.php).
+const MB_T = {{ \Illuminate\Support\Js::from(__('mailbox.js')) }};
 const showMailRouteTemplate = "{{ route('profile.showMail', ['encryptedId' => '__ID__']) }}";
 const csrfToken = "{{ csrf_token() }}";
 
@@ -385,7 +387,7 @@ window.addEventListener('hashchange', loadMailFromHash);
 function printDiv(divId) {
     const divContent = document.getElementById(divId).innerHTML;
     const printWindow = window.open('', '', 'height=600,width=800');
-    printWindow.document.write('<html><head><title>Print Div</title></head><body>');
+    printWindow.document.write('<html><head><title>' + MB_T.print_title + '</title></head><body>');
     printWindow.document.write(divContent);
     printWindow.document.write('</body></html>');
     printWindow.document.close();
@@ -417,10 +419,10 @@ function updateemailstatus(mailId, type) {
         const randomNumber = Math.floor(1000 + Math.random() * 9000);
 
         Swal.fire({
-            title: 'Delete Mail?',
+            title: MB_T.delete_title,
             html: `
-                <p>This action cannot be undone.</p>
-                <p>Please enter the following number to confirm deletion:</p>
+                <p>${MB_T.cannot_undo}</p>
+                <p>${MB_T.enter_number}</p>
 
                 <h2 style="color:#dc3545;font-weight:bold;">
                     ${randomNumber}
@@ -429,12 +431,12 @@ function updateemailstatus(mailId, type) {
                 <input type="text"
                        id="confirmCode"
                        class="swal2-input"
-                       placeholder="Enter the number">
+                       placeholder="${MB_T.number_placeholder}">
             `,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, Delete',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: MB_T.yes_delete,
+            cancelButtonText: MB_T.cancel,
             confirmButtonColor: '#dc3545',
 
             preConfirm: () => {
@@ -443,7 +445,7 @@ function updateemailstatus(mailId, type) {
 
                 if (enteredCode != randomNumber) {
                     Swal.showValidationMessage(
-                        'Confirmation number does not match'
+                        MB_T.mismatch
                     );
                     return false;
                 }
@@ -467,7 +469,7 @@ function updateemailstatus(mailId, type) {
 
                         Swal.fire({
                             icon: 'success',
-                            title: 'Mail deleted successfully',
+                            title: MB_T.deleted,
                             timer: 1500,
                             showConfirmButton: false
                         });
@@ -481,8 +483,8 @@ function updateemailstatus(mailId, type) {
 
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to delete mail.'
+                            title: MB_T.error,
+                            text: MB_T.delete_failed
                         });
                     }
                 });

@@ -188,10 +188,11 @@ class FinheroStudentController extends Controller
         // The row's own salary overrides the global default for this
         // activity_key; null falls back to it - same pattern as max_points
         // above (Daniel, 2026-10-21: "salary, set one as default if not
-        // picked").
-        $salary = $activity->salary
-            ?? \App\Models\FinheroActivityDefault::where('activity_key', $activityKey)->value('salary')
-            ?? 0;
+        // picked"). With neither set, the city's monthly salary: a salary of 0
+        // turned Task 4's shares into "Infinity%".
+        $salary = $activity?->salary
+            ?: \App\Models\FinheroActivityDefault::where('activity_key', $activityKey)->value('salary')
+            ?: config('zedville.monthly_salary');
 
         return view($viewPath, compact('salary', 'activityKey'));
     }
@@ -248,6 +249,70 @@ class FinheroStudentController extends Controller
     }
 
     /**
+     * POST /finhero/quiz/{task}/answers - a chart-and-questions Task (compound
+     * interest: App\Services\Finhero\QuizTasks), graded here: which answers are
+     * right and, for those, why (not to hybrid classes: "solo informar"). All
+     * right and assigned to the class: the Task is done, with its points once
+     * a month - unless the task's finish() says it isn't yet (Task 15: until
+     * the student chooses a health insurance plan, sent with the answers).
+     */
+    public function quizAnswers(Request $request, string $task): JsonResponse
+    {
+        $activityKey = str_replace('-', '_', $task);
+        abort_unless(\App\Services\Finhero\QuizTasks::has($activityKey), 404);
+        // plan: Task 15 sends the health insurance plan chosen once the answers are right
+        $data = $request->validate(['answers' => ['required', 'array'], 'plan' => ['nullable', 'string', 'in:basic,complete']]);
+
+        $questions = \App\Services\Finhero\QuizTasks::questions($activityKey, (int) Auth::id());
+        $right = \App\Services\Finhero\QuizTasks::grade($questions, $data['answers']);
+        $done = !in_array(false, $right, true);
+        $hybrid = \App\Support\Hybrid::on();
+        $why = array_map(fn ($q, $ok) => $ok && !$hybrid ? ($q['why'] ?? null) : null, $questions, $right);
+        $finish = $done ? \App\Services\Finhero\QuizTasks::finish($activityKey, Auth::user(), $data) : ['complete' => false];
+        if (isset($finish['error'])) {
+            return response()->json(['right' => $right, 'why' => $why, 'done' => true, 'choose' => true, 'error' => true, 'message' => $finish['error']]);
+        }
+
+        if ($finish['complete'] && ($assigned = $this->assignedActivityForStudent('task', $activityKey))) {
+            app(\App\Services\ActivityCompletionService::class)->complete(Auth::id(), $assigned->activity_key, 'task-' . $assigned->activity_name);
+            $this->awardQuizPoints($activityKey);
+        }
+        $wrong = count(array_filter($right, fn ($ok) => !$ok));
+
+        return response()->json(array_merge([
+            'right' => $right,
+            'why' => $why,
+            'done' => $done,
+            'message' => $done ? __('quiz.all_right') : trans_choice('quiz.not_right', $wrong, ['count' => $wrong]),
+        ], $finish['extra'] ?? []));
+    }
+
+    /** A quiz Task's points: first-try ones (the Approach System's tier 0), once a month. */
+    private function awardQuizPoints(string $activityKey): void
+    {
+        $now = now();
+        $sourceKey = $activityKey . '_question_1';
+        $already = DB::table('finhero_student_points')->where('student_id', Auth::id())->where('source_type', 'task')
+            ->where('source_key', $sourceKey)->whereMonth('earned_at', $now->month)->whereYear('earned_at', $now->year)->exists();
+        $points = \App\Services\FinheroApproachSystem::pointsForTier(0);
+        if ($already || $points <= 0) {
+            return;
+        }
+        DB::table('finhero_student_points')->insert([
+            'student_id' => Auth::id(),
+            'month' => $now->month,
+            'year' => $now->year,
+            'academic_year' => $this->calculator->getAcademicYear($now->month, $now->year),
+            'source_type' => 'task',
+            'source_key' => $sourceKey,
+            'points_earned' => $points,
+            'earned_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+    }
+
+    /**
      * GET /finhero/library/{key} - an assigned Library module: its lesson,
      * then its quiz. The lesson and questions belong to the module
      * (finhero_library_modules), shared by every class it's assigned to.
@@ -261,7 +326,13 @@ class FinheroStudentController extends Controller
         $module = FinheroLibraryModule::where('module_key', $activityKey)->firstOrFail();
         $questions = $module->questions()->with('options')->get();
 
-        return view('finhero.library', compact('activity', 'module', 'questions'));
+        // Right after submitting: the result instead of the quiz.
+        $result = session('library_result');
+        if (($result['key'] ?? null) !== $activityKey) {
+            $result = null;
+        }
+
+        return view('finhero.library', compact('activity', 'module', 'questions', 'result'));
     }
 
     /**
@@ -330,11 +401,13 @@ class FinheroStudentController extends Controller
             return response()->json($score);
         }
 
-        return view('finhero.library', [
-            'activity' => $activity,
-            'module' => $module,
-            'questions' => $questions,
-            'score' => $score,
+        // The result page (Daniel, 2026-10-26: "make acknowledgement after
+        // clicking submit... then give a result after submitting"), shown
+        // by libraryPage() after a redirect, so reloading it never sends
+        // the answers again.
+        return redirect()->route('library.page', $key)->with('library_result', $score + [
+            'key' => $activityKey,
+            'answers' => array_map('intval', (array) $answers),
         ]);
     }
     public function savePoints(Request $request)

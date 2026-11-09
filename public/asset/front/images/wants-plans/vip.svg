@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A1A2E"/><stop offset="1" stop-color="#4A148C"/></linearGradient></defs><rect width="400" height="250" fill="url(#bg)"/>
+<g opacity=".45"><path d="M80 0 L130 0 L190 170 L140 170 Z" fill="#FFD54F"/><path d="M320 0 L270 0 L210 170 L260 170 Z" fill="#FFD54F"/></g>
+<rect x="40" y="160" width="320" height="16" fill="#3E2723"/>
+<g transform="translate(184 76)"><circle cx="16" cy="12" r="12" fill="#F1C27D"/><path d="M4 30 Q16 22 28 30 L30 84 H2 Z" fill="#E91E63"/></g>
+<g transform="translate(40 150)"><rect x="0" y="0" width="120" height="76" rx="10" fill="#FFD54F"/><rect x="40" y="-24" width="40" height="30" fill="none" stroke="#FFD54F" stroke-width="5"/>
+ <text x="60" y="52" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="34" fill="#4A148C">VIP</text></g>
+<g fill="#FFEB3B" font-family="Arial" font-size="22"><text x="300" y="60">★</text><text x="340" y="110">★</text><text x="290" y="200">★</text></g></svg>

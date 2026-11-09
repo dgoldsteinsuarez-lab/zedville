@@ -16,27 +16,15 @@
  *
  * 3. Add this import at the top of your routes file if not already present:
  *    use App\Http\Controllers\Admin\BadgeAdminController;
- *    use App\Http\Controllers\Student\BadgeStudentController;
  */
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\BadgeAdminController;
-use App\Http\Controllers\Student\BadgeStudentController;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// STUDENT ROUTES — logged-in students only
-// ─────────────────────────────────────────────────────────────────────────────
-Route::middleware(['auth'])->group(function () {
-
-    // Student's own badge section page
-    Route::get('/badges', [BadgeStudentController::class, 'index'])
-        ->name('badges.index');
-
-    // Student's own badge data (JSON — called by the frontend JS)
-    Route::get('/badges/data', [BadgeStudentController::class, 'data'])
-        ->name('badges.data');
-
-});
+// Students see their badges on the Badges tab of their settings and on the
+// home page (App\Services\BadgeOverview). The old /badges page, which no menu
+// linked to and still showed the old rule's numbers, is gone (Daniel,
+// 2026-11-02: "bórrala").
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ADMIN / TUTOR ROUTES — admin and tutor access only

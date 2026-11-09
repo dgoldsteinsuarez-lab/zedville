@@ -7,6 +7,10 @@ use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\ClassActivityAssigner;
+use App\Support\AdminLevel;
+use App\Support\AssignmentScope;
+use App\Support\ClassLabel;
 use App\Support\ClassColor;
 
 /**
@@ -28,6 +32,8 @@ class SpendingActivityController extends Controller
     /** activity (form value) => [activity_key, calendar event title] */
     private const ACTIVITIES = [
         'high' => ['hba_position', 'Spending budget activity'],
+        // Low Spending is back as its own kind (Daniel, 2026-10-31) - see Activity::SLOTS
+        'low' => ['lba_position', 'Low spending activity'],
     ];
 
     public function index()
@@ -35,11 +41,7 @@ class SpendingActivityController extends Controller
         $userId = Auth::id();
         $sid = session('selected_school');
 
-        $classes = DB::table('classes')
-            ->when($sid, function ($q) use ($sid) {
-                $q->where('sid', $sid);
-            })
-            ->get();
+        $classes = ClassLabel::classes($sid);
 
         $list = DB::table('mba_position as mp')
             ->leftJoin('school_domains as sd', 'mp.sid', '=', 'sd.id')
@@ -47,19 +49,21 @@ class SpendingActivityController extends Controller
                 $join->on('mp.cid', '=', 'c.id')
                     ->on('mp.sid', '=', 'c.sid');
             })
+            ->leftJoin('grades as cg', 'cg.id', '=', 'c.grade_id')
             ->leftJoin('activities as act', 'mp.activity_id', '=', 'act.id')
-            ->where('mp.user_id', $userId)
-            ->where('mp.activity_key', 'hba_position')
+            // Every class's assignment, whoever made it: a position belongs
+            // to the class (2026-10-26).
+            ->whereIn('mp.activity_key', ['hba_position', 'lba_position'])
             ->when($sid, function ($q) use ($sid) {
                 $q->where('mp.sid', $sid);
-            }, function ($q) {
-                $q->whereNull('mp.sid');
             })
-            ->select('mp.*', 'sd.school_name', 'sd.id as school_id', 'c.name as class_name', 'c.classCode', 'act.title as activity_title')
+            // the level being worked on (the menu by level): its classes only
+            ->when(AdminLevel::id(), fn ($q, $level) => $q->where('cg.grade_level_id', $level))
+            ->select('mp.*', 'sd.school_name', 'sd.id as school_id', 'c.name as class_name', 'cg.name as class_grade_name', 'c.classCode', 'act.title as activity_title')
             ->orderByDesc('mp.id')
             ->get();
 
-        $activities = Activity::orderBy('type')->orderBy('number')->get();
+        $activities = AdminLevel::scope(Activity::query())->orderBy('type')->orderBy('number')->get();
 
         return view('admin.education.spending-activity', compact('classes', 'list', 'activities'));
     }
@@ -86,20 +90,38 @@ class SpendingActivityController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
+        // "All classes" (of this school, or of every school): the same
+        // assignment for each class, updating the ones that have it.
+        if (AssignmentScope::isMany($cid)) {
+            if ($id) {
+                return back()->with('error', 'To give it to many classes, add it as a new assignment instead of editing this one.');
+            }
+            $classes = AssignmentScope::classes($cid, session('selected_school'));
+            if ($classes->isEmpty()) {
+                return back()->with('error', 'There are no classes to assign this to.');
+            }
+            foreach ($classes as $class) {
+                ClassActivityAssigner::assign($class, [
+                    'key' => $activityKey, 'activity_id' => $activityId, 'activitys' => true,
+                    'title' => $calendarTitle, 'description' => 'This is ' . $calendarTitle,
+                    'position' => $position, 'start_date' => $startDate, 'end_date' => $endDate,
+                ]);
+            }
+
+            return back()->with('success', 'Spending Activity assigned to ' . $classes->count() . ' classes.');
+        }
+
         $required = $position === 'required' ? 1 : 0;
         $optional = $position === 'optional' ? 1 : 0;
 
-        $sid = session()->has('selected_school') ? session('selected_school') : null;
+        // The class's own school: students only see an assignment of their
+        // school, so one saved while managing "all schools" (no school)
+        // never reached anyone (2026-10-26).
+        $sid = session('selected_school') ?: DB::table('classes')->where('id', $cid)->value('sid');
 
         $duplicate = DB::table('mba_position')
-            ->where('user_id', $userId)
             ->where('activity_key', $activityKey)
             ->where('cid', $cid)
-            ->when($sid, function ($q) use ($sid) {
-                $q->where('sid', $sid);
-            }, function ($q) {
-                $q->whereNull('sid');
-            })
             ->when($id, function ($q) use ($id) {
                 $q->where('id', '!=', $id);
             })
@@ -139,8 +161,12 @@ class SpendingActivityController extends Controller
             ]);
         }
 
+        // The event belongs to the class's own school - saving while managing
+        // "all schools" used to add a second copy of it (2026-10-25).
+        $eventSid = $sid ?: DB::table('classes')->where('id', $cid)->value('sid');
+
         $calendarEvent = DB::table('calendar_events')
-            ->where('sid', $sid)
+            ->where('sid', $eventSid)
             ->where('classId', $cid)
             ->where('title', $calendarTitle)
             ->whereYear('created_at', now()->year)
@@ -166,7 +192,7 @@ class SpendingActivityController extends Controller
                 ]);
         } else {
             DB::table('calendar_events')->insert([
-                'sid' => $sid,
+                'sid' => $eventSid,
                 'classId' => $cid,
                 'title' => $calendarTitle,
                 'description' => 'This is ' . $calendarTitle,
@@ -187,19 +213,20 @@ class SpendingActivityController extends Controller
 
     public function destroy($id)
     {
-        $userId = Auth::id();
-
+        // Any class's assignment the admin can see (the school being
+        // managed, or every school for a super admin), whoever made it.
+        $sid = session('selected_school') ?: (Auth::user()->isSuperAdmin() ? null : Auth::user()->sid);
         $position = DB::table('mba_position')
             ->where('id', $id)
-            ->where('user_id', $userId)
-            ->where('activity_key', 'hba_position')
+            ->whereIn('activity_key', ['hba_position', 'lba_position'])
+            ->when($sid, fn ($q) => $q->where('sid', $sid))
             ->first();
 
         if (!$position) {
             return back()->with('error', 'Record not found.');
         }
 
-        [, $calendarTitle] = self::ACTIVITIES['high'];
+        [, $calendarTitle] = self::ACTIVITIES[$position->activity_key === 'lba_position' ? 'low' : 'high'];
 
         DB::table('calendar_events')
             ->where('sid', $position->sid)

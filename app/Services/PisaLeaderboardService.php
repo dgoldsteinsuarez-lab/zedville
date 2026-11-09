@@ -31,6 +31,7 @@ class PisaLeaderboardService
             ->join('curriculum_items as i', 'i.id', '=', 'a.item_id')
             ->join('users as u', 'u.id', '=', 'a.student_id')
             ->where('i.category_id', $categoryId)
+            ->where('i.is_real_exam', false)
             ->where('u.sid', $sid)
             ->whereYear('a.completed_at', $year)
             ->whereMonth('a.completed_at', $month)
@@ -42,7 +43,7 @@ class PisaLeaderboardService
             ->map(fn ($rows) => (int) $rows->sum('best_score'))
             ->sortDesc();
 
-        $students = User::whereIn('id', $totals->keys())->get(['id', 'nickname'])->keyBy('id');
+        $students = User::whereIn('id', $totals->keys())->get(['id', 'nickname', 'name'])->keyBy('id');
 
         return $totals->map(fn ($total, $studentId) => ['student' => $students->get($studentId), 'total' => $total])
             ->filter(fn ($row) => $row['student'])

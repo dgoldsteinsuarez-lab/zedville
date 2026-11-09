@@ -48,6 +48,10 @@ class ApplySalaryBonuses extends Command
             if (!$this->isDue($bonus, $today)) {
                 continue;
             }
+            if (!Transaction1::where('user_id', $bonus->student_id)->exists()) {
+                $this->line('  bonus #' . $bonus->id . ': waits - the student\'s bank has no first month yet');
+                continue;
+            }
 
             $this->line('  bonus #' . $bonus->id . ' (student ' . $bonus->student_id . ', ' . $bonus->amount . ' zeds): ' . ($write ? 'crediting' : 'would credit'));
 
@@ -104,7 +108,7 @@ class ApplySalaryBonuses extends Command
 
         $next = $bonus->frequency === 'weekly'
             ? $bonus->last_applied_at->copy()->addWeek()
-            : $bonus->last_applied_at->copy()->addMonth();
+            : $bonus->last_applied_at->copy()->addMonthNoOverflow(); // Jan 31 -> Feb 28, not Mar 3
 
         return $today->gte($next);
     }

@@ -224,7 +224,7 @@
     }
 
     .reference-actual {
-      font-size: 11px;
+      font-size: 12px;
       color: #64748B;
       font-weight: 700;
     }
@@ -297,7 +297,7 @@
     .question-card.done-revealed .question-number { background: #F59E0B; }
 
     .question-tag {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       color: var(--scale-color);
       text-transform: uppercase;
@@ -457,7 +457,7 @@
     .attempt-dot.current { background: var(--scale-color); }
 
     .attempts-label {
-      font-size: 11px;
+      font-size: 12px;
       color: #94A3B8;
       margin-left: 4px;
       font-weight: 600;
@@ -552,7 +552,7 @@
     }
 
     .stat-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: #64748B;
       text-transform: uppercase;
@@ -654,22 +654,18 @@
     display: none;
   }
   </style>
-<div class="flex items-center justify-between pb-6">
-    <h1 class="text-xl font-bold whitespace-nowrap">
-        Task 3
-    </h1>
-
-    <a href="{{ url()->previous() }}"
-       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">
-        ← Back
-    </a>
-</div>
   @endpush
+@include('finhero._intro_fit')
+<div class="zv-task-head flex items-center justify-between pb-6">
+    <h1 class="text-xl font-bold whitespace-nowrap">
+        {{ __('finhero.task3.heading') }}
+    </h1>
+</div>
  <!-- ─── Loading screen ───────────────────────────────────────── -->
   <div id="loading-screen" class="screen">
     <div>
       <div id="loading-emoji">📊</div>
-      <p id="loading-text">Loading the 50/30/20 Rule...</p>
+      <p id="loading-text">{{ __('finhero.task3.loading') }}</p>
     </div>
   </div>
 
@@ -677,31 +673,31 @@
   <div id="intro-screen" class="screen hidden">
     <div class="intro-card">
       <div class="intro-icon">📊</div>
-      <h1 class="intro-title">The 50/30/20 Budget Rule</h1>
+      <h1 class="intro-title">{{ __('finhero.task3.title') }}</h1>
       <p class="intro-description">
-        The most popular budgeting rule in personal finance. Let's learn percentages and apply them to YOUR salary!
+        {{ __('finhero.task3.intro') }}
       </p>
 
       <div class="rule-list">
         <div class="rule-row needs">
           <div class="rule-icon">🏠</div>
           <div>
-            <div class="rule-title">50% → NEEDS</div>
-            <div class="rule-sub">Rent, groceries, utilities, transport — the essentials</div>
+            <div class="rule-title">{{ __('finhero.task3.rule_needs') }}</div>
+            <div class="rule-sub">{{ __('finhero.task3.rule_needs_sub') }}</div>
           </div>
         </div>
         <div class="rule-row wants">
           <div class="rule-icon">🎮</div>
           <div>
-            <div class="rule-title">30% → WANTS</div>
-            <div class="rule-sub">Dining out, streaming, hobbies — the fun stuff</div>
+            <div class="rule-title">{{ __('finhero.task3.rule_wants') }}</div>
+            <div class="rule-sub">{{ __('finhero.task3.rule_wants_sub') }}</div>
           </div>
         </div>
         <div class="rule-row savings">
           <div class="rule-icon">🏦</div>
           <div>
-            <div class="rule-title">20% → SAVINGS</div>
-            <div class="rule-sub">Emergency fund, future goals — paying your future self</div>
+            <div class="rule-title">{{ __('finhero.task3.rule_savings') }}</div>
+            <div class="rule-sub">{{ __('finhero.task3.rule_savings_sub') }}</div>
           </div>
         </div>
       </div>
@@ -712,10 +708,10 @@
       </div>
 
       <div class="intro-points-note">
-        <p><strong>Finhero Badge Points: up to 30</strong> — up to 3 points per question. Get it right on your first approach for 3 points; each time you use up your tries, the hint gets stronger and the points available go down: 2, then 1, then 0 — but you can always keep trying. You'll calculate percentages of your salary and figure out what percentage your actual spending is.</p>
+        <p>{!! __('finhero.task3.points_note') !!}</p>
       </div>
 
-      <button class="start-button" id="start-button">Let's Go! 📊</button>
+      <button class="start-button" id="start-button">{{ __('finhero.task3.start') }}</button>
     </div>
   </div>
 
@@ -723,13 +719,13 @@
   <div id="game-screen" class="hidden">
     <div class="container">
       <div class="header">
-        <h1 class="game-title">Task 3: The 50/30/20 Rule</h1>
-        <p class="game-subtitle">Learn percentages and apply them to your budget</p>
+        <h1 class="game-title">{{ __('finhero.task3.game_title') }}</h1>
+        <p class="game-subtitle">{{ __('finhero.task3.game_subtitle') }}</p>
       </div>
 
       <div class="stats-row">
-        <div class="stat-pill points" id="stat-points">🏆 Finhero Badge Points: 0 / 30</div>
-        <div class="stat-pill done" id="stat-done">✅ 0 / 10 done</div>
+        <div class="stat-pill points" id="stat-points">{{ __('finhero.common.points_of', ['points' => 0, 'total' => 30]) }}</div>
+        <div class="stat-pill done" id="stat-done">{{ __('finhero.common.done_of', ['done' => 0, 'total' => 10]) }}</div>
       </div>
 
       <div class="reference">
@@ -758,21 +754,21 @@
         </div>
         <div class="completion-card">
           <div class="completion-icon">📊</div>
-          <h2 class="completion-title">Percentage Pro!</h2>
+          <h2 class="completion-title">{{ __('finhero.task3.complete_title') }}</h2>
           <p class="completion-text" id="completion-text"></p>
 
           <div class="rule-recap">
-            <div class="rule-recap-title">Remember the 50/30/20 Rule:</div>
+            <div class="rule-recap-title">{{ __('finhero.task3.recap_title') }}</div>
             <div class="rule-recap-list">
-              <div>🏠 <strong>50% for Needs</strong> — the essentials that keep you safe and working</div>
-              <div>🎮 <strong>30% for Wants</strong> — the things that make life enjoyable</div>
-              <div>🏦 <strong>20% for Savings</strong> — your future self will thank you!</div>
-              <div class="rule-recap-note">This is a guideline, not a strict law. The important thing is being AWARE of where your money goes!</div>
+              <div>{!! __('finhero.task3.recap_needs') !!}</div>
+              <div>{!! __('finhero.task3.recap_wants') !!}</div>
+              <div>{!! __('finhero.task3.recap_savings') !!}</div>
+              <div class="rule-recap-note">{{ __('finhero.task3.recap_note') }}</div>
             </div>
           </div>
 
           <div class="stat-box">
-            <div class="stat-label">Finhero Badge Points</div>
+            <div class="stat-label">{{ __('finhero.common.points_label') }}</div>
             <div class="stat-value">
               <span id="final-points">0</span>
               <span class="stat-divisor">/ 30</span>
@@ -783,16 +779,22 @@
         <div class="next-teaser">
           <div class="next-teaser-card">
             <div class="next-teaser-icon">🔜</div>
-            <div class="next-teaser-title">Up Next: Budget Reality Check</div>
-            <div class="next-teaser-sub">Compare your actual spending against the 50/30/20 ideal and make a budget plan!</div>
+            <div class="next-teaser-title">{{ __('finhero.task3.next_title') }}</div>
+            <div class="next-teaser-sub">{{ __('finhero.task3.next_sub') }}</div>
           </div>
         </div>
+
+        @include('finhero._finished')
       </div>
     </div>
   </div>
  @endsection
 @push('scripts')
+  @include('finhero._i18n')
   <script>
+    // Texts in the student's language (lang/<language>/finhero.php).
+    const T = {{ \Illuminate\Support\Js::from(['common' => __('finhero.common'), 'levels' => __('finhero.income_levels'), 'task' => __('finhero.task3')]) }};
+
     // ───────────────────────────────────────────────────────────────
     // CONFIG (same as JSX original)
     // ───────────────────────────────────────────────────────────────
@@ -817,10 +819,10 @@
         return {{ $salary }};
     }
     const SCALE_STYLES = {
-      2000: { label: "Low Income",          emoji: "🟢", color: "#059669", bg: "#D1FAE5", border: "#6EE7B7" },
-      4000: { label: "Middle Income",       emoji: "🟡", color: "#CA8A04", bg: "#FEF9C3", border: "#FDE047" },
-      6000: { label: "Upper-Middle Income", emoji: "🟠", color: "#EA580C", bg: "#FED7AA", border: "#FB923C" },
-      9000: { label: "High Income",         emoji: "🟣", color: "#7C3AED", bg: "#EDE9FE", border: "#C4B5FD" },
+      2000: { label: T.levels.low.label,       emoji: "🟢", color: "#059669", bg: "#D1FAE5", border: "#6EE7B7" },
+      4000: { label: T.levels.middle.label,    emoji: "🟡", color: "#CA8A04", bg: "#FEF9C3", border: "#FDE047" },
+      6000: { label: T.levels.upper_mid.label, emoji: "🟠", color: "#EA580C", bg: "#FED7AA", border: "#FB923C" },
+      9000: { label: T.levels.high.label,      emoji: "🟣", color: "#7C3AED", bg: "#EDE9FE", border: "#C4B5FD" },
     };
 
     const ACTUAL_SPENDING = {
@@ -847,49 +849,53 @@
       const wantsPct   = Math.round((actual.wants / salary) * 100);
       const savingsPct = Math.round((actual.savings / salary) * 100);
 
-      const fmt = n => n.toLocaleString();
+      const fmt = n => zvNum(n);
+      const dec = (n, d) => zvNum(n, d);
+      const zeds = T.common.zeds;
+      const pctOf = (pct) => zvT(T.task.pct_of, { pct: pct, salary: fmt(salary) });
+      const share = (part) => (part / salary).toFixed(2);
 
       return [
-        { id: 1,  question: `50% of ${fmt(salary)} zeds = ?`, answer: needs50, answerType: "number",
-          hint: `50% means half. Divide your salary by 2: ${fmt(salary)} ÷ 2`,
-          steps: `${fmt(salary)} ÷ 2 = ${fmt(needs50)} zeds`,
-          tag: "🏠 50% — Needs budget" },
-        { id: 2,  question: `30% of ${fmt(salary)} zeds = ?`, answer: wants30, answerType: "number",
-          hint: `First find 10% (divide by 10), then multiply by 3: ${fmt(salary)} ÷ 10 = ${fmt(ten)}, then × 3`,
-          steps: `${fmt(salary)} ÷ 10 = ${fmt(ten)}\n${fmt(ten)} × 3 = ${fmt(wants30)} zeds`,
-          tag: "🎮 30% — Wants budget" },
-        { id: 3,  question: `20% of ${fmt(salary)} zeds = ?`, answer: savings20, answerType: "number",
-          hint: `20% means one fifth. Divide your salary by 5: ${fmt(salary)} ÷ 5`,
-          steps: `${fmt(salary)} ÷ 5 = ${fmt(savings20)} zeds`,
-          tag: "🏦 20% — Savings target" },
-        { id: 4,  question: `Add them up: ${fmt(needs50)} + ${fmt(wants30)} + ${fmt(savings20)} = ?`, answer: salary, answerType: "number",
-          hint: `Add all three amounts. They should equal your full salary!`,
-          steps: `${fmt(needs50)} + ${fmt(wants30)} = ${fmt(needs50 + wants30)}\n${fmt(needs50 + wants30)} + ${fmt(savings20)} = ${fmt(salary)} zeds ✅`,
-          tag: "✅ Balance check" },
-        { id: 5,  question: `10% of ${fmt(salary)} zeds = ?`, answer: ten, answerType: "number",
-          hint: `10% means one tenth. Just move the comma one place: ${fmt(salary)} ÷ 10`,
-          steps: `${fmt(salary)} ÷ 10 = ${fmt(ten)} zeds`,
-          tag: "🔟 10% — The building block" },
-        { id: 6,  question: `75% of ${fmt(salary)} zeds = ?`, answer: seventyFive, answerType: "number",
-          hint: `75% is three quarters. Find one quarter first (÷ 4), then × 3: ${fmt(salary)} ÷ 4 = ${fmt(salary/4)}, then × 3`,
-          steps: `${fmt(salary)} ÷ 4 = ${fmt(salary/4)}\n${fmt(salary/4)} × 3 = ${fmt(seventyFive)} zeds`,
-          tag: "📐 75% — Three quarters" },
-        { id: 7,  question: `Your Needs spending is ${fmt(actual.needs)} out of ${fmt(salary)} zeds. What percentage is that?`, answer: needsPct, answerType: "percent",
-          hint: `Divide Needs by your Salary, then × 100:\n(${fmt(actual.needs)} ÷ ${fmt(salary)}) × 100`,
-          steps: `${fmt(actual.needs)} ÷ ${fmt(salary)} = ${(actual.needs/salary).toFixed(2)}\n${(actual.needs/salary).toFixed(2)} × 100 = ${needsPct}%`,
-          tag: "🏠 What % are your Needs?", tolerance: 1 },
-        { id: 8,  question: `Your Wants spending is ${fmt(actual.wants)} out of ${fmt(salary)} zeds. What percentage is that?`, answer: wantsPct, answerType: "percent",
-          hint: `Divide Wants by your Salary, then × 100:\n(${fmt(actual.wants)} ÷ ${fmt(salary)}) × 100`,
-          steps: `${fmt(actual.wants)} ÷ ${fmt(salary)} = ${(actual.wants/salary).toFixed(2)}\n${(actual.wants/salary).toFixed(2)} × 100 = ${wantsPct}%`,
-          tag: "🎮 What % are your Wants?", tolerance: 1 },
-        { id: 9,  question: `Your Savings is ${fmt(actual.savings)} out of ${fmt(salary)} zeds. What percentage is that?`, answer: savingsPct, answerType: "percent",
-          hint: `Divide Savings by your Salary, then × 100:\n(${fmt(actual.savings)} ÷ ${fmt(salary)}) × 100`,
-          steps: `${fmt(actual.savings)} ÷ ${fmt(salary)} = ${(actual.savings/salary).toFixed(2)}\n${(actual.savings/salary).toFixed(2)} × 100 = ${savingsPct}%`,
-          tag: "🏦 What % are your Savings?", tolerance: 1 },
-        { id: 10, question: `${fmt(needs50)} is what percentage of ${fmt(salary)}?`, answer: 50, answerType: "percent",
-          hint: `Divide the first number by the second, then × 100: ${fmt(needs50)} ÷ ${fmt(salary)} = ?`,
-          steps: `${fmt(needs50)} ÷ ${fmt(salary)} = 0.5\n0.5 × 100 = 50%`,
-          tag: "🧠 Reverse percentage" },
+        { id: 1,  question: pctOf(50), answer: needs50, answerType: "number",
+          hint: zvT(T.task.q1_hint, { salary: fmt(salary) }),
+          steps: `${fmt(salary)} ÷ 2 = ${fmt(needs50)} ${zeds}`,
+          tag: T.task.q1_tag },
+        { id: 2,  question: pctOf(30), answer: wants30, answerType: "number",
+          hint: zvT(T.task.q2_hint, { salary: fmt(salary), ten: fmt(ten) }),
+          steps: `${fmt(salary)} ÷ 10 = ${fmt(ten)}\n${fmt(ten)} × 3 = ${fmt(wants30)} ${zeds}`,
+          tag: T.task.q2_tag },
+        { id: 3,  question: pctOf(20), answer: savings20, answerType: "number",
+          hint: zvT(T.task.q3_hint, { salary: fmt(salary) }),
+          steps: `${fmt(salary)} ÷ 5 = ${fmt(savings20)} ${zeds}`,
+          tag: T.task.q3_tag },
+        { id: 4,  question: zvT(T.task.q4, { first: fmt(needs50), second: fmt(wants30), third: fmt(savings20) }), answer: salary, answerType: "number",
+          hint: T.task.q4_hint,
+          steps: `${fmt(needs50)} + ${fmt(wants30)} = ${fmt(needs50 + wants30)}\n${fmt(needs50 + wants30)} + ${fmt(savings20)} = ${fmt(salary)} ${zeds} ✅`,
+          tag: T.task.q4_tag },
+        { id: 5,  question: pctOf(10), answer: ten, answerType: "number",
+          hint: zvT(T.task.q5_hint, { salary: fmt(salary) }),
+          steps: `${fmt(salary)} ÷ 10 = ${fmt(ten)} ${zeds}`,
+          tag: T.task.q5_tag },
+        { id: 6,  question: pctOf(75), answer: seventyFive, answerType: "number",
+          hint: zvT(T.task.q6_hint, { salary: fmt(salary), quarter: fmt(salary/4) }),
+          steps: `${fmt(salary)} ÷ 4 = ${fmt(salary/4)}\n${fmt(salary/4)} × 3 = ${fmt(seventyFive)} ${zeds}`,
+          tag: T.task.q6_tag },
+        { id: 7,  question: zvT(T.task.q7, { amount: fmt(actual.needs), salary: fmt(salary) }), answer: needsPct, answerType: "percent",
+          hint: zvT(T.task.q7_hint, { amount: fmt(actual.needs), salary: fmt(salary) }),
+          steps: `${fmt(actual.needs)} ÷ ${fmt(salary)} = ${dec(share(actual.needs), 2)}\n${dec(share(actual.needs), 2)} × 100 = ${needsPct}%`,
+          tag: T.task.q7_tag, tolerance: 1 },
+        { id: 8,  question: zvT(T.task.q8, { amount: fmt(actual.wants), salary: fmt(salary) }), answer: wantsPct, answerType: "percent",
+          hint: zvT(T.task.q8_hint, { amount: fmt(actual.wants), salary: fmt(salary) }),
+          steps: `${fmt(actual.wants)} ÷ ${fmt(salary)} = ${dec(share(actual.wants), 2)}\n${dec(share(actual.wants), 2)} × 100 = ${wantsPct}%`,
+          tag: T.task.q8_tag, tolerance: 1 },
+        { id: 9,  question: zvT(T.task.q9, { amount: fmt(actual.savings), salary: fmt(salary) }), answer: savingsPct, answerType: "percent",
+          hint: zvT(T.task.q9_hint, { amount: fmt(actual.savings), salary: fmt(salary) }),
+          steps: `${fmt(actual.savings)} ÷ ${fmt(salary)} = ${dec(share(actual.savings), 2)}\n${dec(share(actual.savings), 2)} × 100 = ${savingsPct}%`,
+          tag: T.task.q9_tag, tolerance: 1 },
+        { id: 10, question: zvT(T.task.q10, { amount: fmt(needs50), salary: fmt(salary) }), answer: 50, answerType: "percent",
+          hint: zvT(T.task.q10_hint, { amount: fmt(needs50), salary: fmt(salary) }),
+          steps: `${fmt(needs50)} ÷ ${fmt(salary)} = ${dec(0.5, 1)}\n${dec(0.5, 1)} × 100 = 50%`,
+          tag: T.task.q10_tag },
       ];
     }
 
@@ -906,11 +912,7 @@
       { maxWrongAttempts: Infinity, points: 0, hint: "full" },
     ];
 
-    function redactFinalStep(stepsText) {
-      const lines = stepsText.split("\n");
-      const last = lines[lines.length - 1].replace(/=\s*[\d.,]+%?\s*$/, "= ?");
-      return [...lines.slice(0, -1), last].join("\n");
-    }
+    const redactFinalStep = zvRedactLastStep;
 
     const state = {
       salary: null,
@@ -974,9 +976,9 @@
     function buildIntroBank() {
       const s = state.scale;
       $("intro-bank-title").textContent =
-        `${s.emoji} Your Salary: ${state.salary.toLocaleString()} zeds/month (${s.label})`;
+        zvT(T.task.salary_title, { emoji: s.emoji, salary: zvMoney(state.salary), level: s.label });
       $("intro-bank-sub").textContent =
-        `Bank Statement: Needs ${state.actual.needs.toLocaleString()} | Wants ${state.actual.wants.toLocaleString()} | Savings ${state.actual.savings.toLocaleString()}`;
+        zvT(T.task.statement_line, { needs: zvNum(state.actual.needs), wants: zvNum(state.actual.wants), savings: zvNum(state.actual.savings) });
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -985,9 +987,9 @@
     function buildReference() {
       const s = state.scale;
       $("reference-salary").textContent =
-        `${s.emoji} Salary: ${state.salary.toLocaleString()} zeds`;
+        zvT(T.task.ref_salary, { emoji: s.emoji, salary: zvMoney(state.salary) });
       $("reference-actual").textContent =
-        `Actual: 🏠 Needs ${state.actual.needs.toLocaleString()} | 🎮 Wants ${state.actual.wants.toLocaleString()} | 🏦 Savings ${state.actual.savings.toLocaleString()}`;
+        zvT(T.task.ref_actual, { needs: zvNum(state.actual.needs), wants: zvNum(state.actual.wants), savings: zvNum(state.actual.savings) });
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -999,8 +1001,8 @@
 
       state.questions.forEach(q => {
         const isPercent = q.answerType === "percent";
-        const unit = isPercent ? "%" : "zeds";
-        const placeholder = isPercent ? "Type the percentage..." : "Type your answer...";
+        const unit = isPercent ? "%" : T.common.zeds;
+        const placeholder = isPercent ? T.common.type_percentage : T.common.type_answer;
 
         const card = document.createElement("div");
         card.className = "question-card";
@@ -1016,19 +1018,19 @@
           <div class="msg-hint hidden"></div>
           <div class="msg-revealed hidden"></div>
           <div class="msg-correct hidden"></div>
-          <div class="msg-wrong hidden">Not quite right, try again! ✨</div>
+          <div class="msg-wrong hidden">${T.common.not_quite}</div>
           <div class="input-row">
             <div class="input-wrapper">
               <input type="text" inputmode="numeric" placeholder="${placeholder}" />
               <span class="currency-suffix">${unit}</span>
             </div>
-            <button class="check-button" disabled>Check</button>
+            <button class="check-button" disabled>${T.common.check}</button>
           </div>
           <div class="attempts-row">
             <div class="attempt-dot current"></div>
             <div class="attempt-dot"></div>
             <div class="attempt-dot"></div>
-            <span class="attempts-label">First try — 1 point!</span>
+            <span class="attempts-label">${zvT(T.common.approach_points_many, { n: 1, total: APPROACH_TIERS.length, points: APPROACH_TIERS[0].points })}</span>
           </div>
         `;
         container.appendChild(card);
@@ -1057,8 +1059,7 @@
     function checkAnswer(qid) {
       const q  = state.questions.find(x => x.id === qid);
       const qs = state.qState[qid];
-      const cleaned = qs.input.replace(/[%,\s]/g, "");
-      const num = parseFloat(cleaned);
+      const num = zvParseNumber(qs.input);
       if (isNaN(num)) return;
 
       const tol = q.tolerance || 0;
@@ -1088,7 +1089,7 @@
             if (data.success === false) {
               const extraFeedback = document.getElementById("extra-feedback");
               extraFeedback.className = "feedback error";
-              extraFeedback.textContent = "You’ve already finished this task, but feel free to give it another go!";
+              extraFeedback.textContent = T.common.already_finished;
               setTimeout(() => {
                 extraFeedback.classList.remove("show");
                 extraFeedback.classList.add("hide");
@@ -1145,7 +1146,7 @@
       // Light hint (tier 1+): the short formula, no computed numbers worked out
       const hintEl = card.querySelector(".msg-hint");
       if (tier.hint === "light" && !done) {
-        hintEl.innerHTML = `💡 <strong>Hint:</strong> ${q.hint}`;
+        hintEl.innerHTML = `💡 <strong>${T.common.hint}</strong> ${q.hint}`;
         hintEl.classList.remove("hidden");
       } else {
         hintEl.classList.add("hidden");
@@ -1159,7 +1160,7 @@
         const stepsHtml = redactFinalStep(q.steps).split("\n")
           .map(line => `<div class="msg-revealed-step">${line}</div>`).join("");
         revEl.innerHTML = `
-          <div class="msg-revealed-title">📝 Here's the setup — you finish the last step:</div>
+          <div class="msg-revealed-title">${T.common.setup_title}</div>
           ${stepsHtml}
         `;
         revEl.classList.remove("hidden");
@@ -1170,11 +1171,11 @@
       // Correct
       const corrEl = card.querySelector(".msg-correct");
       if (done) {
-        const answerSuffix = isPercent ? "%" : " zeds";
-        const ptsText = qs.earned > 0 ? ` +${qs.earned} Finhero Badge Point${qs.earned === 1 ? '' : 's'}!` : '';
+        const answerSuffix = isPercent ? "%" : " " + T.common.zeds;
+        const ptsText = qs.earned > 0 ? zvT(qs.earned === 1 ? T.common.plus_points_one : T.common.plus_points_many, { points: qs.earned }) : '';
         corrEl.innerHTML = `
           <span class="msg-correct-icon">🎉</span>
-          <span>${q.answer.toLocaleString()}${answerSuffix} — Correct!${ptsText}</span>
+          <span>${zvT(T.common.correct_answer, { answer: zvNum(q.answer) + answerSuffix })}${ptsText}</span>
         `;
         corrEl.classList.remove("hidden");
       } else {
@@ -1213,7 +1214,7 @@
         });
 
         const label = card.querySelector(".attempts-label");
-        label.textContent = `Approach ${qs.tier + 1} of ${APPROACH_TIERS.length} — ${tier.points} point${tier.points === 1 ? '' : 's'} if correct`;
+        label.textContent = zvT(tier.points === 1 ? T.common.approach_points_one : T.common.approach_points_many, { n: qs.tier + 1, total: APPROACH_TIERS.length, points: tier.points });
       }
     }
 
@@ -1224,8 +1225,8 @@
       const completedCount = Object.keys(state.scores).length;
       const totalPoints    = Object.values(state.scores).reduce((a, b) => a + b, 0);
 
-      $("stat-points").textContent = `🏆 Finhero Badge Points: ${totalPoints} / ${TASK3_TOTAL_POINTS}`;
-      $("stat-done").textContent   = `✅ ${completedCount} / ${TOTAL_QS} done`;
+      $("stat-points").textContent = zvT(T.common.points_of, { points: totalPoints, total: TASK3_TOTAL_POINTS });
+      $("stat-done").textContent   = zvT(T.common.done_of, { done: completedCount, total: TOTAL_QS });
       $("progress-fill").style.width = ((completedCount / TOTAL_QS) * 100) + "%";
     }
 
@@ -1245,9 +1246,9 @@
 
       const totalPoints = Object.values(state.scores).reduce((a, b) => a + b, 0);
       let message;
-      if (totalPoints >= 24)      message = "Amazing! You really understand percentages and the 50/30/20 rule! 🌟";
-      else if (totalPoints >= 15) message = "Great work! You've got a solid grip on budget percentages!";
-      else                        message = "Now you know how percentages work with real money! Review the hints to master it.";
+      if (totalPoints >= 24)      message = T.task.msg_amazing;
+      else if (totalPoints >= 15) message = T.task.msg_great;
+      else                        message = T.task.msg_keep;
 
       $("completion-text").textContent = message;
       $("final-points").textContent    = totalPoints;

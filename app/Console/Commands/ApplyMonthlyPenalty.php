@@ -3,19 +3,22 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\BankController;
-use App\Models\AutopilotPeriod;
-use App\Models\Transaction1;
 use App\Models\User;
+use App\Services\MonthEndPenaltyService;
 use App\Services\StatementGenerator;
 use Illuminate\Console\Command;
 
 /**
- * Month-end penalty for EVERY student (not only those who log in that day).
- * Reuses BankController::banks_penalty so the rules stay in one place.
+ * Month-end fine for EVERY student (not only those who log in that day).
+ * Reuses BankController::banks_penalty so the rules stay in one place: only a
+ * student who never chose the plan of the month pays it - the City Hall's
+ * fine, up to 99% of the salary spent, with its letter
+ * (App\Services\MonthEndPenaltyService, Daniel 2026-11-07).
  *
- * Skips: non-students, accounts created this month, students who already got
- * this month's penalty, and students on approved Autopilot that month (it would
- * punish an approved absence).
+ * Skips: non-students, students who chose a plan and students on approved
+ * Autopilot that month (it would punish an approved absence). Accounts created
+ * this month too, since 2026-11-07: "el primer mes también debe haber
+ * penalización".
  *
  * Only scheduled when config('zedville.auto_penalty') is true (env
  * ZEDVILLE_AUTO_PENALTY). Default is a dry run:
@@ -25,7 +28,7 @@ use Illuminate\Console\Command;
 class ApplyMonthlyPenalty extends Command
 {
     protected $signature = 'penalty:apply {--write}';
-    protected $description = 'Apply the monthly activity penalty to all students (dry run unless --write)';
+    protected $description = 'Apply the month-end penalty to the students without a plan of the month (dry run unless --write)';
 
     public function handle()
     {
@@ -36,30 +39,23 @@ class ApplyMonthlyPenalty extends Command
         }
 
         $write = (bool) $this->option('write');
-        $onAutopilot = AutopilotPeriod::overlappingMonth($today->year, $today->month)->pluck('student_id')->all();
+        $penalty = app(MonthEndPenaltyService::class);
         $bank = app(BankController::class);
         $gen = app(StatementGenerator::class);
         $done = 0;
 
-        foreach (User::where('role', 4)->where('created_at', '<', $today->copy()->startOfMonth())->cursor() as $student) {
-            if (in_array($student->id, $onAutopilot)) {
-                $this->line("  {$student->nickname}: on Autopilot - skipped");
+        foreach (User::where('role', 4)->cursor() as $student) {
+            if (!$penalty->due($student)) {
                 continue;
             }
-            $has = Transaction1::where('user_id', $student->id)->where('category', 'Penalty')
-                ->whereYear('transaction_date', $today->year)->whereMonth('transaction_date', $today->month)->exists();
-            if ($has) {
-                $this->line("  {$student->nickname}: already penalised this month");
-                continue;
-            }
-            $this->line("  {$student->nickname}: " . ($write ? 'checking/applying' : 'would be checked'));
+            $this->line("  {$student->display_name}: no plan of the month - " . ($write ? 'charging' : 'would be charged'));
             if ($write) {
                 $bank->banks_penalty($gen, $student);
                 $done++;
             }
         }
 
-        $this->comment($write ? "Processed {$done} student(s)." : 'Dry run - nothing written. Add --write to apply.');
+        $this->comment($write ? "Charged {$done} student(s)." : 'Dry run - nothing written. Add --write to apply.');
         return self::SUCCESS;
     }
 }

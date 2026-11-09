@@ -58,14 +58,49 @@
                         </select>
                     </div>
 
-                    <div class="form-group mab-20">
-                        <label class="form-label">Subject</label>
-                        <input type="text" class="form-control" name="subject" value="{{ old('subject', $template->subject) }}" required>
-                    </div>
+                    {{-- One version per language: each student receives the one in their
+                         language, or the English one when theirs is left empty. --}}
+                    <ul class="nav nav-tabs mab-20" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#version-en" type="button" role="tab">English (main)</button>
+                        </li>
+                        @foreach ($languages as $locale => $language)
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#version-{{ $locale }}" type="button" role="tab">
+                                    {{ $language }}
+                                    @if (filled(old("translations.$locale.subject", $template->translations[$locale]['subject'] ?? null)))
+                                        <span class="badge bg-success ms-1">✓</span>
+                                    @endif
+                                </button>
+                            </li>
+                        @endforeach
+                    </ul>
 
-                    <div class="form-group mab-20">
-                        <label class="form-label">Content</label>
-                        <textarea class="form-control longheight" name="content" id="emilnote">{!! old('content', $template->content) !!}</textarea>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="version-en" role="tabpanel">
+                            <p class="text-muted small">Students whose language has no version of its own receive this one.</p>
+                            <div class="form-group mab-20">
+                                <label class="form-label">Subject</label>
+                                <input type="text" class="form-control" name="subject" value="{{ old('subject', $template->subject) }}">
+                            </div>
+                            <div class="form-group mab-20">
+                                <label class="form-label">Content</label>
+                                <textarea class="form-control longheight js-editor" name="content" id="emilnote">{!! old('content', $template->content) !!}</textarea>
+                            </div>
+                        </div>
+                        @foreach ($languages as $locale => $language)
+                            <div class="tab-pane fade" id="version-{{ $locale }}" role="tabpanel">
+                                <p class="text-muted small">Optional. Students who use Zedville in {{ $language }} receive this version. Leave it empty to send them the English one. The same @{{name}} / @{{citizenId}} placeholders work here.</p>
+                                <div class="form-group mab-20">
+                                    <label class="form-label">Subject ({{ $language }})</label>
+                                    <input type="text" class="form-control" name="translations[{{ $locale }}][subject]" value="{{ old("translations.$locale.subject", $template->translations[$locale]['subject'] ?? '') }}">
+                                </div>
+                                <div class="form-group mab-20">
+                                    <label class="form-label">Content ({{ $language }})</label>
+                                    <textarea class="form-control longheight js-editor" name="translations[{{ $locale }}][content]">{!! old("translations.$locale.content", $template->translations[$locale]['content'] ?? '') !!}</textarea>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
 
                     <button type="submit" class="themeBtn text-white mt-2">{{ $template->exists ? 'Update' : 'Create' }} Template</button>
@@ -80,15 +115,17 @@
 <script src="https://cdn.ckeditor.com/ckeditor5/41.2.1/classic/ckeditor.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        ClassicEditor
-            .create(document.querySelector('#emilnote'), {
-                toolbar: [
-                    'bold', 'italic',
-                    '|', 'bulletedList', 'numberedList',
-                    '|', 'link', 'undo', 'redo'
-                ]
-            })
-            .catch(error => console.error(error));
+        document.querySelectorAll('.js-editor').forEach(function (textarea) {
+            ClassicEditor
+                .create(textarea, {
+                    toolbar: [
+                        'bold', 'italic',
+                        '|', 'bulletedList', 'numberedList',
+                        '|', 'link', 'undo', 'redo'
+                    ]
+                })
+                .catch(error => console.error(error));
+        });
     });
 </script>
 @endpush

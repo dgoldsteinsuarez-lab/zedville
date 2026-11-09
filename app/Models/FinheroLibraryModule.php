@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinheroLibraryModule extends Model
 {
-    protected $fillable = ['id', 'module_key', 'title', 'icon', 'sort_order', 'lesson'];
+    protected $fillable = ['id', 'module_key', 'title', 'icon', 'sort_order', 'lesson', 'levels'];
 
-    protected $casts = ['lesson' => 'array'];
+    // levels: the grade levels it is for, null for every level (App\Support\AdminLevel, 2026-11-02)
+    protected $casts = ['lesson' => 'array', 'levels' => 'array'];
 
     public function questions()
     {

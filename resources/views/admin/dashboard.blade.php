@@ -80,7 +80,7 @@
             <h5 class="card-title mb-1">School Month Settings</h5>
             <p class="text-muted small mb-0">
                 Set which calendar month each school's "Month 1" progression starts on - this determines when that
-                month's Log In Questions appear.
+                month's Log In Questions appear. A Grade can start in a different month (Grades &rsaquo; Manage Classes).
             </p>
         </div>
         <a href="{{ url('admin/login-question/school-month-settings') }}" class="btn btn-sm btn-primary flex-shrink-0">Manage Month Settings</a>

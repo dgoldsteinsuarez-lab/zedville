@@ -95,7 +95,7 @@
     .bank-tile-icon { font-size: 18px; }
 
     .bank-tile-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: #64748B;
       text-transform: uppercase;
@@ -434,7 +434,7 @@
     .attempt-dot.current { background: var(--scale-color); }
 
     .attempts-label {
-      font-size: 11px;
+      font-size: 12px;
       color: #94A3B8;
       margin-left: 6px;
       font-weight: 600;
@@ -508,7 +508,7 @@
     .stat-box.attempts { background: #F8FAFC; }
 
     .stat-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: #64748B;
       text-transform: uppercase;
@@ -578,21 +578,17 @@
     }
   </style>
   @endpush
-<div class="flex items-center justify-between pb-6">
+@include('finhero._intro_fit')
+<div class="zv-task-head flex items-center justify-between pb-6">
     <h1 class="text-xl font-bold whitespace-nowrap">
-        Task 2
+        {{ __('finhero.task2.heading') }}
     </h1>
-
-    <a href="{{ url()->previous() }}"
-       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">
-        ← Back
-    </a>
 </div>
  <!-- ─── Loading screen ───────────────────────────────────────── -->
   <div id="loading-screen" class="screen">
     <div>
       <div id="loading-emoji">🧮</div>
-      <p id="loading-text">Loading your budget...</p>
+      <p id="loading-text">{{ __('finhero.task2.loading') }}</p>
     </div>
   </div>
 
@@ -600,9 +596,9 @@
   <div id="intro-screen" class="screen hidden">
     <div class="intro-card">
       <div class="intro-icon">🧮</div>
-      <h1 class="intro-title">Budget Math!</h1>
+      <h1 class="intro-title">{{ __('finhero.task2.title') }}</h1>
       <p class="intro-description">
-        Time to crunch the numbers! Use your bank statement totals to answer 8 calculation questions about your budget.
+        {{ __('finhero.task2.intro') }}
       </p>
 
       <div class="intro-bank" id="intro-bank">
@@ -611,10 +607,10 @@
       </div>
 
       <div class="intro-points-note">
-        <p><strong>Finhero Badge Points: up to 24</strong> — up to 3 points per question. Get it right on your first approach for 3 points; each time you use up your tries, the hint gets stronger and the points available go down: 2, then 1, then 0 — but you can always keep trying.</p>
+        <p>{!! __('finhero.task2.points_note') !!}</p>
       </div>
 
-      <button class="start-button" id="start-button">Let's Go! 🚀</button>
+      <button class="start-button" id="start-button">{{ __('finhero.task2.start') }}</button>
     </div>
   </div>
 
@@ -622,13 +618,13 @@
   <div id="game-screen" class="hidden">
     <div class="container">
       <div class="header">
-        <h1 class="game-title">Task 2: Budget Calculations</h1>
-        <p class="game-subtitle">Answer each question using your bank statement numbers</p>
+        <h1 class="game-title">{{ __('finhero.task2.game_title') }}</h1>
+        <p class="game-subtitle">{{ __('finhero.task2.game_subtitle') }}</p>
       </div>
 
       <div class="stats-row">
-        <div class="stat-pill points" id="stat-points">🏆 Finhero Badge Points: 0 / 24</div>
-        <div class="stat-pill done" id="stat-done">✅ 0 / 8 done</div>
+        <div class="stat-pill points" id="stat-points">{{ __('finhero.common.points_of', ['points' => 0, 'total' => 24]) }}</div>
+        <div class="stat-pill done" id="stat-done">{{ __('finhero.common.done_of', ['done' => 0, 'total' => 8]) }}</div>
       </div>
 
       <div class="bank-sticky" id="bank-sticky"></div>
@@ -650,18 +646,18 @@
         </div>
         <div class="completion-card">
           <div class="completion-icon">🧮</div>
-          <h2 class="completion-title">Budget Math Complete!</h2>
+          <h2 class="completion-title">{{ __('finhero.task2.complete_title') }}</h2>
           <p class="completion-text" id="completion-text"></p>
           <div class="completion-stats">
             <div class="stat-box">
-              <div class="stat-label">Finhero Badge Points</div>
+              <div class="stat-label">{{ __('finhero.common.points_label') }}</div>
               <div class="stat-value">
                 <span id="final-points">0</span>
                 <span class="stat-divisor">/ 24</span>
               </div>
             </div>
             <div class="stat-box attempts">
-              <div class="stat-label">First-Try Correct</div>
+              <div class="stat-label">{{ __('finhero.common.first_try_correct') }}</div>
               <div class="stat-value">
                 <span id="final-firsttry">0</span>
                 <span class="stat-divisor">/ 8</span>
@@ -669,12 +665,18 @@
             </div>
           </div>
         </div>
+
+        @include('finhero._finished')
       </div>
     </div>
   </div>
  @endsection
 @push('scripts')
+@include('finhero._i18n')
 <script>
+    // Texts in the student's language (lang/<language>/finhero.php).
+    const T = {{ \Illuminate\Support\Js::from(['common' => __('finhero.common'), 'levels' => __('finhero.income_levels'), 'task' => __('finhero.task2')]) }};
+
     // ───────────────────────────────────────────────────────────────
     // CONFIG (same as JSX original)
     // ───────────────────────────────────────────────────────────────
@@ -699,10 +701,10 @@
         return {{ $salary ?? 0 }};
     }
     const SALARY_SCALES = {
-      2000: { label: "Low Income",          emoji: "🟢", color: "#059669", bg: "#D1FAE5", border: "#6EE7B7", income: 2000, needs: 1100, wants: 500,  savings: 400,  cutAmount: 200, saveGoal: 1000 },
-      4000: { label: "Middle Income",       emoji: "🟡", color: "#CA8A04", bg: "#FEF9C3", border: "#FDE047", income: 4000, needs: 2000, wants: 1200, savings: 800,  cutAmount: 400, saveGoal: 2000 },
-      6000: { label: "Upper-Middle Income", emoji: "🟠", color: "#EA580C", bg: "#FED7AA", border: "#FB923C", income: 6000, needs: 2700, wants: 1800, savings: 1500, cutAmount: 600, saveGoal: 3000 },
-      9000: { label: "High Income",         emoji: "🟣", color: "#7C3AED", bg: "#EDE9FE", border: "#C4B5FD", income: 9000, needs: 3600, wants: 2700, savings: 2700, cutAmount: 900, saveGoal: 5000 },
+      2000: { label: T.levels.low.label,       emoji: "🟢", color: "#059669", bg: "#D1FAE5", border: "#6EE7B7", income: 2000, needs: 1100, wants: 500,  savings: 400,  cutAmount: 200, saveGoal: 1000 },
+      4000: { label: T.levels.middle.label,    emoji: "🟡", color: "#CA8A04", bg: "#FEF9C3", border: "#FDE047", income: 4000, needs: 2000, wants: 1200, savings: 800,  cutAmount: 400, saveGoal: 2000 },
+      6000: { label: T.levels.upper_mid.label, emoji: "🟠", color: "#EA580C", bg: "#FED7AA", border: "#FB923C", income: 6000, needs: 2700, wants: 1800, savings: 1500, cutAmount: 600, saveGoal: 3000 },
+      9000: { label: T.levels.high.label,      emoji: "🟣", color: "#7C3AED", bg: "#EDE9FE", border: "#C4B5FD", income: 9000, needs: 3600, wants: 2700, savings: 2700, cutAmount: 900, saveGoal: 5000 },
     };
 
     function getScale(salary) {
@@ -722,55 +724,56 @@
       const threeMonths       = s.income * 3;
       const needsPerWeek      = Math.round(s.needs / 4);
 
-      const fmt = n => n.toLocaleString();
+      const fmt = n => zvNum(n);
+      const zeds = T.common.zeds;
 
       return [
         {
           id: 1,
-          question: "How much do you spend in total? (Needs + Wants)",
+          question: T.task.q1,
           answer: totalSpending,
-          hint: `Add your Needs and Wants together: ${fmt(s.needs)} + ${fmt(s.wants)}`,
-          steps: `${fmt(s.needs)} + ${fmt(s.wants)} = ${fmt(totalSpending)} zeds`,
+          hint: zvT(T.task.q1_hint, { needs: fmt(s.needs), wants: fmt(s.wants) }),
+          steps: `${fmt(s.needs)} + ${fmt(s.wants)} = ${fmt(totalSpending)} ${zeds}`,
           operation: "addition",
         },
         {
           id: 2,
-          question: "After all spending and saving, how much is left over?",
+          question: T.task.q2,
           answer: leftover,
-          hint: `Start with your Income, then subtract total spending and savings: ${fmt(s.income)} − ${fmt(totalSpending)} − ${fmt(s.savings)}`,
-          steps: `${fmt(s.income)} − ${fmt(totalSpending)} = ${fmt(s.income - totalSpending)}\n${fmt(s.income - totalSpending)} − ${fmt(s.savings)} = ${fmt(leftover)} zeds`,
+          hint: zvT(T.task.q2_hint, { income: fmt(s.income), spending: fmt(totalSpending), savings: fmt(s.savings) }),
+          steps: `${fmt(s.income)} − ${fmt(totalSpending)} = ${fmt(s.income - totalSpending)}\n${fmt(s.income - totalSpending)} − ${fmt(s.savings)} = ${fmt(leftover)} ${zeds}`,
           operation: "subtraction",
         },
         {
           id: 3,
-          question: "How much more do you spend on Needs than on Wants?",
+          question: T.task.q3,
           answer: needsMoreThanWants,
-          hint: `Subtract the smaller from the bigger: ${fmt(s.needs)} − ${fmt(s.wants)}`,
-          steps: `${fmt(s.needs)} − ${fmt(s.wants)} = ${fmt(needsMoreThanWants)} zeds`,
+          hint: zvT(T.task.q3_hint, { needs: fmt(s.needs), wants: fmt(s.wants) }),
+          steps: `${fmt(s.needs)} − ${fmt(s.wants)} = ${fmt(needsMoreThanWants)} ${zeds}`,
           operation: "subtraction",
         },
         {
           id: 4,
-          question: `If you cut your Wants by ${fmt(s.cutAmount)} zeds, what is your new Wants total?`,
+          question: zvT(T.task.q4, { cut: fmt(s.cutAmount) }),
           answer: newWants,
-          hint: `Take your Wants and subtract the cut: ${fmt(s.wants)} − ${fmt(s.cutAmount)}`,
-          steps: `${fmt(s.wants)} − ${fmt(s.cutAmount)} = ${fmt(newWants)} zeds`,
+          hint: zvT(T.task.q4_hint, { wants: fmt(s.wants), cut: fmt(s.cutAmount) }),
+          steps: `${fmt(s.wants)} − ${fmt(s.cutAmount)} = ${fmt(newWants)} ${zeds}`,
           operation: "subtraction",
         },
         {
           id: 5,
-          question: `If you move those ${fmt(s.cutAmount)} zeds to Savings, what is your new Savings?`,
+          question: zvT(T.task.q5, { cut: fmt(s.cutAmount) }),
           answer: newSavings,
-          hint: `Add the cut amount to your current Savings: ${fmt(s.savings)} + ${fmt(s.cutAmount)}`,
-          steps: `${fmt(s.savings)} + ${fmt(s.cutAmount)} = ${fmt(newSavings)} zeds`,
+          hint: zvT(T.task.q5_hint, { savings: fmt(s.savings), cut: fmt(s.cutAmount) }),
+          steps: `${fmt(s.savings)} + ${fmt(s.cutAmount)} = ${fmt(newSavings)} ${zeds}`,
           operation: "addition",
         },
         {
           id: 6,
-          question: "Split your Needs equally across 4 weeks. How much per week?",
+          question: T.task.q6,
           answer: needsPerWeek,
-          hint: `Divide your Needs by 4: ${fmt(s.needs)} ÷ 4`,
-          steps: `${fmt(s.needs)} ÷ 4 = ${fmt(needsPerWeek)} zeds`,
+          hint: zvT(T.task.q6_hint, { needs: fmt(s.needs) }),
+          steps: `${fmt(s.needs)} ÷ 4 = ${fmt(needsPerWeek)} ${zeds}`,
           operation: "division",
           tolerance: 5,
         },
@@ -784,20 +787,20 @@
         },*/
         {
           id: 7,
-          question: `If you earn ${fmt(s.income)} for 3 months, how much total income?`,
+          question: zvT(T.task.q7, { income: fmt(s.income) }),
           answer: threeMonths,
-          hint: `Multiply your monthly income by 3: ${fmt(s.income)} × 3`,
-          steps: `${fmt(s.income)} × 3 = ${fmt(threeMonths)} zeds`,
+          hint: zvT(T.task.q7_hint, { income: fmt(s.income) }),
+          steps: `${fmt(s.income)} × 3 = ${fmt(threeMonths)} ${zeds}`,
           operation: "multiplication",
         },
         {
           id: 8,
           //question: `You want to save ${fmt(s.saveGoal)} zeds. How much more do you need?`,
           //question: `If you want to save ${fmt(s.saveGoal)} zeds instead of 1,500 zeds, how many more do you need?`,
-          question: `If you want to save ${fmt(s.saveGoal)} zeds, how many more do you need?`,
+          question: zvT(T.task.q8, { goal: fmt(s.saveGoal) }),
           answer: moreToSave,
-          hint: `Subtract what you already have from your goal: ${fmt(s.saveGoal)} − ${fmt(s.savings)}`,
-          steps: `${fmt(s.saveGoal)} − ${fmt(s.savings)} = ${fmt(moreToSave)} zeds`,
+          hint: zvT(T.task.q8_hint, { goal: fmt(s.saveGoal), savings: fmt(s.savings) }),
+          steps: `${fmt(s.saveGoal)} − ${fmt(s.savings)} = ${fmt(moreToSave)} ${zeds}`,
           operation: "subtraction",
         },
         /*{
@@ -825,11 +828,7 @@
       { maxWrongAttempts: Infinity, points: 0, hint: "full" },
     ];
 
-    function redactFinalStep(stepsText) {
-      const lines = stepsText.split("\n");
-      const last = lines[lines.length - 1].replace(/=\s*[\d,]+(\s*zeds)?\s*$/, "= ?");
-      return [...lines.slice(0, -1), last].join("\n");
-    }
+    const redactFinalStep = zvRedactLastStep;
 
     // ───────────────────────────────────────────────────────────────
     // STATE
@@ -886,13 +885,13 @@
     function buildIntroBank() {
       const s = state.scale;
       $("intro-bank-title").textContent =
-        `${s.emoji} Your Bank Statement — ${s.label} (${state.salary.toLocaleString()} zeds/month)`;
+        zvT(T.task.bank_title, { emoji: s.emoji, level: s.label, salary: zvMoney(state.salary) });
 
       const items = [
-        { label: "Income",  val: s.income,  icon: "💰" },
-        { label: "Needs",   val: s.needs,   icon: "🏠" },
-        { label: "Wants",   val: s.wants,   icon: "🎮" },
-        { label: "Savings", val: s.savings, icon: "🏦" },
+        { label: T.common.income,  val: s.income,  icon: "💰" },
+        { label: T.common.needs,   val: s.needs,   icon: "🏠" },
+        { label: T.common.wants,   val: s.wants,   icon: "🎮" },
+        { label: T.common.savings, val: s.savings, icon: "🏦" },
       ];
 
       $("intro-bank-grid").innerHTML = items.map(item => `
@@ -900,7 +899,7 @@
           <span class="bank-tile-icon">${item.icon}</span>
           <div>
             <div class="bank-tile-label">${item.label}</div>
-            <div class="bank-tile-value">${item.val.toLocaleString()}</div>
+            <div class="bank-tile-value">${zvNum(item.val)}</div>
           </div>
         </div>
       `).join("");
@@ -912,16 +911,16 @@
     function buildBankSticky() {
       const s = state.scale;
       const items = [
-        { label: "Income",  val: s.income,  icon: "💰" },
-        { label: "Needs",   val: s.needs,   icon: "🏠" },
-        { label: "Wants",   val: s.wants,   icon: "🎮" },
-        { label: "Savings", val: s.savings, icon: "🏦" },
+        { label: T.common.income,  val: s.income,  icon: "💰" },
+        { label: T.common.needs,   val: s.needs,   icon: "🏠" },
+        { label: T.common.wants,   val: s.wants,   icon: "🎮" },
+        { label: T.common.savings, val: s.savings, icon: "🏦" },
       ];
       $("bank-sticky").innerHTML = items.map(item => `
         <div class="bank-item">
           <span class="bank-item-icon">${item.icon}</span>
           <span class="bank-item-label">${item.label}:</span>
-          <span class="bank-item-value">${item.val.toLocaleString()}</span>
+          <span class="bank-item-value">${zvNum(item.val)}</span>
         </div>
       `).join("");
     }
@@ -946,19 +945,19 @@
           <div class="msg-hint hidden"></div>
           <div class="msg-revealed hidden"></div>
           <div class="msg-correct hidden"></div>
-          <div class="msg-wrong hidden">Not quite right, try again! ✨</div>
+          <div class="msg-wrong hidden">${T.common.not_quite}</div>
           <div class="input-row">
             <div class="input-wrapper">
-              <input type="text" inputmode="numeric" placeholder="Type your answer..." />
-              <span class="currency-suffix">zeds</span>
+              <input type="text" inputmode="numeric" placeholder="${T.common.type_answer}" />
+              <span class="currency-suffix">${T.common.zeds}</span>
             </div>
-            <button class="check-button" disabled>Check</button>
+            <button class="check-button" disabled>${T.common.check}</button>
           </div>
           <div class="attempts-row">
             <div class="attempt-dot current"></div>
             <div class="attempt-dot"></div>
             <div class="attempt-dot"></div>
-            <span class="attempts-label">First try — 1 point!</span>
+            <span class="attempts-label">${zvT(T.common.approach_points_many, { n: 1, total: APPROACH_TIERS.length, points: APPROACH_TIERS[0].points })}</span>
           </div>
         `;
         container.appendChild(card);
@@ -987,7 +986,7 @@
     function checkAnswer(qid) {
       const q  = state.questions.find(x => x.id === qid);
       const qs = state.qState[qid];
-      const num = parseInt(qs.input.replace(/,/g, ""), 10);
+      const num = zvParseNumber(qs.input);
       if (isNaN(num)) return;
 
       const tol = q.tolerance || 0;
@@ -1017,7 +1016,7 @@
             if (data.success === false) {
               const extraFeedback = document.getElementById("extra-feedback");
               extraFeedback.className = "feedback error";
-              extraFeedback.textContent = "You’ve already finished this task, but feel free to give it another go!";
+              extraFeedback.textContent = T.common.already_finished;
               setTimeout(() => {
                 extraFeedback.classList.remove("show");
                 extraFeedback.classList.add("hide");
@@ -1073,7 +1072,7 @@
       // Light hint (tier 1+): the short formula, no computed numbers worked out
       const hintEl = card.querySelector(".msg-hint");
       if (tier.hint === "light" && !done) {
-        hintEl.innerHTML = `💡 <strong>Hint:</strong> ${q.hint}`;
+        hintEl.innerHTML = `💡 <strong>${T.common.hint}</strong> ${q.hint}`;
         hintEl.classList.remove("hidden");
       } else {
         hintEl.classList.add("hidden");
@@ -1087,7 +1086,7 @@
         const stepsHtml = redactFinalStep(q.steps).split("\n")
           .map(line => `<div class="msg-revealed-step">${line}</div>`).join("");
         revEl.innerHTML = `
-          <div class="msg-revealed-title">📝 Here's the setup — you finish the last step:</div>
+          <div class="msg-revealed-title">${T.common.setup_title}</div>
           ${stepsHtml}
         `;
         revEl.classList.remove("hidden");
@@ -1098,10 +1097,10 @@
       // Correct
       const corrEl = card.querySelector(".msg-correct");
       if (done) {
-        const ptsText = qs.earned > 0 ? ` +${qs.earned} Finhero Badge Point${qs.earned === 1 ? '' : 's'}!` : '';
+        const ptsText = qs.earned > 0 ? zvT(qs.earned === 1 ? T.common.plus_points_one : T.common.plus_points_many, { points: qs.earned }) : '';
         corrEl.innerHTML = `
           <span class="msg-correct-icon">🎉</span>
-          <span>${q.answer.toLocaleString()} zeds — Correct!${ptsText}</span>
+          <span>${zvT(T.common.correct_answer, { answer: zvNum(q.answer) + ' ' + T.common.zeds })}${ptsText}</span>
         `;
         corrEl.classList.remove("hidden");
       } else {
@@ -1140,7 +1139,7 @@
         });
 
         const label = card.querySelector(".attempts-label");
-        label.textContent = `Approach ${qs.tier + 1} of ${APPROACH_TIERS.length} — ${tier.points} point${tier.points === 1 ? '' : 's'} if correct`;
+        label.textContent = zvT(tier.points === 1 ? T.common.approach_points_one : T.common.approach_points_many, { n: qs.tier + 1, total: APPROACH_TIERS.length, points: tier.points });
       }
     }
 
@@ -1153,8 +1152,8 @@
       const completedCount = Object.keys(state.scores).length;
       const totalPoints    = Object.values(state.scores).reduce((a, b) => a + b, 0);
 
-      $("stat-points").textContent = `🏆 Finhero Badge Points: ${totalPoints} / ${TASK2_TOTAL_POINTS}`;
-      $("stat-done").textContent   = `✅ ${completedCount} / 8 done`;
+      $("stat-points").textContent = zvT(T.common.points_of, { points: totalPoints, total: TASK2_TOTAL_POINTS });
+      $("stat-done").textContent   = zvT(T.common.done_of, { done: completedCount, total: 8 });
       $("progress-fill").style.width = ((completedCount / 8) * 100) + "%";
     }
 
@@ -1174,10 +1173,10 @@
 
       const totalPoints = Object.values(state.scores).reduce((a, b) => a + b, 0);
       let message;
-      if (totalPoints === TASK2_TOTAL_POINTS) message = "Perfect score! You nailed every question on the first try! 🌟";
-      else if (totalPoints >= 18)              message = "Great work! You've got a strong handle on your budget numbers!";
-      else if (totalPoints >= 1)               message = "Good effort! Review the hints and steps to strengthen your budget skills.";
-      else                                     message = "Don't worry — now you know how to break down a budget! Practice makes perfect.";
+      if (totalPoints === TASK2_TOTAL_POINTS) message = T.task.msg_perfect;
+      else if (totalPoints >= 18)              message = T.task.msg_great;
+      else if (totalPoints >= 1)               message = T.task.msg_good;
+      else                                     message = T.task.msg_keep;
 
       $("completion-text").textContent = message;
       $("final-points").textContent    = totalPoints;

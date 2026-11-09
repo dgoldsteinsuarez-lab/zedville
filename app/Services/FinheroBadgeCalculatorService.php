@@ -111,6 +111,36 @@ class FinheroBadgeCalculatorService
         return $this->lookupAccumulatedBadge(FinheroBadgeRecord::ACCUMULATED_THRESHOLDS, $totalPoints);
     }
 
+    /** The % of the month's points each badge needs (the month's settings, or the defaults), lowest first. */
+    public function thresholds(int $month, int $year): array
+    {
+        $settings = $this->getMonthlySettings($month, $year);
+
+        return [
+            'ROOKIE' => (float) ($settings->threshold_rookie ?? 25),
+            'FINHERO' => (float) ($settings->threshold_finhero ?? 50),
+            'CHAMPION' => (float) ($settings->threshold_champion ?? 70),
+            'LEGEND' => (float) ($settings->threshold_legend ?? 90),
+        ];
+    }
+
+    /**
+     * The next badge a student can reach this month and the % it needs (the
+     * Badges page shows it), or null at Legend.
+     *
+     * @return array{badge: string, pct: float}|null
+     */
+    public function nextLevel(float $pct, int $month, int $year): ?array
+    {
+        foreach ($this->thresholds($month, $year) as $badge => $needed) {
+            if ($pct < $needed) {
+                return ['badge' => $badge, 'pct' => $needed];
+            }
+        }
+
+        return null;
+    }
+
     // ─────────────────────────────────────────────────────────────
     // TOTAL AVAILABLE POINTS
     // ─────────────────────────────────────────────────────────────

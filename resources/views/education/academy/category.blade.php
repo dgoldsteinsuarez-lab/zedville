@@ -1,12 +1,13 @@
 @extends('layouts.profile')
+@section('no_page_back', '1'){{-- has its own back link at the top --}}
 
-@section('title', $category->name)
+@section('title', ct('curriculum', $category->name))
 
 @section('content')
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
     <div>
-        <a href="{{ route('academy.index') }}" class="text-sm text-gray-500">&larr; {{ __('academy.back_to_academy') }}</a>
-        <h1 class="text-xl font-bold whitespace-nowrap mt-1">{{ $category->name }}</h1>
+        <a href="{{ route('academy.index') }}" class="zvBackBtn inline-flex items-center gap-2 py-2 px-4 mb-3 text-sm">&larr; {{ __('academy.back_to_academy') }}</a>
+        <h1 class="text-xl font-bold whitespace-nowrap mt-1">{{ ct('curriculum', $category->name) }}</h1>
     </div>
 </div>
 

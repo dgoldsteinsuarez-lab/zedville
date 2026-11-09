@@ -14,16 +14,15 @@
         <div class="step-header">
 
             <div class="step-eyebrow">
-                Step 2 of 6 — Bank Account
+                {{ __('citizen.eyebrow', ['step' => 2, 'total' => 6, 'name' => __('citizen.bank.step')]) }}
             </div>
 
             <div class="ca-step-title">
-                Open your city bank account
+                {{ __('citizen.bank.title') }}
             </div>
 
             <div class="step-subtitle">
-                In banking, a <span class="term">current account</span> is used for everyday money —
-                receiving your salary and paying bills. Open yours at Universal Bank now.
+                {!! __('citizen.bank.subtitle') !!}
             </div>
 
         </div>
@@ -31,9 +30,7 @@
         <div class="step-body">
 
             <div class="narrative">
-                Every Zedville citizen banks at <strong>Universal Bank</strong> — the city's official
-                bank. This is where your monthly salary in Zeds will land and where your expenses
-                will be paid from. It only takes 60 seconds to open.
+                {!! __('citizen.bank.narrative') !!}
             </div>
 
             <form action="{{ route('CitizenActivation.store') }}" method="post">
@@ -41,17 +38,17 @@
                 <div class="form-grid">
 
                     <div class="field-group">
-                        <label class="field-label">Full Name</label>
+                        <label class="field-label">{{ __('citizen.bank.full_name') }}</label>
                         <input
                             class="field-input readonly"
                             type="text"
                             value="{{ Auth::user()->name }}"
                             readonly>
-                        <small class="field-hint">Made a typo? Fix it in <a href="{{ route('profile.edit') }}">Settings</a>.</small>
+                        <small class="field-hint">{!! __('citizen.bank.typo_hint', ['settings' => '<a href="' . e(route('profile.edit')) . '">' . e(__('citizen.bank.settings')) . '</a>']) !!}</small>
                     </div>
 
                     <div class="field-group">
-                        <label class="field-label">Citizen ID (Auto-filled)</label>
+                        <label class="field-label">{{ __('citizen.bank.citizen_id') }}</label>
                         <input
                             class="field-input readonly"
                             type="text"
@@ -65,13 +62,13 @@
                 <div class="form-grid single">
 
                     <div class="field-group">
-                        <label class="field-label">Email Address</label>
+                        <label class="field-label">{{ __('citizen.bank.email') }}</label>
                         <input
                             class="field-input"
                             type="email"
                             name="email"
                             value="{{ Auth::user()->email }}"
-                            placeholder="Your Email">
+                            placeholder="{{ __('citizen.bank.email_placeholder') }}">
                     </div>
 
                 </div>
@@ -79,12 +76,23 @@
                 <div class="form-grid single">
 
                     <div class="field-group">
-                        <label class="field-label">Home Address</label>
+                        @if ($cityAddress)
+                            <label class="field-label">{{ __('citizen.bank.address_auto') }}</label>
+                            <input
+                                class="field-input readonly"
+                                type="text"
+                                name="homeAddress"
+                                value="{{ $cityAddress }}"
+                                readonly>
+                            <small class="field-hint">{{ __('citizen.bank.address_hint') }}</small>
+                        @else
+                            <label class="field-label">{{ __('citizen.bank.address') }}</label>
 
-                        <textarea
-                            class="field-textarea"
-                            name="homeAddress"
-                            placeholder="Home Address">{{ $user->address }}</textarea>
+                            <textarea
+                                class="field-textarea"
+                                name="homeAddress"
+                                placeholder="{{ __('citizen.bank.address') }}">{{ $user->address }}</textarea>
+                        @endif
 
                     </div>
 
@@ -105,7 +113,7 @@
                         </div>
 
                         <span class="check-text">
-                            I agree to receive account statements via email
+                            {{ __('citizen.bank.agree_statements') }}
                         </span>
 
                     </label>
@@ -122,7 +130,7 @@
                         </div>
 
                         <span class="check-text">
-                            I agree to the Terms & Conditions
+                            {{ __('citizen.bank.agree_terms') }}
                         </span>
 
                     </label>
@@ -133,12 +141,12 @@
 
                     <a href="{{ route('CitizenActivation.index') }}"
                        class="ca-btn-secondary">
-                        ← Back
+                        {{ __('citizen.back') }}
                     </a>
 
                     <button type="submit"
                             class="ca-btn-primary">
-                        Submit Application →
+                        {{ __('citizen.bank.submit') }}
                     </button>
 
                 </div>

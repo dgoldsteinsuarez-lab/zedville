@@ -13,6 +13,7 @@ class SchoolDomain extends Model
         'school_code',
         'school_phone',
         'country_region',
+        'timezone',
         'school_domain',
     ];
 

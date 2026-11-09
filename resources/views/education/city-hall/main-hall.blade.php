@@ -60,7 +60,7 @@
     }
     .ch-city-sub { font-size: 12px; color: #7a6a50; margin-top: 2px; }
     .rename-btn {
-      font-size: 11px; color: #a08040; background: none; border: none; cursor: pointer;
+      font-size: 12px; color: #a08040; background: none; border: none; cursor: pointer;
       display: inline-flex; align-items: center; gap: 3px;
       padding: 2px 7px; border-radius: 6px; transition: background 0.15s;
     }
@@ -85,7 +85,7 @@
       padding-left: 12px; border-left: 2px solid var(--gold); flex: 1; line-height: 1.6;
     }
     .ch-quote-btn {
-      font-size: 11px; font-weight: 500; color: var(--gold);
+      font-size: 12px; font-weight: 500; color: var(--gold);
       background: var(--gold-light); border: 0.5px solid var(--gold-border);
       border-radius: 8px; padding: 4px 10px; cursor: pointer; white-space: nowrap;
       text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
@@ -148,17 +148,17 @@
     }
     .live-dot-red { width: 6px; height: 6px; border-radius: 50%; background: #E24B4A; animation: livepulse 2s infinite; }
     @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    .live-txt { font-size: 10px; font-weight: 500; color: #A32D2D; letter-spacing: 0.05em; text-transform: uppercase; }
+    .live-txt { font-size: 12px; font-weight: 500; color: #A32D2D; letter-spacing: 0.05em; text-transform: uppercase; }
 
     .bulletin-viewport { height: 162px; position: relative; overflow: hidden; }
     .bslide { position: absolute; top: 0; left: 0; right: 0; opacity: 0; transition: opacity 0.7s ease; pointer-events: none; }
     .bslide.active { opacity: 1; pointer-events: auto; }
-    .slide-eyebrow { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+    .slide-eyebrow { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
     .slide-headline { font-family: 'Lora', serif; font-size: 14px; font-weight: 500; color: #2c2010; line-height: 1.5; margin-bottom: 8px; }
     .slide-body { font-size: 12px; color: #6b5a3a; line-height: 1.6; }
     .stat-row { display: flex; gap: 7px; margin-top: 9px; }
     .stat-chip { flex: 1; border-radius: 8px; padding: 7px 9px; }
-    .stat-chip-lbl { font-size: 10px; font-weight: 500; margin-bottom: 2px; }
+    .stat-chip-lbl { font-size: 12px; font-weight: 500; margin-bottom: 2px; }
     .stat-chip-val { font-size: 15px; font-weight: 500; }
     .sc-blue   { background: rgba(24,95,165,0.10);  } .sc-blue   .stat-chip-lbl,.sc-blue   .stat-chip-val { color: var(--blue);   }
     .sc-green  { background: rgba(59,109,17,0.10);  } .sc-green  .stat-chip-lbl,.sc-green  .stat-chip-val { color: var(--green);  }
@@ -186,17 +186,19 @@
     }
     .mood-card:hover { border-color: rgba(59,109,17,0.5); }
     .mood-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
-    .mood-see { font-size: 11px; color: var(--blue); display: flex; align-items: center; gap: 3px; }
+    .mood-see { font-size: 12px; color: var(--blue); display: flex; align-items: center; gap: 3px; }
     .quadrants { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .quad { border-radius: 8px; padding: 8px 10px; }
+    .quad { border-radius: 8px; padding: 10px 12px; }
+    /* name, then the big share, then what it means - one under the other, not run together */
+    .quad-name, .quad-pct, .quad-sub { display: block; }
     .q-hc { background: rgba(59,109,17,0.10);  } .q-hc .quad-name,.q-hc .quad-pct { color: var(--green);  } .q-hc .quad-sub { color: #639922; }
     .q-hu { background: rgba(184,134,11,0.10); } .q-hu .quad-name,.q-hu .quad-pct { color: var(--gold);   } .q-hu .quad-sub { color: #854F0B; }
     .q-lc { background: rgba(24,95,165,0.10);  } .q-lc .quad-name,.q-lc .quad-pct { color: var(--blue);   } .q-lc .quad-sub { color: #378ADD; }
     .q-lu { background: rgba(83,74,183,0.10);  } .q-lu .quad-name,.q-lu .quad-pct { color: var(--purple); } .q-lu .quad-sub { color: #7F77DD; }
-    .quad-name { font-size: 10px; font-weight: 500; margin-bottom: 2px; }
-    .quad-pct  { font-size: 18px; font-weight: 500; }
-    .quad-sub  { font-size: 10px; }
-    .mood-footer { margin-top: 8px; font-size: 11px; color: #7a6a50; display: flex; justify-content: space-between; align-items: center; }
+    .quad-name { font-size: 12px; line-height: 16px; font-weight: 600; }
+    .quad-pct  { font-size: 20px; line-height: 26px; font-weight: 600; }
+    .quad-sub  { font-size: 12px; line-height: 16px; }
+    .mood-footer { margin-top: 8px; font-size: 12px; color: #7a6a50; display: flex; justify-content: space-between; align-items: center; }
 
     /* ── ROOM DOORS ── */
     .ch-doors { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; animation: fadeUp 0.4s 0.26s ease both; }
@@ -215,7 +217,7 @@
     .door-info { flex: 1; }
     .door-name { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; color: #2c2010; margin-bottom: 3px; }
     .door-desc { font-size: 12px; color: #7a6a50; line-height: 1.4; }
-    .door-badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; margin-top: 6px; display: inline-block; }
+    .door-badge { font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 10px; margin-top: 6px; display: inline-block; }
     .db-blue { background: var(--blue-light); color: var(--blue); }
     .db-teal { background: rgba(15,110,86,0.12); color: #0F6E56; }
     .door-arrow { font-size: 18px; color: rgba(184,134,11,0.45); }
@@ -271,7 +273,7 @@
       border-top:13px solid rgba(184,134,11,0.35);
     }
     .bubble-greeting {
-      font-size:10px; font-weight:500; color:#B8860B;
+      font-size:12px; font-weight:500; color:#B8860B;
       text-transform:uppercase; letter-spacing:0.08em; margin-bottom:5px;
     }
     .bubble-text { font-size:13px; color:#3a2e1a; line-height:1.6; margin-bottom:0.8rem; }
@@ -293,7 +295,7 @@
     .bubble-btn-ok:hover { background:rgba(184,134,11,0.20); }
     .bubble-btn-hide {
       padding:7px 10px; border-radius:8px; cursor:pointer;
-      font-family:'DM Sans',sans-serif; font-size:11px; color:#a09070;
+      font-family:'DM Sans',sans-serif; font-size:12px; color:#a09070;
       background:transparent; border:0.5px solid rgba(0,0,0,0.10); white-space:nowrap;
     }
     .bubble-btn-hide:hover { background:rgba(0,0,0,0.05); }
@@ -308,7 +310,7 @@
     }
     .receptionist-avatar:hover { transform:scale(1.08); }
     .receptionist-hint {
-      font-size:10px; color:rgba(255,255,255,0.80);
+      font-size:12px; color:rgba(255,255,255,0.80);
       margin-top:4px; margin-bottom:14px; margin-left:6px;
       text-shadow:0 1px 3px rgba(0,0,0,0.5);
     }
@@ -325,7 +327,7 @@
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="ch-city-name">{{ $cityName }}</span>
             <button class="rename-btn" onclick="location.href='{{ route('education.civic-chamber') }}?topic=city-name'">
-              <i class="ti ti-pencil" style="font-size:11px;" aria-hidden="true"></i> propose rename
+              <i class="ti ti-pencil" style="font-size:12px;" aria-hidden="true"></i> {{ __('cityhall.propose_rename') }}
             </button>
           </div>
           <!-- <div class="ch-city-sub">City Hall · Gran Canaria</div> -->
@@ -334,13 +336,13 @@
       <!-- IT TEAM: replace mood label with top quadrant from mood_meter table -->
       <div class="ch-mood-pill">
         <div class="mood-dot"></div>
-        <span class="mood-txt">City mood: Calm &amp; focused</span>
+        <span class="mood-txt">{{ __('cityhall.city_mood_pill') }}</span>
       </div>
     </div>
     <div class="ch-quote-strip">
-      <span class="ch-quote-txt">"{{ $cityQuote ?? 'A budget is telling your money where to go instead of wondering where it went.' }}"</span>
+      <span class="ch-quote-txt">"{{ $cityQuote ?? __('cityhall.default_quote') }}"</span>
       <a href="{{ route('education.civic-chamber') }}?topic=city-quote" class="ch-quote-btn">
-        <i class="ti ti-pencil" style="font-size:11px;" aria-hidden="true"></i> Change quote
+        <i class="ti ti-pencil" style="font-size:12px;" aria-hidden="true"></i> {{ __('cityhall.change_quote') }}
       </a>
     </div>
   </div>
@@ -350,18 +352,18 @@
   <div class="salary-bar">
     <span class="salary-lbl">
       <i class="ti ti-report-money" style="font-size:15px;" aria-hidden="true"></i>
-      Current salary policy — Scale B
+      {{ __('cityhall.salary_policy') }}
     </span>
-    <span class="salary-val">3,953 zeds / month</span>
+    <span class="salary-val">{{ __('cityhall.zeds_per_month', ['amount' => number_format(config('zedville.monthly_salary', 3952.40))]) }}</span>
   </div>
 
   <!-- ALERT STRIP -->
   <!-- IT TEAM: build $alerts array from active referendums + petitions tables -->
   <div class="alert-strip">
     <div class="alert-dot"></div>
-    <span class="alert-txt">A new referendum is open · "Should the city invest in a community library?" · A petition needs your signature</span>
+    <span class="alert-txt">{{ __('cityhall.alert_sample') }}</span>
     <a href="{{ route('education.civic-chamber') }}" class="alert-link">
-      See all <i class="ti ti-arrow-right" style="font-size:11px;" aria-hidden="true"></i>
+      {{ __('cityhall.see_all') }} <i class="ti ti-arrow-right" style="font-size:12px;" aria-hidden="true"></i>
     </a>
   </div>
 
@@ -373,11 +375,11 @@
       <div class="bulletin-header">
         <span class="panel-title">
           <i class="ti ti-chart-bar" aria-hidden="true"></i>
-          City economic bulletin
+          {{ __('cityhall.bulletin') }}
         </span>
         <div class="live-badge">
           <div class="live-dot-red"></div>
-          <span class="live-txt">Live</span>
+          <span class="live-txt">{{ __('cityhall.live') }}</span>
         </div>
       </div>
 
@@ -385,64 +387,64 @@
         <!-- IT TEAM: replace static slides with DB loop from bulletin_slides table -->
 
         <div class="bslide active" id="bslide-0">
-          <div class="slide-eyebrow" style="color:#185FA5;">Citizens &amp; Economy</div>
+          <div class="slide-eyebrow" style="color:#185FA5;">{{ __('cityhall.citizens_economy') }}</div>
           <!-- IT TEAM: replace 29 with citizen count from users WHERE role='student' -->
-          <div class="slide-headline">Zedville has 29 active citizens this year</div>
+          <div class="slide-headline">{{ __('cityhall.active_citizens', ['count' => 29]) }}</div>
           <div class="stat-row">
-            <div class="stat-chip sc-blue"><div class="stat-chip-lbl">Total citizens</div><div class="stat-chip-val">29</div></div>
-            <div class="stat-chip sc-green"><div class="stat-chip-lbl">City budget</div><div class="stat-chip-val">53,650 z</div></div>
-            <div class="stat-chip sc-amber"><div class="stat-chip-lbl">Salary scale</div><div class="stat-chip-val">Scale B</div></div>
+            <div class="stat-chip sc-blue"><div class="stat-chip-lbl">{{ __('cityhall.total_citizens') }}</div><div class="stat-chip-val">29</div></div>
+            <div class="stat-chip sc-green"><div class="stat-chip-lbl">{{ __('cityhall.city_budget') }}</div><div class="stat-chip-val">53,650 z</div></div>
+            <div class="stat-chip sc-amber"><div class="stat-chip-lbl">{{ __('cityhall.salary_scale') }}</div><div class="stat-chip-val">{{ __('cityhall.scale_b') }}</div></div>
           </div>
         </div>
 
         <div class="bslide" id="bslide-1">
-          <div class="slide-eyebrow" style="color:#3B6D11;">Salaries</div>
-          <div class="slide-headline">Every citizen earns 1,850 zeds per month</div>
-          <div class="slide-body">The salary policy is reviewed once a year. The scale can go up or down depending on how the city's finances are managed. Scale A starts at 1,500 z and Scale D reaches 2,600 z.</div>
+          <div class="slide-eyebrow" style="color:#3B6D11;">{{ __('cityhall.salaries') }}</div>
+          <div class="slide-headline">{{ __('cityhall.every_citizen_earns', ['amount' => number_format(config('zedville.monthly_salary', 3952.40))]) }}</div>
+          <div class="slide-body">{{ __('cityhall.salary_policy_text') }}</div>
           <div class="stat-row">
-            <div class="stat-chip sc-green"><div class="stat-chip-lbl">Minimum salary</div><div class="stat-chip-val">1,500 z</div></div>
-            <div class="stat-chip sc-amber"><div class="stat-chip-lbl">Current salary</div><div class="stat-chip-val">3,953 z</div></div>
+            <div class="stat-chip sc-green"><div class="stat-chip-lbl">{{ __('cityhall.minimum_salary') }}</div><div class="stat-chip-val">1,500 z</div></div>
+            <div class="stat-chip sc-amber"><div class="stat-chip-lbl">{{ __('cityhall.current_salary') }}</div><div class="stat-chip-val">{{ number_format(config('zedville.monthly_salary', 3952.40)) }} z</div></div>
           </div>
         </div>
 
         <div class="bslide" id="bslide-2">
-          <div class="slide-eyebrow" style="color:#B8860B;">Wealth &amp; Inequality</div>
-          <div class="slide-headline">14% of citizens are considered wealthy in Zedville</div>
-          <div class="slide-body">A citizen is considered wealthy when their savings exceed 3 months of salary. The top spenders hold 28% of all zeds in circulation.</div>
+          <div class="slide-eyebrow" style="color:#B8860B;">{{ __('cityhall.wealth_inequality') }}</div>
+          <div class="slide-headline">{{ __('cityhall.wealthy_share', ['pct' => 14]) }}</div>
+          <div class="slide-body">{{ __('cityhall.wealthy_text') }}</div>
           <div class="stat-row">
-            <div class="stat-chip sc-amber"><div class="stat-chip-lbl">Wealthy citizens</div><div class="stat-chip-val">14%</div></div>
-            <div class="stat-chip sc-purple"><div class="stat-chip-lbl">Wealth threshold</div><div class="stat-chip-val">5,550 z</div></div>
+            <div class="stat-chip sc-amber"><div class="stat-chip-lbl">{{ __('cityhall.wealthy_citizens') }}</div><div class="stat-chip-val">14%</div></div>
+            <div class="stat-chip sc-purple"><div class="stat-chip-lbl">{{ __('cityhall.wealth_threshold') }}</div><div class="stat-chip-val">5,550 z</div></div>
           </div>
         </div>
 
         <div class="bslide" id="bslide-3">
-          <div class="slide-eyebrow" style="color:#A32D2D;">City Challenges</div>
-          <div class="slide-headline">8 citizens are spending more than 40% on non-essentials</div>
-          <div class="slide-body">Over-spending in Wants is rising. The city council has opened a referendum to discuss a spending awareness campaign.</div>
+          <div class="slide-eyebrow" style="color:#A32D2D;">{{ __('cityhall.city_challenges') }}</div>
+          <div class="slide-headline">{{ __('cityhall.over_spending_count', ['count' => 8]) }}</div>
+          <div class="slide-body">{{ __('cityhall.over_spending_text') }}</div>
           <div class="stat-row">
-            <div class="stat-chip sc-red"><div class="stat-chip-lbl">Over-spenders</div><div class="stat-chip-val">8 citizens</div></div>
-            <div class="stat-chip sc-blue"><div class="stat-chip-lbl">Open referendums</div><div class="stat-chip-val">1</div></div>
+            <div class="stat-chip sc-red"><div class="stat-chip-lbl">{{ __('cityhall.over_spenders') }}</div><div class="stat-chip-val">{{ trans_choice('cityhall.citizens_count', 8) }}</div></div>
+            <div class="stat-chip sc-blue"><div class="stat-chip-lbl">{{ __('cityhall.open_referendums') }}</div><div class="stat-chip-val">1</div></div>
           </div>
         </div>
 
         <div class="bslide" id="bslide-4">
-          <div class="slide-eyebrow" style="color:#0F6E56;">Did you know?</div>
-          <div class="slide-headline">In small European towns, 3 in 10 families have no emergency savings</div>
-          <div class="slide-body">Around 30% of households cannot cover an unexpected expense of €400. Financial literacy programmes reduce this by up to 40%.</div>
+          <div class="slide-eyebrow" style="color:#0F6E56;">{{ __('cityhall.did_you_know') }}</div>
+          <div class="slide-headline">{{ __('cityhall.no_savings_fact') }}</div>
+          <div class="slide-body">{{ __('cityhall.no_savings_text') }}</div>
           <div class="stat-row">
-            <div class="stat-chip sc-teal"><div class="stat-chip-lbl">No savings</div><div class="stat-chip-val">~30%</div></div>
-            <div class="stat-chip sc-green"><div class="stat-chip-lbl">With education</div><div class="stat-chip-val">up to 40%</div></div>
+            <div class="stat-chip sc-teal"><div class="stat-chip-lbl">{{ __('cityhall.no_savings') }}</div><div class="stat-chip-val">~30%</div></div>
+            <div class="stat-chip sc-green"><div class="stat-chip-lbl">{{ __('cityhall.with_education') }}</div><div class="stat-chip-val">{{ __('cityhall.up_to', ['pct' => 40]) }}</div></div>
           </div>
         </div>
 
       </div><!-- /bulletin-viewport -->
 
       <div class="progress-dots" id="bulletinDots">
-        <button class="pdot on" onclick="bulletinGoTo(0)" aria-label="Slide 1"></button>
-        <button class="pdot" onclick="bulletinGoTo(1)" aria-label="Slide 2"></button>
-        <button class="pdot" onclick="bulletinGoTo(2)" aria-label="Slide 3"></button>
-        <button class="pdot" onclick="bulletinGoTo(3)" aria-label="Slide 4"></button>
-        <button class="pdot" onclick="bulletinGoTo(4)" aria-label="Slide 5"></button>
+        <button class="pdot on" onclick="bulletinGoTo(0)" aria-label="{{ __('cityhall.slide', ['number' => 1]) }}"></button>
+        <button class="pdot" onclick="bulletinGoTo(1)" aria-label="{{ __('cityhall.slide', ['number' => 2]) }}"></button>
+        <button class="pdot" onclick="bulletinGoTo(2)" aria-label="{{ __('cityhall.slide', ['number' => 3]) }}"></button>
+        <button class="pdot" onclick="bulletinGoTo(3)" aria-label="{{ __('cityhall.slide', ['number' => 4]) }}"></button>
+        <button class="pdot" onclick="bulletinGoTo(4)" aria-label="{{ __('cityhall.slide', ['number' => 5]) }}"></button>
       </div>
     </div><!-- /bulletin -->
 
@@ -451,22 +453,21 @@
     <a href="{{ url('city-mood') }}" class="mood-card">
       <div class="mood-card-top">
         <span class="panel-title">
-          <i class="ti ti-heart" style="color:#0F6E56;font-size:15px;" aria-hidden="true"></i>
-          City mood today
+          <i class="ti ti-heart" style="color:#0F6E56;font-size:15px;" aria-hidden="true"></i> {{ __('cityhall.city_mood_today') }}
         </span>
-        <span class="mood-see">Full profile <i class="ti ti-arrow-right" style="font-size:11px;" aria-hidden="true"></i></span>
+        <span class="mood-see">{{ __('cityhall.full_profile') }} <i class="ti ti-arrow-right" style="font-size:12px;" aria-hidden="true"></i></span>
       </div>
       <!-- IT TEAM: replace percentages from mood_meter daily averages -->
       <div class="quadrants">
-        <div class="quad q-hc"><span class="quad-name">Excited · Happy</span><span class="quad-pct">41%</span><span class="quad-sub">High energy, comfortable</span></div>
-        <div class="quad q-hu"><span class="quad-name">Stressed · Anxious</span><span class="quad-pct">18%</span><span class="quad-sub">High energy, uncomfortable</span></div>
-        <div class="quad q-lc"><span class="quad-name">Calm · Focused</span><span class="quad-pct">31%</span><span class="quad-sub">Low energy, comfortable</span></div>
-        <div class="quad q-lu"><span class="quad-name">Sad · Tired</span><span class="quad-pct">10%</span><span class="quad-sub">Low energy, uncomfortable</span></div>
+        <div class="quad q-hc"><span class="quad-name">{{ __('cityhall.excited_happy') }}</span><span class="quad-pct">41%</span><span class="quad-sub">{{ __('cityhall.high_energy_comfortable') }}</span></div>
+        <div class="quad q-hu"><span class="quad-name">{{ __('cityhall.stressed_anxious') }}</span><span class="quad-pct">18%</span><span class="quad-sub">{{ __('cityhall.high_energy_uncomfortable') }}</span></div>
+        <div class="quad q-lc"><span class="quad-name">{{ __('cityhall.calm_focused') }}</span><span class="quad-pct">31%</span><span class="quad-sub">{{ __('cityhall.low_energy_comfortable') }}</span></div>
+        <div class="quad q-lu"><span class="quad-name">{{ __('cityhall.sad_tired') }}</span><span class="quad-pct">10%</span><span class="quad-sub">{{ __('cityhall.low_energy_uncomfortable') }}</span></div>
       </div>
       <div class="mood-footer">
         <!-- IT TEAM: replace with count of students who logged today -->
-        <span>29 students logged today</span>
-        <span class="mood-see">See city mood page <i class="ti ti-arrow-right" style="font-size:11px;" aria-hidden="true"></i></span>
+        <span>{{ __('cityhall.students_logged_today', ['count' => 29]) }}</span>
+        <span class="mood-see">{{ __('cityhall.see_city_mood') }} <i class="ti ti-arrow-right" style="font-size:12px;" aria-hidden="true"></i></span>
       </div>
     </a>
 
@@ -480,10 +481,10 @@
         <i class="ti ti-checkup-list" aria-hidden="true"></i>
       </div>
       <div class="door-info">
-        <div class="door-name">Civic Chamber</div>
-        <div class="door-desc">Referendums and petitions — your civic voice</div>
+        <div class="door-name">{{ __('cityhall.civic_chamber') }}</div>
+        <div class="door-desc">{{ __('cityhall.civic_chamber_desc') }}</div>
         <!-- IT TEAM: replace count from referendums + petitions tables -->
-        <span class="door-badge db-blue">3 items need your attention</span>
+        <span class="door-badge db-blue">{{ __('cityhall.items_need_attention', ['count' => 3]) }}</span>
       </div>
       <span class="door-arrow"><i class="ti ti-arrow-right" aria-hidden="true"></i></span>
     </a>
@@ -493,10 +494,10 @@
         <i class="ti ti-heart" aria-hidden="true"></i>
       </div>
       <div class="door-info">
-        <div class="door-name">Wellbeing Room</div>
-        <div class="door-desc">Articles and videos to balance your life</div>
+        <div class="door-name">{{ __('cityhall.wellbeing_room') }}</div>
+        <div class="door-desc">{{ __('cityhall.wellbeing_desc') }}</div>
         <!-- IT TEAM: replace with count of new wellbeing posts from DB -->
-        <span class="door-badge db-teal">3 new articles</span>
+        <span class="door-badge db-teal">{{ __('cityhall.new_articles', ['count' => 3]) }}</span>
       </div>
       <span class="door-arrow"><i class="ti ti-arrow-right" aria-hidden="true"></i></span>
     </a>
@@ -512,46 +513,46 @@
 
     <!-- Speech bubble — shown on first visit -->
     <div class="speech-bubble" id="speechBubble">
-      <div class="bubble-greeting">👋 Welcome to City Hall</div>
-      <div class="bubble-text">Hi! I am here to help you find your way around. Here is what you can do in City Hall:</div>
+      <div class="bubble-greeting">{{ __('cityhall.welcome') }}</div>
+      <div class="bubble-text">{{ __('cityhall.welcome_text') }}</div>
       <div class="bubble-items">
         <div class="bubble-item">
           <span class="bicon bicon-blue"><i class="ti ti-checkup-list" aria-hidden="true"></i></span>
-          <span><strong>Vote</strong> on referendums proposed by your tutor</span>
+          <span>{!! __('cityhall.bubble_vote') !!}</span>
         </div>
         <div class="bubble-item">
           <span class="bicon bicon-purple"><i class="ti ti-writing" aria-hidden="true"></i></span>
-          <span><strong>Start or sign</strong> a petition for your class</span>
+          <span>{!! __('cityhall.bubble_petition') !!}</span>
         </div>
         <div class="bubble-item">
           <span class="bicon bicon-teal"><i class="ti ti-heart" aria-hidden="true"></i></span>
-          <span><strong>Read</strong> wellbeing articles and watch videos</span>
+          <span>{!! __('cityhall.bubble_read') !!}</span>
         </div>
         <div class="bubble-item">
           <span class="bicon bicon-gold"><i class="ti ti-chart-bar" aria-hidden="true"></i></span>
-          <span><strong>Follow</strong> your city's economic bulletin</span>
+          <span>{!! __('cityhall.bubble_follow') !!}</span>
         </div>
         <div class="bubble-item">
           <span class="bicon bicon-green"><i class="ti ti-mood-smile" aria-hidden="true"></i></span>
-          <span><strong>See</strong> how the whole city is feeling today</span>
+          <span>{!! __('cityhall.bubble_see') !!}</span>
         </div>
       </div>
       <div class="bubble-actions">
         <button class="bubble-btn-ok" onclick="closeBubble(false)">
-          Got it, let me explore!
+          {{ __('cityhall.got_it') }}
         </button>
         <button class="bubble-btn-hide" onclick="closeBubble(true)">
-          Don't show again
+          {{ __('cityhall.dont_show_again') }}
         </button>
       </div>
     </div>
 
     <!-- Avatar — always visible, click to reopen bubble -->
     <div class="receptionist-avatar" id="receptionistAvatar"
-      onclick="toggleBubble()" title="Click me for help">
+      onclick="toggleBubble()" title="{{ __('cityhall.click_for_help') }}">
       👩‍💼
     </div>
-    <div class="receptionist-hint" id="avatarHint">Click me for help</div>
+    <div class="receptionist-hint" id="avatarHint">{{ __('cityhall.click_for_help') }}</div>
 
   </div>
 </div>
@@ -596,7 +597,7 @@
     if (dismissed === 'permanent') {
       // Permanently dismissed — hide bubble, show only avatar
       bubble.style.display = 'none';
-      hint.textContent = 'Ask me anything';
+      hint.textContent = @json(__('cityhall.ask_me_anything'));
     } else if (dismissed === 'session') {
       // Dismissed this session — hide bubble on reload
       bubble.style.display = 'none';
@@ -613,7 +614,7 @@
     bubble.style.transition = 'all 0.25s ease';
     setTimeout(() => {
       bubble.style.display = 'none';
-      hint.textContent = 'Ask me anything';
+      hint.textContent = @json(__('cityhall.ask_me_anything'));
     }, 250);
     localStorage.setItem(WELCOME_KEY, permanent ? 'permanent' : 'session');
   }
@@ -630,7 +631,7 @@
         bubble.style.opacity   = '1';
         bubble.style.transform = 'scale(1) translateY(0)';
       });
-      hint.textContent = 'Click me for help';
+      hint.textContent = @json(__('cityhall.click_for_help'));
       // Remove permanent dismissal so they can read again
       if (localStorage.getItem(WELCOME_KEY) !== 'permanent') return;
       localStorage.removeItem(WELCOME_KEY);

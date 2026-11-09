@@ -4,10 +4,6 @@ use App\Http\Controllers\EFDController;
 
 Route::get('/', [EFDController::class, 'index'])->name('index');
 Route::get('/educational-finance-department', [EFDController::class, 'educational_finance_department'])->name('educational_finance_department');
-Route::get('/multiple-choice-email', [EFDController::class, 'multipleChoiceEmail'])->name('multipleChoiceEmail');
-Route::get('/quize-multiple-choice-question', [EFDController::class, 'quizMultipleChoiceQuestion'])->name('quizMultipleChoiceQuestion');
-Route::get('/budget-quiz', [EFDController::class, 'budgetQuiz'])->name('budgetQuiz');
-Route::get('/budget-quiz-2', [EFDController::class, 'budgetQuiz2'])->name('budgetQuiz2');
 Route::post('/store-mba', [EFDController::class, 'storemba'])->name('storemba');
 Route::get('/mba-data', [EFDController::class, 'getMbaData']);
 Route::get('/city-mall', [EFDController::class, 'city_mall'])->name('city-mall');
@@ -30,6 +26,18 @@ Route::get('/civic-chamber', [EFDController::class, 'civic_chamber'])->name('civ
 Route::get('/city', [\App\Http\Controllers\CityController::class, 'index'])->name('city');
 Route::get('/city/{district}', [\App\Http\Controllers\CityController::class, 'district'])->name('city.district');
 Route::get('/well-being-room', [EFDController::class, 'well_being_room'])->name('well-being-room');
+
+// The Money Factory (Daniel, 2026-11-02): where Zedland prints its money, the
+// currency exchange, and two pages to find out more.
+Route::get('/money-factory', [\App\Http\Controllers\MoneyFactoryController::class, 'index'])->name('money-factory');
+Route::get('/money-factory/money-supply', [\App\Http\Controllers\MoneyFactoryController::class, 'supply'])->name('money-factory.supply');
+Route::get('/money-factory/too-little-or-too-much', [\App\Http\Controllers\MoneyFactoryController::class, 'circulation'])->name('money-factory.circulation');
+Route::get('/money-factory/how-money-gets-in', [\App\Http\Controllers\MoneyFactoryController::class, 'enter'])->name('money-factory.enter');
+Route::post('/money-factory/exchange', [\App\Http\Controllers\MoneyFactoryController::class, 'exchange'])->name('money-factory.exchange');
+Route::get('/money-factory/tracker', [\App\Http\Controllers\MoneyFactoryController::class, 'tracker'])->name('money-factory.tracker');
+Route::post('/money-factory/tracker/answers', [\App\Http\Controllers\MoneyFactoryController::class, 'trackerAnswers'])->name('money-factory.tracker.answers');
+Route::get('/money-factory/activities/{slug}', [\App\Http\Controllers\MoneyFactoryController::class, 'activity'])->name('money-factory.activity');
+Route::post('/money-factory/activities/{slug}/answers', [\App\Http\Controllers\MoneyFactoryController::class, 'activityAnswers'])->name('money-factory.activity.answers');
 
 // Civic Chamber AJAX
 

@@ -32,10 +32,10 @@ class MonthlyQuestionsController extends Controller
         return optional(optional(optional(Auth::user()->gradeRelation)->grade)->level)->id;
     }
 
-    /** The school's current progression month - Month 1 if the school hasn't set its start month. */
+    /** The student's current progression month (their Grade's start month, else the school's) - Month 1 if neither is set. */
     private function reachedMonth(): int
     {
-        return SchoolMonthSetting::currentProgressionMonthNumber(Auth::user()->sid) ?? 1;
+        return SchoolMonthSetting::progressionMonthForStudent(Auth::user()) ?? 1;
     }
 
     private function questions()
@@ -159,9 +159,9 @@ class MonthlyQuestionsController extends Controller
             $correct = $question->options->firstWhere('is_correct', true);
 
             return [
-                'question' => $question->question,
-                'chosen' => optional($chosen)->option_text,
-                'correct' => optional($correct)->option_text,
+                'question' => ct('daily_questions', $question->question),
+                'chosen' => ct('daily_questions', optional($chosen)->option_text),
+                'correct' => ct('daily_questions', optional($correct)->option_text),
                 'is_correct' => $chosen && $correct && $chosen->id === $correct->id,
             ];
         });

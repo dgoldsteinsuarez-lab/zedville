@@ -16,7 +16,10 @@ class CitizenActivationService
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
 
         if (!$bankAccount) {
-            return route('CitizenActivation.bankAccount');
+            // The Mayor's welcome announcement comes first (Daniel, 2026-10-23).
+            return $user->welcome_seen_at
+                ? route('CitizenActivation.bankAccount')
+                : route('CitizenActivation.index');
         }
 
         // STEP 2 - Salary Authorization
@@ -137,32 +140,36 @@ class CitizenActivationService
             ]);
         }
 
-        foreach (['Rent' => config('zedville.rent', 300), 'School Fees' => config('zedville.school_fees', 1000)] as $description => $amount) {
-            $alreadyPosted = Transaction1::where('user_id', $user->id)
-                ->where('description', $description)
-                ->whereDate('transaction_date', now()->toDateString())
-                ->exists();
-
-            if ($alreadyPosted) {
-                continue;
-            }
-
-            $lastBalance = Transaction1::where('user_id', $user->id)->latest('id')->value('balance') ?? 0;
-
-            Transaction1::create([
-                'user_id' => $user->id,
-                'sid' => $user->sid,
-                'bank_account_id' => $bankAccount->id,
-                'transaction_date' => now(),
-                'description' => $description,
-                'type' => 'debit',
-                'category' => 'Needs',
-                'amount' => $amount,
-                'balance' => max(0, $lastBalance - $amount),
-                'is_penalty' => false,
-            ]);
-        }
-
+        // The bank's first month (salary and fixed needs) - before anything else
+        // is on the account: it only runs for an account without any line yet.
         app(StatementGenerator::class)->generateForUser($user->id);
+
+        // Their salary every month, as students get it (the nightly run only
+        // pays students: from the second month a tutor's account ran dry).
+        app(\App\Http\Controllers\BankController::class)->creditMonthlySalary($user->id);
+
+        // Rent and School Fees once a month (it was once a day: a tutor paid them
+        // again on every day they logged in - bank review, 2026-10-29), locked
+        // and through the ledger so the running balance is right.
+        foreach (['Rent' => config('zedville.rent', 300), 'School Fees' => config('zedville.school_fees', 1000)] as $description => $amount) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($user, $bankAccount, $description, $amount) {
+                BankAccount::whereKey($bankAccount->id)->lockForUpdate()->first();
+                $alreadyPosted = Transaction1::where('user_id', $user->id)
+                    ->where('description', $description)
+                    ->whereYear('transaction_date', now()->year)
+                    ->whereMonth('transaction_date', now()->month)
+                    ->exists();
+
+                if ($alreadyPosted) {
+                    return;
+                }
+
+                \App\Services\LedgerService::post($user->id, 'debit', 'Needs', (float) $amount, $description, [
+                    'sid' => $user->sid,
+                    'bank_account_id' => $bankAccount->id,
+                    'only_if_enough' => true, // tried again at the next login
+                ]);
+            });
+        }
     }
 }

@@ -17,9 +17,9 @@ use Tests\TestCase;
  * temporarily unavailable" exercise is built on.
  *
  * Counts toward the Engagement badge, not FinHero (Daniel caught this
- * was wired into the wrong badge). Fully automatic - no admin/tutor
- * action at all, not even an activation toggle: every student always has
- * up to 3 items auto-picked from their own basket each month. Tests
+ * was wired into the wrong badge). Since 2026-10-23 an admin assigns it
+ * to a class (Admin > Engagement); while it runs, every student in that
+ * class has up to 3 items auto-picked from their own basket. Tests
  * pre-seed a SubstituteGoodsPick row to simulate "this was already
  * auto-picked this month," since BasketController::blockedItemIdsFor()
  * only generates fresh picks when none exist yet - keeps tests
@@ -42,7 +42,9 @@ class BasketSwapTest extends TestCase
 
     private function makeStudentWithBasket(array $items, string $diet = 'omnivore'): array
     {
-        $student = User::factory()->create(['role' => 4, 'sid' => 1, 'grade' => null]);
+        $class = \App\Models\SchoolClass::create(['sid' => '1', 'name' => 'Class ' . uniqid()]);
+        $student = User::factory()->create(['role' => 4, 'sid' => 1, 'grade' => $class->id]);
+        $this->assignTo($class->id);
 
         $groceries = array_map(fn ($item) => [
             'id' => $item->id,
@@ -66,6 +68,30 @@ class BasketSwapTest extends TestCase
         ]);
 
         return [$student, $survey];
+    }
+
+    /** Admin > Engagement > Substitute Goods: the activity runs for this class this month. */
+    private function assignTo(int $classId): void
+    {
+        DB::table('mba_position')->insert([
+            'user_id' => 1, 'activity_key' => 'substitute_goods', 'sid' => '1', 'cid' => $classId,
+            'required' => 1, 'optional' => 0,
+            'start_date' => now()->startOfMonth()->toDateString(), 'end_date' => now()->endOfMonth()->toDateString(),
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+    }
+
+    public function test_nothing_goes_out_of_stock_until_the_activity_is_assigned_to_the_class(): void
+    {
+        $chicken = $this->makeDietItem('omnivore', 'Chicken', 10);
+        [$student] = $this->makeStudentWithBasket([$chicken]);
+        DB::table('mba_position')->where('activity_key', 'substitute_goods')->delete();
+
+        $this->actingAs($student)->getJson(route('basket.state'))
+            ->assertOk()
+            ->assertJson(['active' => false])
+            ->assertJsonPath('items.0.blocked', false);
+        $this->assertSame(0, SubstituteGoodsPick::count());
     }
 
     private function seedPick(User $student, Supermarket $item): void
@@ -141,7 +167,7 @@ class BasketSwapTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_items_are_auto_picked_from_the_students_own_basket_with_no_activation_needed(): void
+    public function test_items_are_auto_picked_from_the_students_own_basket_once_assigned(): void
     {
         $chicken = $this->makeDietItem('omnivore', 'Chicken', 10);
         $beans = $this->makeDietItem('omnivore', 'Beans', 4);

@@ -54,7 +54,7 @@
     </style>
   @endpush
   <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">My Closet — Zedville</h1>
+    <h1 class="text-xl font-bold whitespace-nowrap ">{{ __('closet.my_closet_zedville') }}</h1>
   </div>
   <div class="grid grid-cols-1 gap-5 ">
     <div class="themeTabspills">
@@ -66,12 +66,11 @@
           <div class="p-5 bg-white border-r border-gray-200">
             <span class="inline-block text-xs font-medium px-3 py-1 rounded-full mb-3"
               style="background:var(--cat-transport-bg);color:var(--cat-transport-text);border:0.5px solid var(--cat-transport-border)">
-              Durable goods
+              {{ __('closet.durable_goods') }}
             </span>
-            <p class="text-sm font-medium text-gray-900 mb-1">Used over time</p>
+            <p class="text-sm font-medium text-gray-900 mb-1">{{ __('closet.used_over_time') }}</p>
             <p class="text-xs text-gray-500 leading-relaxed mb-3">
-              Physical items that last 3 or more years and are not consumed in a single use.
-              They lose value gradually through depreciation.
+              {{ __('closet.physical_items_that_last_3_or') }}
             </p>
             <div class="flex flex-wrap gap-1">
               @foreach(['Laptop', 'Bicycle', 'Phone', 'Furniture'] as $tag)
@@ -87,12 +86,11 @@
           <div class="p-5 bg-white">
             <span class="inline-block text-xs font-medium px-3 py-1 rounded-full mb-3"
               style="background:var(--cat-tools-bg);color:var(--cat-tools-text);border:0.5px solid var(--cat-tools-border)">
-              Non-durable goods
+              {{ __('closet.non_durable_goods') }}
             </span>
-            <p class="text-sm font-medium text-gray-900 mb-1">Consumed quickly</p>
+            <p class="text-sm font-medium text-gray-900 mb-1">{{ __('closet.consumed_quickly') }}</p>
             <p class="text-xs text-gray-500 leading-relaxed mb-3">
-              Items used up in less than 3 years — often in a single use.
-              Once spent, they are gone and must be replaced.
+              {{ __('closet.items_used_up_in_less_than') }}
             </p>
             <div class="flex flex-wrap gap-1">
               @foreach(['Food', 'Shampoo', 'Notebook', 'Bus ticket'] as $tag)
@@ -106,31 +104,31 @@
 
           <!-- Footer note -->
           <div class="col-span-2 bg-gray-50 px-5 py-2 text-xs text-gray-400 tracking-wide border-t border-gray-200">
-            Only durable goods appear in your closet
+            {{ __('closet.only_durable_goods_appear_in_your') }}
           </div>
         </div>
 
         <!-- ── SECTION HEADER ──────────────────────────────────────── -->
         <div class="flex items-center gap-3 mb-4">
-          <h2 class="text-lg font-medium text-gray-900" id="section-title">My Closet</h2>
+          <h2 class="text-lg font-medium text-gray-900" id="section-title">{{ __('closet.my_closet') }}</h2>
           <span id="item-count-badge" class="text-xs font-medium px-3 py-1 rounded-full"
             style="background:var(--cat-transport-bg);color:var(--cat-transport-text);border:0.5px solid var(--cat-transport-border)">
-            0 items
+            {{ __('closet.n0_items') }}
           </span>
         </div>
 
         <!-- ── SUMMARY CARDS ───────────────────────────────────────── -->
         <div id="summary-cards" class="hidden grid grid-cols-3 gap-2 mb-5">
           <div class="bg-gray-50 rounded-lg p-3">
-            <div class="text-xs text-gray-500 mb-1">Items owned</div>
+            <div class="text-xs text-gray-500 mb-1">{{ __('closet.items_owned') }}</div>
             <div class="text-lg font-medium text-gray-900" id="summary-count">—</div>
           </div>
           <div class="bg-gray-50 rounded-lg p-3">
-            <div class="text-xs text-gray-500 mb-1">Total value</div>
+            <div class="text-xs text-gray-500 mb-1">{{ __('closet.total_value') }}</div>
             <div class="text-lg font-medium text-gray-900" id="summary-value">—</div>
           </div>
           <div class="bg-gray-50 rounded-lg p-3">
-            <div class="text-xs text-gray-500 mb-1">Oldest item</div>
+            <div class="text-xs text-gray-500 mb-1">{{ __('closet.oldest_item') }}</div>
             <div class="text-lg font-medium text-gray-900" id="summary-oldest">—</div>
           </div>
         </div>
@@ -139,13 +137,13 @@
         <div id="filter-bar" class="hidden flex flex-wrap gap-2 mb-5"></div>
 
         <!-- ── STATES ──────────────────────────────────────────────── -->
-        <div id="state-loading" class="text-sm text-gray-400 text-center py-10">Loading closet…</div>
+        <div id="state-loading" class="text-sm text-gray-400 text-center py-10">{{ __('closet.loading_closet') }}</div>
         <div id="state-error" class="hidden text-sm text-red-500 text-center py-6"></div>
         <div id="state-empty" class="hidden text-sm text-gray-400 text-center bg-gray-50 rounded-xl py-10 px-6">
-          No durable goods yet. Start spending to fill your closet!
+          {{ __('closet.no_durable_goods_yet_start_spending') }}
         </div>
         <div id="state-cat-empty" class="hidden text-sm text-gray-400 text-center bg-gray-50 rounded-xl py-8 px-6">
-          No items in this category yet.
+          {{ __('closet.no_items_in_this_category_yet') }}
         </div>
 
         <!-- ── ITEM GRID ───────────────────────────────────────────── -->
@@ -159,14 +157,16 @@
   <!-- ── JAVASCRIPT ──────────────────────────────────────────── -->
   <script>
     (() => {
+    // Texts in the student's language (lang/<language>/closet.php).
+    const CL_T = {{ \Illuminate\Support\Js::from(__('closet.js')) }};
       // ── Category config ─────────────────────────────────────
       const CATS = {
-        tech: { label: 'Tech', bg: 'var(--cat-tech-bg)', text: 'var(--cat-tech-text)', border: 'var(--cat-tech-border)', bar: 'var(--cat-tech-bar)' },
-        transport: { label: 'Transport', bg: 'var(--cat-transport-bg)', text: 'var(--cat-transport-text)', border: 'var(--cat-transport-border)', bar: 'var(--cat-transport-bar)' },
-        home: { label: 'Home', bg: 'var(--cat-home-bg)', text: 'var(--cat-home-text)', border: 'var(--cat-home-border)', bar: 'var(--cat-home-bar)' },
-        clothing: { label: 'Clothing', bg: 'var(--cat-clothing-bg)', text: 'var(--cat-clothing-text)', border: 'var(--cat-clothing-border)', bar: 'var(--cat-clothing-bar)' },
-        tools: { label: 'Tools', bg: 'var(--cat-tools-bg)', text: 'var(--cat-tools-text)', border: 'var(--cat-tools-border)', bar: 'var(--cat-tools-bar)' },
-        other: { label: 'Other', bg: 'var(--cat-other-bg)', text: 'var(--cat-other-text)', border: 'var(--cat-other-border)', bar: 'var(--cat-other-bar)' },
+        tech: { label: CL_T.categories.tech, bg: 'var(--cat-tech-bg)', text: 'var(--cat-tech-text)', border: 'var(--cat-tech-border)', bar: 'var(--cat-tech-bar)' },
+        transport: { label: CL_T.categories.transport, bg: 'var(--cat-transport-bg)', text: 'var(--cat-transport-text)', border: 'var(--cat-transport-border)', bar: 'var(--cat-transport-bar)' },
+        home: { label: CL_T.categories.home, bg: 'var(--cat-home-bg)', text: 'var(--cat-home-text)', border: 'var(--cat-home-border)', bar: 'var(--cat-home-bar)' },
+        clothing: { label: CL_T.categories.clothing, bg: 'var(--cat-clothing-bg)', text: 'var(--cat-clothing-text)', border: 'var(--cat-clothing-border)', bar: 'var(--cat-clothing-bar)' },
+        tools: { label: CL_T.categories.tools, bg: 'var(--cat-tools-bg)', text: 'var(--cat-tools-text)', border: 'var(--cat-tools-border)', bar: 'var(--cat-tools-bar)' },
+        other: { label: CL_T.categories.other, bg: 'var(--cat-other-bg)', text: 'var(--cat-other-text)', border: 'var(--cat-other-border)', bar: 'var(--cat-other-bar)' },
       };
       const getCat = key => CATS[key] || CATS.other;
 
@@ -192,7 +192,7 @@
       const params = new URLSearchParams(window.location.search);
       const studentId = params.get('student');
       const endpoint = studentId ? `/closet/student/${studentId}` : '/closet/mine';
-      if (studentId) $title.textContent = 'Student Closet';
+      if (studentId) $title.textContent = CL_T.student_closet;
 
       // ── Fetch ───────────────────────────────────────────────
       async function load() {
@@ -204,7 +204,7 @@
           render(data.totalValue || 0);
         } catch (err) {
           $loading.classList.add('hidden');
-          $error.textContent = 'Could not load closet. Please try again.';
+          $error.textContent = CL_T.load_error;
           $error.classList.remove('hidden');
         }
       }
@@ -214,7 +214,7 @@
         $loading.classList.add('hidden');
 
         // Badge
-        $badge.textContent = `${allItems.length} ${allItems.length === 1 ? 'item' : 'items'}`;
+        $badge.textContent = (allItems.length === 1 ? CL_T.item : CL_T.items).replace(':count', allItems.length);
 
         if (allItems.length === 0) {
           $empty.classList.remove('hidden');
@@ -224,7 +224,7 @@
         // Summary
         const oldest = allItems.reduce((a, b) => a.ageYears > b.ageYears ? a : b, allItems[0]);
         $sumCount.textContent = allItems.length;
-        $sumValue.textContent = `${totalValue.toLocaleString()} zeds`;
+        $sumValue.textContent = CL_T.zeds.replace(':amount', totalValue.toLocaleString(document.documentElement.lang));
         $sumOldest.textContent = oldest ? oldest.name : '—';
         $summary.classList.remove('hidden');
         $summary.style.display = 'grid';
@@ -242,7 +242,7 @@
         ['all', ...presentCats].forEach(key => {
           const btn = document.createElement('button');
           btn.dataset.key = key;
-          btn.textContent = key === 'all' ? 'All' : getCat(key).label;
+          btn.textContent = key === 'all' ? CL_T.all : getCat(key).label;
           btn.className = 'filter-btn text-xs font-medium px-4 py-1 rounded-full border cursor-pointer';
           applyFilterStyle(btn, key === activeFilter, key);
           btn.addEventListener('click', () => {
@@ -307,7 +307,7 @@
 
             <!-- Name & price -->
             <div class="font-medium text-gray-900 mb-0.5">${item.name}</div>
-            <div class="text-xs text-gray-500 mb-2">${item.pricePaidZeds.toLocaleString()} zeds</div>
+            <div class="text-xs text-gray-500 mb-2">${CL_T.zeds.replace(':amount', item.pricePaidZeds.toLocaleString(document.documentElement.lang))}</div>
 
             <!-- Life bar -->
             <div class="h-1 bg-gray-100 rounded-full overflow-hidden mb-1">
@@ -316,13 +316,13 @@
 
             <!-- Age / lifespan -->
             <div class="flex justify-between text-xs text-gray-400 mb-2">
-              <span>Age: ${item.ageYears}yr</span>
-              <span>Life: ${item.lifespanYears}yr</span>
+              <span>${CL_T.age.replace(':years', item.ageYears)}</span>
+              <span>${CL_T.life.replace(':years', item.lifespanYears)}</span>
             </div>
 
             <!-- Cost per year -->
             <div class="pt-2 border-t border-gray-100 text-xs text-gray-500">
-              ~${item.costPerYear.toLocaleString()} zeds/year
+              ~${CL_T.per_year.replace(':amount', item.costPerYear.toLocaleString(document.documentElement.lang))}
             </div>
           </div>`;
       }

@@ -72,7 +72,7 @@ public function supermarket()
         ->where('sid', $user->sid)
         ->where('grade', $user->grade)
         ->orderBy('citizenId')
-        ->get(['id', 'citizenId', 'nickname']);
+        ->get(['id', 'citizenId', 'nickname', 'name']);
 
     // 🔹 URL type (omnivore / veg / etc.)
     $type = request()->segment(count(request()->segments()));
@@ -81,6 +81,8 @@ public function supermarket()
     $products = Supermarket::where('type', $type)
         ->orderBy('id', 'ASC')
         ->get();
+    // the Intermediate's new prices, for the page only (App\Services\PriceRise)
+    \App\Services\PriceRise::reprice($user, $products, 'supermarkets');
 
     // 🔹 Last transaction balance
     $latestTxn = Transaction1::where('user_id', $user->id)
@@ -95,11 +97,13 @@ public function supermarket()
 
     if (!$ConsumersurveyExists) {
         return redirect('/supermarket/market-list')
-            ->with('error', 'Please complete your monthly survey first.');
+            ->with('error', __('flash.survey_first'));
     }
 
     $groceries = $summary['groceryItems'];
     $itemNames = $summary['itemNames'];
+    // The basket swap only shows in the student's own diet section.
+    $basketDiet = $summary['diet'];
     $basketTotal = $summary['basketTotal'];
     $lunch = $summary['lunch'];
     $transport = $summary['transport'];
@@ -126,6 +130,7 @@ $npos = Npo::where('status', 1)
             'restaurants',
             'total',
             'itemNames',
+            'basketDiet',
             'ConsumersurveyExists',
             'npos' 
         )

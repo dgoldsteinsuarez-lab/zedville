@@ -36,8 +36,8 @@ class CityBasketTrendTest extends TestCase
         $viewer = User::factory()->create(['role' => 4, 'sid' => 1, 'grade' => 5]);
         $classmate = User::factory()->create(['role' => 4, 'sid' => 1, 'grade' => 5]);
 
-        $this->surveyAt($viewer, 100, now()->subMonth());
-        $this->surveyAt($classmate, 120, now()->subMonth());
+        $this->surveyAt($viewer, 100, now()->startOfMonth()->subMonth());
+        $this->surveyAt($classmate, 120, now()->startOfMonth()->subMonth());
         $this->surveyAt($viewer, 150, now());
 
         $trend = ConsumerSurveySummaryService::cityBasketTrend($viewer);

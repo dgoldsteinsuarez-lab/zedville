@@ -7,7 +7,7 @@
 <div class="progress-header">
 
     <div class="progress-label">
-        <span>Citizen Activation — Step {{ $step }} of {{ $total }}</span>
+        <span>{{ __('citizen.progress', ['step' => $step, 'total' => $total]) }}</span>
         <span>{{ $percent }}%</span>
     </div>
 

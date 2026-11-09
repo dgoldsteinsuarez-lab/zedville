@@ -18,6 +18,38 @@
         <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
     @endif
 
+    <div class="alert alert-secondary small">
+        PISA activities are original Zedville practice material inspired by the published PISA financial literacy framework.
+        Zedville is not affiliated with or endorsed by the OECD - many activities are adapted from the OECD's released sample units (new names, figures and graphics); students see this disclaimer on every PISA page.
+    </div>
+
+    @if ($pisaCategory)
+    <div class="card mb-4">
+        <div class="card-header"><strong>Real PISA exams</strong> <span class="text-muted">- one attempt per student; the result is only shown to tutors and the school (Exam Results)</span></div>
+        <ul class="list-group list-group-flush">
+            @forelse ($realExams as $exam)
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        {{ $exam->title }} <span class="text-muted">({{ $exam->questions_count }} questions)</span>
+                        @if ($exam->is_active)
+                            <span class="badge bg-success">Active</span>
+                        @else
+                            <span class="badge bg-secondary">Draft - students can't see it yet</span>
+                        @endif
+                        @if ($exam->start_date) <span class="text-muted small">{{ $exam->start_date->format('d M Y') }}@if ($exam->end_date) - {{ $exam->end_date->format('d M Y') }}@endif</span> @endif
+                    </span>
+                    <span class="d-flex gap-2">
+                        <a href="{{ url('admin/curriculum/items/' . $exam->id . '/questions') }}" class="btn btn-sm btn-outline-primary">Questions</a>
+                        <a href="{{ url('admin/curriculum/categories/' . $pisaCategory->id . '/items') }}" class="btn btn-sm btn-outline-secondary">Activate / set dates</a>
+                    </span>
+                </li>
+            @empty
+                <li class="list-group-item text-muted">No real PISA exam yet - add one in Curriculum and tick "Real exam".</li>
+            @endforelse
+        </ul>
+    </div>
+    @endif
+
     <div class="card mb-4">
         <div class="card-header"><strong>Add a Level</strong></div>
         <div class="card-body">

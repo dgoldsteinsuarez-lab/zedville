@@ -1,25 +1,25 @@
 @extends('layouts.profile')
 
-@section('title', 'Bank Account')
+@section('title', __('bank.bank_account'))
 
 @section('content')
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">Bank Account</h1>
+    <h1 class="text-xl font-bold whitespace-nowrap ">{{ __('messages.nav_bank_account') }}</h1>
 </div>
 <div class="grid grid-cols-1 gap-5 mt-6"  x-data="{ confirmationModal: false }">
     <!-- Account Opening From -->
      <div class="w-full max-w-[650px]">
         <div class="bg-white rounded-lg border border-[#D2DDDB]">
-            <h2 class="text-xl font-bold py-4 border-b border-[#D2DDDB] text-center px-6">Universal Bank Student Account Application</h2>
+            <h2 class="text-xl font-bold py-4 border-b border-[#D2DDDB] text-center px-6">{{ __('bank.universal_bank_student_account_application') }}</h2>
             <div class="cardBody p-6 userProfileDtls ">
                 <form action="{{ route('bank.store') }}" method="post">
                      @csrf
-                    <h3 class="text-lg font-bold mb-6">Personal Information</h3>
+                    <h3 class="text-lg font-bold mb-6">{{ __('layout.personal_information') }}</h3>
                     <div class="flex flex-wrap lg:flex-nowrap gap-4">
                         <div class="w-full lg:w-[100%]">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-base font-medium text-black">Full Name</label>
-                                <input class="form-control" name="fullName" placeholder="Enter Full Name" type="text" value="{{ $user->nickname }}" />
+                                <label class="block mb-2 text-base font-medium text-black">{{ __('bank.full_name') }}</label>
+                                <input class="form-control" name="fullName" placeholder="{{ __('bank.enter_full_name') }}" type="text" value="{{ $user->display_name }}" />
                             </div>
                         </div>
                         <!-- <div class="w-full lg:w-[50%]">
@@ -32,29 +32,29 @@
                     <div class="flex flex-wrap lg:flex-nowrap gap-4" >
                         <div class="w-full lg:w-[50%]" style="display: none;">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-base font-medium text-black">Date of Birth</label>
-                                <input class="form-control" name="dob" placeholder="Enter first name" type="date" />
+                                <label class="block mb-2 text-base font-medium text-black">{{ __('bank.date_of_birth') }}</label>
+                                <input class="form-control" name="dob" placeholder="{{ __('bank.enter_first_name') }}" type="date" />
                             </div>
                         </div>
                         <div class="w-full lg:w-[100%]">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-base font-medium text-black">Student ID</label>
-                                <input class="form-control" name="studentId" placeholder="Student ID" type="text" value="{{ $user->citizenId }}" disabled />
+                                <label class="block mb-2 text-base font-medium text-black">{{ __('bank.student_id') }}</label>
+                                <input class="form-control" name="studentId" placeholder="{{ __('bank.student_id') }}" type="text" value="{{ $user->citizenId }}" disabled />
                             </div>
                         </div>
                     </div>
 
-                    <h3 class="text-lg font-bold my-6">Contact Information</h3>
+                    <h3 class="text-lg font-bold my-6">{{ __('bank.contact_information') }}</h3>
                     <div class="flex flex-wrap lg:flex-nowrap gap-4">
                         <div class="w-full lg:w-[100%]">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-base font-medium text-black">Email Address</label>
+                                <label class="block mb-2 text-base font-medium text-black">{{ __('bank.email_address') }}</label>
                                 <input class="form-control" name="email" placeholder="john@zedville.com" type="email" value="{{ $user->email }}" />
                             </div>
                         </div>
                         <div class="w-full lg:w-[50%]" style="display: none;">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-base font-medium text-black">Mobile Number</label>
+                                <label class="block mb-2 text-base font-medium text-black">{{ __('bank.mobile_number') }}</label>
                                 <input class="form-control" name="phone" placeholder="+00 0000 000 000" type="text" />
                             </div>
                         </div>
@@ -62,17 +62,17 @@
                     <div class="flex flex-wrap lg:flex-nowrap gap-4">
                         <div class="w-full">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-base font-medium text-black">Home Address</label>
-                                <textarea name="homeAddress" class="form-control logheight" id="" placeholder="Home address...">{{ $user->address }}</textarea>
+                                <label class="block mb-2 text-base font-medium text-black">{{ __('bank.home_address') }}</label>
+                                <textarea name="homeAddress" class="form-control logheight" id="" placeholder="{{ __('bank.home_address_2') }}">{{ $user->address }}</textarea>
                             </div>
                         </div>
                     </div>
 
-                    <h3 class="text-lg font-bold my-6" style="display: none;">Account Preferance</h3>
+                    <h3 class="text-lg font-bold my-6" style="display: none;">{{ __('bank.account_preferance') }}</h3>
                     <div class="flex flex-wrap lg:flex-nowrap gap-4" style="display: none;">
                         <div class="w-full">
                             <div class="mb-4 form-group">
-                                <label class="block mb-2 text-base font-medium text-black">Prefered Username</label>
+                                <label class="block mb-2 text-base font-medium text-black">{{ __('bank.prefered_username') }}</label>
                                 <input class="form-control" name="AccPreName" placeholder="" type="text" />
                             </div>
                         </div>
@@ -80,19 +80,19 @@
                     <div class="flex gap-x-4 items-start form-group mb-4">
                         <input id="rcvaccemail" name="rcvaccemail" type="checkbox" class="rounded" value="1">
                         <label for="rcvaccemail" class="text-xs leading-4 text-black">
-                            I agree receive account statements via email
+                            {{ __('bank.i_agree_receive_account_statements_via') }}
                         </label>
                     </div>
                     <div class="flex gap-x-4 items-start form-group">
                         <input id="tandc" type="checkbox" name="tandc" class="rounded" value="1" @click="confirmationModal = true">
                         <label for="tandc" class="text-xs leading-4 text-black" @click="confirmationModal = true" style="cursor: pointer;">
-                            I agree to terms & Conditions
+                            {{ __('bank.i_agree_to_terms_conditions') }}
                         </label>
                     </div>
                     <x-timezone-field />
                     <div class="mt-10 text-center">
                         <button type="submit" class="themeBtn flex items-center justify-center mx-auto gap-2">
-                            Submit Application
+                            {{ __('bank.submit_application') }}
                             <span class="icon">
                                 <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M4.08008 10.3H15.0801M15.0801 10.3L9.80008 5.79999M15.0801 10.3L9.80008 14.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -133,7 +133,7 @@
                             </svg>
                         </div> -->
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900">Student Bank Account - Terms & Conditions</h3>
+                            <h3 class="text-lg font-bold text-gray-900">{{ __('bank.student_bank_account_terms_conditions') }}</h3>
                             <!-- <p class="text-sm text-gray-600">Temporary Service Unavailability</p> -->
                         </div>
                     </div>
@@ -142,82 +142,82 @@
                         <div class="text-sm text-red-800">We apologize, but our card freeze functionality is currently undergoing scheduled maintenance and is not available at this time.</div>
                     </div> -->
                     <div class="bg-blue-50 p-4 rounded border border-blue-200 mt-4">
-                        <div class="text-sm text-blue-800 font-bold mb-3">Welcome to Zedville!</div>
+                        <div class="text-sm text-blue-800 font-bold mb-3">{{ __('bank.welcome_to_zedville') }}</div>
 
                         <div class="text-sm text-blue-800 space-y-4">
-                            <p><strong>By creating an account, you agree to the following:</strong></p>
+                            <p><strong>{{ __('bank.by_creating_an_account_you_agree') }}</strong></p>
 
                             <ul class="list-decimal list-inside space-y-2">
                                 <li>
-                                    <strong>Educational Use Only</strong>
+                                    {!! __('bank.strong_educational_use_only_strong') !!}
                                     <ul class="list-disc list-inside ml-5">
-                                        <li>This is a simulated bank for learning purposes.</li>
-                                        <li>No real money is involved.</li>
-                                        <li>All transactions are practice activities.</li>
+                                        <li>{{ __('bank.this_is_a_simulated_bank_for') }}</li>
+                                        <li>{{ __('bank.no_real_money_is_involved') }}</li>
+                                        <li>{{ __('bank.all_transactions_are_practice_activities') }}</li>
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <strong>Your Account</strong>
+                                    {!! __('bank.strong_your_account_strong') !!}
                                     <ul class="list-disc list-inside ml-5">
-                                        <li>Do not share your real name or personal information.</li>
-                                        <li>Keep your login information private.</li>
+                                        <li>{{ __('bank.do_not_share_your_real_name') }}</li>
+                                        <li>{{ __('bank.keep_your_login_information_private') }}</li>
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <strong>Appropriate Behavior</strong>
+                                    {!! __('bank.strong_appropriate_behavior_strong') !!}
                                     <ul class="list-disc list-inside ml-5">
-                                        <li>Be respectful to classmates and teachers.</li>
-                                        <li>Use the platform only for class activities.</li>
-                                        <li>Follow your teacher's instructions.</li>
-                                        <li>Do not post, share, or upload inappropriate content.</li>
+                                        <li>{{ __('bank.be_respectful_to_classmates_and_teachers') }}</li>
+                                        <li>{{ __('bank.use_the_platform_only_for_class') }}</li>
+                                        <li>{{ __('bank.follow_your_teacher_s_instructions') }}</li>
+                                        <li>{{ __('bank.do_not_post_share_or_upload') }}</li>
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <strong>Tutor Access</strong>
+                                    {!! __('bank.strong_tutor_access_strong') !!}
                                     <ul class="list-disc list-inside ml-5">
-                                        <li>Your tutor can view your account activity.</li>
-                                        <li>This helps them guide your learning.</li>
-                                        <li>All activities are monitored for educational purposes.</li>
+                                        <li>{{ __('bank.your_tutor_can_view_your_account') }}</li>
+                                        <li>{{ __('bank.this_helps_them_guide_your_learning') }}</li>
+                                        <li>{{ __('bank.all_activities_are_monitored_for_educational') }}</li>
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <strong>Privacy</strong>
+                                    {!! __('bank.strong_privacy_strong') !!}
                                     <ul class="list-disc list-inside ml-5">
-                                        <li>We protect your information.</li>
-                                        <li>Only your teacher and school have access to your data.</li>
-                                        <li>Your pseudonym keeps your identity private.</li>
-                                        <li>We collect basic information (like your name, email, and school) only to help you use the platform.</li>
-                                        <li>Your data will not be shared with others without your permission.</li>
+                                        <li>{{ __('bank.we_protect_your_information') }}</li>
+                                        <li>{{ __('bank.only_your_teacher_and_school_have') }}</li>
+                                        <li>{{ __('bank.your_pseudonym_keeps_your_identity_private') }}</li>
+                                        <li>{{ __('bank.we_collect_basic_information_like_your') }}</li>
+                                        <li>{{ __('bank.your_data_will_not_be_shared') }}</li>
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <strong>Account Rules</strong>
+                                    {!! __('bank.strong_account_rules_strong') !!}
                                     <ul class="list-disc list-inside ml-5">
-                                        <li>Complete activities honestly.</li>
-                                        <li>Don’t share passwords.</li>
-                                        <li>Report any problems to your teacher.</li>
+                                        <li>{{ __('bank.complete_activities_honestly') }}</li>
+                                        <li>{{ __('bank.don_t_share_passwords') }}</li>
+                                        <li>{{ __('bank.report_any_problems_to_your_teacher') }}</li>
                                     </ul>
                                 </li>
 
                                 <li>
-                                    <strong>Changes to Terms</strong>
+                                    {!! __('bank.strong_changes_to_terms_strong') !!}
                                     <ul class="list-disc list-inside ml-5">
-                                        <li>We may update these Terms and Conditions anytime to improve the platform.</li>
-                                        <li>We’ll let you know if there are important changes.</li>
+                                        <li>{{ __('bank.we_may_update_these_terms_and') }}</li>
+                                        <li>{{ __('bank.we_ll_let_you_know_if') }}</li>
                                     </ul>
                                 </li>
                             </ul>
-                            <p><strong>By clicking "I Agree," you confirm you understand these rules and will follow them.</strong></p>
+                            <p><strong>{{ __('bank.by_clicking_i_agree_you_confirm') }}</strong></p>
                         </div>
                     </div>
 
                     <div class="text-center mt-8">
-                        <button id="agreeButton"  @click="confirmationModal = false" class="themeBtn w-full">I Agree</button>
+                        <button id="agreeButton"  @click="confirmationModal = false" class="themeBtn w-full">{{ __('bank.i_agree') }}</button>
                     </div>
                 </div>
             </div>

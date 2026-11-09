@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#80DEEA"/><stop offset="1" stop-color="#FFF3E0"/></linearGradient></defs><rect width="400" height="250" fill="url(#bg)"/><circle cx="330" cy="46" r="24" fill="#FFD54F"/><g fill="#fff" opacity=".9" transform="translate(110 40) scale(1.0)"><ellipse cx="0" cy="0" rx="30" ry="11"/><ellipse cx="18" cy="-8" rx="18" ry="11"/><ellipse cx="-14" cy="-5" rx="14" ry="9"/></g>
+<g fill="#90A4AE"><rect x="30" y="70" width="34" height="80"/><rect x="70" y="50" width="26" height="100"/><rect x="100" y="84" width="40" height="66"/></g>
+<path d="M140 150 V112 L170 92 L200 112 V150 Z" fill="#B0BEC5"/><rect x="160" y="120" width="20" height="30" fill="#78909C"/>
+<path d="M0 150 H400 V178 Q300 170 200 182 T0 178 Z" fill="#26C6DA"/><path d="M0 178 Q100 170 200 182 T400 178 V250 H0 Z" fill="#FFE0B2"/>
+<g transform="translate(300 160)"><path d="M10 70 Q14 30 4 0" stroke="#6D4C41" stroke-width="6" fill="none"/><g fill="#43A047"><path d="M4 0 q-30 -6 -40 14 q20 -10 40 -14z"/><path d="M4 0 q30 -10 40 8 q-20 -8 -40 -8z"/><path d="M4 0 q-6 -26 10 -34 q-4 20 -10 34z"/></g></g>
+<g transform="translate(200 206)"><path d="M0 0 h50" stroke="#E53935" stroke-width="5"/><path d="M0 0 q25 -28 50 0" fill="#FFEB3B"/></g></svg>

@@ -1,19 +1,21 @@
-<p><strong>Hello {{ $user->nickname }}</strong></p>
-<p>Congratulations! You're officially <span style="color:#3c41fb">Zedville's newest citizen.</span></p>
-<p><strong>Your Citizen ID:</strong> {{ $user->citizenId }}</p>
-<p><strong>How it works:</strong> Every month, you'll <span style="color:#3c41fb">receive a salary in Zeds</span> (our virtual currency). Use it to practice budgeting, pay bills, and make money decisions—just like in real adult life!</p>
-<p><strong>Get Started Now:</strong></p>
+{{-- Rendered in the reader's language when the message is opened (App\Models\Mailbox). --}}
+@php $name = e($user->nickname ?: $user->name); @endphp
+<p><strong>{!! __('mail.welcome.hello', ['name' => $name]) !!}</strong></p>
+<p>{!! __('mail.welcome.newest') !!}</p>
+<p><strong>{{ __('mail.welcome.citizen_id') }}</strong> {{ $user->citizenId }}</p>
+<p><strong>{{ __('mail.welcome.how_title') }}</strong> {!! __('mail.welcome.how') !!}</p>
+<p><strong>{{ __('mail.welcome.start_title') }}</strong></p>
 <ul style="list-style: none;">
-    <li> 1. Go to the <strong>Bank Accounts</strong> tab</li>
-    <li> 2. <span style="color:#3c41fb">Create your first bank account</span></li>
-    <li> 3. Wait for your first salary to arrive</li>
+    <li> 1. {!! __('mail.welcome.step1') !!}</li>
+    <li> 2. {!! __('mail.welcome.step2') !!}</li>
+    <li> 3. {{ __('mail.welcome.step3') }}</li>
 </ul>
 <ul>
-    <li><strong>City Hall</strong> – Complete activities and access city services</li>
-    <li><strong>Educational Finance Department</strong> – Learn money skills through interactive lessons</li>
-    <li><strong>Your Profile</strong> – Customize your citizen information</li>
+    <li>{!! __('mail.welcome.city_hall') !!}</li>
+    <li>{!! __('mail.welcome.efd') !!}</li>
+    <li>{!! __('mail.welcome.profile') !!}</li>
 </ul>
 <hr>
-<p>Welcome to your new virtual life! We're excited to have you here.</p>
-<br><br>Best regards,
-<br>Zedville City Hall
+<p>{{ __('mail.welcome.closing') }}</p>
+<br><br>{{ __('mail.regards') }}
+<br>{{ __('mail.city_hall') }}

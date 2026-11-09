@@ -50,7 +50,15 @@ class PisaController extends Controller
                 ->pluck('c', 'pisa_proficiency_level_id')
             : collect();
 
-        return view('education.pisa.index', compact('levels', 'itemCounts'));
+        // A real PISA exam covers every level, so it has no level of its own -
+        // it is listed on this page once an admin switches it on.
+        $realExams = $category
+            ? CurriculumItem::where('category_id', $category->id)->where('is_real_exam', true)->where('is_active', true)
+                ->orderBy('sort_order')->get()
+                ->each(fn (CurriculumItem $item) => $item->best_score = CurriculumAttempt::where('item_id', $item->id)->where('student_id', Auth::id())->first())
+            : collect();
+
+        return view('education.pisa.index', compact('levels', 'itemCounts', 'realExams'));
     }
 
     public function level(PisaProficiencyLevel $pisaLevel)
@@ -62,6 +70,7 @@ class PisaController extends Controller
             ? CurriculumItem::where('category_id', $category->id)
                 ->where('pisa_proficiency_level_id', $pisaLevel->id)
                 ->where('is_active', true)
+                ->where('is_real_exam', false)
                 ->orderBy('sort_order')
                 ->get()
                 ->map(function (CurriculumItem $item) use ($studentId) {

@@ -1,139 +1,78 @@
-<div class="survey-container">
-    <div class="survey-content">
-    <style>
-        .disabled-btn {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .tooltip-wrapper {
-    position: relative;
-    display: inline-block;
-}
+{{-- The student's saved Consumer Profile (Settings): their consumer type,
+     their month by Need/Want, and when they can update it - the survey is
+     once per calendar month (Daniel, 2026-10-23). Same look as the survey
+     itself (surveys/wizard). --}}
+@include('surveys._styles')
+@php
+    $w = __('surveys.wizard');
+    $surveyProfile = !empty($Consumersurvey) ? $Consumersurvey->profile() : null;
+    $money = fn ($amount) => 'Ƶ' . number_format((float) $amount, 2);
+    $rows = [
+        [$w['groceries'], $basketTotal ?? 0, false, $itemNames ?? ''],
+        [$w['school_lunch'], $lunch ?? 0, false, ''],
+        [$w['transport'], $transport ?? 0, (float) ($transport ?? 0) == \App\Models\ConsumerSurvey::TAXI, ''],
+        [$w['activities'], $activities ?? 0, true, ''],
+        [$w['eating_out'], $restaurants ?? 0, true, ''],
+    ];
+    $needsPct = $surveyProfile && $surveyProfile['total'] > 0 ? (int) round($surveyProfile['needs'] / $surveyProfile['total'] * 100) : 0;
+@endphp
 
-.custom-tooltip {
-    visibility: hidden;
-    opacity: 0;
-    width: 280px;
-    background-color: #222;
-    color: #fff;
-    text-align: center;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 13px;
+<div class="zvq">
+    <div class="zvq-head">
+        <div class="zvq-title">{{ __('surveys.results_title') }}</div>
+    </div>
 
-    position: absolute;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-
-    transition: opacity 0.3s ease;
-    z-index: 1000;
-}
-
-.tooltip-wrapper:hover .custom-tooltip {
-    visibility: visible;
-    opacity: 1;
-}
-
-    </style>
-        <div>
-            <h2 class="step-title">📊 My Consumer Profile</h2>
-            <p class="step-description"><b>Where Does Your Money Go?</b></p>
-            <p class="step-description">
-                <b>Intro text:</b> Understanding how you spend money is the first step to becoming a smart consumer. 
-                Here's a breakdown of your typical monthly expenses based on your lifestyle:
-            </p>
-
-            <div class="results-container">
-
-                <!-- Food & Groceries -->
-                <div class="category-section">
-                    <div class="category-title">🍎 Food & Groceries</div>
-
-                    <div class="expense-item">
-                        <span>
-                            Weekly groceries
-                             <br>
-                            <small>{{ $itemNames }}</small>
-                        </span>
-                        <span id="basketCost" style="white-space: nowrap;">{{ number_format($basketTotal, 2) }} Zed</span>
-                    </div>
-
-                    <div class="expense-item">
-                        <span>School lunch</span>
-                        <span id="lunchCost">{{ number_format($lunch, 2) }} Zed</span>
-                    </div>
-                </div>
-
-                <!-- Transportation -->
-                <div class="category-section">
-                    <div class="category-title">🚌 Getting Around</div>
-
-                    <div class="expense-item">
-                        <span>Travel to school</span>
-                        <span id="transportCost">{{ number_format($transport , 2) }} Zed</span>
-                    </div>
-                </div>
-
-                <!-- Fun & Free Time -->
-                <div class="category-section">
-                    <div class="category-title">🎭 Fun & Free Time</div>
-
-                    <div class="expense-item">
-                        <span>Activities & hobbies</span>
-                        <span id="activitiesCost">{{ number_format($activities , 2) }} Zed</span>
-                    </div>
-
-                    <div class="expense-item">
-                        <span>Eating out</span>
-                        <span id="restaurantsCost">{{ number_format($restaurants , 2) }} Zed</span>
-                    </div>
-                </div>
-
-                <!-- Total -->
-                <div class="total-section">
-                    <div class="total-label">Your Monthly Spending Snapshot</div>
-                    <div class="total-amount" id="totalCost">{{ number_format($total, 2) }} Zed</div>
-                </div>
-
-            </div>
-
-            <!-- Info Note -->
-            <div class="info-note">
-                <strong>💡 Good to Know:</strong>
-                This shows your spending in the categories we asked about. Real life includes other costs too—
-                like clothes, phone plans, and personal items. As you learn to budget, you'll track these as well!
-            </div>
-
-            <!-- Buttons -->
-            <div class="button-group">
-                <div></div>
-                @if($ConsumersurveyExists)
-                    <div class="tooltip-wrapper">
-                        <button
-                            class="themeBtn disabled-btn"
-                            disabled>
-                            Update My Profile
-                        </button>
-                        <span class="custom-tooltip">
-                            You have completed the survey for this month. You can do the survey again next month.
-                        </span>
-                    </div>
-
-                @else
-                    <a href="{{ route('consumer-profile-survey') }}">
-                        <button class="themeBtn">
-                            Update My Profile
-                        </button>
-                    </a>
-                @endif
-            </div>
-
-            <p class="step-description" style="margin-top: 10px; text-align:center;">
-                Changed your habits? Maybe you started biking to school or cooking more at home?  
-                Update your profile anytime, and you'll see the changes reflected in next month's statement.
-            </p>
-
+    @if ($surveyProfile)
+        <div class="zvq-type">
+            <div class="zvq-type-title">{{ $surveyProfile['title'] }}</div>
+            <p class="zvq-type-text">{{ $surveyProfile['text'] }}</p>
+            <p class="zvq-type-tip">{{ $surveyProfile['tip'] }}</p>
         </div>
+    @endif
+
+    @if (!empty($upcomingSurvey))
+        <div class="zvq-note mb-3">{{ __('surveys.upcoming', ['month' => $upcomingSurvey->monthStart()->translatedFormat('F Y')]) }}</div>
+    @endif
+
+    <div class="zvq-summary">
+        <div class="zvq-summary-title">{{ $w['your_month'] }}</div>
+        @foreach ($rows as [$label, $amount, $isWant, $detail])
+            <div class="zvq-summary-row">
+                <span>
+                    {{ $label }}
+                    @if ($detail)
+                        <br><small class="text-gray-500">{{ $detail }}</small>
+                    @endif
+                </span>
+                <span class="zvq-summary-right">
+                    <span class="zvq-tag {{ $isWant ? 'is-want' : 'is-need' }}">{{ $isWant ? $w['want'] : $w['need'] }}</span>
+                    <strong>{{ $money($amount) }}</strong>
+                </span>
+            </div>
+        @endforeach
+        <div class="zvq-summary-row zvq-summary-total">
+            <span>{{ $w['total'] }}</span><strong>{{ $money($total ?? 0) }}</strong>
+        </div>
+        @if ($surveyProfile)
+            <div class="zvq-split">
+                <div class="zvq-split-needs" style="width: {{ $needsPct }}%"></div>
+                <div class="zvq-split-wants" style="width: {{ 100 - $needsPct }}%"></div>
+            </div>
+            <div class="zvq-split-legend">
+                <span><i class="is-need"></i> {{ $w['needs'] }} <b>{{ $needsPct }}%</b></span>
+                <span><i class="is-want"></i> {{ $w['wants'] }} <b>{{ 100 - $needsPct }}%</b></span>
+            </div>
+        @endif
+    </div>
+
+    <p class="zvq-muted mt-3 mb-0">{!! __('surveys.good_to_know') !!}</p>
+
+    <div class="zvq-nav">
+        <span class="zvq-muted">{{ __('surveys.changed_habits') }}</span>
+        @if ($surveyDoneThisMonth ?? true)
+            <span class="zvq-count">{{ __('surveys.once_per_month', ['date' => now()->startOfMonth()->addMonth()->translatedFormat('j F')]) }}</span>
+        @else
+            <a href="{{ route('consumer-profile-survey') }}" class="themeBtn">{{ __('surveys.update_profile') }}</a>
+        @endif
     </div>
 </div>

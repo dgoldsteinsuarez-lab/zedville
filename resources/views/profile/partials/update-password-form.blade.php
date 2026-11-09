@@ -5,7 +5,7 @@
         <div class="fieldsItems border-b border-[#D2DDDB] pb-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Old Password <span class="text-gray-800">*</span></h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.old_password') }} <span class="text-gray-800">*</span></h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative pswtoggle">
@@ -33,7 +33,7 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">New Password <span class="text-gray-800">*</span></h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.new_password') }} <span class="text-gray-800">*</span></h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative pswtoggle">
@@ -61,7 +61,7 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Re-confirm password <span class="text-gray-800">*</span></h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.re_confirm_password') }} <span class="text-gray-800">*</span></h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative pswtoggle">
@@ -90,10 +90,10 @@
 
     <div class="buttons text-center flex items-center justify-center gap-4 mt-8">
         <button type="submit" class="themeBtn ">
-            Update Password
+            {{ __('profile.update_password') }}
         </button>
         <button type="reset" class="whiteBtn ">
-            Cancel
+            {{ __('messages.cancel') }}
         </button>
     </div>
     

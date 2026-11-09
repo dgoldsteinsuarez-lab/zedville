@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     nextBtn.style.display = "block";   // show Next button again
     nextBtn.disabled = false;          // enable it
-    nextBtn.innerText = "Next";        // reset label
+    nextBtn.innerText = window.ZV_EFD.next; // reset label
 
     backBtn.disabled = true;           // back disabled on first step
     finishBtn.style.display = "none";  // hide finish button
@@ -77,42 +77,17 @@ document.addEventListener("DOMContentLoaded", function () {
     function closeDoorModal() {
         document.getElementById('doorModal').classList.add('hidden');
     }
-    //Women Text
-        const steps = [
-        `<p>Welcome to the Financial Education Department, ${window.citizenName} ! I'm Ms. Rodriguez, and I'm here to help you navigate your financial learning journey. This department is your personal hub for building a strong foundation in financial literacy.</p>`,
-
-        `<p>See that box above? That's your Activity Center. You'll find <b>Required Activities</b> that will guide you through essential financial concepts, and <b>Optional Activities</b> where you can earn Badge Points while exploring topics that interest you. The more you engage, the more you learn—and the more badges you collect!</p>`,
-
-        `<p>Let me show you around! To your left, you'll find our <b>Library</b>—it has modules and activities to help you learn at your own pace.And over there? That's our <b>Posters Room</b>, with visual guides that make financial concepts easier to understand. Feel free to visit both whenever you need them!</p>`,
-
-        `<p>"I know someone named Robert. He's 87 years old now. He worked as a postal worker his entire life—never made more than <b>45,000 Zed</b> a year. But Robert understood something important: he saved 15% of every paycheck and let compound interest do its work. Today, he has over <b>800,000 Zed</b>. He travels, helps his grandchildren with college, and never worries about medical bills. His secret? He started at 25 and never stopped."</p>`,
-
-        `<p>"Then there's Margaret. She's 82 and also worked her whole life as a teacher. Good salary, but she never budgeted. Every promotion meant a bigger apartment, a nicer car. She retired with <b>12,000 Zed</b> in savings. Now she lives with her daughter, depends on social security, and had to sell her belongings when she needed a surgery last year. Same generation as Robert. Very different choices. Very different lives."</p>`,
-
-        `<p>"Let me tell you about Marcus. He's 40 years old and currently serving time for fraud. It started innocently—he couldn't pay his rent, so he wrote a bad check. Then another to cover that one. Then he started using other people's information to open accounts. He told himself it was temporary, that he'd pay it all back. He owed <b>67,000 Zed</b> when they arrested him. He had no emergency fund, no budget, no plan. Now he has a criminal record and his two kids visit him behind glass."</p>`,
-
-        `<p>"There's also Sarah, 45 years old. She declared bankruptcy three years ago. Not because of medical bills or bad luck—because she never tracked her spending. Small purchases here and there. 'Just <b>50 Zed</b>' turned into <b>3,000 Zed</b> a month she didn't have. The collection calls started. Her car was repossessed while she was at work. She lost her apartment. Her credit score is 490. She can't rent a decent place now, can't get a car loan, and pays everything in cash because no bank will work with her."</p>`,
-
-        `<p>"Now meet David. He's 38, same age Sarah was when everything collapsed. But David started budgeting at 30. He tracked every expense, built a six-month emergency fund, and invested the rest. Last year, he lost his job during company layoffs. You know what happened? Nothing dramatic. He had time to find a better position. He didn't miss a rent payment. His kids didn't know anything was wrong. His emergency fund protected him. That's the difference between a crisis and an inconvenience."</p>`,
-
-        `<p>"I met Linda last month. She's 55 and just realized she has <b>23,000 Zed</b> saved for retirement. She has maybe 10 working years left. She always thought she'd 'start saving later.' Later became now, and now she's terrified. She calculated that she'll need to live on about <b>900 Zed</b> a month when she retires. Her current rent is <b>1,400 Zed</b>. She's not sure what she'll do. She can't go back in time. That's the thing about compound interest—it works magnificently if you start early. It works barely at all if you start late."</p>`,
-
-         `<p>"But here's James. He's 56 and started saving seriously at 35. Not early, but not too late. He set aside 20% of his income—more than Robert because he started later. He drove older cars, lived below his means, and never wavered. Today, he has <b>620,000 Zed</b>. He'll retire comfortably at 65. He made up for lost time with discipline. It wasn't easy, but he understood something: every year you wait makes it harder. He didn't want to be Linda, so he made different choices."</p>`,
-
-        `<p class='mb-2'>"Here's what I've learned watching people for 30 years in this department:"</p>
-          <p class='mb-2'>Your financial decisions today are writing your life story for tomorrow.</p><ol class="list-decimal list-inside">
-          <li> Robert is 87 and free.</li>
-          <li> Margaret is 82 and dependent.</li>
-          <li> Marcus is 40 and imprisoned.</li>
-          <li> Sarah is 45 and starting over from nothing.</li>
-          <li> David is 38 and secure.</li>
-          <li> Linda is 55 and scared.</li>
-          <li> James is 56 and confident.</li>
-          <li> Same economy. Same world. Different choices.</li>
-          <li> ${window.citizenName}, the activities in this department? They're not just lessons.</li>
-          <li> They're the difference between these stories.</li>
-          <li> Choose which person you want to be.</li><ol>`
-    ];
+    // Ms. Rodriguez's welcome and stories - the texts come from the page
+    // (lang/<language>/efd.php) so they show in the student's language.
+    const withName = (text) => text.split(':name').join(window.citizenName);
+    const finalStep = window.ZV_EFD.reception_final;
+    const steps = window.ZV_EFD.reception_steps
+        .map((text) => `<p>${withName(text)}</p>`)
+        .concat([
+            `<p class='mb-2'>${withName(finalStep.intro)}</p>
+          <p class='mb-2'>${withName(finalStep.lead)}</p><ol class="list-decimal list-inside">
+          ${finalStep.items.map((item) => `<li> ${withName(item)}</li>`).join('')}</ol>`
+        ]);
 
     let current = 0;
 
@@ -139,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (current === steps.length - 1) {
             this.disabled = true;
-            this.innerText = "Completed";
+            this.innerText = window.ZV_EFD.completed;
             // CALL YOUR FUNCTION HERE
             //closeReceptionModal();
             // HIDE BUTTON
@@ -173,7 +148,7 @@ document.getElementById("backBtn").addEventListener("click", function () {
     // ENABLE & SHOW NEXT BUTTON WHEN GOING BACK
     nextBtn.style.display = "block";
     nextBtn.disabled = false;
-    nextBtn.innerText = "Next";
+    nextBtn.innerText = window.ZV_EFD.next;
 
     // HIDE FINISH BUTTON WHEN NOT ON LAST STEP
     finishBtn.style.display = "none";

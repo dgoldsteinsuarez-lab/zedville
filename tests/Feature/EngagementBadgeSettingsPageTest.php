@@ -67,7 +67,8 @@ class EngagementBadgeSettingsPageTest extends TestCase
 
         $response = $this->actingAs($student)->get('/profile');
 
-        $response->assertOk();
-        $response->assertSee('engData = {"monthly":"BRONZE"', false);
+        // the month is still going: shown as this month so far (App\Services\BadgeOverview, 2026-11-02)
+        $response->assertOk()->assertSee('So far this month: Bronze');
+        $this->assertSame('BRONZE', $response->viewData('badges')['engagement']['current']['badge']);
     }
 }

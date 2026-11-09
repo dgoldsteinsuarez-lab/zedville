@@ -70,33 +70,6 @@
                 max-width: 860px;
             }
 
-            .breadcrumb {
-                font-size: 12px;
-                color: var(--text-muted);
-                margin-bottom: 8px;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            .breadcrumb a {
-                color: var(--text-muted);
-                text-decoration: none;
-            }
-
-            .breadcrumb a:hover {
-                color: var(--teal);
-            }
-
-            .breadcrumb .sep {
-                color: var(--border);
-            }
-
-            .breadcrumb .cur {
-                color: var(--teal);
-                font-weight: 500;
-            }
-
             .page-heading {
                 font-size: 22px;
                 font-weight: 700;
@@ -194,7 +167,7 @@
             }
 
             .summary-section-label {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 700;
                 letter-spacing: 0.08em;
                 text-transform: uppercase;
@@ -257,7 +230,7 @@
             .current-badge {
                 display: inline-flex;
                 align-items: center;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 700;
                 letter-spacing: 0.04em;
                 background: var(--teal-light);
@@ -329,7 +302,7 @@
 
             .cal-dow {
                 text-align: center;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 700;
                 letter-spacing: 0.05em;
                 text-transform: uppercase;
@@ -350,7 +323,7 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 600;
                 position: relative;
                 background: #f5f7f6;
@@ -384,7 +357,7 @@
                 position: absolute;
                 top: 2px;
                 left: 3px;
-                font-size: 7px;
+                font-size: 10px; /* a count in the day's corner, like the bell's */
                 font-weight: 700;
                 line-height: 1;
             }
@@ -402,7 +375,7 @@
                 display: flex;
                 align-items: center;
                 gap: 5px;
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-secondary);
             }
 
@@ -427,14 +400,14 @@
             }
 
             .face-block.sm .face-label {
-                font-size: 11px;
+                font-size: 12px;
             }
 
             .q-badge {
                 display: inline-flex;
                 align-items: center;
                 gap: 5px;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 700;
                 padding: 3px 10px;
                 border-radius: var(--radius-pill);
@@ -565,7 +538,7 @@
             }
 
             .past-month-abbr {
-                font-size: 9px;
+                font-size: 12px;
                 font-weight: 700;
                 letter-spacing: 0.06em;
                 text-transform: uppercase;
@@ -589,13 +562,13 @@
             }
 
             .past-meta {
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-muted);
                 line-height: 1.65;
             }
 
             .past-tag {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 700;
                 padding: 4px 10px;
                 border-radius: var(--radius-pill);
@@ -664,20 +637,14 @@
                 <div class="main" id="mainArea">
                     <div class="content">
 
-                        <!-- Breadcrumb + Heading -->
-                        <div class="breadcrumb">
-                            <a href="#">Home</a><span class="sep">›</span>
-                            <a href="#">Account Settings</a><span class="sep">›</span>
-                            <span class="cur">City Mood</span>
-                        </div>
-                        <div class="page-heading">City <span>Mood</span></div>
-                        <div class="page-subheading">Track your emotional wellness and how your class is feeling each month.
-                        </div>
+                        <!-- Heading (no "Home › Account Settings › City Mood" trail, Daniel 2026-10-28) -->
+                        <div class="page-heading">{!! __('mood.heading') !!}</div>
+                        <div class="page-subheading">{{ __('mood.subheading') }}</div>
 
                         <!-- Tab Row -->
                         <div class="tab-row">
-                            <button class="tab-btn active" onclick="showTab('my', this)">😊 My Mood</button>
-                            <button class="tab-btn" onclick="showTab('city', this)">🏙️ City Mood</button>
+                            <button class="tab-btn active" onclick="showTab('my', this)">😊 {{ __('mood.my_mood') }}</button>
+                            <button class="tab-btn" onclick="showTab('city', this)">🏙️ {{ __('mood.city_mood') }}</button>
                         </div>
 
                         <!-- ── MY MOOD TAB ── -->
@@ -686,13 +653,13 @@
 
                             <div class="month-bar">
                                 <div class="month-nav">
-                                    <button class="month-nav-btn" onclick="changeMonth(-1)" title="Previous month">
+                                    <button class="month-nav-btn" onclick="changeMonth(-1)" title="{{ __('mood.previous_month') }}">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                                         </svg>
                                     </button>
                                     <div class="month-name-label" id="month-label"></div>
-                                    <button class="month-nav-btn" id="next-btn" onclick="changeMonth(1)" title="Next month">
+                                    <button class="month-nav-btn" id="next-btn" onclick="changeMonth(1)" title="{{ __('mood.next_month') }}">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                                         </svg>
@@ -705,8 +672,8 @@
                                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                                 </svg>
-                                View full month calendar
-                            </button>
+                            {{ __('mood.view_calendar') }}
+                        </button>
                             <div class="cal-wrap" id="cal-wrap"></div>
                         </div>
 
@@ -714,7 +681,7 @@
                         <div class="tab-page " id="page-city">
                             <div id="city-current"></div>
                             <div class="section-header">
-                                <div class="section-title">Past months</div>
+                                <div class="section-title">{{ __('mood.past_months') }}</div>
                             </div>
                             <div class="past-list" id="past-list"></div>
                         </div>
@@ -730,36 +697,40 @@
 @push('scripts')
     <script>
         (function () {
+        // Texts in the student's language (lang/<language>/mood.php, layout.php).
+        const MD_T = {{ \Illuminate\Support\Js::from(__('mood.js')) }};
+        const MOOD_NAMES = {{ \Illuminate\Support\Js::from(__('layout.mood')) }};
             /* ══════════════════════════════════════════════════════════════════
                MOOD DEFINITIONS
             ══════════════════════════════════════════════════════════════════ */
             const MOODS = [
-                { id: 'furious', label: 'Furious', q: 'HU', e: 9, p: 2 },
-                { id: 'angry', label: 'Angry', q: 'HU', e: 8, p: 3 },
-                { id: 'nervous', label: 'Nervous', q: 'HU', e: 6, p: 3 },
-                { id: 'worried', label: 'Worried', q: 'HU', e: 6, p: 4 },
-                { id: 'excited', label: 'Excited', q: 'HC', e: 9, p: 8 },
-                { id: 'ecstatic', label: 'Ecstatic', q: 'HC', e: 10, p: 9 },
-                { id: 'happy', label: 'Happy', q: 'HC', e: 7, p: 8 },
-                { id: 'joyful', label: 'Joyful', q: 'HC', e: 7, p: 7 },
-                { id: 'lonely', label: 'Lonely', q: 'LU', e: 3, p: 2 },
-                { id: 'sad', label: 'Sad', q: 'LU', e: 2, p: 3 },
-                { id: 'hopeless', label: 'Hopeless', q: 'LU', e: 1, p: 1 },
-                { id: 'disappointed', label: 'Disappointed', q: 'LU', e: 2, p: 2 },
-                { id: 'calm', label: 'Calm', q: 'LC', e: 4, p: 8 },
-                { id: 'serene', label: 'Serene', q: 'LC', e: 3, p: 9 },
-                { id: 'at_ease', label: 'At Ease', q: 'LC', e: 3, p: 7 },
-                { id: 'content', label: 'Content', q: 'LC', e: 4, p: 7 },
+                { id: 'furious', label: MOOD_NAMES.furious, q: 'HU', e: 9, p: 2 },
+                { id: 'angry', label: MOOD_NAMES.angry, q: 'HU', e: 8, p: 3 },
+                { id: 'nervous', label: MOOD_NAMES.nervous, q: 'HU', e: 6, p: 3 },
+                { id: 'worried', label: MOOD_NAMES.worried, q: 'HU', e: 6, p: 4 },
+                { id: 'excited', label: MOOD_NAMES.excited, q: 'HC', e: 9, p: 8 },
+                { id: 'ecstatic', label: MOOD_NAMES.ecstatic, q: 'HC', e: 10, p: 9 },
+                { id: 'happy', label: MOOD_NAMES.happy, q: 'HC', e: 7, p: 8 },
+                { id: 'joyful', label: MOOD_NAMES.joyful, q: 'HC', e: 7, p: 7 },
+                { id: 'lonely', label: MOOD_NAMES.lonely, q: 'LU', e: 3, p: 2 },
+                { id: 'sad', label: MOOD_NAMES.sad, q: 'LU', e: 2, p: 3 },
+                { id: 'hopeless', label: MOOD_NAMES.hopeless, q: 'LU', e: 1, p: 1 },
+                { id: 'disappointed', label: MOOD_NAMES.disappointed, q: 'LU', e: 2, p: 2 },
+                { id: 'calm', label: MOOD_NAMES.calm, q: 'LC', e: 4, p: 8 },
+                { id: 'serene', label: MOOD_NAMES.serene, q: 'LC', e: 3, p: 9 },
+                { id: 'at_ease', label: MOOD_NAMES.at_ease, q: 'LC', e: 3, p: 7 },
+                { id: 'content', label: MOOD_NAMES.content, q: 'LC', e: 4, p: 7 },
             ];
 
             const QS = {
-                HU: { color: '#dc2626', bg: 'var(--q-HU-bg)', border: 'var(--q-HU-border)', l1: 'High energy', l2: 'Uncomfortable' },
-                HC: { color: '#d97706', bg: 'var(--q-HC-bg)', border: 'var(--q-HC-border)', l1: 'High energy', l2: 'Comfortable' },
-                LU: { color: '#2563eb', bg: 'var(--q-LU-bg)', border: 'var(--q-LU-border)', l1: 'Low energy', l2: 'Uncomfortable' },
-                LC: { color: '#1aaa8e', bg: 'var(--q-LC-bg)', border: 'var(--q-LC-border)', l1: 'Low energy', l2: 'Comfortable' },
+                HU: { color: '#dc2626', bg: 'var(--q-HU-bg)', border: 'var(--q-HU-border)', l1: MD_T.high_energy, l2: MD_T.uncomfortable },
+                HC: { color: '#d97706', bg: 'var(--q-HC-bg)', border: 'var(--q-HC-border)', l1: MD_T.high_energy, l2: MD_T.comfortable },
+                LU: { color: '#2563eb', bg: 'var(--q-LU-bg)', border: 'var(--q-LU-border)', l1: MD_T.low_energy, l2: MD_T.uncomfortable },
+                LC: { color: '#1aaa8e', bg: 'var(--q-LC-bg)', border: 'var(--q-LC-border)', l1: MD_T.low_energy, l2: MD_T.comfortable },
             };
 
-            const MN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const MN = Array.from({ length: 12 }, (_, m) => new Date(2000, m, 1)
+            .toLocaleString(document.documentElement.lang, { month: 'long' }).replace(/^./, c => c.toUpperCase()));
             const MN3 = MN.map(m => m.slice(0, 3).toUpperCase());
 
             /* ── PHP → JS: inject server-side data ── */
@@ -817,7 +788,7 @@
                 return `<div class="face-block${size < 48 ? ' sm' : ''}">
             ${face(mood, size)}
             <div class="face-label" style="color:${q.color};font-size:${labelSize}px">${mood.label}</div>
-            ${extra ? `<div style="font-size:10px;color:var(--text-muted);margin-top:1px">${extra}</div>` : ''}
+            ${extra ? `<div style="font-size:12px;color:var(--text-muted);margin-top:1px">${extra}</div>` : ''}
         </div>`;
             }
 
@@ -861,7 +832,7 @@
                 let todayMood = null, todayExtra = '';
                 if (isCurrent && todayMyLog) {
                     todayMood = moodById(todayMyLog.mood);
-                    todayExtra = `${todayMyLog.loginCount} check-in${todayMyLog.loginCount > 1 ? 's' : ''} today`;
+                    todayExtra = (todayMyLog.loginCount > 1 ? MD_T.checkins_today : MD_T.checkin_today).replace(':count', todayMyLog.loginCount);
                 }
                 const tq = todayMood ? QS[todayMood.q] : null;
 
@@ -901,22 +872,22 @@
 
                 sc.innerHTML = `
             <div class="summary-col-left">
-                <div class="summary-section-label">Today</div>
+                <div class="summary-section-label">${MD_T.today}</div>
                 ${todayMood
                         ? faceBlock(todayMood, 52, todayExtra)
-                        : `<div style="font-size:12px;color:var(--text-muted);padding:8px 0">Not logged yet</div>`}
+                        : `<div style="font-size:12px;color:var(--text-muted);padding:8px 0">${MD_T.not_logged}</div>`}
             </div>
             <div class="summary-divider" style="background:${tq ? tq.color + '33' : 'var(--border)'}"></div>
             <div class="summary-col-right">
-                <div class="summary-section-label">${MN[vM - 1]} Average</div>
+                <div class="summary-section-label">${MD_T.month_average.replace(':month', MN[vM - 1])}</div>
                 ${avgMood
-                        ? faceBlock(avgMood, 52, `${daysLogged} day${daysLogged !== 1 ? 's' : ''} logged`)
-                        : `<div style="font-size:12px;color:var(--text-muted);padding:8px 0">No data</div>`}
+                        ? faceBlock(avgMood, 52, (daysLogged !== 1 ? MD_T.days_logged : MD_T.day_logged).replace(':count', daysLogged))
+                        : `<div style="font-size:12px;color:var(--text-muted);padding:8px 0">${MD_T.no_data}</div>`}
             </div>`;
 
                 document.getElementById('month-label').textContent = `${MN[vM - 1]} ${vY}`;
                 const bw = document.getElementById('month-badge-wrap');
-                bw.innerHTML = isCurrent ? `<span class="current-badge">Current month</span>` : '';
+                bw.innerHTML = isCurrent ? `<span class="current-badge">${MD_T.current_month}</span>` : '';
                 document.getElementById('next-btn').disabled = isCurrent;
             }
 
@@ -942,7 +913,8 @@
 
                 let html = `<div class="cal-month-title">${MN[vM - 1]} ${vY}</div>`;
                 html += `<div class="cal-dow-row">`;
-                ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(d => { html += `<div class="cal-dow">${d}</div>`; });
+                Array.from({ length: 7 }, (_, d) => new Date(2000, 0, 2 + d)
+                .toLocaleString(document.documentElement.lang, { weekday: 'short' }).slice(0, 2)).forEach(d => { html += `<div class="cal-dow">${d}</div>`; });
                 html += `</div><div class="cal-grid">`;
 
                 for (let i = 0; i < first; i++) html += `<div></div>`;
@@ -968,7 +940,7 @@
                 Object.entries(QS).forEach(([k, qs]) => {
                     html += `<div class="cal-legend-item"><div class="cal-legend-dot" style="background:${qs.color}"></div>${qs.l1} · ${qs.l2}</div>`;
                 });
-                html += `<div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--text-muted)"></div>×2 = multiple check-ins</div></div>`;
+                html += `<div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--text-muted)"></div>×2 = ${MD_T.multiple_checkins}</div></div>`;
 
                 document.getElementById('cal-wrap').innerHTML = html;
             }
@@ -981,7 +953,7 @@
                 btn.classList.toggle('open', calOpen);
                 btn.innerHTML = `
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-            ${calOpen ? 'Hide calendar' : 'View full month calendar'}`;
+            ${calOpen ? MD_T.hide_calendar : MD_T.view_calendar}`;
                 if (calOpen) renderCalendar();
             }
 
@@ -1018,10 +990,10 @@
                     <div class="city-current-header">
                         <div>
                             <div class="city-current-title">${MN[curM - 1]} ${curY}</div>
-                            <div class="city-current-sub">Class average mood · ${current.totalLogs} total check-ins</div>
+                            <div class="city-current-sub">${MD_T.class_average} · ${MD_T.total_checkins.replace(':count', current.totalLogs)}</div>
                         </div>
                         <div style="display:flex;align-items:center;gap:10px">
-                            <span class="current-badge">Current month</span>
+                            <span class="current-badge">${MD_T.current_month}</span>
                             ${qBadge(cm.q)}
                         </div>
                     </div>
@@ -1029,17 +1001,17 @@
                         ${faceBlock(cm, 64)}
                         <div class="city-stats">
                             <div class="city-stat-row">
-                                <div class="city-stat-label">⚡ Avg. Energy</div>
+                                <div class="city-stat-label">⚡ ${MD_T.avg_energy}</div>
                                 <div class="city-stat-track"><div class="city-stat-fill" style="width:${energyPct}%;background:${q.color}"></div></div>
                                 <div class="city-stat-val" style="color:${q.color}">${(+current.avgEnergy).toFixed(1)}/10</div>
                             </div>
                             <div class="city-stat-row">
-                                <div class="city-stat-label">☀️ Avg. Comfort</div>
+                                <div class="city-stat-label">☀️ ${MD_T.avg_comfort}</div>
                                 <div class="city-stat-track"><div class="city-stat-fill" style="width:${pleasantnessPct}%;background:${q.color}"></div></div>
                                 <div class="city-stat-val" style="color:${q.color}">${(+current.avgPleasantness).toFixed(1)}/10</div>
                             </div>
                             <div class="city-stat-row">
-                                <div class="city-stat-label">📅 Days logged</div>
+                                <div class="city-stat-label">📅 ${MD_T.days_logged_label}</div>
                                 <div class="city-stat-track"><div class="city-stat-fill" style="width:${daysPct}%;background:var(--border)"></div></div>
                                 <div class="city-stat-val">${current.daysLogged}/${daysInMonth}</div>
                             </div>
@@ -1052,11 +1024,11 @@
                     <div class="city-current-header">
                         <div>
                             <div class="city-current-title">${MN[curM - 1]} ${curY}</div>
-                            <div class="city-current-sub">Class average mood</div>
+                            <div class="city-current-sub">${MD_T.class_average}</div>
                         </div>
-                        <span class="current-badge">Current month</span>
+                        <span class="current-badge">${MD_T.current_month}</span>
                     </div>
-                    <div class="no-data-msg">No mood entries logged this month yet.</div>
+                    <div class="no-data-msg">${MD_T.no_entries}</div>
                 </div>`;
                 }
 
@@ -1068,7 +1040,7 @@
                 const pastListEl = document.getElementById('past-list');
 
                 if (!past.length) {
-                    pastListEl.innerHTML = `<div class="no-data-msg">No past month data available.</div>`;
+                    pastListEl.innerHTML = `<div class="no-data-msg">${MD_T.no_past}</div>`;
                     return;
                 }
 
@@ -1085,8 +1057,8 @@
                     <div class="past-info">
                         <div class="past-mood-name" style="color:${pq.color}">${m.label}</div>
                         <div class="past-meta">
-                            ⚡ Energy ${(+r.avgEnergy).toFixed(1)}/10 · ☀️ Comfort ${(+r.avgPleasantness).toFixed(1)}/10<br>
-                            ${r.daysLogged} day${r.daysLogged !== 1 ? 's' : ''} logged · ${r.totalLogs} total check-ins
+                            ⚡ ${MD_T.energy} ${(+r.avgEnergy).toFixed(1)}/10 · ☀️ ${MD_T.comfort} ${(+r.avgPleasantness).toFixed(1)}/10<br>
+                            ${(r.daysLogged !== 1 ? MD_T.days_logged : MD_T.day_logged).replace(':count', r.daysLogged)} · ${MD_T.total_checkins.replace(':count', r.totalLogs)}
                         </div>
                     </div>
                     <div class="past-tag" style="color:${pq.color};background:${pq.bg};border-color:${pq.color}44">

@@ -1,6 +1,7 @@
-<p><strong>Dear {{ $user->nickname }},</strong></p>
-<p><strong>CONGRATULATIONS!</strong> You've just arrived in Virtual City, and we're THRILLED to have you as our newest citizen!</p>
-<p><strong>Official Citizen ID: {{ $user->citizenId }}</strong></p>
-<p> (Check your Avatar Space to see your shiny new digital ID!)</p>
-<br><br>Sincerely,
-<br>The [Your Company/Bank] Team
+{{-- Rendered in the reader's language when the message is opened (App\Models\Mailbox). --}}
+<p><strong>{{ __('mail.dear', ['name' => $user->nickname ?: $user->name]) }}</strong></p>
+<p>{!! __('mail.cityzenid.congrats') !!}</p>
+<p><strong>{{ __('mail.citizen_id') }} {{ $user->citizenId }}</strong></p>
+<p>{{ __('mail.cityzenid.check') }}</p>
+<br><br>{{ __('mail.sincerely') }}
+<br>{{ __('mail.city_hall') }}

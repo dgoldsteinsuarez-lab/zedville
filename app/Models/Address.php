@@ -20,6 +20,12 @@ class Address extends Model
         return $this->belongsTo(Street::class);
     }
 
+    /** e.g. "1 Adam Smith Avenue, Zedville" - as written on the bank account. */
+    public function label(): string
+    {
+        return $this->house_number . ' ' . $this->street->name . ', Zedville';
+    }
+
     public function grade()
     {
         return $this->belongsTo(Grade::class);

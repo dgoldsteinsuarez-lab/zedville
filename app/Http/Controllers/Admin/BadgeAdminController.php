@@ -64,7 +64,9 @@ class BadgeAdminController extends Controller
                     'year'                 => $record->year,
                     'required_assigned'    => $record->required_assigned,
                     'required_completed'   => $record->required_completed,
+                    'optional_assigned'    => $record->optional_assigned,
                     'optional_completed'   => $record->optional_completed,
+                    'own_completed'        => $record->own_completed,
                     'participation_points' => $record->participation_points,
                     'monthly_badge'        => $record->effective_monthly_badge, // uses override if set
                     'monthly_badge_points' => $record->monthly_badge_points,

@@ -25,9 +25,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Daniel, 2026-10-26: the home page is the log-in page - the skyline with
+// the log-in box, and "What is Zedville?" for schools below it. A signed-in
+// citizen goes straight to their own home (the guest middleware).
+Route::get('/', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'create'])
+    ->middleware(['guest', 'guest.locale'])
+    ->name('home');
 
 /*Route::get('/citizen-activation', function () {
     $user = auth()->user();
@@ -49,8 +52,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/profile/autopilot', [\App\Http\Controllers\StudentAutopilotController::class, 'store'])->name('profile.autopilot.store');
-    Route::post('/profile/autopilot/{id}/cancel', [\App\Http\Controllers\StudentAutopilotController::class, 'cancel'])->name('profile.autopilot.cancel');
     Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.updateAvatar');
     Route::post('/profile/save-mood', [MoodController::class, 'saveMode'])->name('profile.saveMode');
     // Mailbox routes
@@ -70,6 +71,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/basket/options', [\App\Http\Controllers\BasketController::class, 'options'])->name('basket.options');
     Route::post('/profile/basket/swap', [\App\Http\Controllers\BasketController::class, 'swap'])->name('basket.swap');
     Route::get('/engagement/substitute-goods', fn () => view('engagement.substitute-goods'))->name('engagement.substitute-goods');
+    // Language activities of hybrid classes: match the words (2026-10-29)
+    Route::get('/activities/words/{activity}', [\App\Http\Controllers\Student\WordMatchController::class, 'show'])->name('easy.words');
+    Route::post('/activities/words/{activity}', [\App\Http\Controllers\Student\WordMatchController::class, 'done'])->name('easy.words.done');
     Route::get('/toggle-view-mode', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'toggleViewMode'])->name('toggle-view-mode');
 });
 
@@ -109,9 +113,12 @@ Route::get('/thank-you', [\App\Http\Controllers\CMSController::class, 'thankYou'
 });*/
 Route::get('/api/groceries/{diet}', function ($diet) {
 
+    // product_name stays English (it is what the survey saves and groups
+    // by); label is what the student reads, in their language.
     return \DB::table('supermarkets')
         ->whereRaw('LOWER(type) = ?', [strtolower($diet)])
-        ->get();
+        ->get()
+        ->map(fn ($item) => tap($item, fn ($i) => $i->label = \App\Support\ContentTranslations::get('products', $i->product_name)));
 
 });
 
@@ -127,6 +134,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 //For Login Quiz
 Route::get('/login-quiz/today',   [LoginQuizController::class, 'getTodayQuestion'])->name('login.quiz.today')->middleware('auth');
 Route::post('/login-quiz/submit', [LoginQuizController::class, 'submit'])->name('login.quiz.submit')->middleware('auth');
+// the plan of the month, chosen once a month after the question of the day (2026-10-31)
+Route::post('/wants-plan/choose', [\App\Http\Controllers\WantsPlanController::class, 'choose'])->name('wants-plan.choose')->middleware('auth');
 
 //City Mood & Profile Mood
 Route::get('/city-mood',   [MoodController::class, 'city_mood'])->name('city-mood')->middleware('auth');
@@ -181,6 +190,27 @@ Route::middleware(['auth'])->group(function () {
     // A Task page reached its "all questions done" screen
     Route::post('/finhero/task-complete', [FinheroStudentController::class, 'completeTask'])
         ->name('finhero.task-complete')->middleware('throttle:20,1');
+    // A chart-and-questions Task (compound interest), graded on the server
+    Route::post('/finhero/quiz/{task}/answers', [FinheroStudentController::class, 'quizAnswers'])
+        ->where('task', 'task-[0-9]+')->name('finhero.quiz.answers')->middleware('throttle:30,1');
+    // The Intermediate's price rise, as the Zedville Statistics Office tells it (App\Services\PriceRise)
+    Route::get('/prices', [\App\Http\Controllers\Student\PriceIndexController::class, 'index'])->name('prices.index');
+    // Zed Directo, the Intermediate's second bank from its third month (App\Services\ZedDirecto)
+    Route::get('/zed-directo', [\App\Http\Controllers\ZedDirectoController::class, 'index'])->name('zeddirecto.index');
+    Route::post('/zed-directo/open', [\App\Http\Controllers\ZedDirectoController::class, 'open'])->name('zeddirecto.open')->middleware('throttle:20,1');
+    Route::post('/zed-directo/move', [\App\Http\Controllers\ZedDirectoController::class, 'move'])->name('zeddirecto.move')->middleware('throttle:20,1');
+    Route::post('/zed-directo/deposit', [\App\Http\Controllers\ZedDirectoController::class, 'deposit'])->name('zeddirecto.deposit')->middleware('throttle:20,1');
+    Route::post('/zed-directo/deposit/cancel', [\App\Http\Controllers\ZedDirectoController::class, 'cancel'])->name('zeddirecto.cancel')->middleware('throttle:20,1');
+    // «Resuelve tu imprevisto»: the Intermediate's emergencies (App\Services\EmergencyService)
+    Route::get('/emergency', [\App\Http\Controllers\EmergencyController::class, 'show'])->name('emergency.show');
+    Route::post('/emergency/pay', [\App\Http\Controllers\EmergencyController::class, 'pay'])->name('emergency.pay')->middleware('throttle:20,1');
+    Route::post('/emergency/answers', [\App\Http\Controllers\EmergencyController::class, 'answers'])->name('emergency.answers')->middleware('throttle:30,1');
+    // the Intermediate's frauds (App\Services\FraudService): the call on screen, the fake email's page and button
+    Route::post('/fraud/call/{fraud}', [\App\Http\Controllers\FraudController::class, 'call'])->name('fraud.call')->middleware('throttle:20,1');
+    Route::get('/fraud/{token}', [\App\Http\Controllers\FraudController::class, 'lesson'])->name('fraud.lesson');
+    Route::post('/fraud/{token}/report', [\App\Http\Controllers\FraudController::class, 'report'])->name('fraud.report')->middleware('throttle:20,1');
+    Route::get('/secure-check/{token}', [\App\Http\Controllers\FraudController::class, 'fake'])->name('fraud.fake');
+    Route::post('/secure-check/{token}', [\App\Http\Controllers\FraudController::class, 'verify'])->name('fraud.verify')->middleware('throttle:20,1');
 
     // Library activity reading/quiz page (Daniel, 2026-10-21: "5. do it")
     Route::get('/finhero/library/{key}', [FinheroStudentController::class, 'libraryPage'])
@@ -197,12 +227,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function ()
   // everything that changes data is limited by role below.
   Route::middleware('role:super_admin,school_admin')->group(function () {
 
-    // Activity Manager
+    // Activity Manager - each level's from the Admin menu by level (App\Support\AdminLevel, 2026-11-02)
+    Route::middleware('admin.level')->group(function () {
     Route::get   ('/activities',       [FinheroAdminController::class, 'listActivities']);
     Route::get   ('/task-activities',       [FinheroAdminController::class, 'taskActivities']);
     Route::post  ('/activities',       [FinheroAdminController::class, 'addActivity']);
     Route::put   ('/activities/{id}',  [FinheroAdminController::class, 'updateActivity']);
     Route::delete('/activities/{id}',  [FinheroAdminController::class, 'deleteActivity']);
+    });
 
     // Badge Settings
     Route::get ('/settings',           [FinheroAdminController::class, 'getSettings']);
@@ -229,6 +261,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin/finhero')->group(function ()
         // A Library module's questions are shared by every school it's
         // assigned to, so editing them is platform-wide too.
         Route::get   ('/library-modules/{moduleId}/questions',              [FinheroAdminController::class, 'libraryQuestions']);
+        Route::post  ('/library-modules/{moduleId}/levels',                 [FinheroAdminController::class, 'saveLibraryModuleLevels']);
         Route::post  ('/library-modules/{moduleId}/questions/save',         [FinheroAdminController::class, 'saveLibraryQuestion']);
         Route::delete('/library-modules/{moduleId}/questions/{questionId}', [FinheroAdminController::class, 'deleteLibraryQuestion']);
 

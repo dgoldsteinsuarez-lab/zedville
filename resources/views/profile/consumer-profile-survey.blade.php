@@ -3,39 +3,39 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">Account Settings</h1>
+<div class="zv-settings-title flex flex-col items-start justify-between pb-3 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
+    <h1 class="text-xl font-bold whitespace-nowrap ">{{ __('profile.account_settings') }}</h1>
 </div>
-<div class="grid grid-cols-1 gap-5 mt-6">
+<div class="grid grid-cols-1 gap-5 mt-2">
     <div class="themeTabspills">
         <div class="w-full">
             <!-- Tabs Header -->
             <div class="flex menus overborderleftright border-b border-[#D2DDDB]">
                 <button class="tabitems tab-button" data-tab="tab1">
-                    Profile
+                    {{ __('profile.profile') }}
                 </button>
                 <button class="tabitems tab-button" data-tab="tab2">
-                    Password
+                    {{ __('profile.password') }}
                 </button>
                 <button class="tabitems tab-button active" data-tab="tab3">
-                    Consumer Profile
+                    {{ __('citizen.profile.step') }}
                 </button>
                 <button class="tabitems tab-button" data-tab="tab4">
-                    Closet
+                    {{ __('profile.closet') }}
                 </button>
                 <button class="tabitems tab-button" data-tab="tab5">
-                    Badges
+                    {{ __('profile.badges') }}
                 </button>
                 <button class="tabitems tab-button" data-tab="tab6">
-                    My Mood
+                    {{ __('profile.my_mood') }}
                 </button>
                 <button class="tabitems tab-button" data-tab="tab7">
-                    Notifications
+                    {{ __('layout.notifications') }}
                 </button>
             </div>
 
             <!-- Tabs Content -->
-            <div class="tailCard py-6 lg:py-10 px-6 lg:px-8 max-w-[900px] w-full mt-4 border border-[#D2DDDB] rounded-lg" x-data="{ changeImageModal: false, moodMeater: false }">
+            <div class="zv-settings tailCard py-6 lg:py-10 px-6 lg:px-8 max-w-[900px] w-full mt-4 border border-[#D2DDDB] rounded-lg" x-data="{ changeImageModal: false, moodMeater: false }">
                 <div id="tab1" class="tab-content">
                     @include('profile.partials.update-profile-information-form')
                 </div>
@@ -46,13 +46,13 @@
                     @include('profile.partials.surveys')
                 </div>
                 <div id="tab4" class="tab-content">
-                    <p>Closet Not available</p>
+                    <p>{{ __('profile.closet_not_available') }}</p>
                 </div>
                 <div id="tab5" class="tab-content">
-                    <p>Badges Not available</p>
+                    <p>{{ __('profile.badges_not_available') }}</p>
                 </div>
                 <div id="tab6" class="tab-content" data-tab="tab6">
-                    <p>My Mood Not available</p>
+                    <p>{{ __('profile.my_mood_not_available') }}</p>
                 </div>
                 <div id="tab7" class="tab-content" data-tab="tab7">
                     @include('profile.partials.notification-settings')

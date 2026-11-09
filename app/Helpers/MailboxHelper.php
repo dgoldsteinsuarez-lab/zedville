@@ -60,7 +60,7 @@ class MailboxHelper
 
         $replacements = array_merge([
             'citizenId' => $user->citizenId ?? '',
-            'name' => $user->nickname ?? '',
+            'name' => $user instanceof \App\Models\User ? $user->display_name : ($user->nickname ?? ''),
         ], array_diff_key($data, ['user' => true]));
 
         foreach ($replacements as $key => $value) {

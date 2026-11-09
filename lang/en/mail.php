@@ -1,0 +1,226 @@
+<?php
+
+// The city's messages in the student's Mailbox (resources/views/mailbox_templates),
+// shown in the reader's language (Daniel, 2026-10-25).
+
+return [
+    'regards' => 'Best regards,',
+    'sincerely' => 'Sincerely,',
+    'city_hall' => 'Zedville City Hall',
+    'bank_team' => 'The Universal Bank Team',
+    'treasury' => 'Zedville Treasury',
+    'hi' => 'Hi,',
+    'dear' => 'Dear :name,',
+    'citizen_id' => 'Official Citizen ID:',
+
+    'welcome' => [
+        'subject' => 'Welcome to Zedville, :name!',
+        'hello' => 'Hello :name',
+        'newest' => 'Congratulations! You\'re officially <span style="color:#3c41fb">Zedville\'s newest citizen.</span>',
+        'citizen_id' => 'Your Citizen ID:',
+        'how_title' => 'How it works:',
+        'how' => 'Every month, you\'ll <span style="color:#3c41fb">receive a salary in Zeds</span> (our virtual currency). Use it to practise budgeting, pay bills and make money decisions — just like in real adult life!',
+        'start_title' => 'Get started now:',
+        'step1' => 'Go to the <strong>Bank</strong>',
+        'step2' => '<span style="color:#3c41fb">Open your first bank account</span>',
+        'step3' => 'Wait for your first salary to arrive',
+        'city_hall' => '<strong>City Hall</strong> – complete activities and use the city\'s services',
+        'efd' => '<strong>Educational Finance Department</strong> – learn money skills with interactive lessons',
+        'profile' => '<strong>Your profile</strong> – personalise your citizen information',
+        'closing' => 'Welcome to your new virtual life! We\'re excited to have you here.',
+    ],
+
+    'auto-debit' => [
+        'subject' => 'Make your bills easier: pay them automatically',
+        'intro' => 'Set up automatic payments for your services (school, internet, electricity and water) to avoid late fees and paying by hand.',
+        'authorize' => 'You will authorise:',
+        'item' => 'The full amount of each bill to be paid automatically every month',
+        'button' => 'Set up automatic payments',
+    ],
+
+    'utility' => [
+        'intro' => 'To have this bill paid automatically, fill in this authorisation form. The amount will be taken from your bank account each month, so your bills are always paid on time — no more paying by hand and no late fees.',
+        'steps' => 'Steps:',
+        'step1' => 'Fill in your name, phone number, email and school account number.',
+        'step2' => 'Write your bank details (bank name, account number, SWIFT/BIC code).',
+        'step3' => 'Tick the payment authorisation option.',
+        'step4' => 'Confirm that you agree to the terms.',
+        'button' => 'Fill in the form',
+    ],
+    'water-auto-debit' => ['subject' => 'Pay your water bill automatically'],
+    'school-auto-debit' => ['subject' => 'Pay your school fees automatically'],
+    'internet-auto-debit' => ['subject' => 'Pay your internet bill automatically'],
+    'electricity-auto-debit' => ['subject' => 'Pay your electricity bill automatically'],
+
+    'monthly-statement' => [
+        'subject' => 'Your :month bank statement',
+        'ready' => 'Your <strong>:month</strong> bank statement is ready.',
+        'view_text' => 'You can see your complete statement, with your income, expenses and balances, here:',
+        'link' => 'See the :month bank statement',
+        'anytime' => '(You can also find it at any time in the Bank.)',
+    ],
+
+    // the City Hall's letter for the month-end fine (App\Services\MonthEndPenaltyService)
+    'city-hall-fine' => [
+        'subject' => 'City Hall fine: your plan for :month',
+        'what' => 'In :month you didn\'t choose your plan of the month, so the City Hall has charged you a fine of :amount.',
+        'what_hy' => 'City Hall fine of :amount: you didn\'t choose your plan for :month.',
+        'why' => 'You receive a salary to prepare for your future and, like any adult citizen, you have obligations. If you don\'t meet them, the City Hall takes from your account what you didn\'t spend of that month\'s salary, up to 99%.',
+        'next' => 'So that it doesn\'t happen again, choose your plan every month: it appears when you log in, after the Daily Quiz.',
+        'next_hy' => 'Choose your plan every month.',
+    ],
+
+    'bank-account-ready' => [
+        'subject' => 'Your bank account is ready',
+        'intro' => 'Great news! Your Universal Bank account is ready to use.',
+        'visit' => 'Go to the Bank to find:',
+        'features' => ['Account summary and balance', 'Debit card details', 'Transaction history', 'Bill payments', 'Savings tools', 'Account alerts'],
+        'starts' => 'Your banking journey starts now!',
+        'online' => 'Universal Bank – Online banking',
+        'welcome' => 'Welcome, :name',
+        'account' => 'Account:',
+        'student' => 'Student',
+        'summary' => 'Account summary',
+        'balance' => 'Available balance:',
+        'number' => 'Account number:',
+        'card' => 'Debit card:',
+        'latest' => 'Latest activity:',
+        'none' => 'None yet',
+        'available' => 'What you can do',
+        'statement_title' => 'See your bank statement',
+        'statement' => 'Check all your account movements.',
+        'card_title' => 'Manage your debit card',
+        'card_items' => ['Turn the card on or off', 'Change the PIN', 'Block the card if you lose it'],
+        'transfers_title' => 'Transfers',
+        'transfers' => ['Transfers between your accounts and to other people', 'Payment of bills (electricity, water, internet)'],
+        'savings_title' => 'Savings tools',
+        'savings' => ['Set savings goals', 'Automatic reminders'],
+        'alerts_title' => 'Notifications and alerts',
+        'alerts' => 'Get notified about your balance and account activity.',
+        'questions' => 'Any questions? Have a look at the Help section in the Bank.',
+        'thanks' => 'Thank you for banking with Universal Bank',
+    ],
+
+    'salary-deposite' => [
+        'subject' => 'Your first salary has arrived',
+        'text' => 'Your first monthly salary has been paid into your account:',
+        'amount' => 'Amount:',
+    ],
+
+    'direct-deposit' => [
+        'subject' => 'Please fill in your salary form',
+        'hello' => 'Hello <strong>:name</strong>,',
+        'intro' => 'Please take <span style="color:#3c41fb">two quick steps</span> to authorise your salary and the automatic payment of your bills.',
+        'title' => 'Have your salary paid into your account',
+        'text' => 'Authorise the city to pay your monthly salary straight into your account — the fastest and safest way to get paid.',
+        'authorize' => 'You will authorise:',
+        'item' => '100% of your salary to be paid into your Universal Bank account',
+        'button' => 'Fill in the form',
+    ],
+
+    'cityzenid' => [
+        'subject' => 'Your Citizen ID',
+        'congrats' => '<strong>CONGRATULATIONS!</strong> You\'ve just arrived in Zedville, and we\'re delighted to have you as our newest citizen!',
+        'check' => '(Look at your profile to see your new digital ID.)',
+    ],
+
+    'open-city-bank-account' => [
+        'subject' => 'Open your student bank account today!',
+        'dear' => 'Dear student,',
+        'why' => 'Open your account today to:',
+        'reasons' => ['Receive your salary', 'Keep track of your spending easily', 'Pay bills online', 'Save money for the future'],
+        'benefits_title' => 'Benefits:',
+        'benefits' => ['No maintenance fees', 'Your savings account earns interest every year'],
+        'start_title' => 'How to start:',
+        'start' => ['Go to the Bank', 'Open your account'],
+        'questions' => 'Any questions? Have a look at the Help section in the Bank.',
+        'signature' => 'Universal Bank',
+    ],
+    'npo-thanks' => [
+        'subject' => 'Thank you for your :month donation',
+    ],
+    // The City Hall's letter about the Intermediate's price rise (App\Services\PriceRise::announce)
+    'price-rise' => [
+        'subject' => 'Prices in Zedville have gone up',
+        'what' => 'The Zedville Statistics Office has published its price index: since :month, what we buy costs :index more on average.',
+        'what_hy' => 'Since :month, prices in Zedville have gone up :index on average.',
+        'why' => 'A drought has spoiled the harvest of fruit, vegetables and olives, and gas, which makes part of the electricity, is dearer. Not everything goes up the same: oil goes up :oil, internet stays the same and electronics even get cheaper.',
+        'you' => 'Your salary does not go up this school year. Your bills and your monthly shopping go from :before to :after: :extra more every month.',
+        'you_hy' => 'Your salary does not go up. Your bills and shopping: from :before to :after a month.',
+        'next' => 'See what went up, and by how much, at the Statistics Office:',
+        'link' => 'See the new prices',
+    ],
+    // The Intermediate's third month: the bank's letter and Zed Directo's (App\Services\ZedDirecto::announce)
+    'rates-up' => [
+        'subject' => 'Your Money Market Account pays more from :month',
+        'what' => 'Zedville\'s central bank has raised interest rates. From :month, your Money Market Account pays :rate a year (it was :old).',
+        'what_hy' => 'From :month, your Money Market Account pays :rate a year (it was :old).',
+        'why' => 'It raises them to slow down rising prices: when saving pays more and borrowing costs more, people spend a little less and prices rise more slowly.',
+        'real' => 'With prices :index higher, the real interest on your Money Market Account is :real.',
+    ],
+    'zed-directo-open' => [
+        'subject' => 'Zed Directo opens in Zedville',
+        'what' => 'From :month there is a new bank in Zedville: Zed Directo, an online bank.',
+        'offer' => 'We offer a savings account at :savings a year and a 6-month deposit that pays what prices rise plus 3%: this year, :deposit. The deposit can\'t be touched for 6 months: if you take the money out earlier, you lose the interest.',
+        'compare' => 'Compare our terms with your bank\'s before you decide where to save.',
+        'compare_hy' => 'Compare before you decide.',
+        'link' => 'Discover Zed Directo',
+        'sign' => 'The Zed Directo team',
+    ],
+    // The Intermediate's saver bonus (App\Services\SaverBonus)
+    'saver-bonus' => [
+        'subject' => 'Your saver bonus',
+        'welcome' => 'Welcome to the Intermediate. As a reward for what you saved in the Rookie, the City Hall has paid you :amount: :pct of your Emergency Fund (at most :max).',
+        'quarter' => 'The quarter\'s bonus: the City Hall has paid you :amount, :pct of what you saved in the last three months (at most :max).',
+        'why' => 'The City Hall gives you a salary so that you are responsible with it, and it wants to reward those who save. In some countries this really happens: in Germany, the State adds money to what workers save from their payslip.',
+        'next' => 'Every three months there is a new bonus: :pct of what you save in your fund, your Money Market Account and Zed Directo.',
+    ],
+    // The overdraft (App\Services\Overdraft)
+    'overdraft' => [
+        'subject' => 'Your current account is overdrawn',
+        'what' => 'You didn\'t have the money to pay “:what” on time, so the bank paid it for you. Your current account is overdrawn: :balance.',
+        'cost' => 'Every month that ends below zero costs :tae a year on what you owe, plus a :fee fee.',
+        'why' => 'An overdraft is a loan you didn\'t ask for, and one of the most expensive. That is why an emergency fund helps.',
+        'next' => 'Your next salary will cover what you owe. Until then, spend only on what you really need.',
+    ],
+    // The health insurance the City Hall gives whoever doesn't choose (App\Services\InsuranceService::assignDefault)
+    'insurance-default' => [
+        'subject' => 'Your health insurance',
+        'given' => 'Every resident of Zedville must have health insurance, and you had not chosen yours in your first month. The City Hall has given you the :plan: :premium a month, with the bills.',
+        'why' => 'Without insurance, you would pay the whole cost of an illness or an accident yourself.',
+        'next' => 'You can still choose your own plan once, in the FinHero task “:task”.',
+    ],
+    // An emergency (App\Services\EmergencyService::arrive)
+    'emergency' => [
+        'subject' => 'An unexpected expense',
+        'cost' => 'It costs :cost.',
+        'insured' => 'It costs :cost; your :plan covers :covered, so you pay :amount.',
+        'no_insurance' => 'It costs :cost. You have no health insurance, so you pay all of it.',
+        'waiting' => 'It costs :cost. Your plan doesn\'t cover the dentist yet (its waiting period), so you pay all of it.',
+        'deductible' => 'It costs :cost. Your :plan has a :deductible deductible, so you pay all of it.',
+        'due' => 'You have 30 days to pay it, until :date: in “:activity”, on the board of the Education Finance Department.',
+        'why' => 'This is what your Emergency Fund is for. If you don\'t pay it in time, it will be taken from your current account, even if that puts it into overdraft.',
+        'from' => [
+            'arm' => 'Zedville Hospital',
+            'filling' => 'Zedville Dental Clinic',
+            'washing_machine' => 'Zedville Repair Service',
+            'phone' => 'Zedville Repair Service',
+            'bike' => 'Zedville Bike Workshop',
+            'trip' => 'Your family',
+        ],
+    ],
+    // The frauds (App\Services\FraudService): the fake emails' subjects, as the mailbox lists them, and the bank's letter
+    'fraud-verify' => ['subject' => 'URGENT: your account will be blocked'],
+    'fraud-refund' => ['subject' => 'You have a refund of Ƶ 450.00'],
+    'fraud-prize' => ['subject' => 'Congratulations! You have won a mobile phone'],
+    'fraud-parcel' => ['subject' => 'Your school materials are on hold'],
+    'fraud-job' => ['subject' => 'A job for students: earn Ƶ 50.00 for each transfer'],
+    'fraud-loss' => [
+        'subject' => 'You have been the victim of a fraud',
+        'call' => 'Today you answered a call from someone pretending to be “:caller” and did what they asked.',
+        'email' => 'Today you pressed the link in an email that pretended to come from the Education Finance Department.',
+        'lost' => 'It was a fraud: you have lost :amount.',
+        'cover' => 'You have 30 days to cover it with your Emergency Fund or a loan, in “:activity”.',
+        'real' => 'In real life, if a scammer pays with a code you gave them, the bank must usually give the money back (you lose at most 50 €); if you make the transfer yourself, in the EU the bank doesn\'t have to return it.',
+    ],
+];

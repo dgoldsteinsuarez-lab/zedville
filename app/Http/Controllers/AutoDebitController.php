@@ -54,6 +54,11 @@ class AutoDebitController extends Controller
         // nickname - see the identical fix/reasoning in
         // CitizenActivationController::store_auto_debit_authorization_form.
 
+        // The address lives on the bank account, not the user - this read
+        // $user->student_address, which never exists, so every auto-debit
+        // was saved without one (found 2026-10-25).
+        $serviceAddress = BankAccount::where('student_id', $user->id)->value('student_address') ?: $user->address;
+
         /*
         |--------------------------------------------------------------------------
         | 1️⃣ SAVE AUTO DEBIT AUTHORIZATION (NO CHANGE)
@@ -72,7 +77,7 @@ class AutoDebitController extends Controller
             if ($alreadySubmitted) {
                 return redirect()
                     ->back()
-                    ->with('error', 'You have already submitted auto-debit for one or more services.');
+                    ->with('error', __('flash.auto_debit_exists'));
             }
 
             AutoDebitRequest::create([
@@ -82,7 +87,7 @@ class AutoDebitController extends Controller
                 'accountno' => $meta['account'],
                 'fullname' => $user->name,
                 'email' => $user->email,
-                'serviceaddress' => $user->student_address,
+                'serviceaddress' => $serviceAddress,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => $meta['amount'] ?? 0,
@@ -105,7 +110,7 @@ class AutoDebitController extends Controller
                 'accountno' => 'RENT-AUTO', // static / dummy
                 'fullname' => $user->name,
                 'email' => $user->email,
-                'serviceaddress' => $user->student_address,
+                'serviceaddress' => $serviceAddress,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.rent', 300), // fixed rent
@@ -135,7 +140,7 @@ class AutoDebitController extends Controller
                 'accountno' => $billers[3]->account_number ?? 'SCHOOL-AUTO',
                 'fullname' => $user->name,
                 'email' => $user->email,
-                'serviceaddress' => $user->student_address,
+                'serviceaddress' => $serviceAddress,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.school_fees', 1000),
@@ -151,7 +156,7 @@ class AutoDebitController extends Controller
 
         return redirect()
             ->route('bank.consumer_survey_message')
-            ->with('success', 'Congratulations, your auto debit is set up. Now complete the survey.');
+            ->with('success', __('flash.auto_debit_done'));
     }
 
     public function eletricity_auto_debit()
@@ -192,7 +197,7 @@ class AutoDebitController extends Controller
             ->exists();
 
         if ($exists) {
-            return redirect()->back()->with('error', 'You have already submitted.');
+            return redirect()->back()->with('error', __('flash.already_submitted'));
         }
 
         // ✅ Validate inputs
@@ -223,34 +228,16 @@ class AutoDebitController extends Controller
         // Get the user's bank account
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
         if (!$bankAccount) {
-            return redirect()->back()->with('error', 'Bank account not found for this user.');
+            return redirect()->back()->with('error', __('flash.account_not_found'));
         }
 
-        // ✅ Check sufficient balance against the real ledger (transactions1),
-        // not the legacy, always-empty `transactions` table.
-        $availableBalance = LedgerService::currentBalance($user->id);
-
-        if ($availableBalance < $validated['amount']) {
-            return redirect()->back()->with('error', 'Insufficient balance for this auto-debit request.');
-        }
-
-        // ✅ Store auto debit request
+        // An auto-debit is a permission, not a payment (bank review, 2026-10-29):
+        // the bank pays the bill on the 7th of every month
+        // (BankController::ensureMonthlyBills). This charged the typed amount at
+        // once as well - with the form's type as category - so the bill was paid
+        // twice that month.
         AutoDebitRequest::create($validated);
 
-        LedgerService::post(
-            $user->id,
-            'debit',
-            $validated['type'] ?? 'Auto Debit',
-            (float) $validated['amount'],
-            'Transfer to ' . ($validated['type'] ?? '') . ' ' . $validated['accountno'],
-            [
-                'sid' => $user->sid,
-                'bank_account_id' => $bankAccount->id,
-                'transaction_date' => now(),
-                'floor_at_zero' => true,
-            ]
-        );
-
-        return redirect()->back()->with('success', 'Form submitted and auto-debit transaction created successfully.');
+        return redirect()->back()->with('success', __('flash.auto_debit_created'));
     }
 }

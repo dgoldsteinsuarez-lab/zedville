@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ED1FC"/><stop offset="1" stop-color="#FFE0B2"/></linearGradient></defs><rect width="400" height="250" fill="url(#bg)"/>
+<circle cx="320" cy="56" r="28" fill="#FFD54F"/>
+<g fill="#fff" opacity=".9"><ellipse cx="90" cy="50" rx="34" ry="12"/><ellipse cx="116" cy="42" rx="22" ry="12"/></g>
+<g fill="#7E8CC9"><rect x="20" y="96" width="34" height="80"/><rect x="58" y="70" width="26" height="106"/><rect x="88" y="110" width="40" height="66"/><rect x="250" y="84" width="30" height="92"/><rect x="284" y="104" width="44" height="72"/><rect x="332" y="78" width="28" height="98"/></g>
+<path d="M150 176 V120 L170 96 L190 120 V176 Z" fill="#9FA8DA"/><rect x="166" y="70" width="8" height="30" fill="#9FA8DA"/>
+<rect x="0" y="176" width="400" height="74" fill="#A5D6A7"/>
+<g stroke="#6D4C41" stroke-width="4"><path d="M0 214 H400"/><path d="M0 226 H400"/></g>
+<g stroke="#8D6E63" stroke-width="4"><path d="M10 210 V230"/><path d="M34 210 V230"/><path d="M58 210 V230"/><path d="M82 210 V230"/><path d="M106 210 V230"/><path d="M130 210 V230"/><path d="M154 210 V230"/><path d="M178 210 V230"/><path d="M202 210 V230"/><path d="M226 210 V230"/><path d="M250 210 V230"/><path d="M274 210 V230"/><path d="M298 210 V230"/><path d="M322 210 V230"/><path d="M346 210 V230"/><path d="M370 210 V230"/><path d="M394 210 V230"/></g>
+<g transform="translate(40 168)">
+ <rect x="0" y="0" width="230" height="44" rx="14" fill="#E53935"/><rect x="0" y="30" width="230" height="8" fill="#B71C1C"/>
+ <g fill="#E3F2FD"><rect x="16" y="8" width="34" height="16" rx="3"/><rect x="60" y="8" width="34" height="16" rx="3"/><rect x="104" y="8" width="34" height="16" rx="3"/><rect x="148" y="8" width="34" height="16" rx="3"/></g>
+ <path d="M196 4 H226 Q234 22 226 40 H196 Z" fill="#FFCDD2"/>
+</g>
+<g transform="translate(300 150)">
+ <rect x="0" y="12" width="60" height="62" rx="8" fill="#5D4037"/><rect x="20" y="0" width="20" height="14" rx="4" fill="none" stroke="#3E2723" stroke-width="5"/>
+ <rect x="0" y="34" width="60" height="6" fill="#FFB300"/><circle cx="12" cy="78" r="5" fill="#212121"/><circle cx="48" cy="78" r="5" fill="#212121"/>
+</g></svg>

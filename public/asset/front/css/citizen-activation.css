@@ -248,7 +248,7 @@
   .check-text .check-desc  { font-size: 0.82rem; color: var(--text-muted); margin-top: 1px; }
   .check-text .required-tag {
     display: inline-block;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
     background: var(--green);
     color: #fff;

@@ -25,6 +25,9 @@ class LedgerController extends Controller
 {
     private const PROTECTED_CATEGORIES = ['Reversal', 'Admin Adjustment', 'Autopilot'];
 
+    /** Money moved to another account: the other side would keep it. */
+    private const TWO_SIDED_CATEGORIES = ['Savings', 'Fund Transfer', 'Own Transfer'];
+
     public function index(Request $request)
     {
         $students = User::where('role', 4)->orderBy('sid')->orderBy('name')->get(['id', 'name', 'nickname', 'sid']);
@@ -53,6 +56,9 @@ class LedgerController extends Controller
 
             if (in_array($original->category, self::PROTECTED_CATEGORIES, true)) {
                 return 'This kind of entry cannot be reversed.';
+            }
+            if (in_array($original->category, self::TWO_SIDED_CATEGORIES, true)) {
+                return 'This money went to (or came from) another account, which would keep it. Use "Set balance" instead.';
             }
             if (!empty($meta['reversed_by'])) {
                 return 'This transaction has already been reversed.';

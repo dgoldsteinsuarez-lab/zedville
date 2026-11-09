@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ConsumerSurvey;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -24,6 +25,10 @@ class SupermarketDietLinksTest extends TestCase
     public function test_diet_links_use_the_apps_own_domain_not_a_hardcoded_one(): void
     {
         $student = User::factory()->create(['role' => 4]);
+        // the shelves only show once the month's survey is done (the market list
+        // is a city scene since 2026-10-28; before it, the survey placeholder)
+        ConsumerSurvey::create(['user_id' => $student->id, 'sid' => 1, 'diet' => 'omnivore', 'groceries' => [],
+            'basket_cost' => 0, 'lunch' => 0, 'transport' => 0, 'activities' => 0, 'restaurants' => 0, 'total_cost' => 0]);
 
         $response = $this->actingAs($student)->get(route('supermarket.market-list'));
 

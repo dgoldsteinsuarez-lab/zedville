@@ -228,7 +228,8 @@ public function addGrade(Request $request)
             \Illuminate\Validation\Rule::unique('classes', 'name')->where('sid', (string) $sid)],
         'grade_id' => 'nullable|integer',
         'language_mode' => 'nullable|in:free,locked',
-        'default_language' => 'nullable|in:en,es',
+        'default_language' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(config('zedville.languages')))],
+        'language_level' => 'nullable|in:standard,beginner,hybrid',
     ]);
 
     // Generate unique 6-digit class code
@@ -241,8 +242,15 @@ public function addGrade(Request $request)
     $class->classCode = $classCode;
     $class->name = $request->name;
     $class->grade_id = $this->validGradeId($request->grade_id, $sid);
-    $class->language_mode = $request->input('language_mode', 'free');
-    $class->default_language = $request->input('default_language', 'en');
+    // A form without the language section (the Classes screen) gives the
+    // new Class its Grade's language (Daniel, 2026-10-22).
+    if ($request->filled('default_language')) {
+        $class->language_mode = $request->input('language_mode', 'free');
+        $class->default_language = $request->input('default_language');
+        $class->language_level = $request->input('language_level', 'standard');
+    } elseif ($grade = Grade::find($class->grade_id)) {
+        $class->fill($grade->languageSettings());
+    }
     $class->save();
 
     return redirect()->back()->with('success', 'Class added successfully!');
@@ -258,7 +266,8 @@ public function updateGrade(Request $request, $id)
         'classCode' => 'nullable|numeric|digits:6|unique:classes,classCode,' . $class->id,
         'grade_id' => 'nullable|integer',
         'language_mode' => 'nullable|in:free,locked',
-        'default_language' => 'nullable|in:en,es',
+        'default_language' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(config('zedville.languages')))],
+        'language_level' => 'nullable|in:standard,beginner,hybrid',
     ]);
 
     $class->name = $request->name;
@@ -267,9 +276,14 @@ public function updateGrade(Request $request, $id)
     // student can switch languages... the tutor might decide to only have
     // this in that specific language for beginners, to force the students
     // to understand it." Omitted = unchecked "Locked" checkbox, same
-    // unchecked-means-off convention used everywhere else this week.
-    $class->language_mode = $request->input('language_mode', 'free');
-    $class->default_language = $request->input('default_language', 'en');
+    // unchecked-means-off convention used everywhere else this week. Only
+    // when the form has the language section at all: the Classes screen's
+    // Edit sends no language fields and must not reset them to English.
+    if ($request->filled('default_language')) {
+        $class->language_mode = $request->input('language_mode', 'free');
+        $class->default_language = $request->input('default_language');
+        $class->language_level = $request->input('language_level', 'standard');
+    }
 
     if ($request->filled('classCode')) {
         $class->classCode = $request->classCode;
@@ -375,6 +389,7 @@ public function schoolDomain(Request $request)
         'school_code' => 'required|string|max:50|unique:school_domains,school_code',
         'school_phone' => 'nullable|string|max:20',
         'country_region' => 'nullable|string|max:255',
+        'timezone' => 'required|timezone',
         'school_domain' => 'required|string|max:255',
     ]);
 
@@ -402,6 +417,7 @@ public function schoolDomain(Request $request)
         'school_code' => $request->school_code,
         'school_phone' => $request->school_phone,
         'country_region' => $request->country_region,
+        'timezone' => $request->timezone,
         'school_domain' => $domainOnly,
     ]);
 
@@ -424,6 +440,7 @@ public function updateschoolDomain(Request $request, $id)
         'school_code' => 'required|string|max:50|unique:school_domains,school_code,' . $id,
         'school_phone' => 'nullable|string|max:20',
         'country_region' => 'nullable|string|max:255',
+        'timezone' => 'required|timezone',
         'school_domain' => 'required|string|max:255',
     ]);
 
@@ -456,6 +473,7 @@ public function updateschoolDomain(Request $request, $id)
         'school_code' => $request->school_code,
         'school_phone' => $request->school_phone,
         'country_region' => $request->country_region,
+        'timezone' => $request->timezone,
         'school_domain' => $domainOnly,
     ]);
 
@@ -556,8 +574,9 @@ public function login_question(Request $request)
 
     // Filter by Level / Month so a month's set can be reviewed and edited
     // together (each Level has 10 questions a month).
-    if ($request->filled('level')) {
-        $query->where('grade_level_id', $request->level);
+    // ?level, or the level being worked on (the Admin menu by level, 2026-11-02)
+    if ($level = $request->filled('level') ? (int) $request->level : \App\Support\AdminLevel::id()) {
+        $query->where('grade_level_id', $level);
     }
     if ($request->filled('month')) {
         $query->where('month_id', $request->month);

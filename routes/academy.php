@@ -12,3 +12,5 @@ Route::post('/monthly-questions/{month}', [MonthlyQuestionsController::class, 's
 Route::get('/category/{category}', [AcademyController::class, 'category'])->name('category');
 Route::get('/item/{item}', [AcademyController::class, 'item'])->name('item');
 Route::post('/item/{item}/submit', [AcademyController::class, 'submit'])->name('item.submit');
+// a real exam's password, from the tutor on the day (a few tries a minute)
+Route::post('/item/{item}/unlock', [AcademyController::class, 'unlock'])->middleware('throttle:10,1')->name('item.unlock');

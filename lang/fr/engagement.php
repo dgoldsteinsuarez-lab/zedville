@@ -1,0 +1,50 @@
+<?php
+
+// Défis de participation - mise à jour du panier (biens de substitution).
+return [
+    'substitute_goods_title' => 'Biens substituables : mon panier de courses',
+    'shopping_basket_update' => 'Biens substituables : mon panier de courses',
+    'special_challenge_shopping_basket_update' => '🛒 Alerte au magasin : des produits sont en rupture de stock !',
+    'a_few_items_in_your_shopping' => 'Oh non ! Quelques produits de ton panier sont <strong>en rupture de stock</strong> au supermarché ce mois-ci. Dans la vraie vie, ça arrive tout le temps : les fournisseurs n\'en ont plus, les prix grimpent ou un produit disparaît des rayons. Les acheteurs malins s\'adaptent ! Un produit qui peut remplir le même rôle qu\'un autre s\'appelle un <strong>bien substituable</strong> (pense au poulet et au tofu, ou au beurre et à la margarine).',
+    'your_challenge' => 'Ta mission :',
+    'look_at_your_current_shopping_basket' => 'Va au supermarché, dans le rayon de ton régime, et trouve « Mon panier de courses ».',
+    'unavailable_rule' => 'Chaque produit marqué <strong>« En rupture de stock »</strong> a besoin d\'un substitut.',
+    'choose_a_replacement_from_the_other' => 'Échange-le contre un autre produit du rayon de ton régime.',
+    'keep_your_basket_at_the_same' => 'C\'est un échange simple : un produit sort, un autre entre. Ton panier garde le même nombre de produits.',
+    'substitution_strategy' => 'Astuces pour un échange malin :',
+    'try_to_replace_an_item_with' => 'Choisis quelque chose qui a la même utilité : une protéine pour une protéine, un légume pour un légume.',
+    'consider_the_cost_difference_your_swap' => 'Regarde le prix : ton échange change le coût de ton panier.',
+    'think_about_how_the_replacement_affects' => 'Réfléchis à pourquoi tu avais choisi le premier produit, et garde cet objectif.',
+    'choose_the_best_alternative_available_not' => 'Le moins cher n\'est pas toujours le meilleur : vise le meilleur rapport qualité-prix.',
+    'checking_your_basket' => 'Vérification de ton panier…',
+    'one_item_needs' => ':count produit a encore besoin d\'un substitut.',
+    'items_need' => ':count produits ont encore besoin d\'un substitut.',
+    'nothing_in_your_basket_needs_a' => '✅ Tout est fait : aucun produit de ton panier n\'a besoin d\'un substitut pour le moment.',
+    'not_assigned' => 'Cette activité n\'a pas encore commencé pour ta classe : ton enseignant l\'activera.',
+    'go_to_my_supermarket' => 'Aller à mon supermarché →',
+
+    // Activités faciles (Admin > Engagement > Easy Activities, 2026-10-29).
+    'easy_tag' => 'Activité facile',
+    'easy_required' => 'Obligatoire',
+    'easy_optional' => 'Facultative',
+    'easy_badge' => 'Compte pour ton badge :badge',
+    'easy_until' => 'Jusqu’au :date',
+    'easy_done' => 'C’est fait ! Ton virement est arrivé.',
+    'easy_start' => 'Faire le virement',
+    'easy_transfer_step1' => 'Demande à un ou une camarade de classe son numéro de compte (ou son IBAN) et son nom tel qu’il figure sur son compte. Les deux se trouvent dans Banque → « Carte et RIB ».',
+    'easy_transfer_step2' => 'Va dans « Virements et paiements » → « Envoyer à un ami ou une amie ». Saisis ses coordonnées et le montant, et dans « Motif », écris à quoi sert l’argent.',
+    'easy_transfer_step2_min' => 'Va dans « Virements et paiements » → « Envoyer à un ami ou une amie ». Envoie-lui au moins :amount et, dans « Motif », écris à quoi sert l’argent.',
+    'easy_transfer_step3' => 'Vérifie le récapitulatif et confirme. L’activité est terminée quand l’argent arrive sur son compte.',
+
+    // Match the words (Hybrid Classes > Language Activities, 2026-10-29).
+    'words_intro' => 'Associe chaque mot à sa signification en anglais.',
+    'words_how' => 'Touche un mot, puis sa signification.',
+    'words_word' => 'Mot',
+    'words_meaning' => 'Signification',
+    'words_try_again' => 'Pas tout à fait : essaie une autre signification.',
+    'words_pick_first' => 'Touche d’abord un mot à gauche.',
+    'words_done' => 'Bravo ! Tu as associé tous les mots.',
+    'words_counted' => 'Cela compte pour ton badge Participation.',
+    'words_already' => 'Tu as déjà fait cette activité. Tu peux rejouer pour t’entraîner.',
+    'words_practice' => 'Cette activité n’est pas en cours pour ta classe : tu peux t’entraîner, mais elle ne compte pas.',
+];

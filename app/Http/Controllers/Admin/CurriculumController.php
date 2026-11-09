@@ -166,9 +166,12 @@ class CurriculumController extends Controller
             return;
         }
 
-        $classes = SchoolClass::whereHas('grade', function ($query) use ($item) {
-            $query->where('grade_level_id', $item->category->grade_level_id);
-        })->get();
+        // The global PISA category has no Grade Level - its real exam is for every class.
+        $classes = $item->category->grade_level_id === null
+            ? SchoolClass::all()
+            : SchoolClass::whereHas('grade', function ($query) use ($item) {
+                $query->where('grade_level_id', $item->category->grade_level_id);
+            })->get();
 
         // Same FullCalendar exclusive-end +1-day convention used by every
         // other "position" screen this week (see MbaPositionController).
@@ -284,6 +287,7 @@ class CurriculumController extends Controller
         $data = $request->validate([
             'id' => 'nullable|integer',
             'question_text' => 'required|string',
+            'explanation' => 'nullable|string|max:2000',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
             // Daniel, 2026-10-21: "are you sure I can add two graphics to
             // compare... sometimes I will compare one graphic, sometimes
@@ -318,6 +322,7 @@ class CurriculumController extends Controller
                 $question = CurriculumQuestion::where('item_id', $item->id)->findOrFail($data['id']);
                 $fields = [
                     'question_text' => $data['question_text'],
+                    'explanation' => $data['explanation'] ?? null,
                     'sort_order' => $data['sort_order'],
                 ];
                 // Only touch the image columns when a new file was actually
@@ -334,6 +339,7 @@ class CurriculumController extends Controller
                 $question = CurriculumQuestion::create([
                     'item_id' => $item->id,
                     'question_text' => $data['question_text'],
+                    'explanation' => $data['explanation'] ?? null,
                     'image' => $image,
                     'image_2' => $image2,
                     'sort_order' => $data['sort_order'],

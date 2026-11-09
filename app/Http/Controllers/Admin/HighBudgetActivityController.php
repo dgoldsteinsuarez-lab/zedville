@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Support\ClassColor;
+use App\Support\ClassLabel;
 
 /**
  * Admin screen for the High (Spending) Budget Activity position: which
@@ -35,11 +36,7 @@ class HighBudgetActivityController extends Controller
 
         $position = $positionQuery->first();
 
-        $classes = DB::table('classes')
-            ->when($sid, function ($q) use ($sid) {
-                $q->where('sid', $sid);
-            })
-            ->get();
+        $classes = ClassLabel::classes($sid);
 
         $mbaList = DB::table('mba_position as mp')
             ->leftJoin('school_domains as sd', 'mp.sid', '=', 'sd.id')
@@ -47,6 +44,7 @@ class HighBudgetActivityController extends Controller
                 $join->on('mp.cid', '=', 'c.id')
                     ->on('mp.sid', '=', 'c.sid');
             })
+            ->leftJoin('grades as cg', 'cg.id', '=', 'c.grade_id')
             ->where('mp.user_id', $userId)
             ->where('mp.activity_key', 'hba_position')
             ->when($sid, function ($q) use ($sid) {
@@ -59,6 +57,7 @@ class HighBudgetActivityController extends Controller
                 'sd.school_name',
                 'sd.id as school_id',
                 'c.name as class_name',
+                'cg.name as class_grade_name',
                 'c.classCode'
             )
             ->orderByDesc('mp.id')
@@ -130,8 +129,12 @@ class HighBudgetActivityController extends Controller
             ]);
         }
 
+        // The event belongs to the class's own school - saving while managing
+        // "all schools" used to add a second copy of it (2026-10-25).
+        $eventSid = $sid ?: DB::table('classes')->where('id', $cid)->value('sid');
+
         $calendarEvent = DB::table('calendar_events')
-            ->where('sid', $sid)
+            ->where('sid', $eventSid)
             ->where('classId', $cid)
             ->where('title', 'Spending budget activity')
             ->whereYear('created_at', now()->year)
@@ -157,7 +160,7 @@ class HighBudgetActivityController extends Controller
                 ]);
         } else {
             DB::table('calendar_events')->insert([
-                'sid' => $sid,
+                'sid' => $eventSid,
                 'classId' => $cid,
                 'title' => 'Spending budget activity',
                 'description' => 'This is Spending budget activity',

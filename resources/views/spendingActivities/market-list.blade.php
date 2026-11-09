@@ -1,21 +1,15 @@
 @extends('layouts.profile')
+@if ($hasSurvey)
+    @section('no_page_back', '1'){{-- Back is beside the picture --}}
+@endif
 
-@section('title', 'Supermarket Market List')
+@section('title', __('shop.market_list_title'))
 
 @section('content')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('asset/front/css/surveys.css') }}">
 <style>
-    .mall-map {
-        position: relative;
-        width: 100%;
-    }
 
-    .mall-img {
-        width: 100%;
-        display: block;
-        pointer-events: none;
-    }
 
     /* main store hit containers */
     .store {
@@ -66,7 +60,7 @@
         border: 1px solid #D2DDDB;
         border-radius: 8px;
         width: 100%;
-        max-width: 800px;
+        max-width: 1140px; /* the survey, its answers side by side (2026-10-28) */
         max-height: 90vh;
         overflow-y: auto;
         position: relative;
@@ -146,95 +140,27 @@
         font-size: 16px;
     }
 
-    .category-overlay {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .survey-info-box {
-    position: relative;
-    z-index: 1000; /* higher than .store */
-    pointer-events: auto;
-}
-
-    .survey-info-box {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-}
-
-.survey-info-box h2 {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.survey-info-box p {
-    color: #555;
-    font-size: 15px;
-    margin-bottom: 15px;
-}
-.centered-box {
-    max-width: 400px;       /* smaller width */
-    margin: 60px auto 0;    /* top margin + center */
-    text-align: center;     /* center align text */
-    padding: 20px;
-    border-radius: 10px;
-    background: #f8f9fa;    /* light background */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.centered-box h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.centered-box p {
-    font-size: 14px;
-    margin-bottom: 10px;
-}
 </style>
 @endpush
-<div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap">Supermarket Market List</h1>
-</div>
-<div class="grid grid-cols-1 gap-5">
-    <div class="themeTabspills">
-        <div class="w-full" style="position: relative; min-height: 400px;">
-            <div class="mall-map" id="mallMapContainer" style="display: none;">
-                
-
-                <img src="{{ asset('asset/front/images/supermarket-list.jpg') }}" alt="City Mall" class="mall-img rounded-lg"> 
-                 
-                <div id="categoryContent">
-                    <!-- Content will be dynamically loaded via JavaScript -->
-                </div>
-                <div class="survey-info-box centered-box">
-                    <h3>Monthly Groceries</h3>
-                    <p>
-                        <strong>11 Products Compulsory.</strong><br>
-                        Always next month after the survey is being done.<br>
-                        Last surveys done are applied.
-                    </p>
-
-                    <button class="btn btn-primary btn-sm mt-2" id="openResultBtn">
-                        View Survey Result
-                    </button>
-                </div>
-            </div>
-            
-            <div id="surveyPlaceholder" class="survey-placeholder" style="position: static; transform: none;">
-                <h3>Complete Your Food Survey</h3>
-                <p>Please complete the food preference survey to access your personalized supermarket categories.</p>
-                <!-- <button class="themeBtn" onclick="openSurveyModal()">Take Survey</button> -->
-                <button class="themeBtn"  id="openSurveyBtn">Take Survey</button>
-            </div>
-        </div>
+@if ($hasSurvey)
+    {{-- The whole picture fits the screen, like City Hall (Daniel, 2026-10-28); each of
+         its four sections is the way into that shop. --}}
+    <x-city-scene :image="asset('asset/front/images/supermarket-list.jpg')" :width="4608" :height="3456"
+        :title="__('shop.market_list_title')" :hint="__('shop.market_list_hint')" :fallback="route('education.high-spending-activities')">
+        @foreach (['omnivore' => 's1', 'pescatarian' => 's2', 'vegetarian' => 's3', 'vegan' => 's4'] as $section => $area)
+            <a class="store {{ $area }}" href="{{ route('spendingactivities.supermarket', ['type' => $section, 'activity_id' => $activityId]) }}"><span>{{ ucfirst($section) }}</span></a>
+        @endforeach
+    </x-city-scene>
+@else
+    <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
+        <h1 class="text-xl font-bold whitespace-nowrap">{{ __('shop.market_list_title') }}</h1>
     </div>
-</div>
+    <div id="surveyPlaceholder" class="survey-placeholder">
+        <h3>{{ __('shop.complete_survey_title') }}</h3>
+        <p>{{ __('shop.complete_survey_text') }}</p>
+        <button class="themeBtn" id="openSurveyBtn">{{ __('shop.take_survey') }}</button>
+    </div>
+@endif
 
 <!-- Survey Modal -->
 <div class="modal-overlay" id="surveyModal">
@@ -248,130 +174,25 @@
         @include('profile.partials.surveys')
     </div>
 </div>
-<!--Sirevy Result Modal -->
-<!-- Survey Result Modal -->
-<div class="modal-overlay" id="resultModal">
-    <div class="modal-content-wrapper">
-        <!-- <button class="modal-close-btn" onclick="closeResultModal()"> -->
-        <button class="modal-close-btn" id="closeResultBtn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        @include('profile.partials.surveys-results')
-    </div>
-</div>
 
 @endsection
 
 @push('scripts')
-<script src="{{ asset('asset/front/js/surveys.js') }}"></script>
 <script>
-    const userData = {
-        surveyCompleted: @json($hasSurvey),
-        foodCategory: @json($diet ?? 'omnivore')
-    };
-
-    const categories = {
-        omnivore:    { name: 'Omnivore',     class: 's1', url: '{{ route('spendingactivities.supermarket', ['type' => 'omnivore', 'activity_id' => $activityId]) }}' },
-        pescatarian: { name: 'Pescatarian',  class: 's2', url: '{{ route('spendingactivities.supermarket', ['type' => 'pescatarian', 'activity_id' => $activityId]) }}' },
-        vegetarian:  { name: 'Vegetarian',   class: 's3', url: '{{ route('spendingactivities.supermarket', ['type' => 'vegetarian', 'activity_id' => $activityId]) }}' },
-        vegan:       { name: 'Vegan',        class: 's4', url: '{{ route('spendingactivities.supermarket', ['type' => 'vegan', 'activity_id' => $activityId]) }}' }
-    };
-
     function openModal(id)  { document.getElementById(id)?.classList.add('show'); }
     function closeModal(id) { document.getElementById(id)?.classList.remove('show'); }
 
-    /*function loadMarketList() {
-        const container   = document.getElementById('categoryContent');
-        const mallMap     = document.getElementById('mallMapContainer');
-        const placeholder = document.getElementById('surveyPlaceholder');
-
-        if (userData.surveyCompleted) {
-            placeholder.style.display = 'none';
-            mallMap.style.display     = 'block';
-
-            const category = categories[userData.foodCategory];
-            if (category) {
-                container.innerHTML = `
-                    <a class="store ${category.class}" href="${category.url}">
-                        <span>${category.name}</span>
-                    </a>
-                `;
-            }
-        } else {
-            placeholder.style.display = 'block';
-            mallMap.style.display     = 'none';
-            container.innerHTML       = '';
-        }
-    }*/
-function loadMarketList() {
-    const container   = document.getElementById('categoryContent');
-    const mallMap     = document.getElementById('mallMapContainer');
-    const placeholder = document.getElementById('surveyPlaceholder');
-
-    if (userData.surveyCompleted) {
-        placeholder.style.display = 'none';
-        mallMap.style.display     = 'block';
-
-        let html = '';
-
-        // 🔥 LOOP ALL CATEGORIES
-        Object.keys(categories).forEach(key => {
-            const cat = categories[key];
-
-            html += `
-                <a class="store ${cat.class}" href="${cat.url}">
-                    <span>${cat.name}</span>
-                </a>
-            `;
-        });
-
-        container.innerHTML = html;
-
-    } else {
-        placeholder.style.display = 'block';
-        mallMap.style.display     = 'none';
-        container.innerHTML       = '';
-    }
-}
-
     // Intercept survey submission
-    const _originalFetch = window.fetch;
-    window.fetch = function(...args) {
-        const url = args[0];
-        if (typeof url === 'string' && url.includes('/profile/storesurvey')) {
-            return _originalFetch.apply(this, args).then(response => {
-                response.clone().json()
-                    .then(() => {
-                        alert('Survey completed! Page will refresh in 3 seconds...');
-                        setTimeout(() => location.reload(), 3000);
-                    })
-                    .catch(err => console.error('Parse error:', err));
-                return response;
-            });
-        }
-        return _originalFetch.apply(this, args);
-    };
-
     document.addEventListener('DOMContentLoaded', function () {
-        loadMarketList();
-
         // ── Button bindings (NO onclick attributes needed in HTML) ──
-        document.getElementById('openResultBtn')
-            ?.addEventListener('click', () => openModal('resultModal'));
-
         document.getElementById('openSurveyBtn')
             ?.addEventListener('click', () => openModal('surveyModal'));
 
         document.getElementById('closeSurveyBtn')
             ?.addEventListener('click', () => closeModal('surveyModal'));
 
-        document.getElementById('closeResultBtn')
-            ?.addEventListener('click', () => closeModal('resultModal'));
-
         // Backdrop click closes modal
-        ['surveyModal', 'resultModal'].forEach(id => {
+        ['surveyModal'].forEach(id => {
             document.getElementById(id)?.addEventListener('click', function (e) {
                 if (e.target === this) closeModal(id);
             });

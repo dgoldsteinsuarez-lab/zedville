@@ -1,6 +1,6 @@
 @extends('layouts.profile')
 
-@section('title', 'Classify Your Salary!')
+@section('title', __('finhero.task1.title'))
 
 @section('content')
 @push('styles')
@@ -412,7 +412,7 @@
     .stat-box.attempts { background: #F8FAFC; }
 
     .stat-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: #64748B;
       text-transform: uppercase;
@@ -463,40 +463,37 @@
     }
   </style>
   @endpush
-  <div class="flex items-center justify-between pb-6">
+  @include('finhero._intro_fit')
+<div class="zv-task-head flex items-center justify-between pb-6">
     <h1 class="text-xl font-bold whitespace-nowrap">
-        Task 1
+        {{ __('finhero.task1.heading') }}
     </h1>
-
-    <a href="{{ url()->previous() }}"
-       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">
-        ← Back
-    </a>
 </div>
  <!-- ─── Loading screen ─────────────────────────────────────────── -->
   <div id="loading-screen" class="screen">
     <div>
       <div id="loading-emoji">💰</div>
-      <p id="loading-text">Loading your salary...</p>
+      <p id="loading-text">{{ __('finhero.task1.loading') }}</p>
     </div>
   </div>
   <!-- ─── Intro screen ───────────────────────────────────────────── -->
   <div id="intro-screen" class="screen hidden">
     <div class="intro-card">
       <div class="intro-icon">🏦</div>
-      <h1 class="intro-title">Classify Your Salary!</h1>
+      <h1 class="intro-title">{{ __('finhero.task1.title') }}</h1>
       <p class="intro-description">
-        You just got your monthly bank statement. Before we dive into the numbers, let's figure out where your income sits on the scale.
+        {{ __('finhero.task1.intro') }}
       </p>
       <div class="intro-instructions">
-        <p class="intro-instructions-title">What You'll Do:</p>
-        <p>👉 You'll see your salary as a draggable card. Drag it (or tap it, then tap a level) into the income category where it belongs.</p>
-        <p>👉 Each income level has a range — find the one that fits your number!</p>
+        <p class="intro-instructions-title">{{ __('finhero.task1.what_youll_do') }}</p>
+        @foreach (__('finhero.task1.instructions') as $line)
+          <p>{{ $line }}</p>
+        @endforeach
       </div>
       <div class="intro-points-note">
-        <p><strong>Finhero Badge Points: up to 3</strong> — get it right on your first try for 3 points. Each wrong try lowers the hint tier and the points available: 2 on your second approach, 1 on your third. After that, no more points, but no limit on tries either.</p>
+        <p>{!! __('finhero.task1.points_note') !!}</p>
       </div>
-      <button class="start-button" id="start-button">Let's Go! 🚀</button>
+      <button class="start-button" id="start-button">{{ __('finhero.task1.start') }}</button>
     </div>
   </div>
 
@@ -504,21 +501,21 @@
   <div id="game-screen" class="hidden">
     <div class="container">
       <div class="header">
-        <h1 class="game-title">Task 1: Classify Your Salary</h1>
-        <p class="game-subtitle">Drag your salary into the correct income level</p>
+        <h1 class="game-title">{{ __('finhero.task1.game_title') }}</h1>
+        <p class="game-subtitle">{{ __('finhero.task1.game_subtitle') }}</p>
       </div>
 
       <div class="status-row">
-        <div class="status-pill status-approach" id="status-approach">Approach 1 of 4</div>
-        <div class="status-pill status-points" id="status-points">🏆 Finhero Badge Points: 3</div>
-        <div class="status-pill status-attempts" id="status-attempts">Attempts left: 1</div>
+        <div class="status-pill status-approach" id="status-approach">{{ __('finhero.common.approach_of', ['n' => 1, 'total' => 4]) }}</div>
+        <div class="status-pill status-points" id="status-points">{{ __('finhero.common.points_status', ['points' => 3]) }}</div>
+        <div class="status-pill status-attempts" id="status-attempts">{{ __('finhero.common.attempts_left', ['n' => 2]) }}</div>
       </div>
 
       <!-- Salary card -->
       <div class="salary-wrapper" id="salary-wrapper">
         <div class="salary-card" id="salary-card" draggable="true">
-          <div class="salary-card-hint" id="salary-hint">💰 Drag me! (or tap me first)</div>
-          <div id="salary-amount">— zeds/month</div>
+          <div class="salary-card-hint" id="salary-hint">{{ __('finhero.task1.drag_me') }}</div>
+          <div id="salary-amount">{{ __('finhero.common.per_month', ['amount' => '—']) }}</div>
         </div>
       </div>
 
@@ -540,34 +537,44 @@
         </div>
         <div class="completion-card">
           <div class="completion-icon">🏦</div>
-          <h2 class="completion-title">Salary Classified!</h2>
+          <h2 class="completion-title">{{ __('finhero.task1.complete_title') }}</h2>
           <p class="completion-text" id="completion-text"></p>
           <div class="completion-stats">
             <div class="stat-box">
-              <div class="stat-label">Finhero Badge Points</div>
+              <div class="stat-label">{{ __('finhero.common.points_label') }}</div>
               <div class="stat-value" id="stat-points">0</div>
             </div>
             <div class="stat-box attempts">
-              <div class="stat-label">Total Attempts</div>
+              <div class="stat-label">{{ __('finhero.common.total_attempts') }}</div>
               <div class="stat-value" id="stat-attempts">0</div>
             </div>
           </div>
         </div>
+
+        @include('finhero._finished')
       </div>
     </div>
   </div>
  @endsection
 @push('scripts')
+  @include('finhero._i18n')
   <script>
+    // Texts in the student's language (lang/<language>/finhero.php).
+    const T = {{ \Illuminate\Support\Js::from(['common' => __('finhero.common'), 'levels' => __('finhero.income_levels'), 'task' => __('finhero.task1')]) }};
+    const levelText = (id) => T.levels[id.replace('-', '_')];
+    const levelRange = (min, max) => max === Infinity
+      ? zvT(T.task.range_open, { min: zvNum(min) })
+      : zvT(T.task.range, { min: zvNum(min), max: zvNum(max) });
+
     // ───────────────────────────────────────────────────────────────
     // CONFIG (same as JSX original)
     // ───────────────────────────────────────────────────────────────
     const INCOME_LEVELS = [
-      { id: "low",       label: "Low Income",          term: "Entry-Level / Minimum Wage", range: "1,500 – 2,500 zeds", min: 1500, max: 2500,     emoji: "🟢", color: "#059669", bg: "#D1FAE5", bgHover: "#A7F3D0", border: "#6EE7B7" },
-      { id: "lower-mid", label: "Lower-Middle Income", term: "Junior / Early Career",      range: "2,500 – 3,500 zeds", min: 2500, max: 3500,     emoji: "🔵", color: "#2563EB", bg: "#DBEAFE", bgHover: "#BFDBFE", border: "#93C5FD" },
-      { id: "middle",    label: "Middle Income",       term: "Mid-Level / Skilled Worker", range: "3,500 – 5,000 zeds", min: 3500, max: 5000,     emoji: "🟡", color: "#CA8A04", bg: "#FEF9C3", bgHover: "#FEF08A", border: "#FDE047" },
-      { id: "upper-mid", label: "Upper-Middle Income", term: "Senior / Specialist",        range: "5,000 – 7,500 zeds", min: 5000, max: 7500,     emoji: "🟠", color: "#EA580C", bg: "#FED7AA", bgHover: "#FDBA74", border: "#FB923C" },
-      { id: "high",      label: "High Income",         term: "Manager / Executive",        range: "7,500+ zeds",        min: 7500, max: Infinity, emoji: "🟣", color: "#7C3AED", bg: "#EDE9FE", bgHover: "#DDD6FE", border: "#C4B5FD" },
+      { id: "low",       label: levelText("low").label,       term: levelText("low").term,       range: levelRange(1500, 2500),     min: 1500, max: 2500,     emoji: "🟢", color: "#059669", bg: "#D1FAE5", bgHover: "#A7F3D0", border: "#6EE7B7" },
+      { id: "lower-mid", label: levelText("lower-mid").label, term: levelText("lower-mid").term, range: levelRange(2500, 3500),     min: 2500, max: 3500,     emoji: "🔵", color: "#2563EB", bg: "#DBEAFE", bgHover: "#BFDBFE", border: "#93C5FD" },
+      { id: "middle",    label: levelText("middle").label,    term: levelText("middle").term,    range: levelRange(3500, 5000),     min: 3500, max: 5000,     emoji: "🟡", color: "#CA8A04", bg: "#FEF9C3", bgHover: "#FEF08A", border: "#FDE047" },
+      { id: "upper-mid", label: levelText("upper-mid").label, term: levelText("upper-mid").term, range: levelRange(5000, 7500),     min: 5000, max: 7500,     emoji: "🟠", color: "#EA580C", bg: "#FED7AA", bgHover: "#FDBA74", border: "#FB923C" },
+      { id: "high",      label: levelText("high").label,      term: levelText("high").term,      range: levelRange(7500, Infinity), min: 7500, max: Infinity, emoji: "🟣", color: "#7C3AED", bg: "#EDE9FE", bgHover: "#DDD6FE", border: "#C4B5FD" },
     ];
 
     // Zedville_FinHero_Point_Values_v1.pdf §2 "The Approach System".
@@ -637,7 +644,7 @@
     (async function init() {
       state.salary = await getStudentSalary();
       state.correctLevel = getCorrectLevel(state.salary);
-      salaryAmount.textContent = state.salary.toLocaleString() + " zeds/month";
+      salaryAmount.textContent = zvT(T.common.per_month, { amount: zvMoney(state.salary) });
       loadingScreen.classList.add("hidden");
       introScreen.classList.remove("hidden");
     })();
@@ -673,7 +680,7 @@
             <div class="level-range-hint">${level.range}</div>
           </div>
           <div class="level-range">${level.range}</div>
-          <div class="level-correct-badge">✅ Correct!</div>
+          <div class="level-correct-badge">${T.task.correct_badge}</div>
           <div class="level-wrong-mark">❌</div>
         `;
 
@@ -731,8 +738,8 @@
 
     function updateSalaryHint() {
       salaryHint.textContent = state.dragging
-        ? "Now tap a level below! 👇"
-        : "💰 Drag me! (or tap me first)";
+        ? T.task.tap_level
+        : T.task.drag_me;
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -771,7 +778,7 @@
               if (data.success  === false) {
                   const extraFeedback = document.getElementById("extra-feedback");
                   extraFeedback.className = "feedback error";
-                  extraFeedback.textContent = "You’ve already finished this task, but feel free to give it another go!";
+                  extraFeedback.textContent = T.common.already_finished;
 
               }
             });
@@ -780,9 +787,10 @@
           // Insert points only if first attempt correct
         state.completed     = true;
         state.totalAttempts = state.totalAttempts; // no increment on success (matches JSX)
+        const params = { salary: zvMoney(state.salary), level: state.correctLevel.label, term: state.correctLevel.term, points: pts };
         const text = pts > 0
-          ? `Correct! Your salary of ${state.salary.toLocaleString()} zeds falls under ${state.correctLevel.label} (${state.correctLevel.term}). You earned ${pts} Finhero Badge Point${pts === 1 ? '' : 's'}! 🎉`
-          : `Correct! Your salary of ${state.salary.toLocaleString()} zeds falls under ${state.correctLevel.label} (${state.correctLevel.term}). 🎉`;
+          ? zvT(pts === 1 ? T.task.correct_points_one : T.task.correct_points_many, params)
+          : zvT(T.task.correct_no_points, params);
         showFeedback("success", text);
         state.dragging = false;
         salaryCard.classList.remove("dragging");
@@ -797,12 +805,12 @@
           if (state.approach < APPROACHES.length - 1) {
             state.approach += 1;
             state.attempts = 0;
-            showFeedback("hint", "Let's try again with a hint! ✨");
+            showFeedback("hint", T.common.try_with_hint);
           } else {
-            showFeedback("error", "Not quite right, try again! ✨");
+            showFeedback("error", T.common.not_quite);
           }
         } else {
-          showFeedback("error", "Not quite right, try again! ✨");
+          showFeedback("error", T.common.not_quite);
         }
         state.dragging = false;
         salaryCard.classList.remove("dragging");
@@ -841,13 +849,13 @@
 
     function updateStatus() {
       const currentApproach = APPROACHES[state.approach];
-      $("status-approach").textContent = `Approach ${state.approach + 1} of ${APPROACHES.length}`;
-      $("status-points").textContent   = `🏆 Finhero Badge Points: ${state.completed ? state.earnedPoints : currentApproach.points}`;
+      $("status-approach").textContent = zvT(T.common.approach_of, { n: state.approach + 1, total: APPROACHES.length });
+      $("status-points").textContent   = zvT(T.common.points_status, { points: state.completed ? state.earnedPoints : currentApproach.points });
 
       const attemptsEl = $("status-attempts");
       if (!state.completed && currentApproach.maxAttempts !== Infinity) {
         attemptsEl.classList.remove("hidden");
-        attemptsEl.textContent = `Attempts left: ${currentApproach.maxAttempts - state.attempts}`;
+        attemptsEl.textContent = zvT(T.common.attempts_left, { n: currentApproach.maxAttempts - state.attempts });
       } else {
         attemptsEl.classList.add("hidden");
       }
@@ -878,10 +886,11 @@
       }).catch(() => {});
 
       const correctLevel = state.correctLevel;
-      $("completion-text").innerHTML =
-        `Your income of <strong>${state.salary.toLocaleString()} zeds</strong> is ` +
-        `<span style="color:${correctLevel.color};font-weight:800;">${correctLevel.label}</span> ` +
-        `(${correctLevel.term}).`;
+      $("completion-text").innerHTML = zvT(T.task.complete_text, {
+        salary: zvMoney(state.salary),
+        level: `<span style="color:${correctLevel.color};font-weight:800;">${correctLevel.label}</span>`,
+        term: correctLevel.term,
+      });
       $("stat-points").textContent   = state.earnedPoints;
       $("stat-attempts").textContent = state.totalAttempts + 1;
       completionEl.classList.remove("hidden");

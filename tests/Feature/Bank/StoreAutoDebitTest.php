@@ -61,14 +61,13 @@ class StoreAutoDebitTest extends TestCase
 
         $response->assertRedirect();
         $this->assertStringNotContainsString('error', (string) session('error'));
-        $this->assertDatabaseHas('transactions1', [
-            'user_id' => $user->id,
-            'category' => 'Internet',
-            'amount' => 20,
-        ]);
+        $this->assertDatabaseHas('auto_debit_requests', ['user_id' => $user->id, 'type' => 'Internet']);
+        // A permission, not a payment: the bank pays the bill on the 7th
+        // (bank review, 2026-10-29 - it was charged here too, so twice).
+        $this->assertDatabaseMissing('transactions1', ['user_id' => $user->id, 'type' => 'debit']);
     }
 
-    public function test_store_auto_debit_rejects_genuinely_insufficient_balance(): void
+    public function test_signing_needs_no_money_on_the_account(): void
     {
         $user = User::factory()->create(['role' => 4, 'sid' => 7002]);
         $account = BankAccount::create([
@@ -105,11 +104,8 @@ class StoreAutoDebitTest extends TestCase
             'date' => now()->toDateString(),
         ]);
 
-        $response->assertRedirect();
-        $this->assertSame('Insufficient balance for this auto-debit request.', session('error'));
-        $this->assertDatabaseMissing('transactions1', [
-            'user_id' => $user->id,
-            'category' => 'Internet',
-        ]);
+        $response->assertRedirect()->assertSessionHas('success');
+        $this->assertDatabaseHas('auto_debit_requests', ['user_id' => $user->id, 'type' => 'Internet']);
+        $this->assertDatabaseMissing('transactions1', ['user_id' => $user->id, 'type' => 'debit']);
     }
 }

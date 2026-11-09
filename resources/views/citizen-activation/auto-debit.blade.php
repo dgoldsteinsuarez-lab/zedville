@@ -14,16 +14,15 @@
         <div class="step-header">
 
             <div class="step-eyebrow">
-                Step 4 of 6 — Bill Payments
+                {{ __('citizen.eyebrow', ['step' => 4, 'total' => 6, 'name' => __('citizen.bills.step')]) }}
             </div>
 
             <div class="ca-step-title">
-                Pay your bills automatically
+                {{ __('citizen.bills.title') }}
             </div>
 
             <div class="step-subtitle">
-                Set up <span class="term">auto-debit</span> so your monthly services are paid on time —
-                every month, without doing anything.
+                {!! __('citizen.bills.subtitle') !!}
             </div>
 
         </div>
@@ -31,12 +30,7 @@
         <div class="step-body">
 
             <div class="narrative">
-                An <strong>auto-debit</strong> (also called a direct debit) is an instruction
-                that allows a company to pull an agreed amount from your bank account on a set
-                date each month.
-
-                Most adults use auto-debits for regular bills—rent, utilities and subscriptions—
-                so they never miss a payment or receive a late fee.
+                {!! __('citizen.bills.narrative') !!}
             </div>
 
             <div class="definition">
@@ -44,16 +38,8 @@
                 <span class="definition-icon">💡</span>
 
                 <div>
-                    <strong>Financial literacy:</strong>
-
-                    <strong>Auto-debit</strong> and
-                    <strong>direct deposit</strong> are different.
-
-                    Direct deposit = money comes <em>into</em> your account (salary).
-
-                    Auto-debit = money goes <em>out</em> of your account (bills).
-
-                    Both are automatic.
+                    <strong>{{ __('citizen.financial_literacy') }}</strong>
+                    {!! __('citizen.bills.definition') !!}
                 </div>
 
             </div>
@@ -76,12 +62,12 @@
                         <div class="check-text">
 
                             <span class="check-title">
-                                School Fees — Ƶ1,000/month
-                                <span class="required-tag">Required</span>
+                                {{ __('citizen.bills.school', ['amount' => 'Ƶ' . number_format(config('zedville.school_fees', 1000))]) }}
+                                <span class="required-tag">{{ __('citizen.bills.required') }}</span>
                             </span>
 
                             <div class="check-desc">
-                                Account No.:{{ $billers[3]->account_number ?? '__________' }}
+                                {{ __('citizen.bills.account_no', ['number' => $billers[3]->account_number ?? '__________']) }}
                             </div>
                             <input type="hidden"
                             name="services[school]"
@@ -114,11 +100,11 @@
                         <div class="check-text">
 
                             <span class="check-title">
-                                Internet Service — ABC Communications
+                                {{ __('citizen.bills.internet') }}
                             </span>
 
                             <div class="check-desc">
-                                Account No.: {{  $billers[12]->account_number ?? '__________' }}
+                                {{ __('citizen.bills.account_no', ['number' => $billers[12]->account_number ?? '__________']) }}
                             </div>
                             <input type="hidden" name="services_meta[internet][name]" value="Internet">
                             <input type="hidden" name="services_meta[internet][account]" value="{{ $billers[12]->account_number ?? '' }}">
@@ -139,11 +125,11 @@
                         <div class="check-text">
 
                             <span class="check-title">
-                                Electricity — ABC Electric Utility Co.
+                                {{ __('citizen.bills.electricity') }}
                             </span>
 
                             <div class="check-desc">
-                                Account No.: {{ $billers[10]->account_number ?? '__________' }}
+                                {{ __('citizen.bills.account_no', ['number' => $billers[10]->account_number ?? '__________']) }}
                             </div>
                             <input type="hidden" name="services_meta[electricity][name]" value="Utility - Electricity">
                             <input type="hidden" name="services_meta[electricity][account]" value="{{ $billers[10]->account_number ?? '' }}">
@@ -164,11 +150,11 @@
                         <div class="check-text">
 
                             <span class="check-title">
-                                Water — ABC Water Utility Co.
+                                {{ __('citizen.bills.water') }}
                             </span>
 
                             <div class="check-desc">
-                                Account No.: {{ $billers[11]->account_number ?? '__________' }}
+                                {{ __('citizen.bills.account_no', ['number' => $billers[11]->account_number ?? '__________']) }}
                             </div>
                             <input type="hidden" name="services_meta[water][name]" value="Utility - Water">
                             <input type="hidden" name="services_meta[water][account]" value="{{ $billers[11]->account_number ?? '' }}">
@@ -181,29 +167,24 @@
 
                 <div class="legal-block">
 
-                    "I hereby authorise ABC Group Companies to initiate debit entries to
-                    my bank account for the bill payments of the services I have selected
-                    above.
-
-                    This authorisation can be cancelled at any time by notifying the
-                    respective company in writing."
+                    {{ __('citizen.bills.legal') }}
 
                 </div>
-                <input type="hidden" name="fullname" value="{{ $user->nickname }}">
+                <input type="hidden" name="fullname" value="{{ $user->display_name }}">
                 <input type="hidden" name="email" value="{{ $user->email }}">
-                <input type="hidden" name="serviceaddress" value="{{ $user->student_address }}">
+                <input type="hidden" name="serviceaddress" value="{{ $bankAccount->student_address }}">
                 <input type="hidden" name="bankname" value="{{ $bankAccount->bank_name }}">
                 <input type="hidden" name="bankaccountnumber" value="{{ $bankAccount->primary_savings_account_number }}"></a>
                 <div class="btn-row">
 
                     <a href="{{ route('CitizenActivation.salaryAuthorization') }}"
                        class="ca-btn-secondary">
-                        ← Back
+                        {{ __('citizen.back') }}
                     </a>
 
                     <button type="submit"
                             class="ca-btn-primary">
-                        Confirm & Activate Auto-Pay →
+                        {{ __('citizen.bills.submit') }}
                     </button>
 
                 </div>

@@ -9,7 +9,6 @@ use App\Http\Controllers\Tutor\AssignmentExtensionController;
 use App\Http\Controllers\Admin\SalaryBonusController;
 use App\Http\Controllers\Admin\NpoController;
 use App\Http\Controllers\Admin\RoomPosterController;
-use App\Http\Controllers\Admin\PenaltyWantsItemController;
 use App\Http\Controllers\Admin\SpendBudgetProductController;
 use App\Http\Controllers\Admin\CityMallStoreController;
 use App\Http\Controllers\Admin\SupermarketProductController;
@@ -38,11 +37,14 @@ Route::post('/profile/password', [AdminDashboardController::class, 'updatePasswo
 // Tutor's own student list (self-scoped to their assigned classes inside the controller)
 Route::get('/my-students', [TutorStudentController::class, 'index'])->name('tutor.my-students');
 Route::get('/my-students/{studentId}', [TutorStudentController::class, 'show'])->name('tutor.my-students.show');
+// A Tutor changing their own Class's language (overrides the Grade's choice)
+Route::put('/my-classes/{classId}/language', [\App\Http\Controllers\Tutor\ClassLanguageController::class, 'update'])->name('tutor.class-language');
 
 // Autopilot for students (approved absence) - every action is scope-checked inside the controller
 Route::get('/autopilot', [\App\Http\Controllers\Admin\AutopilotController::class, 'index'])->name('autopilot.index');
 Route::post('/autopilot', [\App\Http\Controllers\Admin\AutopilotController::class, 'store'])->name('autopilot.store');
 Route::post('/autopilot/{id}/cancel', [\App\Http\Controllers\Admin\AutopilotController::class, 'cancel'])->name('autopilot.cancel');
+Route::post('/autopilot/batch/{batch}/cancel', [\App\Http\Controllers\Admin\AutopilotController::class, 'cancelBatch'])->name('autopilot.cancel-batch');
 
 // A Tutor switching Autopilot on/off for their own citizen account
 Route::post('/autopilot/toggle-self', [\App\Http\Controllers\Admin\AutopilotController::class, 'toggleSelf'])->name('autopilot.toggle-self');
@@ -57,6 +59,16 @@ Route::post('/salary-bonuses', [SalaryBonusController::class, 'store'])->name('s
 Route::post('/salary-bonuses/{id}/pause', [SalaryBonusController::class, 'pause'])->name('salary-bonuses.pause');
 Route::post('/salary-bonuses/{id}/resume', [SalaryBonusController::class, 'resume'])->name('salary-bonuses.resume');
 Route::post('/salary-bonuses/{id}/cancel', [SalaryBonusController::class, 'cancel'])->name('salary-bonuses.cancel');
+// The students' personal loans, from the Intermediate (App\Services\LoanService) - read-only, scoped in the controller
+Route::get('/loans', [\App\Http\Controllers\Admin\LoanAdminController::class, 'index'])->name('loans.index');
+// The students' health insurance plans, from the Intermediate (App\Services\InsuranceService) - read-only, scoped in the controller
+Route::get('/health-insurance', [\App\Http\Controllers\Admin\InsuranceAdminController::class, 'index'])->name('insurance.index');
+// The students' credit cards, from the Intermediate (App\Services\CreditCardService) - read-only, scoped in the controller
+Route::get('/credit-cards', [\App\Http\Controllers\Admin\CreditCardAdminController::class, 'index'])->name('cards.index');
+
+// Fines for Required activities not done in time - scoped to the admin's students; the amount is Super Admin only
+Route::get('/activity-fines', [\App\Http\Controllers\Admin\ActivityFineController::class, 'index'])->name('activity-fines.index');
+Route::post('/activity-fines/settings', [\App\Http\Controllers\Admin\ActivityFineController::class, 'settings'])->name('activity-fines.settings');
 
 // City name & quote proposals - staff review (Super Admin + Tutor only, per doc)
 Route::middleware('role:super_admin,tutor')->group(function () {
@@ -89,6 +101,20 @@ Route::delete('/wellbeing/delete/{id}', [WellbeingController::class, 'destroy'])
 // Super-Admin-exclusive.
 // ================================================================
 Route::middleware('role:super_admin')->group(function () {
+    // Spending Activity: the shopping lists and the plans of the month (2026-10-31),
+    // each level's from the menu by level (App\Support\AdminLevel, 2026-11-02)
+    Route::middleware('admin.level')->group(function () {
+        Route::get('/spending/shopping-lists', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'lists'])->name('spending.lists');
+        Route::post('/spending/shopping-lists', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'saveList'])->name('spending.lists.store');
+        Route::put('/spending/shopping-lists/{activity}', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'saveList'])->name('spending.lists.update');
+        Route::get('/spending/plans', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'plans'])->name('spending.plans');
+        Route::post('/spending/plans', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'savePlan'])->name('spending.plans.store');
+        Route::put('/spending/plans/{plan}', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'savePlan'])->name('spending.plans.update');
+        Route::post('/spending/plans/{plan}/toggle', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'togglePlan'])->name('spending.plans.toggle');
+        Route::post('/spending/classes/{class}', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'classKind'])->name('spending.class-kind');
+        Route::post('/spending/levels', [\App\Http\Controllers\Admin\SpendingCatalogController::class, 'levelKind'])->name('spending.level-kind');
+    });
+
     // "View as" another role (impersonation) - see ImpersonateController
     // docblock. stop() is NOT here - it's in routes/web.php under plain
     // auth, since the session role while impersonating a Student genuinely
@@ -197,6 +223,9 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
 
     // General Information page for one Grade (Admin Structure Proposal doc §3)
     Route::get('/grades/{id}/general-information', [\App\Http\Controllers\Admin\GradeGeneralInformationController::class, 'show'])->name('grades.general-information');
+    Route::put('/grades/{id}/language', [\App\Http\Controllers\Admin\GradeGeneralInformationController::class, 'updateLanguage'])->name('grades.language');
+    Route::put('/grades/{id}/start-month', [\App\Http\Controllers\Admin\GradeGeneralInformationController::class, 'updateStartMonth'])->name('grades.start-month');
+    Route::put('/grades/{id}/school-start-month', [\App\Http\Controllers\Admin\GradeGeneralInformationController::class, 'updateSchoolStartMonth'])->name('grades.school-start-month');
 
     //For Student (school-wide admin list — a Tutor's own class is /my-students instead)
     Route::get('/student', [AdminStudentController::class, 'index'])->name('admin.student.index');
@@ -211,6 +240,23 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::get('/accounts', [AdminDashboardController::class, 'city_bank_account'])->name('accounts');
 
     //Education — curriculum/content configuration
+    // The activity screens of the menu by level (App\Support\AdminLevel, 2026-11-02):
+    // each works on the level its menu link carries.
+    Route::middleware('admin.level')->group(function () {
+    // Engagement activities an admin assigns to a class (Daniel, 2026-10-23)
+    Route::get('/engagement/substitute-goods', [\App\Http\Controllers\Admin\EngagementActivityController::class, 'substituteGoods'])->name('engagement.substitute-goods');
+    Route::post('/engagement/substitute-goods', [\App\Http\Controllers\Admin\EngagementActivityController::class, 'storeSubstituteGoods'])->name('engagement.substitute-goods.store');
+    Route::delete('/engagement/substitute-goods/{id}', [\App\Http\Controllers\Admin\EngagementActivityController::class, 'deleteSubstituteGoods'])->name('engagement.substitute-goods.delete');
+    // Easy activities, e.g. "Transfer money to a friend" (Daniel, 2026-10-29),
+    // the language activities of hybrid classes and the Money Factory's - one screen per section
+    Route::get('/engagement/easy-activities', [\App\Http\Controllers\Admin\EasyActivityController::class, 'index'])->name('engagement.easy-activities');
+    Route::get('/hybrid/activities', [\App\Http\Controllers\Admin\EasyActivityController::class, 'language'])->name('hybrid.activities');
+    Route::get('/money-factory', [\App\Http\Controllers\Admin\EasyActivityController::class, 'moneyFactory'])->name('money-factory');
+    Route::post('/engagement/easy-activities', [\App\Http\Controllers\Admin\EasyActivityController::class, 'store'])->name('engagement.easy-activities.store');
+    Route::put('/engagement/easy-activities/{id}', [\App\Http\Controllers\Admin\EasyActivityController::class, 'update'])->name('engagement.easy-activities.update');
+    Route::delete('/engagement/easy-activities/{id}', [\App\Http\Controllers\Admin\EasyActivityController::class, 'destroy'])->name('engagement.easy-activities.delete');
+    Route::post('/engagement/easy-activities/{id}/assign', [\App\Http\Controllers\Admin\EasyActivityController::class, 'assign'])->name('engagement.easy-activities.assign');
+    Route::delete('/engagement/easy-activities/assignment/{id}', [\App\Http\Controllers\Admin\EasyActivityController::class, 'unassign'])->name('engagement.easy-activities.unassign');
     Route::get('/education/monthly-budget-activity', [MbaPositionController::class, 'monthly_budget_activity'])->name('admin.education.monthly-budget-activity');
     Route::post('/education/mba-position', [MbaPositionController::class, 'mba_position'])->name('admin.education.mba-position');
     Route::get('/education/mba-position/delete/{id}', [MbaPositionController::class, 'mba_position_delete'])
@@ -218,6 +264,26 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
 
     Route::get('/education/emergency-fund-account', [EmergencyFundPositionController::class, 'emergencyFundAccount'])->name('admin.education.emergency-fund-account');
     Route::post('/education/emergency-fund-position', [EmergencyFundPositionController::class, 'emergencyFundPosition'])->name('admin.education.emergency-fund-position');
+    // the monthly donation to a charity (Daniel, 2026-11-08)
+    Route::get('/education/donation', [\App\Http\Controllers\Admin\DonationPositionController::class, 'index'])->name('education.donation');
+    Route::post('/education/donation', [\App\Http\Controllers\Admin\DonationPositionController::class, 'store'])->name('education.donation-position');
+    // each Intermediate class's scenario (A/B) and start month (Daniel, 2026-11-08)
+    Route::get('/intermediate/setup', [\App\Http\Controllers\Admin\IntermediateSetupController::class, 'index'])->name('intermediate.setup');
+    Route::post('/intermediate/setup/{class}', [\App\Http\Controllers\Admin\IntermediateSetupController::class, 'update'])->name('intermediate.setup.update');
+    // the unexpected expenses of a saver level: on or off, the months of each scenario (App\Services\EmergencyService)
+    Route::get('/emergencies', [\App\Http\Controllers\Admin\EmergencyAdminController::class, 'index'])->name('emergencies.index');
+    Route::post('/emergencies', [\App\Http\Controllers\Admin\EmergencyAdminController::class, 'update'])->name('emergencies.update');
+
+    // Unified Spending Activity screen (Daniel, 2026-10-21) - see below.
+    Route::get('/education/spending-activity', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'index'])->name('spending-activity.index');
+    Route::post('/education/spending-activity-position', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'save'])->name('spending-activity.save');
+    Route::get('/education/spending-activity-position/delete/{id}', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'destroy'])->name('spending-activity.delete');
+
+    //For Login Question - per level already (login_questions.grade_level_id)
+    Route::get('/login-question', [AdminDashboardController::class, 'login_question'])->name('admin.login-question.login-question');
+    Route::post('/login-question/loginQuestionStore', [AdminDashboardController::class, 'loginQuestionStore'])->name('admin.login-question.loginQuestionStore');
+    Route::delete('/login-question/{id}', [AdminDashboardController::class, 'loginQuestionDestroy'])->name('admin.login-question.loginQuestionDestroy');
+    });
 
     Route::get('/education/high-budget-activity', [HighBudgetActivityController::class, 'high_budget_activity'])->name('admin.education.high-budget-activity');
     Route::post('/education/hba-position', [HighBudgetActivityController::class, 'hba_position'])->name('admin.education.hba-position');
@@ -232,10 +298,8 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     // all the spending activities... I can not select any" - one page with
     // an Activity dropdown, instead of two separate admin screens. The two
     // routes above stay untouched/reachable - this is a new entry point,
-    // not a replacement of their underlying data writes).
-    Route::get('/education/spending-activity', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'index'])->name('spending-activity.index');
-    Route::post('/education/spending-activity-position', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'save'])->name('spending-activity.save');
-    Route::get('/education/spending-activity-position/delete/{id}', [\App\Http\Controllers\Admin\SpendingActivityController::class, 'destroy'])->name('spending-activity.delete');
+    // not a replacement of their underlying data writes). Its routes are
+    // with the other activity screens of the menu by level, above.
 
     //Poster
     Route::get('/education/poster', [RoomPosterController::class, 'poster'])->name('admin.education.poster');
@@ -264,21 +328,13 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
     Route::post('/education/supermarket-update/{id}', [SupermarketProductController::class, 'supermarketUpdate'])->name('admin.education.supermarket-update');
     Route::delete('/education/supermarket-delete/{id}', [SupermarketProductController::class, 'supermarketDelete'])->name('admin.education.supermarket-delete');
     //For Wants Iteam
-    Route::get('/education/wants-iteams', [PenaltyWantsItemController::class, 'wantsIteam'])->name('admin.education.wants-iteams');
-    Route::post('/education/wants-iteams-store', [PenaltyWantsItemController::class, 'wantsIteamStore'])->name('admin.education.wants-iteams-store');
-    Route::get('/education/wants-iteams-list', [PenaltyWantsItemController::class, 'wantsIteamList'])->name('admin.education.wants-iteams-list');
-    Route::post('/education/wants-iteams-update/{id}', [PenaltyWantsItemController::class, 'wantsIteamUpdate'])->name('admin.education.wants-iteams-update');
-    Route::delete('/education/wants-iteams-delete/{id}', [PenaltyWantsItemController::class, 'wantsIteamDelete'])->name('admin.education.wants-iteams-delete');
     //For NPOs
     Route::get('/npos', [NpoController::class, 'npos'])->name('admin.npos.npos');
     Route::post('/npo/add-npo', [NpoController::class, 'add_npo'])->name('admin.npo.add-npo');
     Route::get('/npo/edit/{id}', [NpoController::class, 'edit_npo']);
     Route::post('/npo/update/{id}', [NpoController::class, 'update_npo']);
     Route::get('/npo/delete/{id}', [NpoController::class, 'delete_npo']);
-    //For Login Question
-    Route::get('/login-question', [AdminDashboardController::class, 'login_question'])->name('admin.login-question.login-question');
-    Route::post('/login-question/loginQuestionStore', [AdminDashboardController::class, 'loginQuestionStore'])->name('admin.login-question.loginQuestionStore');
-    Route::delete('/login-question/{id}', [AdminDashboardController::class, 'loginQuestionDestroy'])->name('admin.login-question.loginQuestionDestroy');
+    //For Login Question (the questions themselves: with the activity screens of the menu by level, above)
     Route::get('/login-question/school-month-settings', [AdminDashboardController::class, 'school_month_settings'])->name('admin.login-question.school-month-settings');
     Route::post('/login-question/bulkSaveSMS', [AdminDashboardController::class, 'bulkSaveSMS'])->name('admin.login-question.bulkSaveSMS');
 });
@@ -290,6 +346,19 @@ Route::middleware('role:super_admin,school_admin')->group(function () {
 // the doc ("Approve petitions" / referendum creation = Tutor only
 // besides Super Admin).
 // ================================================================
+// Real exam results - the score of a real exam is only for the tutor and the
+// school (Daniel, 2026-10-22); the controller scopes what each role sees.
+Route::middleware('role:super_admin,school_admin,tutor')->group(function () {
+    Route::get('/exam-results', [\App\Http\Controllers\Admin\RealExamResultsController::class, 'index'])->name('exam-results.index');
+    Route::get('/exam-results/print/{item}', [\App\Http\Controllers\Admin\RealExamResultsController::class, 'print'])->name('exam-results.print');
+    // the tutor opens a real exam for a class on the day, with a password, and releases the marks (2026-10-31)
+    Route::get('/exam-results/run/{item}', [\App\Http\Controllers\Admin\RealExamResultsController::class, 'classes'])->name('exam-results.classes');
+    Route::post('/exam-results/run/{item}/{class}', [\App\Http\Controllers\Admin\RealExamResultsController::class, 'open'])->name('exam-results.open');
+    Route::post('/exam-sessions/{session}/close', [\App\Http\Controllers\Admin\RealExamResultsController::class, 'close'])->name('exam-results.close');
+    Route::post('/exam-sessions/{session}/release', [\App\Http\Controllers\Admin\RealExamResultsController::class, 'release'])->name('exam-results.release');
+    Route::get('/exam-results/{attempt}', [\App\Http\Controllers\Admin\RealExamResultsController::class, 'show'])->name('exam-results.show');
+});
+
 Route::middleware('role:super_admin,tutor')->group(function () {
     // Referendum — create/edit/delete (viewing is in the open group above)
     Route::get('/referendum/create', [CivicChamberController::class, 'referendumCreate'])->name('referendum.create');

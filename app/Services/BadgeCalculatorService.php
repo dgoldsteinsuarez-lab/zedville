@@ -32,14 +32,26 @@ class BadgeCalculatorService
     // -------------------------------------------------------------------------
     // MONTHLY BADGE THRESHOLDS
     // -------------------------------------------------------------------------
-    private const OPTIONAL_THRESHOLDS = [
-        'PLATINUM' => 4,
-        'GOLD'     => 3,
-        'SILVER'   => 2,
-        'BRONZE'   => 1,
+    // Every Required activity done is the way in; each Optional activity then
+    // raises the badge one level. Bronze used to need an Optional one too, so a
+    // month with no Optional activities on the calendar (October 2026: none in
+    // any class) gave nobody a badge - Esperanza did all 5 Required ones with
+    // the full 15 participation points and got nothing (Daniel, 2026-11-02:
+    // "should have gotten minimum the least valuable one ... should we make it
+    // less rigid"). And when the class has no Optional activity that month,
+    // Silver needs none (Daniel, 2026-11-02: "si no hay opcional, puede recibir
+    // la de plata, porque no es culpa de ellos") and Gold takes activities done
+    // on the student's own, not on the class calendar ("Oro si hace otras
+    // actividades no asignadas, pero si hay opcionales, no") - see
+    // optionalNeeded() and ownCounts(). Platinum always needs the calendar's.
+    public const OPTIONAL_THRESHOLDS = [
+        'PLATINUM' => 3,
+        'GOLD'     => 2,
+        'SILVER'   => 1,
+        'BRONZE'   => 0,
     ];
 
-    private const PARTICIPATION_THRESHOLDS = [
+    public const PARTICIPATION_THRESHOLDS = [
         'PLATINUM' => 15,
         'GOLD'     => 10,
         'SILVER'   => 7,
@@ -78,7 +90,9 @@ class BadgeCalculatorService
         // --- Gather raw data ---
         $requiredAssigned  = $this->getRequiredAssigned($studentId, $month, $year);
         $requiredCompleted = $this->getRequiredCompleted($studentId, $month, $year);
+        $optionalAssigned  = $this->getOptionalAssigned($studentId, $month, $year);
         $optionalCompleted = $this->getOptionalCompleted($studentId, $month, $year);
+        $ownCompleted      = $this->getOwnCompleted($studentId, $month, $year);
         $participationPts  = $this->getParticipationPoints($studentId, $month, $year);
 
         // --- Calculate monthly badge ---
@@ -86,7 +100,9 @@ class BadgeCalculatorService
             $requiredAssigned,
             $requiredCompleted,
             $optionalCompleted,
-            $participationPts
+            $participationPts,
+            $optionalAssigned,
+            $ownCompleted
         );
         $monthlyBadgePts   = StudentBadgeRecord::BADGE_POINTS[$monthlyBadge];
 
@@ -105,7 +121,9 @@ class BadgeCalculatorService
                 'academic_year'         => $academicYear,
                 'required_assigned'     => $requiredAssigned,
                 'required_completed'    => $requiredCompleted,
+                'optional_assigned'     => $optionalAssigned,
                 'optional_completed'    => $optionalCompleted,
+                'own_completed'         => $ownCompleted,
                 'participation_points'  => $participationPts,
                 'monthly_badge'         => $monthlyBadge,
                 'monthly_badge_points'  => $monthlyBadgePts,
@@ -124,12 +142,17 @@ class BadgeCalculatorService
     /**
      * Determine the monthly badge level based on the three criteria.
      * All three must be met simultaneously for a given level.
+     * $optionalAssigned: the Optional activities on the class's calendar that
+     * month (null when unknown: the usual thresholds); $ownCompleted: the
+     * activities the student did that weren't on it.
      */
     public function determineMonthlyBadge(
         int $requiredAssigned,
         int $requiredCompleted,
         int $optionalCompleted,
-        int $participationPts
+        int $participationPts,
+        ?int $optionalAssigned = null,
+        int $ownCompleted = 0
     ): string {
         // If no Required activities were assigned, no badge can be earned
         if ($requiredAssigned === 0) {
@@ -143,8 +166,9 @@ class BadgeCalculatorService
 
         // Check from highest to lowest
         foreach (['PLATINUM', 'GOLD', 'SILVER', 'BRONZE'] as $level) {
+            $optionalDone = $optionalCompleted + ($this->ownCounts($level, $optionalAssigned) ? $ownCompleted : 0);
             if (
-                $optionalCompleted >= self::OPTIONAL_THRESHOLDS[$level] &&
+                $optionalDone      >= $this->optionalNeeded($level, $optionalAssigned) &&
                 $participationPts  >= self::PARTICIPATION_THRESHOLDS[$level]
             ) {
                 return $level;
@@ -152,6 +176,63 @@ class BadgeCalculatorService
         }
 
         return 'NONE';
+    }
+
+    /**
+     * The Optional activities a level needs: none for Silver when the class
+     * had no Optional activity that month - it isn't the student's fault.
+     */
+    public function optionalNeeded(string $level, ?int $optionalAssigned = null): int
+    {
+        return $level === 'SILVER' && $optionalAssigned === 0 ? 0 : self::OPTIONAL_THRESHOLDS[$level];
+    }
+
+    /**
+     * Whether activities done on the student's own (not on the class
+     * calendar) stand in for Optional ones: for Gold, and only in a month
+     * whose calendar has no Optional activity.
+     */
+    public function ownCounts(string $level, ?int $optionalAssigned = null): bool
+    {
+        return $level === 'GOLD' && $optionalAssigned === 0;
+    }
+
+    /**
+     * The next level a student can reach this month and what is still missing
+     * for it (the Badges page shows it): the Required activities left, the
+     * Optional activities (or, for Gold in a month without any, activities on
+     * the student's own) and the participation points still needed. A level
+     * needing more Optional activities than the class has is skipped. Null at
+     * the top level possible, or when the class has no Required activity.
+     *
+     * @return array{badge: string, required: int, optional: int, own: int, points: int}|null
+     */
+    public function nextLevel(int $requiredAssigned, int $requiredCompleted, int $optionalCompleted, int $participationPts, ?int $optionalAssigned = null, int $ownCompleted = 0): ?array
+    {
+        if ($requiredAssigned === 0) {
+            return null;
+        }
+        $current = $this->determineMonthlyBadge($requiredAssigned, $requiredCompleted, $optionalCompleted, $participationPts, $optionalAssigned, $ownCompleted);
+        foreach (['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'] as $level) {
+            $optional = $this->optionalNeeded($level, $optionalAssigned);
+            $own = $this->ownCounts($level, $optionalAssigned);
+            if (!$own && $optionalAssigned !== null && $optional > max($optionalAssigned, $optionalCompleted)) {
+                break;
+            }
+            if (StudentBadgeRecord::BADGE_POINTS[$level] > StudentBadgeRecord::BADGE_POINTS[$current]) {
+                $missing = max(0, $optional - $optionalCompleted - ($own ? $ownCompleted : 0));
+
+                return [
+                    'badge' => $level,
+                    'required' => max(0, $requiredAssigned - $requiredCompleted),
+                    'optional' => $own ? 0 : $missing,
+                    'own' => $own ? $missing : 0,
+                    'points' => max(0, self::PARTICIPATION_THRESHOLDS[$level] - $participationPts),
+                ];
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -270,6 +351,26 @@ class BadgeCalculatorService
     }
 
     /**
+     * Count how many Optional activities are on the student's class calendar
+     * for a given month (getRequiredAssigned()'s Optional twin).
+     */
+    public function getOptionalAssigned(int $studentId, int $month, int $year): int
+    {
+        $classId = DB::table('users')->where('id', $studentId)->value('grade');
+
+        if (!$classId) {
+            return 0;
+        }
+
+        return DB::table('calendar_events')
+            ->where('classId', $classId)
+            ->where('position', 'optional')
+            ->whereMonth('start', $month)
+            ->whereYear('start', $year)
+            ->count();
+    }
+
+    /**
      * Count how many Optional activities a student completed in a given month.
      * Includes BOTH calendar-assigned optional AND platform optional activities.
      */
@@ -286,6 +387,29 @@ class BadgeCalculatorService
             ->where(function ($q) {
                 $q->where('calendar_events.position', 'optional')
                   ->orWhere('activity_completions.activity_type', 'optional');
+            })
+            ->whereMonth('activity_completions.completed_at', $month)
+            ->whereYear('activity_completions.completed_at', $year)
+            ->count();
+    }
+
+    /**
+     * Count the activities a student did in a given month that weren't on
+     * their class calendar as Required or Optional: a Money Factory activity
+     * done on their own (ActivityCompletionService::completeOwn()), or one
+     * finished with no calendar event for the class (activity_id 0) or with a
+     * free one. Rows that literally say 'optional' already count as Optional.
+     */
+    private function getOwnCompleted(int $studentId, int $month, int $year): int
+    {
+        return DB::table('activity_completions')
+            ->leftJoin('calendar_events', 'activity_completions.activity_id', '=', 'calendar_events.id')
+            ->where('activity_completions.student_id', $studentId)
+            ->where(fn ($q) => $q->whereNull('activity_completions.activity_type')->orWhere('activity_completions.activity_type', '!=', 'optional'))
+            ->where(function ($q) {
+                $q->whereNull('calendar_events.id')
+                  ->orWhereNull('calendar_events.position')
+                  ->orWhereNotIn('calendar_events.position', ['required', 'optional']);
             })
             ->whereMonth('activity_completions.completed_at', $month)
             ->whereYear('activity_completions.completed_at', $year)

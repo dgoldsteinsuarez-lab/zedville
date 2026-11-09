@@ -15,6 +15,7 @@ class Beneficiary extends Model
         'name',
         'bank',
         'account_number',
+        'sort_code',
     ];
 
     public function user()

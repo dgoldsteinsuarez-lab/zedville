@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}" translate="no">
 
 <head>
     <meta charset="utf-8">
+    {{-- Zedville shows the class's language on purpose (a German class reads German):
+         the browser must not machine-translate it (Daniel, 2026-10-25). --}}
+    <meta name="google" content="notranslate">
     <meta http-equiv="content-type" content="text/html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="author" content="text/html" />
@@ -12,7 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="#00A47D">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Zedville - Financial Skills for Your Future</title>
+    <title>{{ __('layout.page_title') }}</title>
     <link sizes='57x57' href='{{ asset('asset/front/images/favicon.png') }}' rel='apple-touch-icon'>
     <link sizes='114x114' href='{{ asset('asset/front/images/favicon.png') }}' rel='apple-touch-icon'>
     <link sizes='72x72' href='{{ asset('asset/front/images/favicon.png') }}' rel='apple-touch-icon'>
@@ -61,6 +64,11 @@
         };
     </script>
     <style>[x-cloak] { display: none !important; }
+
+    /* Pop-ups (themeModal / modalContent) are marked z-100, which Tailwind
+       doesn't have: without it the City Map's street names and pins showed
+       through the Daily Quiz (Daniel, 2026-10-27). */
+    .z-100 { z-index: 100; }
 
     /* ── Avatar dropdown — aligned to the app design system ── */
     .avatarDropdown,
@@ -114,6 +122,30 @@
         border: 1px solid #EFC7CB !important;
         font-weight: 600 !important;
     }
+
+    /* ── The top bar: Daniel's own skyline (2026-10-29) as a silhouette in the ZedVille
+       green (the buttons' green, "Lets take this zedville green") on a soft blue sky
+       ("I want soft sky"), stretched across the free space between the sidebar button
+       and the language switch. The silhouette is public/asset/front/images/city/
+       skyline-wide.png, cut from his drawing (the sky is the white open to the top).
+       The chosen language and the avatar ring take the same green. ── */
+    .zv-top {
+        --zt-bg: linear-gradient(180deg, #A9DCF5 0%, #DDF2FC 100%); --zt-shadow: 0 6px 20px rgba(14, 76, 110, .12);
+        --zt-ink: #0F2A22; --zt-hover: rgba(15, 42, 34, .08); --zt-sky: #00A47D; --zt-sky-alpha: 1; --zt-sky-top: 8px;
+        --zt-lang-bg: rgba(255, 255, 255, .8); --zt-lang-line: #C6E3F2; --zt-lang-ink: #3E5560; --zt-on-bg: #00A47D; --zt-on-ink: #fff;
+        --zt-mask: url('{{ asset('asset/front/images/city/skyline-wide.png') }}');
+        position: relative; z-index: 5; background: var(--zt-bg); box-shadow: var(--zt-shadow); }
+    .zv-top .zv-toggle, .zv-top .zv-chip, .zv-top .zv-locked { color: var(--zt-ink) !important; }
+    .zv-top .zv-toggle:hover, .zv-top .zv-chip:hover { background-color: var(--zt-hover) !important; }
+    .zv-top .zv-lang { border-color: var(--zt-lang-line) !important; background: var(--zt-lang-bg); border-radius: 999px; padding: 3px; }
+    .zv-top .zv-lang button { color: var(--zt-lang-ink) !important; border-radius: 999px; }
+    .zv-top .zv-lang button:hover { background-color: var(--zt-hover) !important; }
+    .zv-top .zv-lang button[disabled] { background: var(--zt-on-bg) !important; color: var(--zt-on-ink) !important; }
+    .zv-top .zv-chip img { box-shadow: 0 0 0 2px var(--zt-on-bg); }
+    /* the skyline: one picture, stretched from the sidebar button to the language switch */
+    .zv-top-sky { flex: 1; align-self: stretch; position: relative; margin: -8px 16px; min-width: 0; pointer-events: none; }
+    .zv-top-sky::after { content: ""; position: absolute; inset: var(--zt-sky-top) 0 0; background: var(--zt-sky); opacity: var(--zt-sky-alpha);
+        -webkit-mask: var(--zt-mask) center bottom / 100% 100% no-repeat; mask: var(--zt-mask) center bottom / 100% 100% no-repeat; }
     </style>
 </head>
 
@@ -132,6 +164,8 @@
             </div>
         </div>
        @include('layouts.profile-sidebar')
+        {{-- Below lg the open sidebar lies over the page: the page dims, and a click beside the sidebar closes it. --}}
+        <div x-show="isSidebarOpen" @click="isSidebarOpen = false" class="fixed inset-0 z-[9] bg-black/30 lg:hidden" style="display: none;"></div>
     
       <div class="flex flex-col flex-1 h-full">
         <header class="flex-shrink-0 hidden">
@@ -148,21 +182,25 @@
             </div>
         </header>
 
-        <header class="flex-shrink-0 border-b bg-white">
+        <header class="flex-shrink-0 zv-top">
             <div class="flex items-center justify-between py-2 px-4 lg:px-8" x-data="{ changeImageModal: false, notificationDrawer: false }">
                 <!-- Navbar left -->
                 <div class="flex items-center space-x-3">
                     <!-- Toggle sidebar button -->
-                    <button @click="toggleSidbarMenu()" class="w-7 h-7 text-[#667085] flex items-center justify-center transition duration-300 ease-in-out">
+                    <button @click="toggleSidbarMenu()" class="zv-toggle rounded-md w-7 h-7 text-[#667085] flex items-center justify-center transition duration-300 ease-in-out">
                         <svg class="w-[18px] h-[18px]" :class="{ 'transform transition-transform -scale-x-100': isSidebarOpen }" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
                             <path d="M9 3V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
-                    <div class="sidebarLogo lg:hidden">
-                        <img src="{{ asset('asset/front/images/logo.svg')}}" class="w-[100px]" alt="">
+                    {{-- Narrow screens: a smaller logo, none on the narrowest, so the
+                         language buttons, bell and avatar still fit (Daniel, 2026-10-27). --}}
+                    <div class="sidebarLogo lg:hidden max-[400px]:hidden">
+                        <img src="{{ asset('asset/front/images/logo.svg')}}" class="w-[80px] sm:w-[100px]" alt="">
                     </div>
                 </div>
+                {{-- the free space of the bar, where the skyline is --}}
+                <div class="zv-top-sky" aria-hidden="true"></div>
                 @php
                 use App\Models\Avatar;
                  $user = Auth::user();
@@ -178,19 +216,19 @@
                 <div class="relative flex items-center space-x-3">
                     <!-- Language switcher (bugs.md, 2026-10-21) -->
                     @if ($languageLocked)
-                        <span class="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500" title="{{ __('messages.language_locked') }}">
+                        <span class="zv-locked hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-500" title="{{ __('messages.language_locked') }}">
                             &#128274; {{ strtoupper($currentLocale) }}
                         </span>
                     @else
-                        <div class="flex items-center border rounded-lg overflow-hidden text-xs font-semibold">
-                            @foreach (['en' => 'EN', 'es' => 'ES'] as $code => $label)
+                        <div class="zv-lang flex items-center border rounded-lg overflow-hidden text-xs font-semibold">
+                            @foreach (config('zedville.languages') as $code => $languageName)
                                 <form action="{{ route('language.switch') }}" method="post" class="m-0">
                                     @csrf
                                     <input type="hidden" name="language" value="{{ $code }}">
-                                    <button type="submit"
+                                    <button type="submit" title="{{ $languageName }}"
                                         class="px-2.5 py-1.5 {{ $currentLocale === $code ? 'bg-themegreen text-white' : 'text-gray-500 hover:bg-themegreen/10' }}"
                                         @if ($currentLocale === $code) disabled @endif>
-                                        {{ $label }}
+                                        {{ strtoupper($code) }}
                                     </button>
                                 </form>
                             @endforeach
@@ -198,7 +236,7 @@
                     @endif
                     <!-- Notification -->
                     <div class="relative">
-                        <button @click="notificationDrawer = true" class="relative px-3 py-2.5 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-themegreen/10 transition-colors">
+                        <button @click="notificationDrawer = true" class="zv-chip relative px-3 py-2.5 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-themegreen/10 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell">
                                 <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
                                 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
@@ -210,11 +248,11 @@
                     </div>
                     <!-- avatar button -->
                     <div class="relative" x-data="{ isOpen: false }">
-                        <button @click="isOpen = !isOpen" class="flex items-center space-x-2 focus:outline-none hover:bg-themegreen/10 transition-colors px-3 py-1 rounded-md">
+                        <button @click="isOpen = !isOpen" class="zv-chip flex items-center space-x-2 focus:outline-none hover:bg-themegreen/10 transition-colors px-3 py-1 rounded-md">
                             <div class="bg-gray-200 rounded-full focus:outline-none focus:ring">
                                 <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png')) }}" class="w-8 h-8 rounded-full object-cover" alt="">
                             </div>
-                            <span class="text-md font-semibold">{{ $user->nickname }}</span>
+                            <span class="hidden sm:inline text-md font-semibold">{{ $user->display_name }}</span>
                         </button>
 
                         <!-- Dropdown card -->
@@ -231,17 +269,17 @@
                                         <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png')) }}" class="w-12 h-12 rounded-full object-cover" alt="User">
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold">{{ $user->nickname }}</h3>
+                                        <h3 class="font-semibold">{{ $user->display_name }}</h3>
                                         <p class="text-sm">{{ $user->email }}</p>
-                                        <p class="text-xs">{{ $bankAccounts->isNotEmpty() ? '****' . substr($bankAccounts->first()->primary_savings_account_amount, -4) : '' }}</p>
+                                        <p class="text-xs">{{ $bankAccounts->isNotEmpty() ? '****' . substr((string) $bankAccounts->first()->primary_savings_account_number, -4) : '' }}</p>
                                     </div>
                                 </div>
-                                <div class="mt-3 text-xs">Last login: {{ Auth::user()->loginTime ? \Carbon\Carbon::parse(Auth::user()->loginTime)->calendar() : 'Never' }}</div>
+                                <div class="mt-3 text-xs">{{ __('layout.last_login', ['when' => Auth::user()->loginTime ? \Carbon\Carbon::parse(Auth::user()->loginTime)->calendar() : __('layout.never')]) }}</div>
                             </div>
                             <div class="max-h-96 overflow-y-auto px-4 py-2">
                                 <div>
                                     <div class="py-2">
-                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Account</h4>
+                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{{ __('layout.account') }}</h4>
                                     </div>
                                     <div class="py-2">
                                         <a href="{{ route('profile.edit') }}" class="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left rounded-md">
@@ -252,8 +290,8 @@
                                                 </svg>
                                             </div>
                                             <div class="flex-1">
-                                                <p class="font-medium text-gray-900 text-sm">Personal Information</p>
-                                                <p class="text-xs text-gray-500">Update your personal details</p>
+                                                <p class="font-medium text-gray-900 text-sm">{{ __('layout.personal_information') }}</p>
+                                                <p class="text-xs text-gray-500">{{ __('layout.personal_information_sub') }}</p>
                                             </div>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400">
                                                 <path d="m9 18 6-6-6-6"></path>
@@ -263,7 +301,7 @@
                                 </div>
                                 <div>
                                     <div class="py-2">
-                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Preferences</h4>
+                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{{ __('layout.preferences') }}</h4>
                                     </div>
                                     <div class="py-2">
                                         <a href="#" class="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left rounded-md">
@@ -274,8 +312,8 @@
                                                 </svg>
                                             </div>
                                             <div class="flex-1">
-                                                <p class="font-medium text-gray-900 text-sm">App Settings</p>
-                                                <p class="text-xs text-gray-500">Language, theme, and display</p>
+                                                <p class="font-medium text-gray-900 text-sm">{{ __('layout.app_settings') }}</p>
+                                                <p class="text-xs text-gray-500">{{ __('layout.app_settings_sub') }}</p>
                                             </div>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400">
                                                 <path d="m9 18 6-6-6-6"></path>
@@ -285,7 +323,7 @@
                                 </div>
                                 <div>
                                     <div class="py-2">
-                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Support</h4>
+                                        <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{{ __('layout.support') }}</h4>
                                     </div>
                                     <div class="py-2">
                                         <a href="#" class="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left rounded-md">
@@ -297,8 +335,8 @@
                                                 </svg>
                                             </div>
                                             <div class="flex-1">
-                                                <p class="font-medium text-gray-900 text-sm">Download App</p>
-                                                <p class="text-xs text-gray-500">Not available now</p>
+                                                <p class="font-medium text-gray-900 text-sm">{{ __('layout.download_app') }}</p>
+                                                <p class="text-xs text-gray-500">{{ __('layout.not_available_now') }}</p>
                                             </div>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right text-gray-400">
                                                 <path d="m9 18 6-6-6-6"></path>
@@ -316,7 +354,7 @@
                                             <polyline points="16 17 21 12 16 7"></polyline>
                                             <line x1="21" x2="9" y1="12" y2="12"></line>
                                         </svg>
-                                        <span>Sign Out</span>
+                                        <span>{{ __('layout.sign_out') }}</span>
                                     </button>
                                 </form>
 
@@ -354,13 +392,13 @@
                             <div class="flex justify-between items-center w-full">
                                 <div class="p-4 border-b border-[#D2DDDB] flex items-center justify-between w-full">
                                     <div class="flex items-center space-x-3">
-                                        <h2 class="text-lg font-semibold text-gray-900">Notifications</h2>
+                                        <h2 class="text-lg font-semibold text-gray-900">{{ __('layout.notifications') }}</h2>
                                         @if(($notificationUnreadCount ?? 0) > 0)
-                                            <span id="notificationUnreadPill" class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">{{ $notificationUnreadCount }} new</span>
+                                            <span id="notificationUnreadPill" class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">{{ __('layout.new_count', ['count' => $notificationUnreadCount]) }}</span>
                                         @endif
                                     </div>
                                     <div class="flex items-center space-x-2">
-                                        <button id="notificationMarkAllRead" class="text-xs text-blue-600 hover:text-blue-700 font-medium">Mark all read</button>
+                                        <button id="notificationMarkAllRead" class="text-xs text-blue-600 hover:text-blue-700 font-medium">{{ __('layout.mark_all_read') }}</button>
                                         <button @click="notificationDrawer = false" class="text-gray-500 hover:opacity-80 focus:outline-none transition">
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <circle cx="12" cy="12" r="9" fill="#E7FBF3" />
@@ -405,6 +443,7 @@
                                                             ];
                                                             $c = $colorMap[$n->color] ?? $colorMap['blue'];
                                                             $isUnread = is_null($n->read_at);
+                                                            [$nTitle, $nBody] = \App\Support\NotificationText::for($n);
                                                         @endphp
                                                         <div id="notification-{{ $n->id }}"
                                                              class="p-4 border-l-4 transition-colors {{ $c['border'] }} notificatItem {{ $isUnread ? 'noread bg-red-50 hover:bg-red-100' : 'bg-white hover:bg-gray-50' }}">
@@ -415,21 +454,21 @@
                                                                 <div class="flex-1 min-w-0">
                                                                     <div class="flex items-start justify-between">
                                                                         <div class="flex-1">
-                                                                            <h3 class="text-sm font-medium {{ $isUnread ? 'text-gray-900' : 'text-gray-700' }}">{{ $n->title }}</h3>
-                                                                            @if($n->body)
-                                                                                <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ $n->body }}</p>
+                                                                            <h3 class="text-sm font-medium {{ $isUnread ? 'text-gray-900' : 'text-gray-700' }}">{{ $nTitle }}</h3>
+                                                                            @if($nBody)
+                                                                                <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ $nBody }}</p>
                                                                             @endif
                                                                             <p class="text-xs text-gray-500 mt-2">{{ $n->created_at->diffForHumans() }}</p>
                                                                         </div>
                                                                         <div class="flex items-center space-x-1 ml-2">
                                                                             @if($isUnread)
-                                                                                <button type="button" class="notificationMarkRead p-1 text-gray-400 hover:text-blue-600 rounded" data-id="{{ $n->id }}" title="Mark as read">
+                                                                                <button type="button" class="notificationMarkRead p-1 text-gray-400 hover:text-blue-600 rounded" data-id="{{ $n->id }}" title="{{ __('layout.mark_as_read') }}">
                                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check">
                                                                                         <path d="M20 6 9 17l-5-5"></path>
                                                                                     </svg>
                                                                                 </button>
                                                                             @endif
-                                                                            <button type="button" class="notificationDelete p-1 text-gray-400 hover:text-red-600 rounded" data-id="{{ $n->id }}" title="Delete notification">
+                                                                            <button type="button" class="notificationDelete p-1 text-gray-400 hover:text-red-600 rounded" data-id="{{ $n->id }}" title="{{ __('layout.delete_notification') }}">
                                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2">
                                                                                     <path d="M3 6h18"></path>
                                                                                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -445,7 +484,7 @@
                                                         </div>
                                                     @empty
                                                         <div class="p-8 text-center text-sm text-gray-400">
-                                                            No notifications yet. Real activity from your account will show up here.
+                                                            {{ __('layout.no_notifications') }}
                                                         </div>
                                                     @endforelse
                                                 </div>
@@ -458,10 +497,10 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4 text-xs text-gray-500">
                                         <div class="flex items-center space-x-1">
-                                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div><span>Read</span>
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div><span>{{ __('layout.read') }}</span>
                                         </div>
                                         <div class="flex items-center space-x-1">
-                                            <div class="w-2 h-2 bg-red-500 rounded-full"></div><span>Unread</span>
+                                            <div class="w-2 h-2 bg-red-500 rounded-full"></div><span>{{ __('layout.unread') }}</span>
                                         </div>
                                     </div>
                                     <a href="{{ route('profile.edit') }}#tab7" class="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
@@ -469,7 +508,7 @@
                                             <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                                             <circle cx="12" cy="12" r="3"></circle>
                                         </svg>
-                                        <span>Settings</span>
+                                        <span>{{ __('layout.settings') }}</span>
                                     </a>
                                 </div>
                             </div>
@@ -479,7 +518,7 @@
             </div>
         </header>
 
-        <main class="bg-white flex-1 max-h-full py-10 px-8 overflow-hidden overflow-y-auto">
+        <main class="zv-main bg-white flex-1 max-h-full pt-5 pb-6 px-6 overflow-hidden overflow-y-auto">
 
             <!-- Toast Message  -->
              <!-- <div class="fixed top-5 right-5 z-50 transition transform duration-300 ease-out translate-y-0 opacity-100" > -->
@@ -507,7 +546,7 @@
                             </div>
                             <!-- 🧾 Middle content -->
                             <div class="flex-1">
-                                <h3 class="text-gray-900 font-semibold text-lg">Successful</h3>
+                                <h3 class="text-gray-900 font-semibold text-lg">{{ __('layout.successful') }}</h3>
                                 <p class="text-gray-600 text-lg mt-0.5">
                                  {!! session('success') !!}
                                 </p>
@@ -556,7 +595,7 @@
                             </div>
                             <!-- 🧾 Middle content -->
                             <div class="flex-1">
-                                <h3 class="text-red-900 font-semibold text-lg">Error</h3>
+                                <h3 class="text-red-900 font-semibold text-lg">{{ __('layout.error') }}</h3>
                                 <p class="text-gray-600 text-lg mt-0.5">
                                 {!! session('error') !!}
                                 </p>
@@ -594,9 +633,9 @@
                                 </div>
                                 <!-- 🧾 Middle content -->
                                 <div class="flex-1">
-                                    <h3 class="text-red-900 font-semibold text-lg">Successfull</h3>
+                                    <h3 class="text-gray-900 font-semibold text-lg">{{ __('layout.successful') }}</h3>
                                     <p class="text-gray-600 text-lg mt-0.5">
-                                    Profile updated successfully.
+                                    {{ __('layout.profile_updated') }}
                                     </p>
                                 </div>
                                 <!-- ❌ Right close button -->
@@ -632,9 +671,9 @@
                             </div>
                             <!-- 🧾 Middle content -->
                             <div class="flex-1">
-                                <h3 class="text-red-900 font-semibold text-lg">Error</h3>
+                                <h3 class="text-red-900 font-semibold text-lg">{{ __('layout.error') }}</h3>
                                 <p class="text-gray-600 text-lg mt-0.5">
-                                Password not updated.
+                                {{ __('layout.password_not_updated') }}
                                 </p>
                             </div>
                             <!-- ❌ Right close button -->
@@ -670,14 +709,22 @@
             @if (auth()->check() && auth()->user()->isTutor())
                 <div class="flex justify-between items-center flex-wrap gap-2 mb-6 p-3 rounded-lg" style="background:#E8F5EE; border:1px solid #A7E3C3;">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-semibold text-white px-3 py-1 rounded-full" style="background:#1B6B3A;">STUDENT MODE</span>
-                        <span class="text-sm text-gray-600">You're viewing this as a Tutor — this is your own citizen account.</span>
+                        <span class="text-xs font-semibold text-white px-3 py-1 rounded-full" style="background:#1B6B3A;">{{ __('layout.student_mode') }}</span>
+                        <span class="text-sm text-gray-600">{{ __('layout.student_mode_note') }}</span>
                     </div>
                     <a href="{{ url('admin/my-students') }}" class="text-sm font-medium px-3 py-1.5 rounded-md bg-white border" style="border-color:#1B6B3A; color:#1B6B3A;">
-                        &larr; Switch to Tutor Mode
+                        &larr; {{ __('layout.switch_to_tutor') }}
                     </a>
                 </div>
             @endif
+
+            @unless (request()->routeIs('dashboard') || View::hasSection('no_page_back'))
+                @include('partials.page-back', [
+                    'fallback' => route('dashboard'),
+                    'label' => __('layout.back'),
+                    'buttonClass' => 'zvBackBtn inline-flex items-center gap-2 py-2 px-4 mb-5 text-sm font-semibold',
+                ])
+            @endunless
 
             @yield('content')
 
@@ -694,6 +741,10 @@
             $hasQuizToday = \App\Models\LoginQuizAttempt::where('user_id', auth()->id())
                 ->whereDate('created_at', now()->toDateString())
                 ->exists();
+            // the plan of the month, after the question of the day (2026-10-31)
+            $wantsPlanBox = \App\Services\WantsPlanService::needsChoice(auth()->user())
+                ? \App\Services\WantsPlanService::box(auth()->user())
+                : null;
         @endphp
         @if (!$hasMoodToday)
         <div x-data="moodPopup()">
@@ -714,18 +765,21 @@
                             <form @submit.prevent="submitMoodForm" data-save-url="{{ route('profile.saveMode') }}">
                                 @csrf
                                 <div class="heading text-center">
-                                    <h4 class="text-xl xl:text-[28px] 2xl:text-[32px] font-semibold text-black mb-2">Mood Meter</h4>
-                                    <h5 class="text-md xl:text-base font-semibold text-black mb-4">How are you feeling today?</h5>
-                                    <p class="text-xs max-w-[450px] w-full mx-auto">Your mood selection will help us understand and this practice will help you build your emotional vocabulary and enhance your emotional wellness.</p>
+                                    <h4 class="text-xl xl:text-[28px] 2xl:text-[32px] font-semibold text-black mb-2">{{ __('layout.mood.title') }}</h4>
+                                    <h5 class="text-md xl:text-base font-semibold text-black mb-4">{{ __('layout.mood.question') }}</h5>
+                                    <p class="text-xs max-w-[450px] w-full mx-auto">{{ __('layout.mood.intro') }}</p>
                                 </div>
-                                <div class="moodemoji grid grid-cols-2 grid-rows-2 gap-12 mt-8 mb-10">
+                                {{-- The axes picture has its four words (High/Low Energy, Comfortable,
+                                     Uncomfortable) drawn in: one copy per language (2026-10-26). --}}
+                                <div class="moodemoji grid grid-cols-2 grid-rows-2 gap-12 mt-8 mb-10"
+                                    @if (app()->getLocale() !== 'en') style="background-image: url('{{ asset('asset/front/images/emoji/meter-arrow.' . app()->getLocale() . '.svg') }}')" @endif>
                                     <div class="emojigroup egroup1 grid grid-cols-2 grid-rows-2 gap-2">
                                         <div class="items">
                                             <input type="radio" class="hidden" name="modeemoji" id="mdemj1" value="furious">
                                             <label for="mdemj1">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji1.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#D10500]">Furious</div>
+                                                    <div class="heading text-xs font-semobold text-[#D10500]">{{ __('layout.mood.furious') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -734,7 +788,7 @@
                                             <label for="mdemj4">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji4.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#D10500]">Angry</div>
+                                                    <div class="heading text-xs font-semobold text-[#D10500]">{{ __('layout.mood.angry') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -743,7 +797,7 @@
                                             <label for="mdemj2">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji2.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#D10500]">Nervous</div>
+                                                    <div class="heading text-xs font-semobold text-[#D10500]">{{ __('layout.mood.nervous') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -752,7 +806,7 @@
                                             <label for="mdemj3">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji3.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#D10500]">Worried</div>
+                                                    <div class="heading text-xs font-semobold text-[#D10500]">{{ __('layout.mood.worried') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -764,7 +818,7 @@
                                             <label for="mdemj5">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji5.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#FFB100]">Excited</div>
+                                                    <div class="heading text-xs font-semobold text-[#FFB100]">{{ __('layout.mood.excited') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -773,7 +827,7 @@
                                             <label for="mdemj7">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji7.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#FFB100]">Ecstatic</div>
+                                                    <div class="heading text-xs font-semobold text-[#FFB100]">{{ __('layout.mood.ecstatic') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -782,7 +836,7 @@
                                             <label for="mdemj6">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji6.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#FFB100]">Happy</div>
+                                                    <div class="heading text-xs font-semobold text-[#FFB100]">{{ __('layout.mood.happy') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -792,7 +846,7 @@
                                             <label for="mdemj8">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji8.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#FFB100]">Joyful</div>
+                                                    <div class="heading text-xs font-semobold text-[#FFB100]">{{ __('layout.mood.joyful') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -803,7 +857,7 @@
                                             <label for="mdemj9">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji9.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#023181]">Lonely</div>
+                                                    <div class="heading text-xs font-semobold text-[#023181]">{{ __('layout.mood.lonely') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -812,7 +866,7 @@
                                             <label for="mdemj10">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji10.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#023181]">Sad</div>
+                                                    <div class="heading text-xs font-semobold text-[#023181]">{{ __('layout.mood.sad') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -821,7 +875,7 @@
                                             <label for="mdemj11">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji11.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#023181]">Hopeless</div>
+                                                    <div class="heading text-xs font-semobold text-[#023181]">{{ __('layout.mood.hopeless') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -830,7 +884,7 @@
                                             <label for="mdemj12">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji12.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#023181]">Disappointed</div>
+                                                    <div class="heading text-xs font-semobold text-[#023181]">{{ __('layout.mood.disappointed') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -841,7 +895,7 @@
                                             <label for="mdemj15">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji15.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#279348]">Calm</div>
+                                                    <div class="heading text-xs font-semobold text-[#279348]">{{ __('layout.mood.calm') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -850,7 +904,7 @@
                                             <label for="mdemj16">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji16.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#279348]">Serene</div>
+                                                    <div class="heading text-xs font-semobold text-[#279348]">{{ __('layout.mood.serene') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -859,7 +913,7 @@
                                             <label for="mdemj13">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji13.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#279348]">At Ease</div>
+                                                    <div class="heading text-xs font-semobold text-[#279348]">{{ __('layout.mood.at_ease') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -868,7 +922,7 @@
                                             <label for="mdemj14">
                                                 <div class="mdinner">
                                                     <img src="{{ asset('asset/front/images/emoji/mood-emoji14.svg')}}" alt="">
-                                                    <div class="heading text-xs font-semobold text-[#279348]">Content</div>
+                                                    <div class="heading text-xs font-semobold text-[#279348]">{{ __('layout.mood.content') }}</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -880,7 +934,7 @@
                                         Save
                                     </button> -->
                                     <button type="submit" class="themeBtn">
-                                        Save
+                                        {{ __('layout.mood.save') }}
                                     </button>
                                 </div>
                             </form>
@@ -912,8 +966,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="text-lg font-bold text-gray-900">Daily Quiz</h4>
-                                    <p class="text-xs text-gray-500">Test your financial knowledge</p>
+                                    <h4 class="text-lg font-bold text-gray-900">{{ __('layout.quiz.title') }}</h4>
+                                    <p class="text-xs text-gray-500">{{ __('layout.quiz.subtitle') }}</p>
                                 </div>
                             </div>
                             
@@ -925,7 +979,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                             </svg>
-                            <p class="text-sm">Loading question...</p>
+                            <p class="text-sm">{{ __('layout.quiz.loading') }}</p>
                         </div>
 
                         <!-- Question -->
@@ -946,8 +1000,8 @@
                             <button @click="submitAnswer()"
                                 :disabled="!selectedOptionId || submitting"
                                 class="mt-6 w-full py-3 rounded-lg bg-themegreen text-white font-semibold text-sm hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span x-show="!submitting">Submit Answer</span>
-                                <span x-show="submitting">Submitting...</span>
+                                <span x-show="!submitting">{{ __('layout.quiz.submit') }}</span>
+                                <span x-show="submitting">{{ __('layout.quiz.submitting') }}</span>
                             </button>
                         </div>
 
@@ -960,8 +1014,8 @@
                                         <path d="M20 6 9 17l-5-5"/>
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-bold text-green-700 mb-2">Correct! 🎉</h3>
-                                <p class="text-sm text-gray-500">Great job! You got it right.</p>
+                                <h3 class="text-xl font-bold text-green-700 mb-2">{{ __('layout.quiz.correct') }}</h3>
+                                <p class="text-sm text-gray-500">{{ __('layout.quiz.correct_text') }}</p>
                             </div> 
                             <!-- Wrong -->
                              <div x-show="!isCorrect">
@@ -970,13 +1024,13 @@
                                         <path d="M18 6 6 18M6 6l12 12"/>
                                     </svg>
                                 </div>
-                                <h3 class="text-xl font-bold text-red-600 mb-2">Not quite! 💡</h3>
-                                <p class="text-sm text-gray-500 mb-1">The correct answer was:</p>
+                                <h3 class="text-xl font-bold text-red-600 mb-2">{{ __('layout.quiz.wrong') }}</h3>
+                                <p class="text-sm text-gray-500 mb-1">{{ __('layout.quiz.correct_answer_was') }}</p>
                                 <p class="text-sm font-bold text-themegreen" x-text="correctText"></p>
                             </div> 
-                            <button @click="open = false"
+                            <button @click="open = false; window.__quizDone = true"
                                 class="mt-6 w-full py-3 rounded-lg bg-themegreen text-white font-semibold text-sm hover:bg-green-700 transition">
-                                Done
+                                {{ __('layout.quiz.done') }}
                             </button>
                         </div>
 
@@ -984,6 +1038,13 @@
                 </div>
             </div>
         </div>
+        @endif
+        @if ($wantsPlanBox)
+            @include('partials.wants-plan-popup')
+        @endif
+        {{-- the Intermediate's fraud call, after all of them (App\Services\FraudService) --}}
+        @if ($fraudCall = \App\Services\FraudService::ringing(auth()->user()))
+            @include('partials.fraud-call', ['fraud' => $fraudCall, 'moodShown' => !$hasMoodToday, 'quizShown' => !$hasQuizToday, 'planShown' => (bool) $wantsPlanBox])
         @endif
       </div>
 
@@ -996,7 +1057,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="{{ asset('asset/front/js/themeScript.js') }}?ver={{ rand(111, 999) }}" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('asset/front/js/surveys.js') }}?ver={{ rand(111, 999) }}" type="text/javascript"></script>
      @stack('scripts')
      @if (!$hasMoodToday)
     <script>
@@ -1014,7 +1074,7 @@
 
             const selected = document.querySelector('input[name="modeemoji"]:checked');
             if (!selected) {
-                alert("Please select a mood.");
+                alert(@json(__('layout.mood.select_a_mood')));
                 this.isSubmitting = false;
                 return;
             }
@@ -1049,12 +1109,12 @@
                     window.__moodDone = true; // ← add this line
                 } catch (e) {
                     console.error('Invalid JSON:', text);
-                    alert("Server error, please try again.");
+                    alert(@json(__('layout.mood.server_error')));
                 }
             })
             .catch(err => {
                 console.error('Failed:', err);
-                alert("Failed to save mood.");
+                alert(@json(__('layout.mood.save_failed')));
             })
             .finally(() => {
                 this.isSubmitting = false;  // Unlock after done
@@ -1119,7 +1179,7 @@ window.quizPopup = function () {
                 .then(data => {
                     this.loading = false;
 
-                    if (!data.show) return;
+                    if (!data.show) { window.__quizDone = true; return; }
 
                     this.quizId   = data.id;
                     this.question = data.question;
@@ -1130,6 +1190,7 @@ window.quizPopup = function () {
                 })
                 .catch(() => {
                     this.loading = false;
+                    window.__quizDone = true;
                 });
         },
 
@@ -1219,7 +1280,7 @@ window.quizPopup = function () {
                 if (!el) return;
                 const n = parseInt(el.textContent) || 0;
                 const next = Math.max(0, n - 1);
-                if (next === 0) { el.remove(); } else { el.textContent = el === pill ? (next + ' new') : next; }
+                if (next === 0) { el.remove(); } else { el.textContent = el === pill ? @json(__('layout.new_count')).replace(':count', next) : next; }
             });
         }
 

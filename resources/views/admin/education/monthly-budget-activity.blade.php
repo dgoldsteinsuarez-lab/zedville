@@ -4,8 +4,18 @@
 
 @section('content')
     <div class="adminHeading">
-        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Needs, Wants & Savings Match</h1>
+        <h1 class="d-flex align-items-center gap-2 theme-text-dark fw-500 fs-16 mab-20">FinHero task Activity Manager @include('admin.partials.level-badge')</h1>
     </div>
+    @include('admin.finhero._task-tabs')
+    @php $topPoints = \App\Models\FinheroActivityDefault::where('activity_key', 'needs_wants_savings_match')->value('max_points') ?: 3; @endphp
+    <p class="text-muted small">
+        Assign the activity to a class here. FinHero points: {{ $topPoints }} with no mistakes, one less with 1-2 mistakes, two less with more (at least 1) -
+        @if (auth()->user()->isSuperAdmin())
+            <a href="{{ url('admin/finhero/point-defaults') }}">change them in FinHero Point Defaults</a>.
+        @else
+            set by the Admin in FinHero Point Defaults.
+        @endif
+    </p>
     <div class="row">
         <div class="themeCard card card-custom card-stretch gutter-b mab-15">
             <div class="card-body pall-30">
@@ -22,10 +32,11 @@
 
                                 <select class="form-select" name="cid" id="cid">
                                     <option value="">Select Class</option>
+                                    @include('admin.partials.assignment-scope-options')
 
                                     @foreach($classes as $class)
                                         <option value="{{ $class->id }}">
-                                            {{ $class->name }}
+                                            {{ $class->label }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -99,7 +110,7 @@
 
                                         <td>{{ $item->school_name ?? 'Default' }}</td>
 
-                                        <td>{{ $item->class_name }}</td>
+                                        <td>{{ \App\Support\ClassLabel::make($item->class_grade_name, $item->class_name) }}</td>
 
                                         <td>
                                             {{ $item->required ? 'Required' : 'Optional' }}

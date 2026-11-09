@@ -1,0 +1,50 @@
+<?php
+
+// Mitmach-Aufgaben - Warenkorb-Update (Substitutionsgüter).
+return [
+    'substitute_goods_title' => 'Substitutionsgüter: mein Einkaufskorb',
+    'shopping_basket_update' => 'Substitutionsgüter: mein Einkaufskorb',
+    'special_challenge_shopping_basket_update' => '🛒 Achtung im Laden: Einige Produkte sind ausverkauft!',
+    'a_few_items_in_your_shopping' => 'Oh nein - einige Produkte in deinem Einkaufskorb sind diesen Monat im Supermarkt <strong>ausverkauft</strong>. Das passiert im echten Leben ständig: Lieferanten haben nichts mehr, Preise steigen oder ein Produkt verschwindet aus dem Regal. Clevere Käufer passen sich an! Ein Produkt, das denselben Zweck erfüllt wie ein anderes, heißt <strong>Substitutionsgut</strong> (denk an Hähnchen und Tofu oder Butter und Margarine).',
+    'your_challenge' => 'Deine Mission:',
+    'look_at_your_current_shopping_basket' => 'Geh in den Supermarkt, in den Bereich deiner Ernährung, und such "Mein Einkaufskorb".',
+    'unavailable_rule' => 'Jedes Produkt mit <strong>"Ausverkauft"</strong> braucht ein Ersatzprodukt.',
+    'choose_a_replacement_from_the_other' => 'Tausche es gegen ein anderes Produkt aus dem Bereich deiner Ernährung.',
+    'keep_your_basket_at_the_same' => 'Es ist ein direkter Tausch: eins raus, eins rein. Dein Korb behält dieselbe Anzahl an Produkten.',
+    'substitution_strategy' => 'Tipps für einen cleveren Tausch:',
+    'try_to_replace_an_item_with' => 'Wähle etwas mit demselben Zweck - ein Eiweiß für ein Eiweiß, ein Gemüse für ein Gemüse.',
+    'consider_the_cost_difference_your_swap' => 'Schau auf den Preis - dein Tausch verändert, was dein Korb kostet.',
+    'think_about_how_the_replacement_affects' => 'Überleg, warum du das erste Produkt gewählt hast, und behalte dieses Ziel.',
+    'choose_the_best_alternative_available_not' => 'Das Billigste ist nicht immer das Beste - achte auf das beste Preis-Leistungs-Verhältnis.',
+    'checking_your_basket' => 'Dein Korb wird geprüft…',
+    'one_item_needs' => ':count Produkt braucht noch ein Ersatzprodukt.',
+    'items_need' => ':count Produkte brauchen noch ein Ersatzprodukt.',
+    'nothing_in_your_basket_needs_a' => '✅ Alles erledigt - gerade braucht kein Produkt in deinem Korb einen Ersatz.',
+    'not_assigned' => 'Diese Aktivität hat für deine Klasse noch nicht begonnen - deine Lehrkraft schaltet sie frei.',
+    'go_to_my_supermarket' => 'Zu meinem Supermarkt →',
+
+    // Einfache Aufgaben (Admin > Engagement > Easy Activities, 2026-10-29).
+    'easy_tag' => 'Einfache Aufgabe',
+    'easy_required' => 'Pflicht',
+    'easy_optional' => 'Freiwillig',
+    'easy_badge' => 'Zählt für dein Abzeichen „:badge“',
+    'easy_until' => 'Bis zum :date',
+    'easy_done' => 'Erledigt! Deine Überweisung ist angekommen.',
+    'easy_start' => 'Jetzt überweisen',
+    'easy_transfer_step1' => 'Frag eine Mitschülerin oder einen Mitschüler nach Kontonummer (oder IBAN) und Namen, wie er auf dem Konto steht. Beides steht unter Bank → „Karte & Kontodaten“.',
+    'easy_transfer_step2' => 'Geh zu „Überweisungen & Zahlungen“ → „An einen Freund oder eine Freundin“. Gib die Daten und den Betrag ein und schreib unter „Verwendungszweck“, wofür das Geld ist.',
+    'easy_transfer_step2_min' => 'Geh zu „Überweisungen & Zahlungen“ → „An einen Freund oder eine Freundin“. Überweise mindestens :amount und schreib unter „Verwendungszweck“, wofür das Geld ist.',
+    'easy_transfer_step3' => 'Prüfe die Zusammenfassung und bestätige. Die Aufgabe ist erledigt, sobald das Geld auf dem Konto ankommt.',
+
+    // Match the words (Hybrid Classes > Language Activities, 2026-10-29).
+    'words_intro' => 'Ordne jedem Wort seine Bedeutung auf Englisch zu.',
+    'words_how' => 'Tippe auf ein Wort und dann auf seine Bedeutung.',
+    'words_word' => 'Wort',
+    'words_meaning' => 'Bedeutung',
+    'words_try_again' => 'Nicht ganz – versuch eine andere Bedeutung.',
+    'words_pick_first' => 'Tippe zuerst links auf ein Wort.',
+    'words_done' => 'Super! Du hast alle Wörter zugeordnet.',
+    'words_counted' => 'Das zählt für dein Abzeichen „Beteiligung“.',
+    'words_already' => 'Du hast diese Aufgabe schon gemacht. Du kannst zum Üben noch einmal spielen.',
+    'words_practice' => 'Diese Aufgabe läuft gerade nicht für deine Klasse: Du kannst üben, aber es zählt nicht.',
+];

@@ -42,10 +42,7 @@ class EngagementBadgeNoRequiredEventsTest extends TestCase
 
         $response = $this->actingAs($student)->get('/profile');
 
-        $response->assertOk();
-        // $engagement is embedded as raw JSON inside a <script> block as
-        // `engData` (@json() in a non-attribute context doesn't
-        // HTML-escape) - check that specific blob's "monthly" value.
-        $response->assertSee('engData = {"monthly":"NONE"', false);
+        $response->assertOk()->assertSee('Your class has no required activities this month yet.');
+        $this->assertSame('NONE', $response->viewData('badges')['engagement']['current']['badge']);
     }
 }

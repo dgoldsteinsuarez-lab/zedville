@@ -28,6 +28,10 @@
                     <textarea name="question_text" class="form-control" rows="2" required></textarea>
                 </div>
                 <div class="mb-3">
+                    <label class="form-label">Why is the right answer right? (optional - shown when a student checks the answers after a practice, never for a real exam)</label>
+                    <textarea name="explanation" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
                     <label class="form-label">Image (chart/graphic, optional)</label>
                     <input type="file" name="image" class="form-control" accept="image/png,image/jpeg,image/webp">
                 </div>
@@ -63,6 +67,9 @@
                     <input type="hidden" name="sort_order" value="{{ $question->sort_order }}">
                     <div class="mb-2">
                         <textarea name="question_text" class="form-control" rows="2" required>{{ $question->question_text }}</textarea>
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="explanation" class="form-control form-control-sm" rows="2" placeholder="Why is the right answer right? (optional)">{{ $question->explanation }}</textarea>
                     </div>
                     <div class="mb-2 d-flex align-items-center gap-2">
                         @if ($question->image)

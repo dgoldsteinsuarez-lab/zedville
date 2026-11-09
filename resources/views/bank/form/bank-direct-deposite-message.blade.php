@@ -1,24 +1,24 @@
 @extends('layouts.profile')
 
-@section('title', 'Direct Deposit Authorization form')
+@section('title', __('bank.direct_deposit_authorization_form'))
 
 @section('content')
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap">Direct Deposit Authorization</h1>
+    <h1 class="text-xl font-bold whitespace-nowrap">{{ __('bank.direct_deposit_authorization') }}</h1>
 </div>
 
 <div class="grid grid-cols-1 gap-5 mt-6">
     <div class="w-full bg-white border border-color-[#D2DDDB] rounded p-10 userProfileDtls">
-        <p>Hello <strong>{{ $user->nickname }}</strong>,</p>
-        <p>Please take <span style="color:#3c41fb">two quick steps</span> to authorize your salary deposits and automatic bill payments.</p>
-        <p><strong>Set Up Direct Deposit for Your Salary</strong></p>
-        <p>Authorize the city to deposit your monthly salary directly into your account—it's the fastest and most secure way to get paid.</p>
-        <p>You'll authorize:</p>
+        <p>{!! __('bank.hello_strong_nickname_strong', ['nickname' => e($user->display_name)]) !!}</p>
+        <p>{!! __('bank.please_take_two_quick_steps') !!}</p>
+        <p><strong>{{ __('bank.set_up_direct_deposit_for_your') }}</strong></p>
+        <p>{{ __('bank.authorize_the_city_to_deposit_your') }}</p>
+        <p>{{ __('bank.you_ll_authorize') }}</p>
         <ul>
-            <li>Deposit 100% of your salary into your Universal Bank account</li>
+            <li>{{ __('bank.deposit_100_of_your_salary_into') }}</li>
         </ul>
         <br>
-        <a href="{{ route('bank.direct_deposite') }}" class="themeBtn mt-6 inline-block">Set Up Direct Deposit</a>
+        <a href="{{ route('bank.direct_deposite') }}" class="themeBtn mt-6 inline-block">{{ __('bank.set_up_direct_deposit') }}</a>
     </div>
 </div>
 @endsection

@@ -161,7 +161,8 @@ function render(data) {
         document.getElementById('admin-monthly-label').textContent = m.label;
         document.getElementById('admin-monthly-breakdown').textContent =
             `Required: ${current.required_completed}/${current.required_assigned} | ` +
-            `Optional: ${current.optional_completed} | ` +
+            `Optional: ${current.optional_completed}/${current.optional_assigned} | ` +
+            `On their own: ${current.own_completed} | ` +
             `Participation: ${current.participation_points}/15 pts`;
 
         if (current.is_overridden) {
@@ -187,7 +188,7 @@ function render(data) {
         row.innerHTML = `
             <td class="py-3 pr-4 font-medium text-gray-700">${MONTH_NAMES[r.month-1]} ${r.year}</td>
             <td class="py-3 pr-4 text-center text-gray-600">${r.required_completed}/${r.required_assigned}</td>
-            <td class="py-3 pr-4 text-center text-gray-600">${r.optional_completed}</td>
+            <td class="py-3 pr-4 text-center text-gray-600">${r.optional_completed}/${r.optional_assigned}${r.own_completed ? ` (+${r.own_completed} own)` : ''}</td>
             <td class="py-3 pr-4 text-center text-gray-600">${r.participation_points}</td>
             <td class="py-3 pr-4 text-center">
                 <span class="px-2 py-1 rounded-full text-xs font-semibold"

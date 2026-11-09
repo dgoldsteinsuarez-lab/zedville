@@ -99,8 +99,27 @@ class TutorStudentController extends Controller
 
         $balance = Transaction1::where('user_id', $studentId)->latest('id')->value('balance') ?? 0;
 
-        $latestStatement = BankStatement::where('user_id', $studentId)->latest('year')->latest('month')->first();
-        $budget = $latestStatement->statement_data['summary'] ?? null;
+        // This month's budget from the bank's own statement (bank review,
+        // 2026-10-29: it read bank_statements, which only the first month
+        // has), as shares of the salary, and the savings accounts when open.
+        $account = \App\Models\BankAccount::where('student_id', $studentId)->first();
+        $budget = null;
+        $savingsAccounts = [];
+        if ($account) {
+            $summary = app(\App\Services\BankStatementService::class)->summary($account);
+            $base = $summary['salary'] > 0 ? $summary['salary'] : $summary['needs'] + $summary['wants'] + $summary['savings'];
+            $share = fn ($amount) => $base > 0 ? (int) round($amount / $base * 100) : 0;
+            $budget = [
+                'totalNeeds' => $summary['needs'], 'needsPercentage' => $share($summary['needs']),
+                'totalWants' => $summary['wants'], 'wantsPercentage' => $share($summary['wants']),
+                'totalSavings' => $summary['savings'], 'savingsPercentage' => $share($summary['savings']),
+            ];
+            foreach (['emergency' => 'Emergency Fund', 'money_market' => 'Money Market'] as $key => $label) {
+                if (\App\Services\SavingsLedger::isOpen($account, $key)) {
+                    $savingsAccounts[$label] = \App\Services\SavingsLedger::balance($account, $key);
+                }
+            }
+        }
 
         // "Evidence of learning" (bugs.md, 2026-10-21) - a real exam locks
         // to one attempt (AcademyController::submit()), so this is always
@@ -119,6 +138,7 @@ class TutorStudentController extends Controller
             'moodHistory',
             'balance',
             'budget',
+            'savingsAccounts',
             'realExamAttempts'
         ));
     }

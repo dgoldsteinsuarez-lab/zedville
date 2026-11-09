@@ -1,8 +1,13 @@
 @extends('layouts.profile')
+@section('no_page_back', '1'){{-- has its own back link at the top --}}
 
 @section('title', 'Wellbeing Room - Educational Finance Department')
 
 @section('content')
+@php
+    $categoryName = fn ($category) => \Illuminate\Support\Facades\Lang::has('cityhall.categories.' . $category)
+        ? __('cityhall.categories.' . $category) : ucfirst($category);
+@endphp
 @push('styles')
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -25,9 +30,6 @@
     }
 
     /* ── BREADCRUMB ── */
-    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #5C5C5C; }
-    .breadcrumb a { color: #5C5C5C; text-decoration: none; display: flex; align-items: center; gap: 4px; }
-    .breadcrumb a:hover { color: var(--teal); }
 
     /* ── HEADER ── */
     .wb-header {
@@ -44,13 +46,6 @@
     }
     .wb-title { font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: #222222; }
     .wb-subtitle { font-size: 12px; color: #5C5C5C; margin-top: 2px; }
-    .wb-back {
-      font-size: 12px; font-weight: 500; color: #000;
-      background: #fff; border: 1px solid #000; box-shadow: 0 3px 0 #000;
-      border-radius: 30px; padding: 6px 14px; text-decoration: none;
-      display: flex; align-items: center; gap: 5px; transition: 0.2s;
-    }
-    .wb-back:hover { background: #fff; color: #000; transform: translateY(3px); box-shadow: 0 1px 0 #000; }
 
     /* ── FILTER BAR ── */
     .filter-bar {
@@ -71,7 +66,7 @@
 
     /* ── SECTION LABEL ── */
     .sec-label {
-      font-size: 11px; font-weight: 500; text-transform: uppercase;
+      font-size: 12px; font-weight: 500; text-transform: uppercase;
       letter-spacing: 0.08em; color: #999999;
     }
 
@@ -92,7 +87,7 @@
     }
     .featured-body { flex: 1; }
     .featured-tag {
-      display: inline-block; font-size: 10px; font-weight: 500;
+      display: inline-block; font-size: 12px; font-weight: 500;
       padding: 2px 8px; border-radius: 8px; margin-bottom: 8px;
     }
     .tag-financial { background: var(--gold-light); color: var(--gold); }
@@ -102,7 +97,7 @@
     .tag-video     { background: var(--blue-light); color: var(--blue); }
 
     .new-badge {
-      display: inline-block; font-size: 10px; font-weight: 500;
+      display: inline-block; font-size: 12px; font-weight: 500;
       padding: 2px 7px; border-radius: 8px; margin-left: 6px;
       background: rgba(1,105,80,0.12); color: var(--teal);
       vertical-align: middle;
@@ -112,7 +107,7 @@
       color: #222222; line-height: 1.5; margin-bottom: 6px;
     }
     .featured-desc { font-size: 13px; color: #5C5C5C; line-height: 1.6; margin-bottom: 10px; }
-    .featured-meta { font-size: 11px; color: #999999; display: flex; align-items: center; gap: 12px; }
+    .featured-meta { font-size: 12px; color: #999999; display: flex; align-items: center; gap: 12px; }
     .read-more {
       font-size: 12px; font-weight: 500; color: var(--teal);
       display: flex; align-items: center; gap: 4px; margin-top: 10px;
@@ -148,7 +143,7 @@
       color: #222222; line-height: 1.5;
     }
     .article-desc { font-size: 12px; color: #5C5C5C; line-height: 1.5; }
-    .article-meta { font-size: 11px; color: #999999; display: flex; align-items: center; gap: 8px; margin-top: auto; }
+    .article-meta { font-size: 12px; color: #999999; display: flex; align-items: center; gap: 8px; margin-top: auto; }
 
     /* ── VIDEO CARD ── */
     .video-card {
@@ -174,10 +169,10 @@
       font-family: 'Lora', serif; font-size: 13px; font-weight: 600;
       color: #222222; line-height: 1.5;
     }
-    .video-meta { font-size: 11px; color: #999999; display: flex; align-items: center; gap: 8px; margin-top: auto; }
+    .video-meta { font-size: 12px; color: #999999; display: flex; align-items: center; gap: 8px; margin-top: auto; }
     .video-duration {
       display: inline-flex; align-items: center; gap: 3px;
-      font-size: 10px; font-weight: 500;
+      font-size: 12px; font-weight: 500;
       background: var(--blue-light); color: var(--blue);
       padding: 2px 7px; border-radius: 8px;
     }
@@ -236,44 +231,38 @@
     }
   </style>  
 @endpush
+{{-- Back top left, where every page has it (Daniel, 2026-10-27) --}}
+<a href="{{ route('education.city-hall') }}" class="zvBackBtn wb-back inline-flex items-center gap-2 py-2 px-4 text-sm">
+  <span aria-hidden="true">&larr;</span> {{ __('cityhall.back_to_city_hall') }}
+</a>
 <div class="wb-layout">
-
-  <!-- BREADCRUMB -->
-  <div class="breadcrumb">
-    <a href="{{ route('education.main-hall') }}"><i class="ti ti-building-community" aria-hidden="true"></i> City Hall</a>
-    <span style="color:#D2DDDB;">›</span>
-    <span>Wellbeing Room</span>
-  </div>
 
   <!-- HEADER -->
   <div class="wb-header">
     <div class="wb-header-left">
       <div class="wb-icon"><i class="ti ti-heart" aria-hidden="true"></i></div>
       <div>
-        <div class="wb-title">Wellbeing Room</div>
-        <div class="wb-subtitle">Articles and videos to balance your life</div>
+        <div class="wb-title">{{ __('cityhall.wellbeing_room') }}</div>
+        <div class="wb-subtitle">{{ __('cityhall.wellbeing_desc') }}</div>
       </div>
     </div>
-    <a href="{{ route('education.city-hall') }}" class="wb-back">
-      <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to City Hall
-    </a>
   </div>
 
   <!-- FILTER BAR -->
   <!-- IT TEAM: filter buttons show/hide cards by category using data-category attribute -->
   <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterContent('all')">All</button>
+    <button class="filter-btn active" onclick="filterContent('all')">{{ __('cityhall.all') }}</button>
     <button class="filter-btn" onclick="filterContent('financial')">
-      <i class="ti ti-coins" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> Financial
+      <i class="ti ti-coins" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> {{ __('cityhall.categories.financial') }}
     </button>
     <button class="filter-btn" onclick="filterContent('stress')">
-      <i class="ti ti-brain" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> Stress
+      <i class="ti ti-brain" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> {{ __('cityhall.categories.stress') }}
     </button>
     <button class="filter-btn" onclick="filterContent('lifestyle')">
-      <i class="ti ti-sun" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> Lifestyle
+      <i class="ti ti-sun" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> {{ __('cityhall.categories.lifestyle') }}
     </button>
     <button class="filter-btn" onclick="filterContent('video')">
-      <i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> Videos
+      <i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> {{ __('cityhall.videos') }}
     </button>
   </div>
 
@@ -285,7 +274,7 @@
 <div id="featured-section">
 
     <div class="sec-label" style="margin-bottom:9px;">
-        Featured
+        {{ __('cityhall.featured') }}
     </div>
 
     <div class="featured-card"
@@ -299,12 +288,12 @@
         <div class="featured-body">
 
             <span class="featured-tag tag-{{ $featured->category }}">
-                {{ ucfirst($featured->category) }}
+                {{ $categoryName($featured->category) }}
             </span>
 
             @if($featured->featured)
                 <span class="new-badge">
-                    Featured
+                    {{ __('cityhall.featured') }}
                 </span>
             @endif
 
@@ -324,14 +313,13 @@
                 </span>
 
                 <span>
-                    {{ $featured->published_at?->format('d M Y') }}
+                    {{ $featured->published_at?->translatedFormat('d M Y') }}
                 </span>
 
             </div>
 
             <div class="read-more">
-
-                Read article
+                {{ __('cityhall.read_article') }}
 
                 <i class="ti ti-arrow-right"></i>
 
@@ -346,7 +334,7 @@
 @endif
 
   <!-- CONTENT GRID -->
-  <div class="sec-label">All content</div>
+  <div class="sec-label">{{ __('cityhall.all_content') }}</div>
   <div class="content-grid" id="contentGrid">
 
     <!-- IT TEAM: repeat article-card block for each published article from wellbeing_posts WHERE type='article' -->
@@ -363,7 +351,7 @@
     </div>
 
     <span class="featured-tag tag-{{ $article->category }}">
-        {{ ucfirst($article->category) }}
+        {{ $categoryName($article->category) }}
     </span>
 
     <div class="article-title">
@@ -418,14 +406,12 @@
     </div>
 
     <span class="featured-tag tag-video">
-
-        Video
-
+        {{ __('cityhall.video') }}
     </span>
 
     <span class="featured-tag tag-{{ $video->category }}" style="margin-left:4px;">
 
-        {{ ucfirst($video->category) }}
+        {{ $categoryName($video->category) }}
 
     </span>
 
@@ -456,15 +442,15 @@
 </div><!-- /wb-layout -->
 @foreach($articles as $article)
 
-<div id="article-data-{{ $article->id }}" style="display:none;">
+<div id="article-data-{{ $article->id }}" data-category="{{ $article->category }}" style="display:none;">
 
     <div class="title">{{ $article->title }}</div>
 
-    <div class="category">{{ ucfirst($article->category) }}</div>
+    <div class="category">{{ $categoryName($article->category) }}</div>
 
     <div class="read">{{ $article->read_time }}</div>
 
-    <div class="date">{{ $article->published_at?->format('d M Y') }}</div>
+    <div class="date">{{ $article->published_at?->translatedFormat('d M Y') }}</div>
 
     <div class="body">
 
@@ -479,24 +465,18 @@
 <!-- IT TEAM: populate modal content dynamically from DB when article is clicked -->
 <div class="modal-overlay" id="articleModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()" aria-label="Close">
+    <button class="modal-close" onclick="closeModal()" aria-label="{{ __('cityhall.close') }}">
       <i class="ti ti-x" aria-hidden="true"></i>
     </button>
     <div class="modal-tag">
-      <span class="featured-tag tag-financial" id="modalTag">Financial</span>
+      <span class="featured-tag" id="modalTag"></span>
     </div>
-    <div class="modal-title" id="modalTitle">Three simple habits to reduce financial stress before exams</div>
+    <div class="modal-title" id="modalTitle"></div>
     <div class="modal-meta">
-      <span id="modalReadTime"><i class="ti ti-clock" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 4 min read</span>
-      <span id="modalDate">Published 2 days ago</span>
+      <span id="modalReadTime"></span>
+      <span id="modalDate"></span>
     </div>
     <div class="modal-body" id="modalBody">
-      <!-- IT TEAM: replace with article content_text from DB -->
-      <p>Feeling anxious about money is more common than you think — especially around exam season when pressure builds up from every direction. The good news is that you do not need to earn more or solve everything at once. Small daily habits can make a big difference in how you feel.</p>
-      <p><strong>Habit 1 — Check your balance once a day.</strong> Just one glance, every morning. Not to judge yourself, just to know. Uncertainty is what causes anxiety, not the number itself. When you know where you stand, your brain stops worrying in the background.</p>
-      <p><strong>Habit 2 — Separate needs from wants before spending.</strong> Before any purchase, ask yourself: is this a need or a want? You do not have to say no to wants — just be honest with yourself. Awareness is the first step.</p>
-      <p><strong>Habit 3 — Set one small savings goal.</strong> It does not matter how much. Even saving 50 zeds a week gives you a sense of progress and control. Progress, not perfection, is what builds confidence.</p>
-      <p>These three habits take less than five minutes a day. Start with just one this week and see how you feel.</p>
     </div>
   </div>
 </div>
@@ -507,7 +487,7 @@
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     event.currentTarget.classList.add('active');
 
-    const featured = document.getElementById('featured-section');
+    const featured = document.getElementById('featured-section') || { style: {} };
     const cards = document.querySelectorAll('#contentGrid [data-category]');
 
     if (category === 'all') {
@@ -520,7 +500,7 @@
       });
     } else {
       featured.style.display =
-        document.querySelector('.featured-card').dataset.category === category ? 'block' : 'none';
+        document.querySelector('.featured-card')?.dataset.category === category ? 'block' : 'none';
       cards.forEach(c => {
         c.style.display = c.dataset.category.includes(category) ? 'flex' : 'none';
       });
@@ -528,61 +508,22 @@
   }
 
   // ── OPEN ARTICLE MODAL ──
-  // IT TEAM: replace static content with fetch to /city-hall/wellbeing/{id}
-  // IT TEAM: also POST /city-hall/wellbeing/{id}/seen to mark as viewed
-  const articleData = {
-    'featured': {
-      tag: 'Financial', tagClass: 'tag-financial',
-      title: 'Three simple habits to reduce financial stress before exams',
-      readTime: '4 min read', date: 'Published 2 days ago',
-      body: document.getElementById('modalBody').innerHTML
-    },
-    '1': {
-      tag: 'Stress', tagClass: 'tag-stress',
-      title: 'How to recognise when stress is becoming too much',
-      readTime: '3 min read', date: 'Published 1 week ago',
-      body: '<p>There is a difference between useful pressure — the kind that motivates you to study or prepare — and harmful stress that drains your energy and affects your health. Learning to tell the difference is a life skill.</p><p>Signs that stress is becoming too much include: difficulty sleeping, loss of appetite, feeling irritable or withdrawn, trouble concentrating, and a general sense of dread. If you notice more than two of these regularly, it is worth talking to someone.</p><p>The first step is simply to name it. Say to yourself: "I am stressed right now." This simple act activates the rational part of your brain and reduces the emotional response. From there, small actions — a walk, a conversation, or even just a glass of water — can start to shift your state.</p>'
-    },
-    '2': {
-      tag: 'Financial', tagClass: 'tag-financial',
-      title: 'How budgeting helps you feel more in control of your week',
-      readTime: '5 min read', date: 'Published 2 days ago',
-      body: '<p>Most people think of a budget as a restriction — a list of things you cannot have. But the real purpose of a budget is the opposite. A budget is a plan that tells you exactly what you can have, guilt-free, once you have covered your essentials.</p><p>When you do not have a budget, every purchase comes with a small background worry: "Can I afford this? Am I spending too much?" That constant uncertainty is exhausting. A budget removes that uncertainty. You know your numbers. You feel in control.</p><p>Start with just three categories: Needs, Wants, and Savings. Use the 50/30/20 rule as a guide — 50% for needs, 30% for wants, 20% for savings. Adjust based on your reality. The exact percentages matter less than the habit of planning.</p>'
-    },
-    '3': {
-      tag: 'Lifestyle', tagClass: 'tag-lifestyle',
-      title: 'The connection between sleep and good financial decisions',
-      readTime: '4 min read', date: 'Published 5 days ago',
-      body: '<p>Research consistently shows that sleep-deprived people make worse financial decisions. They are more impulsive, less able to evaluate long-term consequences, and more susceptible to emotional spending.</p><p>One study found that people who slept less than 6 hours a night spent an average of 20% more on impulse purchases than those who slept 8 hours. The brain, when tired, defaults to short-term reward over long-term planning.</p><p>The practical implication is simple: if you are going to make an important financial decision — a big purchase, a savings commitment, a budget review — do it when you are rested. Never when you are tired, hungry, or stressed.</p>'
-    },
-    '4': {
-      tag: 'Lifestyle', tagClass: 'tag-lifestyle',
-      title: 'Five free things to do when you feel overwhelmed',
-      readTime: '3 min read', date: 'Published 1 week ago',
-      body: '<p>When everything feels like too much, the instinct is often to spend — on food, entertainment, or comfort shopping. But you do not need to spend money to feel better. Here are five things that actually work.</p><p><strong>1. Walk for 10 minutes.</strong> Outside if possible. Movement shifts your brain chemistry in minutes.</p><p><strong>2. Write three things that went well today.</strong> Even small ones. This retrains your brain to notice the positive.</p><p><strong>3. Call or message a friend.</strong> Not to vent — just to connect. Human contact is one of the fastest mood-shifters.</p><p><strong>4. Tidy one small space.</strong> A desk, a drawer, a corner. External order creates internal calm.</p><p><strong>5. Do nothing for five minutes.</strong> No phone, no music. Just sit. It feels uncomfortable at first, then restorative.</p>'
-    },
-    '5': {
-      tag: 'Stress', tagClass: 'tag-stress',
-      title: 'Why talking about money is not embarrassing',
-      readTime: '4 min read', date: 'Published 2 weeks ago',
-      body: '<p>In most cultures, money is a taboo topic. We are taught not to ask how much someone earns, not to talk about debt, not to admit we are struggling. This silence causes enormous harm — because it means people deal with financial stress alone, without support or information.</p><p>The truth is that almost everyone worries about money at some point. The students who seem most confident about finances are often the ones who had conversations about money at home — not because they are naturally better with money, but because they had more practice talking about it.</p><p>Start small. Talk to a trusted friend about one financial concern. Ask your tutor a question about something you do not understand. Read one article about personal finance. Every conversation makes the next one easier.</p>'
-    },
-  };
-
+  // Shows the published article from its hidden #article-data-{id} block above.
+  // (It used to show built-in sample articles instead of the real ones.)
   function openArticle(id) {
-    const data = articleData[id];
-    if (!data) return;
-    document.getElementById('modalTag').textContent    = data.tag;
-    document.getElementById('modalTag').className      = 'featured-tag ' + data.tagClass;
-    document.getElementById('modalTitle').textContent  = data.title;
-    document.getElementById('modalReadTime').innerHTML = '<i class="ti ti-clock" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ' + data.readTime;
-    document.getElementById('modalDate').textContent   = data.date;
-    document.getElementById('modalBody').innerHTML     = data.body;
+    const source = document.getElementById('article-data-' + id);
+    if (!source) return;
+    const tag = document.getElementById('modalTag');
+    tag.textContent = source.querySelector('.category').textContent.trim();
+    tag.className = 'featured-tag tag-' + source.dataset.category;
+    document.getElementById('modalTitle').textContent = source.querySelector('.title').textContent.trim();
+    const readTime = document.getElementById('modalReadTime');
+    readTime.innerHTML = '<i class="ti ti-clock" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ';
+    readTime.append(source.querySelector('.read').textContent.trim());
+    document.getElementById('modalDate').textContent = source.querySelector('.date').textContent.trim();
+    document.getElementById('modalBody').innerHTML = source.querySelector('.body').innerHTML;
     document.getElementById('articleModal').classList.add('open');
     document.body.style.overflow = 'hidden';
-
-    // IT TEAM: mark as seen
-    // fetch('/city-hall/wellbeing/' + id + '/seen', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content } });
   }
 
   function closeModal() {
@@ -601,7 +542,7 @@
   // ── OPEN VIDEO ──
   // IT TEAM: replace URL with actual video_url from DB
   function openVideo(url) {
-    if (confirm('This will open an external video. Continue?')) {
+    if (confirm(@json(__('cityhall.external_video_confirm')))) {
       window.open(url, '_blank', 'noopener');
       // IT TEAM: also mark as seen
       // fetch('/city-hall/wellbeing/' + id + '/seen', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content } });

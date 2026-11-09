@@ -16,7 +16,9 @@ class LanguageController extends Controller
 {
     public function switch(Request $request)
     {
-        $validated = $request->validate(['language' => 'required|in:en,es']);
+        $validated = $request->validate([
+            'language' => ['required', \Illuminate\Validation\Rule::in(array_keys(config('zedville.languages')))],
+        ]);
 
         $user = Auth::user();
         $class = optional($user->gradeRelation);

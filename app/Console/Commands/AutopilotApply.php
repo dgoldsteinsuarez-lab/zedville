@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\AutopilotPeriod;
 use App\Models\BankAccount;
-use App\Models\Transaction1;
 use App\Models\User;
+use App\Services\AutopilotService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -59,37 +59,19 @@ class AutopilotApply extends Command
         $recorded = 0;
         foreach (array_unique($targets) as $userId) {
             $user = User::find($userId);
-            $account = BankAccount::where('student_id', $userId)->first();
-            if (!$user || !$account) {
+            if (!$user || !BankAccount::where('student_id', $userId)->exists()) {
                 $this->line("  skip user {$userId}: no account");
                 continue;
             }
 
-            $already = Transaction1::where('user_id', $userId)->where('category', 'Autopilot')
-                ->where('meta', 'like', '%"autopilot_month":"' . $key . '"%')->exists();
-            if ($already) {
+            // a period set later may have written this month's line already
+            if (AutopilotService::monthRecorded($userId, $year, $month)) {
                 $this->line("  {$user->nickname}: already recorded for {$key}");
                 continue;
             }
 
             $this->line("  {$user->nickname}: " . ($write ? 'recording' : 'would record') . " \"{$label}\"");
-            if ($write) {
-                DB::transaction(function () use ($user, $account, $label, $key, $to) {
-                    $last = Transaction1::where('user_id', $user->id)->lockForUpdate()->latest('id')->first();
-                    Transaction1::create([
-                        'user_id' => $user->id,
-                        'sid' => $user->sid,
-                        'bank_account_id' => $account->id,
-                        'transaction_date' => $to,
-                        'description' => $label,
-                        'type' => 'credit',
-                        'category' => 'Autopilot',
-                        'amount' => 0,
-                        'balance' => $last->balance ?? 0,
-                        'is_penalty' => 0,
-                        'meta' => ['autopilot_month' => $key],
-                    ]);
-                });
+            if ($write && AutopilotService::recordMonth($user, $year, $month, $to)) {
                 $recorded++;
             }
         }

@@ -10,6 +10,7 @@
 <div class="themeCard card card-custom card-stretch gutter-b mab-15">
     <div id="msg" style="text-align:center; margin:20px 0;"></div>
     <div class="card-body pall-30">
+        <p class="text-muted small">A Grade can start in a different month from its school: Grades &rsaquo; Manage Classes &rsaquo; Start month.</p>
         <div class="themeTable">
             <div class="table-responsive">
                 <table class="table w-100">

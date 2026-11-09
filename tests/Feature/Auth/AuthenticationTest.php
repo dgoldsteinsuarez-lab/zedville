@@ -33,7 +33,8 @@ class AuthenticationTest extends TestCase
         $response = $this->post('/login', ['email' => $student->email, 'password' => 'password']);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('CitizenActivation.bankAccount'));
+        // The Mayor's welcome announcement comes first (2026-10-23).
+        $response->assertRedirect(route('CitizenActivation.index'));
     }
 
     public function test_a_student_who_finished_citizen_activation_lands_on_the_dashboard(): void

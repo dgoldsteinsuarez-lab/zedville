@@ -48,10 +48,10 @@ class FinheroActivityFormTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 1]);
         $class = $this->aClass();
-        FinheroActivityDefault::create(['activity_key' => 'task_9', 'type' => 'task', 'max_points' => 42]);
+        FinheroActivityDefault::create(['activity_key' => 'task_99', 'type' => 'task', 'max_points' => 42]);
 
         $response = $this->actingAs($admin)->post('/admin/finhero/activities', [
-            'activity_key' => 'task_9',
+            'activity_key' => 'task_99',
             'activity_name' => 'Test Task',
             'position' => 'required',
             'type' => 'task',
@@ -63,7 +63,7 @@ class FinheroActivityFormTest extends TestCase
         // The form never collects max_points at all any more - the row
         // itself stays null, relying entirely on the global default.
         $this->assertDatabaseHas('finhero_activity_registry', [
-            'activity_key' => 'task_9',
+            'activity_key' => 'task_99',
             'max_points' => null,
         ]);
     }
@@ -74,7 +74,7 @@ class FinheroActivityFormTest extends TestCase
         $class = $this->aClass();
 
         $response = $this->actingAs($admin)->post('/admin/finhero/activities', [
-            'activity_key' => 'task_9',
+            'activity_key' => 'task_99',
             'activity_name' => 'Test Task',
             'position' => 'required',
             'type' => 'task',
@@ -86,7 +86,7 @@ class FinheroActivityFormTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('finhero_activity_registry', [
-            'activity_key' => 'task_9',
+            'activity_key' => 'task_99',
             'start_date' => '2026-11-02',
             'end_date' => '2026-11-06',
         ]);
@@ -130,7 +130,7 @@ class FinheroActivityFormTest extends TestCase
         $class = $this->aClass();
 
         $id = DB::table('finhero_activity_registry')->insertGetId([
-            'activity_key' => 'task_9', 'activity_name' => 'Old Name', 'type' => 'task',
+            'activity_key' => 'task_99', 'activity_name' => 'Old Name', 'type' => 'task',
             'cid' => $class->id,
             'max_points' => 30, 'position' => 'required', 'is_active' => 1, 'salary' => 2000,
             'created_at' => now(), 'updated_at' => now(),
@@ -169,7 +169,7 @@ class FinheroActivityFormTest extends TestCase
         $classB = SchoolClass::create(['sid' => 1, 'grade_id' => $grade->id, 'name' => 'B ' . uniqid()]);
 
         $response = $this->actingAs($admin)->post('/admin/finhero/activities', [
-            'activity_key' => 'task_9',
+            'activity_key' => 'task_99',
             'activity_name' => 'Grade-wide Task',
             'position' => 'required',
             'type' => 'task',
@@ -179,7 +179,7 @@ class FinheroActivityFormTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('finhero_activity_registry', [
-            'activity_key' => 'task_9',
+            'activity_key' => 'task_99',
             'grade_id' => $grade->id,
             'cid' => null,
         ]);
@@ -218,7 +218,7 @@ class FinheroActivityFormTest extends TestCase
         $class = $this->aClass();
 
         $response = $this->actingAs($admin)->post('/admin/finhero/activities', [
-            'activity_key' => 'task_9',
+            'activity_key' => 'task_99',
             'activity_name' => 'Test Task',
             'position' => 'required',
             'type' => 'task',
@@ -229,6 +229,35 @@ class FinheroActivityFormTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('end_date');
-        $this->assertDatabaseMissing('finhero_activity_registry', ['activity_key' => 'task_9']);
+        $this->assertDatabaseMissing('finhero_activity_registry', ['activity_key' => 'task_99']);
+    }
+
+    /**
+     * Daniel, 2026-10-25: giving Grade 9 a library module another grade of
+     * the same school already had crashed with "Duplicate entry
+     * 'task_5-library-1' for key 'unique_activity_type'". An activity is
+     * assigned per grade (or class), so each grade can have it once.
+     */
+    public function test_the_same_activity_can_be_given_to_two_grades_of_one_school(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        $first = $this->aClass();
+        $second = $this->aClass();
+        $add = fn (SchoolClass $class) => $this->actingAs($admin)->withSession(['selected_school' => 1])
+            ->post('/admin/finhero/activities', [
+                'activity_key' => 'task_5',
+                'activity_name' => 'Introduction to Banking',
+                'position' => 'required',
+                'type' => 'library',
+                'grade_id' => $class->grade_id,
+            ]);
+
+        $add($first)->assertSessionHasNoErrors();
+        $add($second)->assertSessionHasNoErrors();
+        $this->assertSame(2, DB::table('finhero_activity_registry')->where('activity_key', 'task_5')->where('sid', 1)->count());
+
+        // The same grade twice is still refused, with a message.
+        $add($second)->assertSessionHasErrors('activity_key');
+        $this->assertSame(2, DB::table('finhero_activity_registry')->where('activity_key', 'task_5')->count());
     }
 }

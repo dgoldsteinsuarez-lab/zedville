@@ -48,12 +48,16 @@ class SendMailboxEmail implements ShouldQueue
     $subject = $this->subject ?? '';
     $replacements = array_merge([
         'citizenId' => $user->citizenId,
-        'name'      => $user->nickname,
+        'name'      => $user->display_name,
     ], $this->extraData);
 
-    foreach ($replacements as $key => $value) {
-        $subject = str_replace('{{' . $key . '}}', $value, $subject);
-    }
+    $fill = function ($text) use ($replacements) {
+        foreach ($replacements as $key => $value) {
+            $text = str_replace('{{' . $key . '}}', $value, $text);
+        }
+        return $text;
+    };
+    $subject = $fill($subject);
     // 🔹 Make sure Laravel loads from resources/views/mailbox_templates
     //$viewPath = "mailbox_templates.{$this->template}";
 
@@ -64,11 +68,20 @@ class SendMailboxEmail implements ShouldQueue
     $content = MailboxHelper::renderMailboxTemplate($this->template, $data);
 
     // 🔹 Save to mailbox table
+    // A city template is shown in the reader's language when opened - see
+    // the Mailbox model. One an admin wrote in the panel carries the
+    // versions the admin wrote in the other languages instead.
+    $adminTemplate = \App\Models\EmailTemplate::where('trigger_event', $this->template)->first();
+
     Mailbox::create([
         'student_id' => $user->id,
         'subject'    => $subject,
         'content'    => $content,
         'type'       => 'primary',
+        'template'   => $adminTemplate ? null : $this->template,
+        'template_data' => $adminTemplate
+            ? $adminTemplate->versionsFor($data, $fill)
+            : array_filter($this->extraData, 'is_scalar'),
         'read'       => 0,
     ]);
 }

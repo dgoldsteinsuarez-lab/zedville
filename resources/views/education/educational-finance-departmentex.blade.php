@@ -1,6 +1,7 @@
 @extends('layouts.profile')
 
-@section('title', 'Educational Finance Department')
+@section('title', __('efd.title'))
+@section('no_page_back', '1')
 
 @section('content')
   @push('styles')
@@ -130,6 +131,57 @@
         height: 14%;
       }
 
+      /* The department as one picture that fits the screen (x-city-scene,
+         Daniel 2026-10-27). Its name sits above the board, sized with the
+         picture (cqw), so the board moves down a little to make room. */
+      .zs--efd .zs-title { top: .8cqw; padding: .25em .9em; font-size: clamp(10px, 1.9cqw, 26px); }
+      /* The board is an exact smaller copy of itself on a smaller picture
+         (Daniel, 2026-10-27: "all is viewable when I adjust the size of the
+         browser"): every size on it is in design pixels x --bb-u, where
+         --bb-u is 1/1280 of the picture's width, so on a 1280px-wide picture
+         it looks exactly as it was designed. */
+      .zs--efd .blackboardHolder { top: 8.5%; height: 33.5%;
+        --bb-u: .078125cqw;
+        --bb-head: max(11px, calc(24 * var(--bb-u))); --bb-name: max(8px, calc(17 * var(--bb-u)));
+        --bb-text: max(7px, calc(14 * var(--bb-u))); --bb-icon: max(26px, calc(60 * var(--bb-u))); }
+      .zs--efd .blackboard-frame { padding: calc(4 * var(--bb-u)); border-radius: calc(14 * var(--bb-u)); }
+      .zs--efd .blackboard-surface { padding: calc(10 * var(--bb-u)); border-radius: calc(10 * var(--bb-u)); }
+      .zs--efd .blackboard-surface .mb-2 { margin-bottom: calc(8 * var(--bb-u)); }
+      .zs--efd .blackboardFiled { padding: calc(10 * var(--bb-u)); border-width: max(1.5px, calc(3 * var(--bb-u)));
+        margin-bottom: calc(5 * var(--bb-u)); border-radius: calc(5 * var(--bb-u)); }
+      .zs--efd .blackboardFiled .gap-2 { gap: calc(8 * var(--bb-u)); }
+      .zs--efd .blackboardFiled .w-14 { width: max(24px, calc(56 * var(--bb-u))); height: max(10px, calc(24 * var(--bb-u))); }
+      .zs--efd .blackboardFiled .text-lg { font-size: max(9px, calc(18 * var(--bb-u))); line-height: 1.55; }
+      .zs--efd .blackboardFiled .text-lg span { padding: calc(2 * var(--bb-u)) calc(15 * var(--bb-u)) !important;
+        border-radius: calc(5 * var(--bb-u)) !important; margin-top: calc(3 * var(--bb-u)) !important; }
+      /* the days left to do an activity, and what a Required one not done in time costs (2026-11-03) */
+      .zs--efd .bb-days { margin-top: calc(3 * var(--bb-u)); font-size: max(7px, calc(12 * var(--bb-u))); font-weight: 700; text-align: center; color: #8A4B08; }
+      .zs--efd .bb-fine { margin: calc(-4 * var(--bb-u)) 0 calc(4 * var(--bb-u)); font-size: max(7px, calc(12 * var(--bb-u))); font-weight: 600; text-align: center; color: #A11D1D; }
+      .zs--efd .bb-why { margin: 0 0 calc(8 * var(--bb-u)); font-size: max(7px, calc(12 * var(--bb-u))); text-align: center; color: #3B3B3B; }
+      .zs--efd .bb-why summary { cursor: pointer; font-weight: 700; color: #A11D1D; text-decoration: underline; list-style: none; }
+      .zs--efd .bb-why summary::-webkit-details-marker { display: none; }
+      .zs--efd .bb-why p { margin: calc(4 * var(--bb-u)) 0 0; padding: calc(6 * var(--bb-u)); border-radius: calc(5 * var(--bb-u)); background: #FFF6E5; text-align: left; line-height: 1.4; }
+      /* Phones: the picture is too small for a readable board on the wall, so the
+         board sits under the picture at its designed size (--bb-u a real pixel).
+         The scene then grows below the picture, so the picture keeps its own cut
+         (the frame no longer has the picture's shape), and the doors' spots are
+         placed in cqw (% of the picture's width = its full height / 1.5). */
+      @media (max-width: 700px) {
+        .zs--efd .zs-scene { aspect-ratio: auto !important; overflow: visible; box-shadow: none; border-radius: 0; }
+        .zs--efd .zs-frame { position: relative; aspect-ratio: auto !important; }
+        .zs--efd .zs-img { height: auto; aspect-ratio: 1536 / 864; object-position: top; border-radius: 14px; box-shadow: 0 12px 28px rgba(15, 42, 34, .16); }
+        .zs--efd .blackboardHolder { position: static; width: auto; height: auto; margin: 14px 0 0; --bb-u: 1px; }
+        .zs--efd .floatingContainer.library { top: 29.667cqw; min-height: 18.667cqw; }
+        .zs--efd .floatingContainer.reception { top: 40.333cqw; min-height: 9.333cqw; }
+        .zs--efd .floatingContainer.door { top: 33.333cqw; min-height: 14.667cqw; }
+      }
+      /* Full screen (the expand button): the picture fills the window instead. */
+      .imgparentEFDmain.expanded { display: grid; place-items: center; background: #fff; }
+      .imgparentEFDmain.expanded .zs { width: 100%; }
+      .imgparentEFDmain.expanded .zv-page-back, .imgparentEFDmain.expanded .zs-head, .imgparentEFDmain.expanded .zs-foot { display: none; }
+      .imgparentEFDmain.expanded .zs-stage { padding-top: 0 !important; }
+      .imgparentEFDmain.expanded .zs-scene { width: min(100vw, 100vh * 1536 / 864) !important; margin: 0 auto !important; border-radius: 0; }
+
       /* Transparent clickable overlays */
       .posterClickOverlay {
         position: absolute;
@@ -235,10 +287,10 @@
     </style>
 
   @endpush
-  <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">Educational Finance Department</h1>
-  </div>
-  <div class="grid grid-cols-1 gap-5 mt-6" x-data="{openEmergencyModal: false, emerFundmodal: false}">
+  {{-- ?open=emergency-fund (the Emergency Fund activity on the dashboard)
+       opens it straight away: the opening form, or the fund once it's open. --}}
+  @php $openFund = request('open') === 'emergency-fund' && $isBankAccountOpen; @endphp
+  <div class="grid grid-cols-1 gap-5" x-data="{openEmergencyModal: @js($openFund && optional($bankAccount)->is_open_emergency_account == 0), emerFundmodal: @js($openFund && optional($bankAccount)->is_open_emergency_account == 1)}">
     <div class="themeTabspills">
       <div class="w-full">
         <div class="imgparentEFDmain">
@@ -247,13 +299,12 @@
             class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white w-full h-full max-w-full max-h-full rounded-lg shadow-xl  relative overflow-auto">
 
-              <button onclick="closeLibraryModal()" class="absolute top-2 right-2 text-gray-600 hover:text-black">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="9" fill="#E7FBF3"></circle>
-                  <path d="M16 8L8 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                  </path>
-                  <path d="M8 8L16 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                  </path>
+              {{-- Stays in the corner while the Library scrolls; the "Back"
+                   button at the top of each screen is the main way out. --}}
+              <button type="button" onclick="closeLibraryModal()" class="lib-close"
+                      title="{{ __('efd.library.close') }}" aria-label="{{ __('efd.library.close') }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M17 7L7 17M7 7l10 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
                 </svg>
               </button>
               <div id="libraryModalapp"></div>
@@ -275,7 +326,7 @@
                   </path>
                 </svg></button>
 
-              <h2 class="text-xl font-bold mb-4">Reception Panel</h2>
+              <h2 class="text-xl font-bold mb-4">{{ __('efd.reception_panel') }}</h2>
 
               <!-- <div class="text-gray-700 space-y-2">
                   <p>Handle visitors & inquiries</p>
@@ -288,10 +339,10 @@
 
               </div>
               <div class="flex gap-2 justify-end mt-3">
-                <button id="backBtn" class="zvBackBtn" disabled>Back</button>
-                <button id="nextBtn" class="themeBtn">Next</button>
+                <button id="backBtn" class="zvBackBtn" disabled>{{ __('efd.back') }}</button>
+                <button id="nextBtn" class="themeBtn">{{ __('efd.next') }}</button>
                 <button id="finishBtn" style="display: none;" onclick="closeReceptionModal()" class="secondaryBtn">
-                  Finish
+                  {{ __('efd.finish') }}
                 </button>
               </div>
 
@@ -302,16 +353,20 @@
           <div id="doorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white w-full h-full rounded-lg shadow-xl py-12 px-6 relative overflow-auto">
 
-              <button onclick="closeDoorModal()" class="absolute top-2 right-2 text-gray-600 hover:text-black"><svg
-                  width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="9" fill="#E7FBF3"></circle>
-                  <path d="M16 8L8 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                  </path>
-                  <path d="M8 8L16 16" stroke="#016950" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                  </path>
-                </svg></button>
+              {{-- Same way out as the Library: a Back button at the top, and an
+                   X that stays visible in the corner (Daniel, 2026-10-22). --}}
+              <button type="button" onclick="closeDoorModal()" class="lib-close"
+                      title="{{ __('efd.library.close') }}" aria-label="{{ __('efd.library.close') }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M17 7L7 17M7 7l10 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </button>
 
-              <h2 class="text-xl font-bold mb-4">Door Access Panel</h2>
+              <button type="button" onclick="closeDoorModal()" class="zvBackBtn inline-flex items-center gap-2 py-2 px-4 mb-4 text-sm font-semibold">
+                <span aria-hidden="true">&larr;</span> {{ __('efd.library.back_to_department') }}
+              </button>
+
+              <h2 class="text-xl font-bold mb-4">{{ __('efd.door_access_panel') }}</h2>
 
               <div style="position:relative" class="text-gray-700 space-y-2">
                 <div class="relative w-full">
@@ -386,6 +441,9 @@
             </div>
           </div>
           <div id="bannerPreviewModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[99999]">
+            <button type="button" id="bannerBackBtn" class="zvBackBtn absolute top-5 left-5 inline-flex items-center gap-2 py-2 px-4 text-sm font-semibold">
+              <span aria-hidden="true">&larr;</span> {{ __('efd.back_to_posters') }}
+            </button>
             <button id="bannerCloseBtn"
               class="absolute top-5 right-5 text-white text-4xl font-bold leading-none hover:text-gray-300">
               ×
@@ -400,7 +458,11 @@
               class="absolute right-6 top-1/2 -translate-y-1/2 text-white text-4xl font-bold">›</button>
           </div>
 
-          <div class="imgparentEFD">
+          {{-- The whole department fits the screen, its name on the picture
+               above the board, Back beside it (x-city-scene). The empty floor
+               at the bottom is cut off, so the hint sits under the furniture. --}}
+          <x-city-scene class="zs--efd" :image="asset('asset/front/images/Educational-Finance-Department2.jpg')" :width="1536" :height="1024" :crop-bottom="160"
+            :title="__('efd.title')" :hint="__('efd.scene_hint')" :fallback="route('dashboard')">
             <button class="expandicon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                 <path fill="#ffffff"
@@ -408,17 +470,33 @@
               </svg>
 
             </button>
-            <img src="{{ asset('asset/front/images/Educational-Finance-Department2.jpg') }}"
-              alt="Educational Finance Department">
             <div class="blackboardHolder">
               <div class="blackboard">
                 <div class="blackboard-frame">
                   <div class="blackboard-surface">
                     <div style="display:flex; width:100%; min-height: 100%">
-                      <div class=" w-1/2" style=" padding-right:10px; border-right:1px solid #333">
+                      <div class=" w-1/2" style=" padding-right:calc(10 * var(--bb-u)); border-right:1px solid #333">
                         <div class="h-full">
-                          <div style="font-size:24px; font-weight: 600" class="text-center mb-2">Required</div>
+                          <div style="font-size:var(--bb-head); font-weight: 600" class="text-center mb-2">{{ __('efd.required') }}</div>
+                          {{-- each activity's days left (App\Support\Deadline) and what one not done in time costs (ActivityFineService) --}}
+                          @php $bbDays = fn ($end) => \App\Support\Deadline::label($end); $bbLeft = fn ($end) => \App\Support\Deadline::daysLeft($end); @endphp
+                          @if ($fineAmount > 0)
+                            <div class="bb-fine">{{ __('efd.fine_note', ['amount' => zeds($fineAmount)]) }}</div>
+                            {{-- why (Daniel, 2026-11-03: the salary is for studying, an investment in their future - "explícalo más fácil y mejor"); a hybrid class is only informed --}}
+                            @unless (\App\Support\Hybrid::on())
+                              <details class="bb-why"><summary>{{ __('efd.fine_why') }}</summary><p>{{ __('efd.fine_why_text') }}</p></details>
+                            @endunless
+                          @endif
                           <div>
+                            {{-- the student's unexpected expense, first: it has its own 30 days and no fine (App\Services\EmergencyService) --}}
+                            @if (!empty($emergency))
+                              <a href="{{ route('emergency.show') }}">
+                                <div class="blackboardFiled">
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ \App\Services\EmergencyService::KINDS[$emergency->kind]['icon'] }} {{ __('emergency.title') }}</div>
+                                  @if ($days = $bbDays($emergency->due_on))<div class="bb-days">{{ $days }}</div>@endif
+                                </div>
+                              </a>
+                            @endif
                             @if(optional($emmfundPosition)->required == 1 && isset($bankAccount) && $bankAccount->is_open_emergency_account == 0)
                               <a href="javascript:void(0);" @click="@if (!$isBankAccountOpen)
                                 window.location.href = '{{ route('bank.index') }}';
@@ -430,40 +508,59 @@
                                 <div class="blackboardFiled">
                                   <div class="flex">
                                     <div class="mb-2"
-                                      style="font-size: 17px; text-align: center; font-weight: 600; color: #000;">Open
-                                      Emergency Fund Account</div>
+                                      style="font-size: var(--bb-name); text-align: center; font-weight: 600; color: #000;">{{ __('efd.open_emergency_fund') }}</div>
                                   </div>
                                   <div class="flex justify-center gap-2">
                                     <div class="w-14 h-6">
-                                      <svg style="width:60px; height:60px" xmlns="http://www.w3.org/2000/svg"
+                                      <svg style="width:var(--bb-icon); height:var(--bb-icon)" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 640 640">
                                         <path fill="#00A47D"
                                           d="M320 576C178.6 576 64 461.4 64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576zM320 112C205.1 112 112 205.1 112 320C112 434.9 205.1 528 320 528C434.9 528 528 434.9 528 320C528 205.1 434.9 112 320 112zM390.7 233.9C398.5 223.2 413.5 220.8 424.2 228.6C434.9 236.4 437.3 251.4 429.5 262.1L307.4 430.1C303.3 435.8 296.9 439.4 289.9 439.9C282.9 440.4 276 437.9 271.1 433L215.2 377.1C205.8 367.7 205.8 352.5 215.2 343.2C224.6 333.9 239.8 333.8 249.1 343.2L285.1 379.2L390.7 234z" />
                                       </svg>
                                     </div>
 
+                                    @if (($left = $bbLeft($emmfundPosition->end_date)) !== null)
                                     <div class="leading-tight">
-                                      <div style="font-size: 14px; font-weight: 600; color: #000;">Days to complete</div>
+                                      <div style="font-size: var(--bb-text); font-weight: 600; color: #000;">{{ __('efd.days_to_complete') }}</div>
                                       <div class="text-lg font-semibold"><span
-                                          style="background:#00A47D;  padding: 2px 15px; border-radius: 5px;   margin-top: 3px; display: inline-block; color: #000;">30</span>
+                                          style="background:#00A47D;  padding: 2px 15px; border-radius: 5px;   margin-top: 3px; display: inline-block; color: #000;">{{ $left }}</span>
                                       </div>
                                     </div>
+                                    @endif
                                   </div>
 
+                                </div>
+                              </a>
+                            @endif
+                            @if(optional($donationPosition)->required == 1)
+                              <a href="{{ route('bank.transfer', ['to' => 'donation']) }}">
+                                <div class="blackboardFiled">
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('npos.activity') }}</div>
+                                  @if ($days = $bbDays($donationPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
                                 </div>
                               </a>
                             @endif
                             @if(optional($mbaPosition)->required == 1 && !in_array('mba', $completedActivities))
                               <a href="{{ route('education.index') }}">
                                 <div class="blackboardFiled">
-                                  <div style="font-size: 14px; text-align: center; ">Needs, Wants &amp; Savings Match</div>
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('efd.needs_wants_savings') }}</div>
+                                  @if ($days = $bbDays($mbaPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
                                 </div>
                               </a>
                             @endif
                             @if($hbaPosition && $hbaPosition->required == 1 && !in_array('high_budget_activity', $completedActivities))
                               <a href="{{ route('education.high-spending-activities') }}">
                                 <div class="blackboardFiled">
-                                  <div style="font-size: 14px; text-align: center; ">Spending Activity</div>
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('efd.spending_activity') }}</div>
+                                  @if ($days = $bbDays($hbaPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
+                                </div>
+                              </a>
+                            @endif
+                            @if($lbaPosition && $lbaPosition->required == 1 && !in_array('low_budget_activity', $completedActivities))
+                              <a href="{{ route('education.high-spending-activities') }}">
+                                <div class="blackboardFiled">
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('efd.low_spending_activity') }}</div>
+                                  @if ($days = $bbDays($lbaPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
                                 </div>
                               </a>
                             @endif
@@ -472,9 +569,10 @@
 
                                 <a href="{{ route('task.page', ['task' => str_replace('_', '-', $task->activity_key)]) }}">
                                   <div class="blackboardFiled">
-                                    <div style="font-size: 14px; text-align: center;">
-                                      {{ $task->activity_name }}
+                                    <div style="font-size: var(--bb-text); text-align: center;">
+                                      {{ ct('activities', $task->activity_name) }}
                                     </div>
+                                    @if ($days = $bbDays($task->end_date))<div class="bb-days">{{ $days }}</div>@endif
                                   </div>
                                 </a>
                               @endif
@@ -484,9 +582,20 @@
 
                                 <a href="{{ route('library.page', ['key' => str_replace('_', '-', $library->activity_key)]) }}">
                                   <div class="blackboardFiled">
-                                    <div style="font-size: 14px; text-align: center;">
-                                      {{ $library->activity_name }}
+                                    <div style="font-size: var(--bb-text); text-align: center;">
+                                      {{ ct('activities', $library->activity_name) }}
                                     </div>
+                                    @if ($days = $bbDays($library->end_date))<div class="bb-days">{{ $days }}</div>@endif
+                                  </div>
+                                </a>
+                              @endif
+                            @endforeach
+                            @foreach($easyActivities as $easy)
+                              @if($easy->position == 'required')
+                                <a href="{{ $easy->studentUrl() }}">
+                                  <div class="blackboardFiled">
+                                    <div style="font-size: var(--bb-text); text-align: center;">{{ $easy->studentTitle() }}</div>
+                                    @if ($days = $bbDays($easy->until))<div class="bb-days">{{ $days }}</div>@endif
                                   </div>
                                 </a>
                               @endif
@@ -498,13 +607,13 @@
                           </div>
                         </div>
                       </div>
-                      <div class="w-1/2" style=" padding-left:10px">
+                      <div class="w-1/2" style=" padding-left:calc(10 * var(--bb-u))">
                         <div class="h-full">
-                          <div style="font-size:24px; font-weight: 600" class="text-center mb-2">Optional</div>
+                          <div style="font-size:var(--bb-head); font-weight: 600" class="text-center mb-2">{{ __('efd.optional') }}</div>
                           <div>
                             @if(optional($emmfundPosition)->optional == 1 && isset($bankAccount) && $bankAccount->is_open_emergency_account == 0)
                               <a href="javascript:void(0);" @click="@if (!$isBankAccountOpen)
-                                window.location.href = '{{ route('bank.account.create') }}';
+                                window.location.href = '{{ route('bank.index') }}';
                               @elseif ($bankAccount->is_open_emergency_account == 0)
                                         openEmergencyModal = true;
                                       @else
@@ -512,24 +621,25 @@
                                       @endif" class="text-md text-yellow-600 mt-1">
                                 <div class="blackboardFiled">
                                   <div class="flex">
-                                    <div class="mb-2" style="font-size: 17px; text-align: center; font-weight: 600;">Open
-                                      Emergency Fund Account</div>
+                                    <div class="mb-2" style="font-size: var(--bb-name); text-align: center; font-weight: 600;">{{ __('efd.open_emergency_fund') }}</div>
                                   </div>
                                   <div class="flex justify-center gap-2">
                                     <div class="w-14 h-6">
-                                      <svg style="width:60px; height:60px" xmlns="http://www.w3.org/2000/svg"
+                                      <svg style="width:var(--bb-icon); height:var(--bb-icon)" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 640 640">
                                         <path fill="#00A47D"
                                           d="M320 576C178.6 576 64 461.4 64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576zM320 112C205.1 112 112 205.1 112 320C112 434.9 205.1 528 320 528C434.9 528 528 434.9 528 320C528 205.1 434.9 112 320 112zM390.7 233.9C398.5 223.2 413.5 220.8 424.2 228.6C434.9 236.4 437.3 251.4 429.5 262.1L307.4 430.1C303.3 435.8 296.9 439.4 289.9 439.9C282.9 440.4 276 437.9 271.1 433L215.2 377.1C205.8 367.7 205.8 352.5 215.2 343.2C224.6 333.9 239.8 333.8 249.1 343.2L285.1 379.2L390.7 234z" />
                                       </svg>
                                     </div>
 
+                                    @if (($left = $bbLeft($emmfundPosition->end_date)) !== null)
                                     <div class="leading-tight">
-                                      <div style="font-size: 14px; font-weight: 600;">Days to complete</div>
+                                      <div style="font-size: var(--bb-text); font-weight: 600;">{{ __('efd.days_to_complete') }}</div>
                                       <div class="text-lg font-semibold"><span
-                                          style="background:#00A47D;  padding: 2px 15px; border-radius: 5px;   margin-top: 3px; display: inline-block;">30</span>
+                                          style="background:#00A47D;  padding: 2px 15px; border-radius: 5px;   margin-top: 3px; display: inline-block;">{{ $left }}</span>
                                       </div>
                                     </div>
+                                    @endif
                                   </div>
 
                                 </div>
@@ -537,30 +647,48 @@
                             @endif
                             <!-- <div class="blackboardFiled">
                                 <div>
-                                  <div class="mb-1" style="font-size: 17px; text-align: center; font-weight: 600;">Title
+                                  <div class="mb-1" style="font-size: var(--bb-name); text-align: center; font-weight: 600;">Title
                                   </div>
-                                  <div style="font-size: 14px; text-align: center; ">Literacy Badge Point</div>
+                                  <div style="font-size: var(--bb-text); text-align: center; ">Literacy Badge Point</div>
                                 </div>
 
                               </div>
                               <div class="blackboardFiled">
                                 <div>
-                                  <div class="mb-1" style="font-size: 17px; text-align: center; font-weight: 600;">Title
+                                  <div class="mb-1" style="font-size: var(--bb-name); text-align: center; font-weight: 600;">Title
                                   </div>
-                                  <div style="font-size: 14px; text-align: center;">Engagement Badge Point</div>
+                                  <div style="font-size: var(--bb-text); text-align: center;">Engagement Badge Point</div>
                                 </div>
                               </div> -->
+                            @if(optional($donationPosition)->optional == 1)
+                              <a href="{{ route('bank.transfer', ['to' => 'donation']) }}">
+                                <div class="blackboardFiled">
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('npos.activity') }}</div>
+                                  @if ($days = $bbDays($donationPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
+                                </div>
+                              </a>
+                            @endif
                             @if(optional($mbaPosition)->optional == 1 && !in_array('mba', $completedActivities))
                               <a href="{{ route('education.index') }}">
                                 <div class="blackboardFiled">
-                                  <div style="font-size: 14px; text-align: center; ">Needs, Wants &amp; Savings Match</div>
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('efd.needs_wants_savings') }}</div>
+                                  @if ($days = $bbDays($mbaPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
                                 </div>
                               </a>
                             @endif
                             @if($hbaPosition && $hbaPosition->optional == 1 && !in_array('high_budget_activity', $completedActivities))
                               <a href="{{ route('education.high-spending-activities') }}">
                                 <div class="blackboardFiled">
-                                  <div style="font-size: 14px; text-align: center; ">Spending Activity</div>
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('efd.spending_activity') }}</div>
+                                  @if ($days = $bbDays($hbaPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
+                                </div>
+                              </a>
+                            @endif
+                            @if($lbaPosition && $lbaPosition->optional == 1 && !in_array('low_budget_activity', $completedActivities))
+                              <a href="{{ route('education.high-spending-activities') }}">
+                                <div class="blackboardFiled">
+                                  <div style="font-size: var(--bb-text); text-align: center; ">{{ __('efd.low_spending_activity') }}</div>
+                                  @if ($days = $bbDays($lbaPosition->end_date))<div class="bb-days">{{ $days }}</div>@endif
                                 </div>
                               </a>
                             @endif
@@ -569,9 +697,10 @@
 
                                 <a href="{{ route('task.page', ['task' => str_replace('_', '-', $task->activity_key)]) }}">
                                   <div class="blackboardFiled">
-                                    <div style="font-size: 14px; text-align: center;">
-                                      {{ $task->activity_name }}
+                                    <div style="font-size: var(--bb-text); text-align: center;">
+                                      {{ ct('activities', $task->activity_name) }}
                                     </div>
+                                    @if ($days = $bbDays($task->end_date))<div class="bb-days">{{ $days }}</div>@endif
                                   </div>
                                 </a>
                               @endif
@@ -581,9 +710,20 @@
 
                                 <a href="{{ route('library.page', ['key' => str_replace('_', '-', $library->activity_key)]) }}">
                                   <div class="blackboardFiled">
-                                    <div style="font-size: 14px; text-align: center;">
-                                      {{ $library->activity_name }}
+                                    <div style="font-size: var(--bb-text); text-align: center;">
+                                      {{ ct('activities', $library->activity_name) }}
                                     </div>
+                                    @if ($days = $bbDays($library->end_date))<div class="bb-days">{{ $days }}</div>@endif
+                                  </div>
+                                </a>
+                              @endif
+                            @endforeach
+                            @foreach($easyActivities as $easy)
+                              @if($easy->position == 'optional')
+                                <a href="{{ $easy->studentUrl() }}">
+                                  <div class="blackboardFiled">
+                                    <div style="font-size: var(--bb-text); text-align: center;">{{ $easy->studentTitle() }}</div>
+                                    @if ($days = $bbDays($easy->until))<div class="bb-days">{{ $days }}</div>@endif
                                   </div>
                                 </a>
                               @endif
@@ -602,7 +742,7 @@
             <div onclick="openLibraryModal()" class="floatingContainer library"></div>
             <div onclick="openReceptionModal()" class="floatingContainer reception"></div>
             <div onclick="openDoorModal()" class="floatingContainer door"></div>
-          </div>
+          </x-city-scene>
 
         </div>
       </div>
@@ -623,7 +763,7 @@
               <div class="flex justify-between align-center w-full">
                 <div class="items-center">
                   <!-- <h4 class="text-2xl font-bold text-gray-900">Emergency Fund Account Agreement</h4> -->
-                  <h4 class="text-2xl font-bold text-gray-900">Opening Your Emergency Fund Account</h4>
+                  <h4 class="text-2xl font-bold text-gray-900">{{ __('efd.ef_opening_title') }}</h4>
                   <p class="text-sm text-gray-600">Universal Bank</p>
                 </div>
                 <button type="button" @click="openEmergencyModal = false"
@@ -645,14 +785,13 @@
                 <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
                   <!-- <h4 class="font-semibold text-blue-900 mb-3 text-lg">Opening Your Emergency Fund Account</h4> -->
                   <div class="space-y-2 text-sm text-gray-800 leading-relaxed">
-                    <p><strong>Dear Valued Citizen,</strong></p>
-                    <p>Emergency Fund Accounts help you prepare for unexpected expenses.</p>
-                    <p><strong>Important:</strong></p>
+                    <p><strong>{{ __('efd.dear_citizen') }}</strong></p>
+                    <p>{{ __('efd.ef_intro') }}</p>
+                    <p><strong>{{ __('efd.important') }}</strong></p>
                     <ul class="list-disc ml-6">
-                      <li>The mandatory 20% auto-debit will help build your emergency fund.</li>
-                      <li>This account should be used only for emergencies.</li>
-                      <li>Your goal should be to save 6 months of your salary.</li>
-                      <li>Opening this account is mandatory as part of our new financial responsibility program.</li>
+                      @foreach (__('efd.ef_important') as $line)
+                        <li>{{ $line }}</li>
+                      @endforeach
                     </ul>
 
                   </div>
@@ -660,57 +799,49 @@
 
                 <!-- Account Information -->
                 <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                  <h4 class="font-semibold text-blue-900 mb-3 text-lg">Account Information</h4>
+                  <h4 class="font-semibold text-blue-900 mb-3 text-lg">{{ __('efd.account_information') }}</h4>
                   <div class="space-y-2 text-sm">
-                    <p><strong>Account Type:</strong> Emergency Fund Account</p>
-                    <p><strong>Interest Rate:</strong> 2% per annum</p>
-                    <p><strong>Purpose:</strong> Emergency expenses and short-term savings</p>
-                    <p><strong>Withdrawal Flexibility:</strong> Flexible withdrawals, no penalties for students</p>
+                    <p><strong>{{ __('efd.account_type_label') }}</strong> {{ __('efd.account_type_value') }}</p>
+                    <p><strong>{{ __('efd.interest_rate_label') }}</strong> {{ __('efd.interest_rate_value') }}</p>
+                    <p><strong>{{ __('efd.purpose_label') }}</strong> {{ __('efd.purpose_value') }}</p>
+                    <p><strong>{{ __('efd.withdrawal_label') }}</strong> {{ __('efd.withdrawal_value') }}</p>
                   </div>
                 </div>
 
                 <!-- Financial Education -->
                 <div class="bg-gray-50 p-6 rounded-lg">
-                  <h4 class="font-semibold text-gray-900 mb-4 text-lg">Financial Education Information</h4>
+                  <h4 class="font-semibold text-gray-900 mb-4 text-lg">{{ __('efd.financial_education_information') }}</h4>
                   <div class="text-sm text-gray-700 leading-relaxed">
                     <ul class="list-disc ml-6">
-                      <li>20% of your salary will be automatically transferred to this account each month.</li>
-                      <li>Use this account only for real emergencies.</li>
-                      <li>Goal: Save 6 months' worth of salary.</li>
-                      <li>Opening this account is mandatory.</li>
+                      @foreach (__('efd.ef_education') as $line)
+                        <li>{{ $line }}</li>
+                      @endforeach
                     </ul>
                   </div>
                 </div>
 
                 <!-- Instructions -->
                 <div class="bg-gray-50 p-6 rounded-lg">
-                  <h4 class="font-semibold text-gray-900 mb-4 text-lg">Instructions</h4>
+                  <h4 class="font-semibold text-gray-900 mb-4 text-lg">{{ __('efd.instructions') }}</h4>
                   <div class="text-sm text-gray-700 leading-relaxed">
                     <ul class="list-disc ml-6">
-                      <li>Fill out the Auto-Debit Authorization Form below.</li>
-                      <li>Click Submit to complete your application.</li>
+                      @foreach (__('efd.ef_instructions') as $line)
+                        <li>{{ $line }}</li>
+                      @endforeach
                     </ul>
                   </div>
                 </div>
 
                 <!-- Auto-Debit Authorization Form -->
                 <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                  <h4 class="font-semibold text-gray-900 mb-4 text-lg">Emergency Fund Account – Auto-Debit Authorization
-                    Form</h4>
+                  <h4 class="font-semibold text-gray-900 mb-4 text-lg">{{ __('efd.ef_auth_title') }}</h4>
                   <div class="text-sm text-gray-700 leading-relaxed">
                     <p class="text-sm leading-relaxed">
-                      I,
-                      <span class="inline-block border-b border-gray-600 px-2">
-                        {{$bankAccount->student_name ?? ''}}
-                      </span>, authorize the bank to automatically debit
-                      20% of my monthly salary
-                      <span class="inline-block border-b border-gray-600 px-10">{{ $emmsavingsAmount }}</span> zed
-                      from my primary account
-
-                      <span
-                        class="inline-block border-b border-gray-600 px-16">{{$bankAccount->emergency_fund_account_number ?? ''}}</span>
-                      and transfer it to my Emergency Fund Account
-                      every first Friday of the month.
+                      {!! __('efd.ef_auth_text', [
+                        'name' => '<span class="inline-block border-b border-gray-600 px-2">' . e($bankAccount->student_name ?? '') . '</span>',
+                        'amount' => '<span class="inline-block border-b border-gray-600 px-10">' . e($emmsavingsAmount) . '</span>',
+                        'account' => '<span class="inline-block border-b border-gray-600 px-16">' . e($bankAccount->primary_savings_account_number ?? '') . '</span>',
+                      ]) !!}
                     </p>
 
                     <!-- <p>
@@ -730,14 +861,12 @@
                   <input id="emeragree-checkbox"
                     class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" required
                     type="checkbox">
-                  <label for="emeragree-checkbox" class="text-sm text-gray-700 font-medium"><strong>I have read and agree
-                      to the terms above.</strong></label>
+                  <label for="emeragree-checkbox" class="text-sm text-gray-700 font-medium"><strong>{{ __('efd.agree_terms') }}</strong></label>
                 </div>
               </div>
               <div class="w-full mt-4 text-center flex flex-wrap gap-4 justify-center">
-                <button type="button" @click="openEmergencyModal = false" class="whiteBtn">Cancel</button>
-                <!-- <button type="button" @click="openEmergencyModal = false; emerFundmodal = true" class="themeBtn">Accept & Open Account</button> -->
-                <button type="submit" class="themeBtn">Accept & Open Account</button>
+                <button type="button" @click="openEmergencyModal = false" class="whiteBtn">{{ __('efd.cancel') }}</button>
+                <button type="submit" class="themeBtn">{{ __('efd.accept_open') }}</button>
               </div>
             </div>
           </form>
@@ -758,7 +887,7 @@
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-x-4">
                   <button @click="emerFundmodal = false"
-                    class="text-gray-400 hover:text-gray-600 p-3 rounded-full transition-colors" title="Go back">
+                    class="text-gray-400 hover:text-gray-600 p-3 rounded-full transition-colors" title="{{ __('efd.go_back') }}">
                     <span class="text-xl font-bold">←</span>
                   </button>
                   <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
@@ -772,7 +901,7 @@
                   </div>
                   <div class="flex items-center">
                     <div>
-                      <h4 class="text-2xl font-bold text-gray-900">Emergency Fund Account</h4>
+                      <h4 class="text-2xl font-bold text-gray-900">{{ __('efd.ef_account') }}</h4>
                       <p class="text-sm text-gray-600">UB-2024-EMG-1425</p>
                     </div>
                   </div>
@@ -796,27 +925,23 @@
               <div class="bg-themeyellow rounded-xl p-6 mb-8">
                 <div class="flex justify-between items-center">
                   <div>
-                    <div class="text-themegreen text-sm mb-1">Available Balance</div>
+                    <div class="text-themegreen text-sm mb-1">{{ __('efd.available_balance') }}</div>
                     <div class="flex items-center space-x-3">
                       <span
-                        class="text-3xl font-bold text-themegreen">{{ $bankAccount ? number_format($bankAccount->emergency_fund_account_amount, 2) : '' }}
-                        ZEDS</span>
+                        class="text-3xl font-bold text-themegreen">{{ $bankAccount ? zeds($bankAccount->emergency_fund_account_amount) : '' }}</span>
                     </div>
-                    <div class="text-dark-800 text-sm mt-1">Interest Rate: 2% per annum</div>
+                    <div class="text-dark-800 text-sm mt-1">{{ __('efd.interest_rate_line') }}</div>
                   </div>
                   <div class="text-right">
-                    <div class="text-dark-800 opacity-90 text-sm">Account Type</div>
-                    <div class="text-xl text-dark-800 font-semibold">Emergency Fund</div>
+                    <div class="text-dark-800 opacity-90 text-sm">{{ __('efd.account_type') }}</div>
+                    <div class="text-xl text-dark-800 font-semibold">{{ __('efd.emergency_fund') }}</div>
                   </div>
                 </div>
               </div>
               <div class="fundProgressSec mt-8 userProfileDtls">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">🎯 Emergency Fund Progress Tracker</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('efd.progress_tracker') }}</h2>
                 <div class="p-6 bg-gray-50 rounded-lg border border-gray-200 mb-6">
-                  <!-- <p class="text-sm text-gray-600 mb-4">Financial experts recommend saving 3-6 months' worth of essential living expenses for your emergency reserve.</p> -->
-                  <p class="text-sm text-gray-600 mb-4">An <b>emergency</b> fund is your safety net for unexpected costs
-                    like medical bills, and it should cover 3-6 months of essential living expenses like rent, groceries,
-                    transportation, and utilities.</p>
+                  <p class="text-sm text-gray-600 mb-4">{!! __('efd.ef_explainer') !!}</p>
                   <!-- <div class="mb-4 form-group">
                                       <label class="block mb-2 text-base font-medium text-black">Monthly Essential Expenses (ZEDS)</label>
                                       <input type="number" placeholder="Enter your monthly expenses" class="form-control" value="1000" />
@@ -825,68 +950,72 @@
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="p-4 bg-white rounded-lg border border-gray-200">
                       <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-semibold text-gray-900">3-Month Emergency Reserve</h4>
-                        <span class="text-sm text-orange-600 font-medium">Basic Safety Net</span>
+                        <h4 class="font-semibold text-gray-900">{{ __('efd.reserve_3') }}</h4>
+                        <span class="text-sm text-orange-600 font-medium">{{ __('efd.basic_safety_net') }}</span>
                       </div>
                       <div class="mb-3">
                         <div class="flex justify-between text-sm text-gray-600 mb-1">
-                          <span>Progress</span>
-                          <span>500 / 3,000 ZEDS</span>
+                          <span>{{ __('efd.progress') }}</span>
+                          <span>{{ __('efd.progress_of', ['current' => \App\Support\Money::number($efGoals['balance'], 0), 'goal' => \App\Support\Money::number($efGoals['goals'][3]['goal'], 0)]) }}</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                           <div class="bg-orange-500 h-2 rounded-full transition-all duration-300"
-                            style="width: 16.6667%;"></div>
+                            style="width: {{ $efGoals['goals'][3]['pct'] }}%;"></div>
                         </div>
-                        <div class="text-xs text-gray-500 mt-1">16.7% Complete</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ __('efd.pct_complete', ['pct' => \App\Support\Money::number($efGoals['goals'][3]['pct'], 1)]) }}</div>
                       </div>
-                      <!-- <p class="text-xs text-gray-600">Covers basic living expenses for short-term emergencies like medical bills or car repairs.</p> -->
-                      <p class="text-xs text-gray-600">Covers 3 months of essential living expenses</p>
+                      <p class="text-xs text-gray-600">{{ __('efd.covers_3') }}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg border border-gray-200">
                       <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-semibold text-gray-900">6-Month Emergency Reserve</h4>
-                        <span class="text-sm text-green-600 font-medium">Optimal Security</span>
+                        <h4 class="font-semibold text-gray-900">{{ __('efd.reserve_6') }}</h4>
+                        <span class="text-sm text-green-600 font-medium">{{ __('efd.optimal_security') }}</span>
                       </div>
                       <div class="mb-3">
                         <div class="flex justify-between text-sm text-gray-600 mb-1">
-                          <span>Progress</span>
-                          <span>500 / 6,000 ZEDS</span>
+                          <span>{{ __('efd.progress') }}</span>
+                          <span>{{ __('efd.progress_of', ['current' => \App\Support\Money::number($efGoals['balance'], 0), 'goal' => \App\Support\Money::number($efGoals['goals'][6]['goal'], 0)]) }}</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                          <div class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 8.33333%;">
+                          <div class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: {{ $efGoals['goals'][6]['pct'] }}%;">
                           </div>
                         </div>
-                        <div class="text-xs text-gray-500 mt-1">8.3% Complete</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ __('efd.pct_complete', ['pct' => \App\Support\Money::number($efGoals['goals'][6]['pct'], 1)]) }}</div>
                       </div>
-                      <!-- <p class="text-xs text-gray-600">Provides comprehensive protection against major life disruptions like job loss or income reduction.</p> -->
-                      <p class="text-xs text-gray-600">Covers 6 months of essential living expenses</p>
+                      <p class="text-xs text-gray-600">{{ __('efd.covers_6') }}</p>
                     </div>
                   </div>
 
                   <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h5 class="font-medium text-blue-900 mb-2">💡 Savings Recommendations</h5>
+                    <h5 class="font-medium text-blue-900 mb-2">{{ __('efd.savings_recommendations') }}</h5>
                     <div class="text-sm text-blue-800 space-y-1">
-                      <p>• <strong>Need 2,500 more ZEDS</strong> to reach your 3-month emergency reserve goal</p>
-                      <p>• <strong>Need 5,500 more ZEDS</strong> to reach your optimal 6-month emergency reserve</p>
-                      <p>• Consider saving <strong>250-500 ZEDS monthly</strong> to reach your 3-month goal in 5-10 months
-                      </p>
+                      @foreach ([3, 6] as $reserve)
+                        @if ($efGoals['goals'][$reserve]['missing'] > 0)
+                          <p>• {!! __('efd.need_more_' . $reserve, ['amount' => e(\App\Support\Money::number($efGoals['goals'][$reserve]['missing'], 0))]) !!}</p>
+                        @else
+                          <p>• ✓ {{ __('efd.reserve_reached_' . $reserve) }}</p>
+                        @endif
+                      @endforeach
+                      @if ($efGoals['goals'][3]['missing'] > 0)
+                        <p>• {!! __('efd.consider_saving', ['range' => e(\App\Support\Money::number($efGoals['monthly_saving'], 0)), 'months' => $efGoals['goals'][3]['months']]) !!}</p>
+                      @endif
                     </div>
                   </div>
                 </div>
               </div>
               <div class="intEarningSection mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">💰 Your Interest Earnings</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('efd.interest_earnings') }}</h2>
                 <div class="space-y-4">
                   <div class="w-full">
                     <div
                       class="flex items-center justify-between p-4 border rounded-lg transition-colors cursor-pointer hover:opacity-90 bg-purple-50 border-purple-200 hover:bg-purple-100">
                       <div class="flex items-center space-x-3">
                         <div>
-                          <h4 class="font-semibold text-md text-gray-900">This Month (Estimated)</h4>
+                          <h4 class="font-semibold text-md text-gray-900">{{ __('efd.this_month_estimated') }}</h4>
                           <p class="text-2xl font-bold text-themegreen">
-                            {{ number_format($emergencyFundInterest['estimated_interest'], 2) }} ZEDS</p>
+                            {{ zeds($emergencyFundInterest['estimated_interest']) }}</p>
                           <div class="flex items-center justify-start space-x-1">
-                            <span class="text-xs font-medium text-gray-700">Based on current balance</span>
+                            <span class="text-xs font-medium text-gray-700">{{ __('efd.based_on_current_balance') }}</span>
                           </div>
                         </div>
                       </div>
@@ -897,12 +1026,11 @@
                       class="flex items-center justify-between p-4 border rounded-lg transition-colors cursor-pointer hover:opacity-90 bg-blue-50 border-blue-200 hover:bg-blue-100">
                       <div class="flex items-center space-x-3">
                         <div>
-                          <h4 class="font-semibold text-md text-gray-700">Annual Projection</h4>
+                          <h4 class="font-semibold text-md text-gray-700">{{ __('efd.annual_projection') }}</h4>
                           <p class="text-2xl font-bold text-blue-500">
-                            {{ number_format($emergencyFundInterest['annual_projection'], 2) }} ZEDS</p>
+                            {{ zeds($emergencyFundInterest['annual_projection']) }}</p>
                           <div class="flex items-center justify-start space-x-1">
-                            <span class="text-xs font-medium text-gray-700">At
-                              {{ $emergencyFundInterest['annual_rate'] }}% rate</span>
+                            <span class="text-xs font-medium text-gray-700">{{ __('efd.at_rate', ['rate' => $emergencyFundInterest['annual_rate']]) }}</span>
                           </div>
                         </div>
                       </div>
@@ -913,11 +1041,11 @@
                       class="flex items-center justify-between p-4 border rounded-lg transition-colors cursor-pointer hover:opacity-90 bg-yellow-50 border-yellow-200 hover:bg-yellow-100">
                       <div class="flex items-center space-x-3">
                         <div>
-                          <h4 class="font-semibold text-md text-gray-700">Next Payment</h4>
+                          <h4 class="font-semibold text-md text-gray-700">{{ __('efd.next_payment') }}</h4>
                           <p class="text-2xl font-bold text-yellow-500">{{ $emergencyFundInterest['next_payment_date'] }}
                           </p>
                           <div class="flex items-center justify-start space-x-1">
-                            <span class="text-xs font-medium text-gray-700">Interest credit date</span>
+                            <span class="text-xs font-medium text-gray-700">{{ __('efd.interest_credit_date') }}</span>
                           </div>
                         </div>
                       </div>
@@ -926,7 +1054,7 @@
                 </div>
               </div>
               <div class="accountActivity mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">📋 Recent Activity</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('efd.recent_activity') }}</h2>
                 <div class="border border-gray-100 rounded-lg">
                   @foreach($emmengercyfundtransactions as $emmtxn)
                     <div
@@ -935,41 +1063,38 @@
                         <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center"><span
                             class="text-lg">🔄</span></div>
                         <div>
-                          <p class="font-medium text-gray-900 text-sm">{{ $emmtxn->description }}</p>
+                          <p class="font-medium text-gray-900 text-sm">{{ txn_text($emmtxn->description) }}</p>
                           <div class="flex items-center space-x-2 text-xs text-gray-500">
-                            {{ \Carbon\Carbon::parse($emmtxn->transaction_date)->diffForHumans() }}
-                            {{ \Carbon\Carbon::parse($emmtxn->transaction_date)->format('g:i A') }}</div>
+                            {{ \Carbon\Carbon::parse($emmtxn->transaction_date)->locale(app()->getLocale())->isoFormat('LL') }}</div>
                         </div>
                       </div>
                       <div class="text-right">
-                        <p class="text-lg font-bold {{ $emmtxn->type == 'credit' ? 'text-red-600' : 'text-green-600' }}">
-                          {{ $emmtxn->type == 'credit' ? '-' . number_format($emmtxn->amount, 2) : '+' . number_format($emmtxn->amount, 2) }}
-                          ZEDS</p>
+                        {{-- the fund's own lines: money in is green --}}
+                        <p class="text-lg font-bold {{ $emmtxn->type == 'credit' ? 'text-green-600' : 'text-red-600' }}">
+                          {{ zeds($emmtxn->type == 'credit' ? $emmtxn->amount : -$emmtxn->amount, true) }}</p>
                       </div>
                     </div>
                   @endforeach
                 </div>
               </div>
               <div class="accFeaturesLists">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">ℹ️ Account Features & Purpose</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-6">{{ __('efd.features_purpose') }}</h2>
                 <div class="p-6 bg-blue-50 rounded-xl border border-blue-200">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 class="text-lg font-semibold text-gray-900 mb-3">Purpose & Benefits</h4>
+                      <h4 class="text-lg font-semibold text-gray-900 mb-3">{{ __('efd.purpose_benefits') }}</h4>
                       <ul class="text-sm text-gray-700 space-y-2">
-                        <li>• Emergency expenses coverage</li>
-                        <li>• Short-term savings growth</li>
-                        <li>• 2% annual interest rate</li>
-                        <li>• No fees for students</li>
+                        @foreach (__('efd.purpose_benefits_list') as $line)
+                          <li>• {{ $line }}</li>
+                        @endforeach
                       </ul>
                     </div>
                     <div>
-                      <h4 class="text-lg font-semibold text-gray-900 mb-3">Interest Calculation</h4>
+                      <h4 class="text-lg font-semibold text-gray-900 mb-3">{{ __('efd.interest_calculation') }}</h4>
                       <ul class="text-sm text-gray-700 space-y-2">
-                        <li>• Computed on ending monthly balance</li>
-                        <li>• Credited on 1st of each month</li>
-                        <li>• Flexible withdrawals allowed</li>
-                        <li>• Compound monthly growth</li>
+                        @foreach (__('efd.interest_calculation_list') as $line)
+                          <li>• {{ $line }}</li>
+                        @endforeach
                       </ul>
                     </div>
                   </div>
@@ -1033,43 +1158,14 @@
       cursor: pointer;
     }
 
-    /* Module page green header */
-    #libraryModalapp .efd-module-head {
-      color: #fff;
-    }
-
-    #libraryModalapp .efd-module-title {
-      color: #fff !important;
-      line-height: 1.2;
-    }
-
-    #libraryModalapp .efd-module-sub {
-      margin-top: 4px;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.85) !important;
-    }
-
+    /* the look is the app's Back button (.zvBackBtn) */
     #libraryModalapp .efd-back-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 14px;
-      padding: 6px 14px;
-      border-radius: 30px;
-      background: #fff;
-      border: 1px solid #000;
-      box-shadow: 0 3px 0 #000;
-      color: #000;
-      font-size: 13px;
-      font-weight: 600;
-      transition: 0.2s;
-    }
-
-    #libraryModalapp .efd-back-btn:hover {
-      background: #fff;
-      color: #000;
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #000;
+      padding: 8px 16px;
+      font-size: 14px;
     }
 
     #libraryModalapp .efd-back-arrow {
@@ -1119,6 +1215,123 @@
       animation: efdWarnShake 0.4s ease;
     }
 
+    /* One question at a time (2026-10-26): progress bar, Back / Continue,
+       and the acknowledgement once the answers are checked. */
+    #libraryModalapp .lib-step-bar { height: 6px; border-radius: 99px; background: #E6ECEA; overflow: hidden; margin: -6px 0 18px; }
+    #libraryModalapp .lib-step-bar span { display: block; height: 100%; background: #00A47D; border-radius: 99px; transition: width .3s; }
+    #libraryModalapp .lib-step-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    #libraryModalapp .lib-step-nav .themeBtn { margin-left: auto; }
+    #libraryModalapp .lib-step-nav button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    #libraryModalapp .lib-step-hint { flex: 1; text-align: center; font-size: 13px; color: #5E7069; min-width: 120px; }
+    #libraryModalapp .lib-ack { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 6px 0 18px; margin-bottom: 16px; border-bottom: 1px solid #E6ECEA; color: #016950; }
+    #libraryModalapp .lib-ack-icon { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #00A47D; background: #E2F6EF; border: 2px solid #00A47D; }
+    #libraryModalapp .lib-ack-score { font-size: 18px; color: #5E7069; margin: 0; }
+    #libraryModalapp .lib-ack-score strong { font-size: 34px; color: #0F2A22; }
+    @media (prefers-reduced-motion: reduce) { #libraryModalapp .lib-step-bar span { transition: none; } }
+
+    /* ── Library redesign (2026-10-22): compact header + progress bar,
+          status-led module cards, lesson/quiz panels ── */
+    #libraryModalapp { min-height: 100%; background: #F4F8F6; }
+
+    .lib-close {
+      position: fixed; top: 16px; right: 20px; z-index: 60; width: 42px; height: 42px; border-radius: 999px;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; color: #016950; border: 1px solid #D2DDDB; box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+      transition: background .15s, color .15s, transform .15s;
+    }
+    .lib-close:hover, .lib-close:focus-visible { background: #00A47D; color: #fff; border-color: #00A47D; transform: scale(1.05); outline: none; }
+
+    #libraryModalapp .lib-wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 48px; }
+
+    #libraryModalapp .lib-head {
+      display: grid; grid-template-columns: auto 1fr minmax(220px, 320px); gap: 20px; align-items: center;
+      background: #fff; border: 1px solid #D2DDDB; border-radius: 16px; padding: 22px 24px;
+      box-shadow: 0 1px 2px rgba(1, 105, 80, .06); margin-bottom: 24px;
+    }
+    #libraryModalapp .lib-head-module { grid-template-columns: auto 1fr; }
+    #libraryModalapp .lib-head-icon {
+      width: 64px; height: 64px; border-radius: 16px; background: #E7FBF3; display: flex;
+      align-items: center; justify-content: center; font-size: 34px;
+    }
+    #libraryModalapp .lib-eyebrow {
+      font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #00A47D; margin: 0 0 4px;
+    }
+    #libraryModalapp .lib-dot { color: #B7E3D6; margin: 0 4px; }
+    #libraryModalapp .lib-title { font-size: 28px; line-height: 1.15; font-weight: 800; color: #0F2A22; margin: 0; }
+    #libraryModalapp .lib-sub { font-size: 14px; color: #5B6B66; margin: 4px 0 0; }
+
+    #libraryModalapp .lib-progress-label { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; font-size: 13px; color: #5B6B66; }
+    #libraryModalapp .lib-progress-label strong { font-size: 22px; color: #016950; }
+    #libraryModalapp .lib-progress-track { height: 10px; border-radius: 999px; background: #E3ECE8; overflow: hidden; }
+    #libraryModalapp .lib-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #00A47D, #2BC79F); transition: width .4s ease; }
+
+    #libraryModalapp .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+    #libraryModalapp .lib-card {
+      display: flex; flex-direction: column; gap: 14px; text-align: left; width: 100%;
+      background: #fff; border: 1px solid #D2DDDB; border-radius: 14px; padding: 16px 18px;
+      transition: border-color .15s, box-shadow .15s, transform .15s; cursor: pointer;
+    }
+    #libraryModalapp .lib-card:hover, #libraryModalapp .lib-card:focus-visible {
+      border-color: #00A47D; box-shadow: 0 6px 18px rgba(1, 105, 80, .12); transform: translateY(-2px); outline: none;
+    }
+    #libraryModalapp .lib-card.is-done { border-color: #B7E3D6; background: linear-gradient(180deg, #F3FBF8, #fff 60%); }
+
+    #libraryModalapp .lib-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    #libraryModalapp .lib-num { font-size: 12px; font-weight: 700; color: #8A9A95; text-transform: uppercase; letter-spacing: .05em; }
+    #libraryModalapp .lib-tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #F1F4F3; color: #5B6B66; }
+    #libraryModalapp .lib-tag-points { background: #FFF5D4; color: #8a6d1d; }
+
+    #libraryModalapp .lib-card-body { display: flex; align-items: center; gap: 14px; }
+    #libraryModalapp .lib-icon {
+      flex: none; width: 56px; height: 56px; border-radius: 14px; background: #E7FBF3;
+      display: flex; align-items: center; justify-content: center; font-size: 30px;
+    }
+    #libraryModalapp .lib-card-title { font-size: 17px; font-weight: 700; color: #0F2A22; line-height: 1.25; margin: 0; }
+    #libraryModalapp .lib-card-meta { font-size: 13px; color: #5B6B66; margin: 2px 0 0; }
+
+    #libraryModalapp .lib-card-foot {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      border-top: 1px dashed #D2DDDB; padding-top: 12px; margin-top: auto;
+    }
+    #libraryModalapp .lib-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+    #libraryModalapp .lib-chip-new { background: #F1F4F3; color: #5B6B66; }
+    #libraryModalapp .lib-chip-score { background: #FFF5D4; color: #8a6d1d; }
+    #libraryModalapp .lib-chip-done { background: #E7FBF3; color: #016950; }
+    #libraryModalapp .lib-go { font-size: 14px; font-weight: 700; color: #00A47D; white-space: nowrap; }
+    #libraryModalapp .lib-card:hover .lib-go { color: #016950; }
+
+    #libraryModalapp .lib-module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; align-items: start; }
+    #libraryModalapp .lib-panel { background: #fff; border: 1px solid #D2DDDB; border-radius: 16px; padding: 24px; }
+    #libraryModalapp .lib-panel-label {
+      font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #00A47D; margin: 0 0 8px;
+    }
+    #libraryModalapp .lib-lesson { font-size: 15px; line-height: 1.65; color: #2A3B36; }
+    #libraryModalapp .lib-lesson h2 { font-size: 20px; color: #0F2A22; }
+    #libraryModalapp .lib-option { border-color: #E3ECE8; transition: border-color .15s, background .15s; }
+    /* a module: the question, its answers and Continue on one screen (Daniel, 2026-10-28:
+       "no scrolling up and down") - a small header, the lesson scrolling in its own panel
+       beside the quiz, the answers two to a row */
+    #libraryModalapp .lib-wrap:has(.lib-head-module) { padding-top: 18px; padding-bottom: 18px; }
+    #libraryModalapp .lib-wrap:has(.lib-head-module) .efd-back-btn { margin-bottom: 10px; }
+    #libraryModalapp .lib-head-module { padding: 12px 18px; margin-bottom: 14px; gap: 14px; }
+    #libraryModalapp .lib-head-module .lib-head-icon { width: 44px; height: 44px; font-size: 24px; border-radius: 12px; }
+    #libraryModalapp .lib-head-module .lib-title { font-size: 22px; }
+    #libraryModalapp .lib-head-module .lib-sub { display: none; }
+    #libraryModalapp .lib-module-grid > .lib-panel { padding: 18px 20px; }
+    #libraryModalapp .lib-module-grid > .lib-lesson-panel { max-height: calc(100vh - 190px); overflow-y: auto; }
+    #libraryModalapp .lib-options { display: grid; gap: 8px; } /* one under the other (2026-10-29: "not two columns of the choices") */
+    #libraryModalapp .lib-options .lib-option { margin-bottom: 0; padding: 10px 14px; }
+    #libraryModalapp .lib-option:hover { border-color: #00A47D; }
+
+    @media (max-width: 768px) {
+      #libraryModalapp .lib-wrap { padding: 20px 16px 32px; }
+      #libraryModalapp .lib-head { grid-template-columns: auto 1fr; }
+      #libraryModalapp .lib-progress { grid-column: 1 / -1; }
+      #libraryModalapp .lib-title { font-size: 22px; }
+      #libraryModalapp .lib-module-grid { grid-template-columns: 1fr; }
+    }
+
     @keyframes efdWarnShake {
 
       0%,
@@ -1138,10 +1351,26 @@
 @endsection
 @push('scripts')
   <script>
-    window.citizenName = "{{ auth()->user()->nickname }}";
+    window.citizenName = "{{ auth()->user()->display_name }}";
+    // Texts for efd.js (Ms. Rodriguez at the reception) in the student's language.
+    window.ZV_EFD = {{ \Illuminate\Support\Js::from([
+      'next' => __('efd.next'),
+      'completed' => __('efd.completed'),
+      'reception_steps' => __('efd.reception_steps'),
+      'reception_final' => __('efd.reception_final'),
+    ]) }};
   </script>
   <script src="{{ asset('asset/front/js/efd.js') }}?ver={{ rand(111, 999) }}"></script>
-  <script>const modules = @json($libraryModalModules);</script>
+  <script>
+    const modules = @json($libraryModalModules);
+    const LIB_T = @json(__('efd.library'));
+    const LIB_LEVEL = @json($libraryLevel ? e($libraryLevel) : null);
+    function libT(key, params) {
+      let text = LIB_T[key] || key;
+      Object.keys(params || {}).forEach(name => { text = text.split(':' + name).join(params[name]); });
+      return text;
+    }
+  </script>
   <script>
     /* ==========================================================================
        FINANCIAL LITERACY APP — Loads ONLY When Modal Opens
@@ -1160,45 +1389,46 @@
       /* ======================================================================
          HOME PAGE
       ====================================================================== */
+      // A module counts as done when the server recorded it this month, or
+      // when the student just got every answer right in this visit.
+      function isDone(m) {
+        const score = getScore(m.id);
+        return m.done || (showResults[m.id] && score.correct === score.total);
+      }
+
       window.renderHome = function () {
-        const completed = modules.filter(m => {
-          const score = getScore(m.id);
-          return showResults[m.id] && score.correct === score.total;
-        }).length;
+        const done = modules.filter(isDone).length;
+        const pct = modules.length ? Math.round(done / modules.length * 100) : 0;
 
         const root = document.getElementById('libraryModalapp');
         if (!root) return;
 
-        const cardsHtml = modules
-          .map((module, index) => createModuleCard(module, index))
-          .join("");
+        const badge = LIB_LEVEL ? libT('level_named', { level: LIB_LEVEL }) : libT('level_badge');
 
         root.innerHTML = `
-      <div class="bg-gradient-to-r from-[#06795d] to-[#00c29a] text-white shadow-xl">
-        <div class="max-w-7xl mx-auto px-6 py-16 text-center">
-          <div class="bg-white/20 px-6 py-2 rounded-full inline-block mb-6 uppercase text-sm font-semibold">
-            Rookie Level
+      <div class="lib-wrap">
+        <button type="button" onclick="closeLibraryModal()" class="zvBackBtn efd-back-btn">
+          <span class="efd-back-arrow">&larr;</span> ${libT('back_to_department')}
+        </button>
+        <header class="lib-head">
+          <div class="lib-head-icon" aria-hidden="true">📚</div>
+          <div class="lib-head-text">
+            <p class="lib-eyebrow">${libT('shelf')} <span class="lib-dot">•</span> ${badge}</p>
+            <h1 class="lib-title">${libT('title')}</h1>
+            <p class="lib-sub">${libT('subtitle')}</p>
           </div>
-
-          <h1 class="text-5xl text-blue-100 font-bold mb-3">Financial Literacy</h1>
-          <p class="text-blue-100 mb-6">Learn financial skills at your own pace</p>
-
-          <div class="flex justify-center gap-8">
-            <div class="bg-white/20 px-6 py-3 rounded-xl">
-              <div class="text-3xl font-bold">${completed}/${modules.length}</div>
-              <div class="text-sm">Completed</div>
+          <div class="lib-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${modules.length}" aria-valuenow="${done}">
+            <div class="lib-progress-label">
+              <strong>${done}/${modules.length}</strong>
+              <span>${libT('progress', { done: done, total: modules.length })}</span>
             </div>
-
-            <div class="bg-white/20 px-6 py-3 rounded-xl">
-              <div class="text-3xl font-bold">${modules.length}</div>
-              <div class="text-sm">Modules</div>
-            </div>
+            <div class="lib-progress-track"><div class="lib-progress-fill" style="width:${pct}%"></div></div>
           </div>
+        </header>
+
+        <div class="lib-grid">
+          ${modules.map((module, index) => createModuleCard(module, index)).join("")}
         </div>
-      </div>
-
-      <div class="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        ${cardsHtml}
       </div>
     `;
       };
@@ -1208,44 +1438,40 @@
       ====================================================================== */
       function createModuleCard(module, index) {
         const score = getScore(module.id);
-        const completed = showResults[module.id] && score.correct === score.total;
-        const hasAttempt = showResults[module.id];
+        const done = isDone(module);
+        const tried = showResults[module.id];
+
+        let status;
+        if (done) {
+          status = `<span class="lib-chip lib-chip-done">✓ ${libT('status_done')}</span>`;
+        } else if (tried) {
+          status = `<span class="lib-chip lib-chip-score">${libT('score', { correct: score.correct, total: score.total })}</span>`;
+        } else {
+          status = `<span class="lib-chip lib-chip-new">${libT('status_new')}</span>`;
+        }
+
+        const kind = module.assigned
+          ? `<span class="lib-tag lib-tag-points">★ ${libT('earns_points')}</span>`
+          : `<span class="lib-tag">${libT('practice')}</span>`;
 
         return `
-      <div
-        class="group bg-white text-center relative rounded-2xl shadow-lg  border-2 hover:border-[#00A47D] hover:shadow-2xl transition cursor-pointer overflow-hidden"
-        onclick="openModule(${module.id})"
-      >
-        <!-- Hover gradient overlay -->
-        <div class="absolute inset-0 bg-gradient-to-br ${module.color} opacity-0 group-hover:opacity-10 transition-opacity"></div>
-
-        <div class="relative p-8">
-          <div class="absolute top-4 right-4 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-slate-600 text-sm">
-            ${index + 1}
-          </div>
-
-          <div class="text-6xl mb-4">${module.icon}</div>
-          <h3 class="text-xl font-bold mb-1">${module.title}</h3>
-          <p class="text-sm text-slate-600 mb-4">${module.content.questions.length} Questions</p>
-
-          ${showResults[module.id]
-            ? `
-            <div class="${completed ? "text-green-600" : "text-amber-600"} font-semibold">
-              ${completed
-              ? "Completed ✔️"
-              : `Score: ${score.correct}/${score.total}`
-            }
-            </div>
-          `
-            : ""
-          }
-
-          ${hasAttempt
-            ? `<div class="themeBtn efd-card-btn mt-4">Review</div>`
-            : `<div class="themeBtn efd-card-btn mt-4">Start Learning</div>`
-          }
+      <button type="button" class="lib-card ${done ? 'is-done' : ''}" onclick="openModule(${module.id})">
+        <div class="lib-card-top">
+          <span class="lib-num">${libT('module_number', { number: index + 1 })}</span>
+          ${kind}
         </div>
-      </div>
+        <div class="lib-card-body">
+          <div class="lib-icon" aria-hidden="true">${module.icon}</div>
+          <div>
+            <h3 class="lib-card-title">${module.title}</h3>
+            <p class="lib-card-meta">${libT('questions', { count: module.content.questions.length })}</p>
+          </div>
+        </div>
+        <div class="lib-card-foot">
+          ${status}
+          <span class="lib-go">${tried || done ? libT('review') : libT('start_learning')} →</span>
+        </div>
+      </button>
     `;
       }
 
@@ -1284,19 +1510,27 @@
 
         const score = getScore(module.id);
 
-        document.getElementById('libraryModalapp').innerHTML = `
-              <div class="bg-gradient-to-r ${module.color} shadow-lg px-6 py-6 rounded-b-2xl efd-module-head">
-                  <button type="button" onclick="goBack()" class="efd-back-btn">
-                      <span class="efd-back-arrow">&larr;</span> Back
-                  </button>
-                  <h1 class="text-3xl font-bold efd-module-title" style="color:#fff">${module.title}</h1>
-                  <p class="efd-module-sub" style="color:rgba(255,255,255,.85)">${module.content.questions.length} Questions</p>
-              </div>
+        const number = modules.indexOf(module) + 1;
 
-              <div class="max-w-7xl mx-auto p-6 grid lg:grid-cols-2 gap-6">
+        document.getElementById('libraryModalapp').innerHTML = `
+            <div class="lib-wrap">
+              <button type="button" onclick="goBack()" class="zvBackBtn efd-back-btn">
+                  <span class="efd-back-arrow">&larr;</span> ${libT('back')}
+              </button>
+              <header class="lib-head lib-head-module">
+                  <div class="lib-head-icon" aria-hidden="true">${module.icon}</div>
+                  <div class="lib-head-text">
+                      <p class="lib-eyebrow">${libT('shelf')} <span class="lib-dot">•</span> ${libT('module_number', { number: number })}</p>
+                      <h1 class="lib-title">${module.title}</h1>
+                      <p class="lib-sub">${libT('questions', { count: module.content.questions.length })}</p>
+                  </div>
+              </header>
+
+              <div class="lib-module-grid">
                   ${renderLearning(module)}
                   ${renderQuiz(module, score, allAnswered)}
               </div>
+            </div>
           `;
         requestAnimationFrame(() => {
           let newQuizBox = root.querySelector('.quiz-scroll-box');
@@ -1309,7 +1543,8 @@
       ====================================================================== */
       function renderLearning(m) {
         return `
-              <div class="bg-white rounded-2xl shadow p-6">
+              <div class="lib-panel lib-lesson lib-lesson-panel">
+                  <p class="lib-panel-label">${libT('lesson')}</p>
                   <h2 class="text-2xl font-bold mb-2">${m.content.subtopic1.title}</h2>
                   ${m.content.subtopic1.text.map(t => `<p class="mb-2">${t}</p>`).join("")}
 
@@ -1337,20 +1572,26 @@
       /* ======================================================================
          QUIZ SECTION
       ====================================================================== */
+      // Daniel, 2026-10-26: one question at a time with Back / Continue,
+      // then - once checked - the acknowledgement, the score and every
+      // answer reviewed. libStep[moduleId] is the question on screen.
+      window.libStep = window.libStep ?? {};
+
       function renderQuiz(m, score, allAnswered) {
         const total = m.content.questions.length;
-        const answered = m.content.questions.filter((q, i) =>
-          answers[`${m.id}-${i}`] !== undefined
-        ).length;
 
-        return `
-              <div class="bg-white rounded-2xl shadow p-6">
+        if (!total) {
+          return `<div class="lib-panel"><p>${libT('no_questions')}</p></div>`;
+        }
 
-                  <div class="quiz-head">
-                    <h2 class="text-2xl font-bold">Quiz Questions</h2>
-                    <span class="quiz-progress ${answered === total ? 'is-complete' : ''}">
-                      ${answered}/${total} questions answered
-                    </span>
+        if (showResults[m.id]) {
+          return `
+              <div class="lib-panel">
+                  <div class="lib-ack" role="status">
+                    <span class="lib-ack-icon" aria-hidden="true">✓</span>
+                    <h2 class="text-xl font-bold">${libT('submitted')}</h2>
+                    <p class="lib-ack-score"><strong>${score.correct}</strong>/${total}</p>
+                    ${libraryResultNote(m)}
                   </div>
 
                   <div class="quiz-scroll-box space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide">
@@ -1358,21 +1599,46 @@
                   </div>
 
                   <div class="mt-6 border-t pt-4 button-group">
-                    ${showResults[m.id]
-            ? `<button onclick="retry(${m.id})" class="themeBtn">Try Again</button> <button  onclick="goBack()" class="themeBtn">Next Module</button>${libraryResultNote(m)}`
-            : `<button type="button" onclick="checkAnswers(${m.id})"
-                                 class="themeBtn"
-                                 title="${allAnswered ? 'Check your answers' : 'Answer all ' + total + ' questions before checking'}">
-                           Check Answers
-                         </button>
-                         <p id="quizWarn-${m.id}" class="quiz-warn" hidden>
-                           Please answer all ${total} questions before checking answers.
-                         </p>`
-          }
+                    <button onclick="retry(${m.id})" class="themeBtn">${libT('try_again')}</button>
+                    <button onclick="goBack()" class="themeBtn">${libT('next_module')}</button>
                   </div>
               </div>
           `;
+        }
+
+        const i = Math.min(libStep[m.id] || 0, total - 1);
+        const chosen = answers[`${m.id}-${i}`] !== undefined;
+        const last = i === total - 1;
+
+        return `
+              <div class="lib-panel">
+                  <div class="quiz-head">
+                    <h2 class="text-2xl font-bold">${libT('quiz_questions')}</h2>
+                    <span class="quiz-progress">${libT('question_of', { current: i + 1, total: total })}</span>
+                  </div>
+                  <div class="lib-step-bar" aria-hidden="true"><span style="width:${Math.round((i + 1) / total * 100)}%"></span></div>
+
+                  <div class="quiz-scroll-box">
+                    ${renderQuestion(m, m.content.questions[i], i)}
+                  </div>
+
+                  <div class="mt-6 border-t pt-4 lib-step-nav">
+                    <button type="button" class="secondaryBtn" onclick="libGo(${m.id}, ${i - 1})" ${i === 0 ? 'disabled' : ''}>&larr; ${libT('step_back')}</button>
+                    ${chosen ? '' : `<span class="lib-step-hint">${libT('choose')}</span>`}
+                    ${last
+            ? `<button type="button" class="themeBtn" onclick="checkAnswers(${m.id})" ${chosen ? '' : 'disabled'}>${libT('check_answers')} ✓</button>`
+            : `<button type="button" class="themeBtn" onclick="libGo(${m.id}, ${i + 1})" ${chosen ? '' : 'disabled'}>${libT('continue')} &rarr;</button>`}
+                  </div>
+                  <p id="quizWarn-${m.id}" class="quiz-warn" hidden>${libT('answer_all_warning', { total: total })}</p>
+              </div>
+          `;
       }
+
+      window.libGo = function (moduleId, step) {
+        const m = modules.find(x => x.id === moduleId);
+        libStep[moduleId] = Math.max(0, Math.min(step, m.content.questions.length - 1));
+        renderModule();
+      };
 
       /* ======================================================================
          QUESTION ITEM
@@ -1385,6 +1651,7 @@
               <div>
                   <p class="font-semibold mb-2">${i + 1}. ${q.q}</p>
 
+                  <div class="lib-options">
                   ${q.options.map((option, index) => {
           let bg = "bg-slate-50";
 
@@ -1396,7 +1663,7 @@
           }
 
           return `
-                          <button class="w-full p-3 text-left rounded-xl border-2 mb-2 ${bg}"
+                          <button class="lib-option w-full p-3 text-left rounded-xl border-2 mb-2 ${bg}"
                                   ${show ? "" : `onclick="selectAnswer(${m.id}, ${i}, ${index})"`}>
                                   <span class="flex items-center gap-3">
                             <span class="font-medium text-sm bg-white px-2.5 py-1 rounded-lg border border-slate-200">${String.fromCharCode(97 + index)})</span>
@@ -1405,6 +1672,7 @@
                             </button>
                       `;
         }).join("")}
+                  </div>
               </div>
           `;
       }
@@ -1482,6 +1750,7 @@
           delete answers[`${moduleId}-${i}`];
         });
         showResults[moduleId] = false;
+        libStep[moduleId] = 0;
         delete libraryResult[moduleId];
         renderModule();
       };
@@ -1491,13 +1760,13 @@
         if (!r) return '';
         let text;
         if (r.practice) {
-          text = 'Practice only: this module isn\'t assigned to your class yet, so it doesn\'t earn points.';
+          text = libT('practice_only');
         } else if (r.error) {
-          text = 'Your answers couldn\'t be saved. Please try again.';
+          text = libT('not_saved');
         } else if (r.first_attempt) {
-          text = `Saved! You earned ${r.points} FinHero ${r.points === 1 ? 'point' : 'points'}.`;
+          text = libT(r.points === 1 ? 'saved_one' : 'saved_many', { points: r.points });
         } else {
-          text = 'Saved. FinHero points only count on your first try, so this one was practice.';
+          text = libT('saved_practice');
         }
         return `<p class="text-sm mt-3" style="color:#1B6B3A">${text}</p>`;
       }
@@ -1524,6 +1793,26 @@
     function closeLibraryModal() {
       document.getElementById('libraryModal').classList.add('hidden');
     }
+
+    // Escape steps back one screen: module -> Library home -> Department,
+    // and Poster Room -> Department (an open poster closes itself first).
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      const modal = document.getElementById('libraryModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        if (window.currentModule) {
+          goBack();
+        } else {
+          closeLibraryModal();
+        }
+        return;
+      }
+      const door = document.getElementById('doorModal');
+      const poster = document.getElementById('bannerPreviewModal');
+      if (door && !door.classList.contains('hidden') && (!poster || poster.classList.contains('hidden'))) {
+        closeDoorModal();
+      }
+    });
   </script>
 
   <script>
@@ -1583,6 +1872,7 @@
       }
 
       closeBtn.addEventListener("click", closeBannerModal);
+      document.getElementById("bannerBackBtn").addEventListener("click", closeBannerModal);
 
       modal.addEventListener("click", (e) => {
         if (e.target === modal) closeBannerModal();

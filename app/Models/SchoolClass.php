@@ -19,6 +19,9 @@ class SchoolClass extends Model
     protected $table = 'classes';
 
     protected $fillable = [
+        'spending4', // low | high: which Spending 4 the class gets (App\Services\WantsPlanService)
+        // the month it started the Intermediate (App\Services\IntermediateClassService)
+        'intermediate_started_on',
         'sid',
         'name',
         'classCode',
@@ -28,9 +31,12 @@ class SchoolClass extends Model
         'status',
         'language_mode',
         'default_language',
+        'language_level',
         'created_at',
         'updated_at',
     ];
+
+    protected $casts = ['intermediate_started_on' => 'date'];
 
     /** Students of this class (they point at it through users.grade). */
     public function students()

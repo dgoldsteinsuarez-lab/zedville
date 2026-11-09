@@ -32,3 +32,18 @@
     font-weight: bold;
     text-align: center;
 }
+/* "+ More space" under each budget box (Daniel, 2026-10-23): a month with lots of lines needs more boxes. */
+.mba-add-space {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 6px;
+    border: 1px dashed #00a47d;
+    border-radius: 6px;
+    background: #fff;
+    color: #016950;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.mba-add-space:hover { background: #e7fbf3; }

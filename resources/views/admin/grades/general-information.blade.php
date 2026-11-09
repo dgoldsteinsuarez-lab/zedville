@@ -67,26 +67,75 @@
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header"><strong>School Month Settings</strong></div>
+    {{-- Daniel, 2026-10-22: the language is chosen per Grade; saving copies it
+         to every Class here. A Tutor can still change their own Class (My
+         Students), and so can the Edit button in the Classes table below. --}}
+    <div class="card mb-4" id="grade-language">
+        <div class="card-header"><strong>Language for this Grade</strong></div>
         <div class="card-body">
             <p class="text-muted small">
-                Defines which month this school's academic-year progression starts — moved here from Education
-                per the Admin Structure Proposal. Applies to the whole school, not just this Grade.
+                Saving applies this language to all {{ $grade->classes->count() }} {{ \Illuminate\Support\Str::plural('class', $grade->classes->count()) }}
+                in {{ $grade->name }}, and to classes added later. A Tutor can change it afterwards for their own class.
             </p>
-            <div class="d-flex align-items-end gap-2">
-                <div>
-                    <label class="form-label">Start month</label>
-                    <select id="sms-start-month" class="form-control">
-                        <option value="">Select month</option>
-                        @for ($i = 1; $i <= 12; $i++)
-                            <option value="{{ $i }}" @selected(($monthSetting->start_month ?? null) == $i)>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <button type="button" class="btn btn-sm btn-primary" onclick="saveSchoolMonthSetting({{ $grade->sid }})">Save</button>
+            <form method="POST" action="{{ route('admin.grades.language', $grade->id) }}" style="max-width: 520px">
+                @csrf
+                @method('PUT')
+                @include('admin.partials.language-fields', ['settings' => $grade->languageSettings(), 'idPrefix' => 'grade'])
+                <button type="submit" class="btn btn-sm btn-primary">Save for the whole Grade</button>
+            </form>
+        </div>
+    </div>
+
+    {{-- Daniel, 2026-10-31: "i should be able to choose the month that a grade starts, because it can be
+         independent from the school" - the Grade's own Month 1, else the school's. --}}
+    <div class="card mb-4" id="start-month">
+        <div class="card-header"><strong>Start month</strong></div>
+        <div class="card-body">
+            <p class="text-muted small">
+                The month that is Month 1 for {{ $grade->name }}: it decides which month's Log In Questions and Monthly
+                Questions its students get. A Grade can start in a different month from the rest of the school.
+            </p>
+            @if (session('start_month_saved'))
+                <div class="alert alert-success py-2">{{ session('start_month_saved') }}</div>
+            @endif
+            <div class="row g-4">
+                <form method="POST" action="{{ route('admin.grades.start-month', $grade->id) }}" class="col-md-6">
+                    @csrf
+                    @method('PUT')
+                    <label class="form-label" for="grade-start-month">{{ $grade->name }} starts in</label>
+                    <div class="d-flex gap-2">
+                        <select name="start_month" id="grade-start-month" class="form-control">
+                            <option value="">Same as the school{{ $schoolStart ? ' (' . date('F', mktime(0, 0, 0, $schoolStart, 1)) . ')' : '' }}</option>
+                            @for ($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}" @selected($grade->start_month === $i)>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
+                            @endfor
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary text-nowrap">Save for this Grade</button>
+                    </div>
+                    <div class="form-text">
+                        @if ($progressionMonth)
+                            {{ now()->format('F') }} is <strong>Month {{ $progressionMonth }}</strong> for {{ $grade->name }}.
+                        @else
+                            No start month yet, for this Grade or the school.
+                        @endif
+                    </div>
+                </form>
+                <form method="POST" action="{{ route('admin.grades.school-start-month', $grade->id) }}" class="col-md-6">
+                    @csrf
+                    @method('PUT')
+                    <label class="form-label" for="school-start-month">The school starts in</label>
+                    <div class="d-flex gap-2">
+                        <select name="school_start_month" id="school-start-month" class="form-control" required>
+                            <option value="">Select month</option>
+                            @for ($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}" @selected($schoolStart === $i)>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
+                            @endfor
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">Save for the school</button>
+                    </div>
+                    <div class="form-text">For every Grade in {{ $school->school_name ?? 'the school' }} without its own start month.</div>
+                </form>
             </div>
-            <div id="sms-msg" class="mt-2"></div>
         </div>
     </div>
 
@@ -131,7 +180,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong>Classes in this Grade</strong>
-            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">Add Class</button>
+            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addClassModal">+ Add Class</button>
         </div>
         <div class="card-body p-0">
             <table class="table mb-0">
@@ -149,12 +198,17 @@
                                 @else
                                     <span class="text-muted small">Free ({{ strtoupper($class->default_language ?? 'en') }} default)</span>
                                 @endif
+                                @if (($class->language_level ?? 'standard') === 'beginner')
+                                    <span class="badge bg-info text-dark">Beginner</span>
+                                @elseif (($class->language_level ?? 'standard') === 'hybrid')
+                                    <span class="badge bg-success">Hybrid + English</span>
+                                @endif
                             </td>
                             <td class="text-end">
                                 <button type="button" class="btn btn-sm btn-outline-primary edit-class-btn"
                                     data-bs-toggle="modal" data-bs-target="#editClassModal"
                                     data-id="{{ $class->id }}" data-name="{{ $class->name }}" data-code="{{ $class->classCode }}"
-                                    data-language-mode="{{ $class->language_mode ?? 'free' }}" data-default-language="{{ $class->default_language ?? 'en' }}">
+                                    data-language-mode="{{ $class->language_mode ?? 'free' }}" data-default-language="{{ $class->default_language ?? 'en' }}" data-language-level="{{ $class->language_level ?? 'standard' }}">
                                     Edit
                                 </button>
                                 <form method="POST" action="{{ url('admin/grade/delete/' . $class->id) }}" class="d-inline"
@@ -200,20 +254,11 @@
                         </div>
                         <hr>
                         <p class="text-muted small mb-2">
-                            Language (bugs.md, 2026-10-21) - let students switch freely, or lock everyone in this
-                            class to one language (e.g. to force immersion for a language-learning class).
+                            Which language does this class run in? It starts with this Grade's language
+                            ({{ config('zedville.languages')[$grade->default_language ?? 'en'] ?? 'English' }}) - pick another one here
+                            if this class needs it, e.g. a Spanish-speaking class.
                         </p>
-                        <div class="mb-3">
-                            <label class="form-label">Default language</label>
-                            <select name="default_language" class="form-control">
-                                <option value="en">English</option>
-                                <option value="es">Spanish (Español)</option>
-                            </select>
-                        </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="language_mode" value="locked" id="newClassLocked">
-                            <label class="form-check-label" for="newClassLocked">Lock to this language (students can't switch)</label>
-                        </div>
+                        @include('admin.partials.language-fields', ['settings' => $grade->languageSettings(), 'idPrefix' => 'newClass'])
                     </div>
                     <div class="modal-footer justify-content-center">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -253,13 +298,22 @@
                         <div class="mb-3">
                             <label class="form-label">Default language</label>
                             <select name="default_language" id="editClassDefaultLanguage" class="form-control">
-                                <option value="en">English</option>
-                                <option value="es">Spanish (Español)</option>
+                                @foreach (config('zedville.languages') as $code => $languageName)
+                                    <option value="{{ $code }}">{{ $languageName }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="language_mode" value="locked" id="editClassLocked">
+                            <input type="checkbox" class="form-check-input" style="appearance: auto; -webkit-appearance: checkbox" name="language_mode" value="locked" id="editClassLocked">
                             <label class="form-check-label" for="editClassLocked">Lock to this language (students can't switch)</label>
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Language level</label>
+                            <select name="language_level" id="editClassLanguageLevel" class="form-control">
+                                <option value="standard">Standard</option>
+                                <option value="beginner">Beginner (A2/B1 - simpler wording)</option>
+                                <option value="hybrid">Hybrid (English + this language)</option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer justify-content-center">
@@ -276,6 +330,15 @@
 
 @push('scripts')
 <script>
+// "+ Add Class" on the Grades list (and a newly added Grade) land here with
+// #add-class: open the form straight away.
+document.addEventListener('DOMContentLoaded', function () {
+    if (location.hash === '#add-class' && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('addClassModal')).show();
+        setTimeout(function () { document.querySelector('#addClassModal input[name=name]').focus(); }, 400);
+    }
+});
+
 document.querySelectorAll('.edit-class-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
         document.getElementById('editClassForm').action = '{{ url('admin/grade/edit') }}/' + this.dataset.id;
@@ -283,30 +346,9 @@ document.querySelectorAll('.edit-class-btn').forEach(function (btn) {
         document.getElementById('editClassCode').value = this.dataset.code;
         document.getElementById('editClassDefaultLanguage').value = this.dataset.defaultLanguage || 'en';
         document.getElementById('editClassLocked').checked = this.dataset.languageMode === 'locked';
+        document.getElementById('editClassLanguageLevel').value = this.dataset.languageLevel || 'standard';
     });
 });
 
-function saveSchoolMonthSetting(schoolId) {
-    const startMonth = document.getElementById('sms-start-month').value;
-    if (!startMonth) {
-        document.getElementById('sms-msg').innerHTML = '<div class="alert alert-danger">Select a month first.</div>';
-        return;
-    }
-
-    fetch('{{ url('admin/login-question/bulkSaveSMS') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ data: [{ school_id: schoolId, start_month: startMonth }] })
-    })
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById('sms-msg').innerHTML = data.status
-                ? '<div class="alert alert-success">' + data.message + '</div>'
-                : '<div class="alert alert-danger">Something went wrong.</div>';
-        });
-}
 </script>
 @endpush

@@ -61,7 +61,8 @@ class EmailCampaign extends Model
         }
 
         if ($this->scope_type === 'grade') {
-            $query->where('grade', $this->scope_grade_id);
+            // users.grade is the student's Class; scope_grade_id is a Grade
+            $query->whereIn('grade', SchoolClass::where('grade_id', $this->scope_grade_id)->pluck('id'));
         }
 
         return $query->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -100,6 +101,8 @@ class EmailCampaign extends Model
                 'sid' => $user->sid,
                 'subject' => $template->subject,
                 'content' => MailboxHelper::applyPlaceholders($template->content, ['user' => $user]),
+                // The versions in other languages - the student reads theirs.
+                'template_data' => ($versions = $template->versionsFor(['user' => $user])) ? json_encode($versions) : null,
                 'type' => 'primary',
                 'read' => 0,
                 'adminemail' => 1,

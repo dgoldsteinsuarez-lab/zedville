@@ -24,7 +24,7 @@
 
                                     @foreach($classes as $class)
                                         <option value="{{ $class->id }}" {{ isset($position) && $position->cid == $class->id ? 'selected' : '' }}>
-                                            {{ $class->name }}
+                                            {{ $class->label }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -91,7 +91,7 @@
 
                                     <td>{{ $item->school_name ?? 'Default' }}</td>
 
-                                    <td>{{ $item->class_name }}</td>
+                                    <td>{{ \App\Support\ClassLabel::make($item->class_grade_name, $item->class_name) }}</td>
 
                                     <td>
                                         {{ $item->required ? 'Required' : 'Optional' }}

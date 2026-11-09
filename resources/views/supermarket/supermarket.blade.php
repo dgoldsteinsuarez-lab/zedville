@@ -398,7 +398,7 @@
             }
 
             .cart-item-sub {
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-muted);
             }
 
@@ -463,7 +463,7 @@
 
             .form-group label {
                 display: block;
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 700;
                 margin-bottom: 4px;
                 color: #546e7a;
@@ -740,16 +740,13 @@
         <div>
             <!-- <h1 class="text-xl font-bold whitespace-nowrap">The Basics Co.</h1> -->
             <h1 class="text-xl font-bold whitespace-nowrap">
-                {{ $titles[$type] ?? 'Supermarket' }}
+                {{ __('shop.diets')[$type] ?? __('shop.supermarket') }}
             </h1>
-            <p class="text-gray-500 mb-5">Secure Student Supermarket</p>
+            <p class="text-gray-500 mb-5">{{ __('shop.secure_supermarket') }}</p>
         </div>
-
-        <!-- Right Back button -->
-        <button onclick="history.back()" class="zvBackBtn px-4 py-2 text-sm font-semibold rounded">
-            ← Back
-        </button>
     </div>
+    {{-- the Intermediate's new prices (App\Services\PriceRise) --}}
+    @include('partials.price-rise-banner')
     <div class="grid grid-cols-1 gap-5 " x-data="{viewPin: false  }">
         <div class="themeTabspills">
             <div class="w-full">
@@ -760,11 +757,11 @@
                     <div class="overlay" id="overlay">
                         <div class="success-modal">
                             <h1 style="font-size: 50px; margin-bottom: 10px;">✔</h1>
-                            <h2 style="color: var(--primary-dark); margin-bottom: 10px;">Payment Successful!</h2>
+                            <h2 style="color: var(--primary-dark); margin-bottom: 10px;">{{ __('shop.payment_successful') }}</h2>
                             <p id="deliveryMessage" style="color: #636e72; margin-bottom: 25px; line-height: 1.6;">
-                                Transaction complete.</p>
+                                {{ __('shop.transaction_complete') }}</p>
                             <button class="btn-pay" onclick="closeSuccessMessage()"
-                                style="background: var(--text-dark);">Close</button>
+                                style="background: var(--text-dark);">{{ __('shop.close') }}</button>
                         </div>
                     </div>
                     <div class="sidebar" style="display: none;">
@@ -793,12 +790,11 @@
                         <div class="app-grid">
                             <div class="store-section section-card">
                                 <div class="section-header">
-                                    <span class="section-title">Products</span>
+                                    <span class="section-title">{{ __('shop.products') }}</span>
 
                                     <div class="view-controls">
-                                        <button class="view-btn active" id="btnList" onclick="switchView('list')">☰
-                                            List</button>
-                                        <button class="view-btn" id="btnGrid" onclick="switchView('grid')">⸬ Grid</button>
+                                        <button class="view-btn active" id="btnList" onclick="switchView('list')">{{ __('shop.list_view') }}</button>
+                                        <button class="view-btn" id="btnGrid" onclick="switchView('grid')">{{ __('shop.grid_view') }}</button>
                                     </div>
                                 </div>
 
@@ -808,78 +804,77 @@
 
                             <div class="tracker-section section-card">
                                 <div class="section-header">
-                                    <span class="section-title">Your Cart</span>
+                                    <span class="section-title">{{ __('shop.your_cart') }}</span>
                                     <span id="itemCounter"
                                         style="background: #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; display:none;">0/10</span>
                                 </div>
 
                                 <div class="cart-list" id="selectedItemsList">
-                                    <div class="empty-cart">Cart is empty</div>
+                                    <div class="empty-cart">{{ __('shop.cart_empty') }}</div>
                                 </div>
 
                                 <div class="budget-row total">
-                                    <span>Total</span>
+                                    <span>{{ __('shop.total') }}</span>
                                     <span id="checkoutTotal">0 Z</span>
                                 </div>
 
                                 <div class="checkout-box">
-                                    <h4 style="margin-bottom: 15px; color: var(--primary-dark); font-weight:700;">Secure
-                                        Checkout</h4>
+                                    <h4 style="margin-bottom: 15px; color: var(--primary-dark); font-weight:700;">{{ __('shop.secure_checkout') }}</h4>
 
                                     <div class="form-group">
-                                        <label>Shipping Method</label>
+                                        <label>{{ __('shop.shipping_method') }}</label>
                                         <select id="shippingType" class="form-control" onchange="updateShippingAddress()">
-                                            <option value="self">My Own Address (Default)</option>
-                                            <option value="discretionary">Current Discretionary “Month”</option>
-                                            <option value="classmate">Gift to Classmate</option>
-                                            <option value="npo">Donate to NPO</option>
+                                            <option value="self">{{ __('shop.ship_self') }}</option>
+                                            <option value="discretionary">{{ __('shop.ship_discretionary') }}</option>
+                                            <option value="classmate">{{ __('shop.ship_classmate') }}</option>
+                                            <option value="npo">{{ __('shop.ship_npo') }}</option>
 
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label id="addressLabel">Delivery Address</label>
+                                        <label id="addressLabel">{{ __('shop.delivery_address') }}</label>
                                         <div id="addressDisplay"
                                             style="font-size: 13px; color: #555; padding: 10px; background: #fff; border-radius: 8px; border: 1px dashed #ccc;">
-                                            123 Main Dorm, Room 456
+                                            {!! __('shop.own_address') !!}
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>Student Name</label>
+                                        <label>{{ __('shop.student_name') }}</label>
                                         <input type="text" class="form-control" placeholder="Daniel Goldstein"
                                             value="{{$user->nickname}}">
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Card Number</label>
+                                        <label>{{ __('shop.card_number') }}</label>
                                         <input type="text" class="form-control" placeholder="xxxx xxxx xxxx xxxx"
                                             value="{{ trim(chunk_split($bankAccount->card_number, 4, ' ')) }}">
                                     </div>
 
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>Expiry</label>
-                                            <input type="text" class="form-control" placeholder="MM/YY"
+                                            <label>{{ __('shop.expiry') }}</label>
+                                            <input type="text" class="form-control" placeholder="{{ __('shop.expiry_placeholder') }}"
                                                 value="{{ \Carbon\Carbon::parse($bankAccount->card_valid)->format('m/y') }}">
                                         </div>
                                         <div class="form-group">
-                                            <label>CVV</label>
+                                            <label>{{ __('shop.cvv') }}</label>
                                             <input type="text" class="form-control" placeholder="123"
                                                 value="{{ $bankAccount->card_cvv }}">
                                         </div>
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Enter 4-Digit PIN</label>
+                                        <label>{{ __('shop.enter_pin') }}</label>
                                         <input type="password" id="pinInput" class="form-control" maxlength="4"
                                             placeholder="• • • •">
                                     </div>
                                     <!-- Forgot PIN Link -->
                                     <div class="text-center pt-1">
                                         <p class="text-sm text-gray-500">
-                                            Forgot your PIN? <!--href="#my-accounts" id="forgotPinLink" -->
+                                            {{ __('shop.forgot_pin') }} <!--href="#my-accounts" id="forgotPinLink" -->
                                             <a href="javascript:void(0)" @click="viewPin = true"
                                                 class="text-warm-500 hover:text-warm-600 font-semibold inline-flex items-center gap-1 hover:underline transition-colors">
-                                                Click here to view your PIN
+                                                {{ __('shop.view_pin') }}
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -889,8 +884,7 @@
                                             </a>
                                         </p>
                                     </div>
-                                    <button id="payButton" class="btn-pay" onclick="processPayment()" disabled>PAY
-                                        NOW</button>
+                                    <button id="payButton" class="btn-pay" onclick="processPayment()" disabled>{{ __('shop.pay_now') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -931,33 +925,34 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">Your PIN</h3>
-                                <p class="text-sm text-gray-600">Debit Card PIN</p>
+                                <h3 class="text-lg font-bold text-gray-900">{{ __('shop.your_pin') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('shop.debit_card_pin') }}</p>
                             </div>
                         </div>
                         <div class="bg-green-50 p-3 rounded border border-green-200">
                             <div class="text-xl text-center text-green-800 font-bold mb-3">{{$bankAccount->card_pin}}</div>
-                            <div class="text-md text-center text-green-800 font-semibold mb-2">📌 Important PIN Security
-                                Information:</div>
+                            <div class="text-md text-center text-green-800 font-semibold mb-2">{{ __('shop.pin_security_title') }}</div>
                             <ul class="text-left space-y-1">
-                                <li>• Never share your PIN with anyone</li>
-                                <li>• Use your PIN for ATM withdrawals and card purchases</li>
-                                <li>• Cover the keypad when entering your PIN</li>
-                                <li>• Change your PIN regularly for security</li>
-                                <li>• Contact us immediately if compromised</li>
+                                @foreach (__('shop.pin_security') as $line)
+                                    <li>• {{ $line }}</li>
+                                @endforeach
                             </ul>
                         </div>
                         <div class="text-center mt-8">
-                            <button @click="viewPin = false" class="themeBtn w-full">Close</button>
+                            <button @click="viewPin = false" class="themeBtn w-full">{{ __('shop.close') }}</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {{-- Only in the student's own diet section (Daniel, 2026-10-23): the basket
+         comes from their survey diet, which only the survey changes. --}}
+    @if (strtolower((string) ($type ?? '')) === strtolower((string) ($basketDiet ?? '')))
     @include('profile.partials.shopping-basket', ['anchorId' => 'myShoppingBasket'])
+    @endif
     <select id="classmateSelect" class="form-control" style="display:none;">
-        <option value="">Select Classmate</option>
+        <option value="">{{ __('shop.select_classmate') }}</option>
         @foreach($classmates as $classmate)
             <option value="{{ $classmate->id }}">
                 {{ $classmate->nickname }}
@@ -970,9 +965,9 @@
         foreach ($products as $p) {
             $storeItems[] = [
                 'id' => $p->id,
-                'name' => $p->product_name,
+                'name' => \App\Support\ContentTranslations::get('products', $p->product_name),
                 'price' => $p->price,
-                'image' => url('public/uploads/supermarket/' . $p->image),
+                'image' => \App\Support\ProductImage::url($p, 'supermarket'),
                 'quantity' => 0,
                 'type' => 'debit',           // extra data
                 'category' => $p->category,   // extra data
@@ -982,6 +977,11 @@
 @endsection
 @push('scripts')
     <script>
+        // Texts in the student's language (lang/<language>/shop.php).
+        const T = @json(__('shop'));
+        const t = (text, params) => Object.keys(params || {})
+            .sort((a, b) => b.length - a.length)
+            .reduce((s, name) => s.split(':' + name).join(params[name]), text);
         const GROCERIES_FROM_SURVEY = @json($groceries);
         const STORE_TYPE = 'supermarket';
         function loadGroceriesFromSurvey(groceries) {
@@ -1002,7 +1002,8 @@
                 cart.push({
                     id: storeItem.id,
                     name: storeItem.name,
-                    price: parseFloat(g.unit_price),
+                    // the shop's price, which is what checkout charges (with the Intermediate's new prices too)
+                    price: parseFloat(storeItem.price),
                     quantity: g.quantity,
                     image: storeItem.image,
                     type: storeItem.type,
@@ -1120,7 +1121,7 @@
             const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
 
             if (totalItems >= MAX_ITEMS) {
-                alert(`Maximum ${MAX_ITEMS} items allowed!`);
+                alert(t(T.max_items, { max: MAX_ITEMS }));
                 return;
             }
 
@@ -1174,7 +1175,7 @@
 
             const cartList = document.getElementById('selectedItemsList');
             if (cart.length === 0) {
-                cartList.innerHTML = `<div class="empty-cart">Cart is empty</div>`;
+                cartList.innerHTML = `<div class="empty-cart">${T.cart_empty}</div>`;
             } else {
                 cartList.innerHTML = cart.map(item => `
                         <div class="cart-item">
@@ -1185,12 +1186,12 @@
 
                                 <div class="cart-item-text">
                                     <span class="cart-item-name">${item.name}</span>
-                                    <span class="cart-item-sub">Qty: ${item.quantity}</span>
+                                    <span class="cart-item-sub">${t(T.qty, { n: item.quantity })}</span>
                                 </div>
                             </div>
                             <div class="cart-item-actions">
                                 <div class="cart-item-price">${formatZed(item.price * item.quantity)} Z</div>
-                                <button class="btn-remove-cart" onclick="removeCartItemCompletely(${item.id})" title="Remove Item">×</button>
+                                <button class="btn-remove-cart" onclick="removeCartItemCompletely(${item.id})" title="${T.remove_item}">×</button>
                             </div>
                         </div>
                     `).join('');
@@ -1206,7 +1207,7 @@
             const display = document.getElementById('addressDisplay');
 
             if (type === 'self') {
-                display.innerHTML = '123 Main Dorm, Room 456<br>Campus City, 12345';
+                display.innerHTML = T.own_address;
             } else if (type === 'classmate') {
                 //display.innerHTML = '<select class="form-control"><option>Alex Johnson</option><option>John Smith</option><option>Casey Williams</option><option>Riley Brown</option><option>Taylor Davis</option></select>';
                 display.innerHTML = '';
@@ -1215,7 +1216,7 @@
                 display.appendChild(select);
             } else if (type === 'npo') {
                 //display.innerHTML = '<select class="form-control"><option>Animal Shelter</option><option>Senior Care Home</option><option>Food Bank</option></select>';
-                let options = '<option value="">Select NPO</option>';
+                let options = `<option value="">${T.select_npo}</option>`;
 
                 npos.forEach(npo => {
                     options += `<option value="${npo.id}">${npo.name}</option>`;
@@ -1227,7 +1228,7 @@
                     </select>
                 `;
             } else {
-                display.innerHTML = '<strong>Community Garden Project</strong><br><small>Discretionary Activity Month</small>';
+                display.innerHTML = T.discretionary_address;
             }
         }
         /*function processPayment() {
@@ -1252,7 +1253,7 @@
             const pin = document.getElementById('pinInput').value;
 
             if (pin.length !== 4) {
-                alert("Please enter a 4-digit PIN");
+                alert(T.enter_pin_alert);
                 return;
             }
 
@@ -1276,17 +1277,14 @@
                         return;
                     }
 
-                    document.getElementById('deliveryMessage').innerHTML = `
-                        Payment of <strong>${totalSpent} Z</strong> successful.<br>
-                        Remaining Balance: <strong>${res.balance} Z</strong>
-                    `;
+                    document.getElementById('deliveryMessage').innerHTML = t(T.payment_done, { amount: totalSpent, balance: res.balance });
 
                     document.getElementById('overlay').classList.add('show');
 
                     resetCart(); // your existing function
                 })
                 .catch(() => {
-                    alert('Payment error');
+                    alert(T.payment_error);
                 });
         }
 

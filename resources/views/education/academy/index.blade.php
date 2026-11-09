@@ -23,7 +23,7 @@
         @foreach ($categories as $category)
             <a href="{{ route('academy.category', $category) }}"
                 class="block bg-white border border-color-[#D2DDDB] rounded p-5 hover:shadow transition">
-                <h3 class="text-lg font-semibold mb-1">{{ $category->name }}</h3>
+                <h3 class="text-lg font-semibold mb-1">{{ ct('curriculum', $category->name) }}</h3>
                 <p class="text-sm text-gray-500 mb-0">
                     {{ trans_choice('academy.item_count', $category->items_count, ['count' => $category->items_count]) }}
                 </p>

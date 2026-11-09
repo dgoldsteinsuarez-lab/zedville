@@ -20,8 +20,11 @@ class ConsumerSurveySummaryService
 {
     public static function forUser(int $userId): array
     {
-        $survey = ConsumerSurvey::where('user_id', $userId)->orderBy('id', 'desc')->first();
-        $exists = (bool) $survey;
+        // The survey in effect this month: one done this month for next
+        // month only takes over on the 1st (ConsumerSurvey::inEffect).
+        $survey = ConsumerSurvey::inEffect($userId);
+        // A survey skipped in Citizen Activation has no answers (no diet) yet.
+        $exists = $survey && !$survey->isSkipped();
         $diet = $survey->diet ?? null;
 
         $groceryItems = [];

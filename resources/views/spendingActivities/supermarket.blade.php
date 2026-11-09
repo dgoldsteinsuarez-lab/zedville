@@ -382,7 +382,7 @@
             }
 
             .cart-item-sub {
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-muted);
             }
 
@@ -457,7 +457,7 @@
 
             .form-group label {
                 display: block;
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 700;
                 margin-bottom: 4px;
                 color: #546e7a;
@@ -708,10 +708,18 @@
                 font-size: 14px;
                 margin-bottom: 10px;
             }
+
+            /* header: the shop's name left, the Task button in the middle of the row */
+            .zv-shop-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+            .zv-task-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 22px; border-radius: 999px;
+                border: 2px solid #00A47D; background: #fff; color: #016950; font-weight: 700; font-size: 14px; cursor: pointer;
+                transition: background .2s, color .2s; }
+            .zv-task-btn:hover { background: #00A47D; color: #fff; }
+            @media (max-width: 640px) { .zv-shop-head { grid-template-columns: 1fr; } }
         </style>
     @endpush
 
-    <div class="flex items-start justify-between pb-6">
+    <div class="zv-shop-head pb-6">
         @php
             $titles = [
                 'omnivore' => 'Omnivore',
@@ -722,15 +730,18 @@
         @endphp
         <div>
             <h1 class="text-xl font-bold whitespace-nowrap">
-                {{ $titles[$type] ?? 'Supermarket' }}
+                {{ __('shop.diets')[$type] ?? __('shop.supermarket') }}
             </h1>
-            <p class="text-gray-500 mb-5">Secure Student Supermarket</p>
+            <p class="text-gray-500 mb-5">{{ __('shop.secure_supermarket') }}</p>
         </div>
-        <button onclick="history.back()" class="zvBackBtn px-4 py-2 text-sm font-semibold rounded">
-            ← Back
-        </button>
+        @if ($activity)
+            {{-- the task, to read again while shopping (Daniel, 2026-10-28) --}}
+            <button type="button" class="zv-task-btn" onclick="zvOpenTask()">📋 {{ __('shop.task') }}</button>
+        @endif
     </div>
 
+    {{-- the Intermediate's new prices (App\Services\PriceRise) --}}
+    @include('partials.price-rise-banner')
     <div class="grid grid-cols-1 gap-5" x-data="{viewPin: false  }">
         <div class="themeTabspills">
             <div class="w-full">
@@ -742,11 +753,11 @@
                     <div class="overlay" id="overlay">
                         <div class="success-modal">
                             <h1 style="font-size: 50px; margin-bottom: 10px;">✔</h1>
-                            <h2 style="color: var(--primary-dark); margin-bottom: 10px;">Payment Successful!</h2>
+                            <h2 style="color: var(--primary-dark); margin-bottom: 10px;">{{ __('shop.payment_successful') }}</h2>
                             <p id="deliveryMessage" style="color: #5C5C5C; margin-bottom: 25px; line-height: 1.6;">
-                                Transaction complete.</p>
+                                {{ __('shop.transaction_complete') }}</p>
                             <button class="btn-pay" onclick="closeSuccessMessage()"
-                                style="background: var(--text-dark);">Close</button>
+                                style="background: var(--text-dark);">{{ __('shop.close') }}</button>
                         </div>
                     </div>
 
@@ -777,11 +788,10 @@
                         <div class="app-grid">
                             <div class="store-section section-card">
                                 <div class="section-header">
-                                    <span class="section-title">Products</span>
+                                    <span class="section-title">{{ __('shop.products') }}</span>
                                     <div class="view-controls">
-                                        <button class="view-btn active" id="btnList" onclick="switchView('list')">☰
-                                            List</button>
-                                        <button class="view-btn" id="btnGrid" onclick="switchView('grid')">⸬ Grid</button>
+                                        <button class="view-btn active" id="btnList" onclick="switchView('list')">{{ __('shop.list_view') }}</button>
+                                        <button class="view-btn" id="btnGrid" onclick="switchView('grid')">{{ __('shop.grid_view') }}</button>
                                     </div>
                                 </div>
                                 <div class="items-container list-view" id="itemsContainer"></div>
@@ -789,76 +799,84 @@
 
                             <div class="tracker-section section-card">
                                 <div class="section-header">
-                                    <span class="section-title">Your Cart</span>
+                                    <span class="section-title">{{ __('shop.your_cart') }}</span>
                                     <!-- <span id="itemCounter" style="background: #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; display:none;">0/10</span> -->
                                 </div>
 
+                                @if (!empty($shoppingList))<div id="zvList" class="zv-list"></div>@endif
                                 <div class="cart-list" id="selectedItemsList">
-                                    <div class="empty-cart">Cart is empty</div>
+                                    <div class="empty-cart">{{ __('shop.cart_empty') }}</div>
                                 </div>
 
                                 {{-- ✅ FIX 2: Validation bar defined in HTML so it always exists in DOM --}}
                                 <div id="validationBar"></div>
 
+                                {{-- how many things are in the cart, next to what the task asks for (Daniel, 2026-10-28) --}}
+                                <div class="budget-row">
+                                    <span>{{ __('shop.items_in_cart') }}</span>
+                                    <span id="cartItemCount">0</span>
+                                </div>
+
                                 <div class="budget-row total">
-                                    <span>Total</span>
+                                    <span>{{ __('shop.total') }}</span>
                                     <span id="checkoutTotal">0 Z</span>
                                 </div>
 
                                 <div class="checkout-box">
-                                    <h4 style="margin-bottom: 15px; color: var(--primary-dark); font-weight:700;">Secure
-                                        Checkout</h4>
+                                    <h4 style="margin-bottom: 15px; color: var(--primary-dark); font-weight:700;">{{ __('shop.secure_checkout') }}</h4>
 
                                     <div class="form-group">
-                                        <label>Shipping Method</label>
+                                        <label>{{ __('shop.shipping_method') }}</label>
                                         <select id="shippingType" class="form-control" onchange="updateShippingAddress()">
-                                            <option value="self">My Own Address (Default)</option>
-                                            <option value="discretionary" selected>Current Discretionary "Month"</option>
-                                            <option value="classmate">Gift to Classmate</option>
-                                            <option value="npo">Donate to NPO</option>
+                                            <option value="self">{{ __('shop.ship_self') }}</option>
+                                            <option value="discretionary" selected>{{ __('shop.ship_discretionary') }}</option>
+                                            <option value="classmate">{{ __('shop.ship_classmate') }}</option>
+                                            <option value="npo">{{ __('shop.ship_npo') }}</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label id="addressLabel">Delivery Address</label>
+                                        <label id="addressLabel">{{ __('shop.delivery_address') }}</label>
                                         <div id="addressDisplay"
                                             style="font-size: 13px; color: #555; padding: 10px; background: #fff; border-radius: 8px; border: 1px dashed #ccc;">
-                                            123 Main Dorm, Room 456
+                                            {!! __('shop.own_address') !!}
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>Student Name</label>
+                                        <label>{{ __('shop.student_name') }}</label>
                                         <input type="text" class="form-control" placeholder="Daniel Goldstein"
                                             value="{{ $user->nickname }}">
                                     </div>
                                     <div class="form-group">
-                                        <label>Card Number</label>
+                                        <label>{{ __('shop.card_number') }}</label>
                                         <input type="text" class="form-control" placeholder="xxxx xxxx xxxx xxxx"
                                             value="{{ trim(chunk_split($bankAccount->card_number, 4, ' ')) }}">
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label>Expiry</label>
-                                            <input type="text" class="form-control" placeholder="MM/YY"
+                                            <label>{{ __('shop.expiry') }}</label>
+                                            <input type="text" class="form-control" placeholder="{{ __('shop.expiry_placeholder') }}"
                                                 value="{{ \Carbon\Carbon::parse($bankAccount->card_valid)->format('m/y') }}">
                                         </div>
                                         <div class="form-group">
-                                            <label>CVV</label>
+                                            <label>{{ __('shop.cvv') }}</label>
                                             <input type="text" class="form-control" placeholder="123"
                                                 value="{{ $bankAccount->card_cvv }}">
                                         </div>
                                     </div>
+                                    {{-- debit or credit card, from the Intermediate (App\Services\CreditCardService) --}}
+                                    @include('partials.pay-with')
                                     <div class="form-group">
-                                        <label>Enter 4-Digit PIN</label>
+                                        <label>{{ __('shop.enter_pin') }}</label>
                                         <input type="password" id="pinInput" class="form-control" maxlength="4"
                                             placeholder="• • • •">
                                     </div>
                                     <!-- Forgot PIN Link -->
                                     <div class="text-center pt-1">
                                         <p class="text-sm text-gray-500">
-                                            Forgot your PIN? <!--href="#my-accounts" id="forgotPinLink" -->
+                                            {{ __('shop.forgot_pin') }} <!--href="#my-accounts" id="forgotPinLink" -->
                                             <a href="javascript:void(0)" @click="viewPin = true"
                                                 class="text-warm-500 hover:text-warm-600 font-semibold inline-flex items-center gap-1 hover:underline transition-colors">
-                                                Click here to view your PIN
+                                                {{ __('shop.view_pin') }}
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -869,7 +887,7 @@
                                         </p>
                                     </div>
                                     {{-- ✅ FIX 3: Removed onclick — bound via addEventListener below --}}
-                                    <button id="payButton" class="btn-pay" disabled>PAY NOW</button>
+                                    <button id="payButton" class="btn-pay" disabled>{{ __('shop.pay_now') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -910,24 +928,21 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">Your PIN</h3>
-                                <p class="text-sm text-gray-600">Debit Card PIN</p>
+                                <h3 class="text-lg font-bold text-gray-900">{{ __('shop.your_pin') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('shop.debit_card_pin') }}</p>
                             </div>
                         </div>
                         <div class="bg-green-50 p-3 rounded border border-green-200">
                             <div class="text-xl text-center text-green-800 font-bold mb-3">{{$bankAccount->card_pin}}</div>
-                            <div class="text-md text-center text-green-800 font-semibold mb-2">📌 Important PIN Security
-                                Information:</div>
+                            <div class="text-md text-center text-green-800 font-semibold mb-2">{{ __('shop.pin_security_title') }}</div>
                             <ul class="text-left space-y-1">
-                                <li>• Never share your PIN with anyone</li>
-                                <li>• Use your PIN for ATM withdrawals and card purchases</li>
-                                <li>• Cover the keypad when entering your PIN</li>
-                                <li>• Change your PIN regularly for security</li>
-                                <li>• Contact us immediately if compromised</li>
+                                @foreach (__('shop.pin_security') as $line)
+                                    <li>• {{ $line }}</li>
+                                @endforeach
                             </ul>
                         </div>
                         <div class="text-center mt-8">
-                            <button @click="viewPin = false" class="themeBtn w-full">Close</button>
+                            <button @click="viewPin = false" class="themeBtn w-full">{{ __('shop.close') }}</button>
                         </div>
                     </div>
                 </div>
@@ -935,10 +950,21 @@
         </div>
     </div>
 
+    {{-- Only in the student's own diet section (Daniel, 2026-10-23): the basket
+         comes from their survey diet, which only the survey changes. --}}
+    @if (strtolower((string) ($type ?? '')) === strtolower((string) ($basketDiet ?? '')))
     @include('profile.partials.shopping-basket', ['anchorId' => 'myShoppingBasket'])
+    @endif
+
+    @include('partials.finish')
+
+    @if ($activity)
+        @include('spendingActivities._task')
+        @includeWhen(!empty($shoppingList), 'spendingActivities._list-mode')
+    @endif
 
     <select id="classmateSelect" class="form-control" style="display:none;">
-        <option value="">Select Classmate</option>
+        <option value="">{{ __('shop.select_classmate') }}</option>
         @foreach($classmates as $classmate)
             <option value="{{ $classmate->id }}">{{ $classmate->nickname }}</option>
         @endforeach
@@ -949,9 +975,9 @@
         foreach ($products as $p) {
             $storeItems[] = [
                 'id' => $p->id,
-                'name' => $p->product_name,
+                'name' => \App\Support\ContentTranslations::get('products', $p->product_name),
                 'price' => $p->price,
-                'image' => url('public/uploads/supermarket/' . $p->image),
+                'image' => \App\Support\ProductImage::url($p, 'supermarket'),
                 'quantity' => 0,
                 'type' => 'debit',
                 'category' => $p->category,
@@ -962,7 +988,11 @@
 
 @push('scripts')
     <script>
-        console.log("SCRIPT LOADED");
+        // Texts in the student's language (lang/<language>/shop.php).
+        const T = @json(__('shop'));
+        const t = (text, params) => Object.keys(params || {})
+            .sort((a, b) => b.length - a.length)
+            .reduce((s, name) => s.split(':' + name).join(params[name]), text);
         const GROCERIES_FROM_SURVEY = @json($groceries);
         const STORE_TYPE = 'supermarket';
 
@@ -973,6 +1003,8 @@
             minItems: {{ $activity->min_items ?? 4 }},
             maxItems: {{ $activity->max_items ?? 8 }},
         };
+        // the task's own item range (no upper limit when it has none - not the 8 above)
+        const TASK_ITEMS = { min: {{ optional($activity)->min_items ?? 0 }}, max: {{ optional($activity)->max_items ?? 'null' }} };
         console.log('ACTIVITY_RULES:', ACTIVITY_RULES);
 
         function loadGroceriesFromSurvey(groceries) {
@@ -986,7 +1018,8 @@
                 cart.push({
                     id: storeItem.id,
                     name: storeItem.name,
-                    price: parseFloat(g.unit_price),
+                    // the shop's price, which is what checkout charges (with the Intermediate's new prices too)
+                    price: parseFloat(storeItem.price),
                     quantity: g.quantity,
                     image: storeItem.image,
                     type: storeItem.type,
@@ -1081,6 +1114,11 @@
         // ── Add Item ──────────────────────────────────────────
         function addItem(itemId) {
             const item = storeItems.find(i => i.id === itemId);
+            // on the shopping list? if not, say why (spendingActivities/_list-mode)
+            if (window.ZV_LIST) {
+                const verdict = zvListTry(item, cart);
+                if (!verdict.ok) { showValidationBar(verdict.message, 'error'); return; }
+            }
             const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
             /*if (totalItems >= ACTIVITY_RULES.maxItems) {
                 showValidationBar(`❌ Maximum ${ACTIVITY_RULES.maxItems} items allowed for this activity.`, 'error');
@@ -1153,6 +1191,13 @@
 
         // ── Real-time Budget Feedback ─────────────────────────
         function renderBudgetFeedback() {
+            if (window.ZV_LIST) {
+                const state = zvListRender(cart, totalSpent);
+                showValidationBar(state.message, state.type);
+                const pay = document.getElementById('payButton');
+                if (pay) pay.disabled = !state.canPay;
+                return;
+            }
             if (cart.length === 0) { hideValidationBar(); return; }
 
             const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
@@ -1167,20 +1212,20 @@
             }*/
             if (totalSpent < ACTIVITY_RULES.minZeds) {
                 showValidationBar(
-                    `⬆️ Spend more. Minimum is ${ACTIVITY_RULES.minZeds} Z. You have ${formatZed(totalSpent)} Z.`,
+                    t(T.spend_more, { min: ACTIVITY_RULES.minZeds, spent: formatZed(totalSpent) }),
                     'warning'
                 );
                 return;
             }
             if (totalSpent > ACTIVITY_RULES.maxZeds) {
                 showValidationBar(
-                    `🚨 BUDGET ALERT: Over limit! Maximum is ${ACTIVITY_RULES.maxZeds} Z. You have ${formatZed(totalSpent)} Z.`,
+                    t(T.over_limit, { max: ACTIVITY_RULES.maxZeds, spent: formatZed(totalSpent) }),
                     'error'
                 );
                 return;
             }
             showValidationBar(
-                `✅ Looking good! ${totalItems} items — ${formatZed(totalSpent)} Z — within range (${ACTIVITY_RULES.minZeds}–${ACTIVITY_RULES.maxZeds} Z)`,
+                t(T.looking_good, { items: totalItems, spent: formatZed(totalSpent), min: ACTIVITY_RULES.minZeds, max: ACTIVITY_RULES.maxZeds }),
                 'success'
             );
         }
@@ -1198,6 +1243,18 @@
             document.getElementById('sidebarBalance').textContent = formatZed(INITIAL_BALANCE - totalSpent);
             document.getElementById('checkoutTotal').textContent = `${formatZed(totalSpent)} Z`;
 
+            // items in the cart, against the task's range: green once it's right
+            const countEl = document.getElementById('cartItemCount');
+            if (countEl && window.ZV_LIST) {
+                countEl.textContent = totalItems;
+            } else if (countEl) {
+                const range = TASK_ITEMS.max ? `${TASK_ITEMS.min}–${TASK_ITEMS.max}` : `${TASK_ITEMS.min}+`;
+                const inRange = totalItems >= TASK_ITEMS.min && (!TASK_ITEMS.max || totalItems <= TASK_ITEMS.max);
+                countEl.textContent = `${totalItems} / ${range}`;
+                countEl.style.color = totalItems === 0 ? '' : (inRange ? '#059669' : '#b45309');
+                countEl.style.fontWeight = '700';
+            }
+
             //const counterEl = document.getElementById('itemCounter');
             //counterEl.textContent = `${totalItems}/${ACTIVITY_RULES.maxItems}`;
             //counterEl.style.display = 'inline-block';
@@ -1214,7 +1271,7 @@
 
             const cartList = document.getElementById('selectedItemsList');
             if (cart.length === 0) {
-                cartList.innerHTML = `<div class="empty-cart">Cart is empty</div>`;
+                cartList.innerHTML = `<div class="empty-cart">${T.cart_empty}</div>`;
             } else {
                 cartList.innerHTML = cart.map(item => `
                     <div class="cart-item">
@@ -1223,12 +1280,12 @@
                                 style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
                             <div class="cart-item-text">
                                 <span class="cart-item-name">${item.name}</span>
-                                <span class="cart-item-sub">Qty: ${item.quantity}</span>
+                                <span class="cart-item-sub">${t(T.qty, { n: item.quantity })}</span>
                             </div>
                         </div>
                         <div class="cart-item-actions">
                             <div class="cart-item-price">${formatZed(item.price * item.quantity)} Z</div>
-                            <button class="btn-remove-cart" onclick="removeCartItemCompletely(${item.id})" title="Remove Item">×</button>
+                            <button class="btn-remove-cart" onclick="removeCartItemCompletely(${item.id})" title="${T.remove_item}">×</button>
                         </div>
                     </div>
                 `).join('');
@@ -1246,7 +1303,7 @@
             const type = document.getElementById('shippingType').value;
             const display = document.getElementById('addressDisplay');
             if (type === 'self') {
-                display.innerHTML = '123 Main Dorm, Room 456<br>Campus City, 12345';
+                display.innerHTML = T.own_address;
             } else if (type === 'classmate') {
                 display.innerHTML = '';
                 const select = document.getElementById('classmateSelect');
@@ -1254,7 +1311,7 @@
                 display.appendChild(select);
             } else if (type === 'npo') {
                 //display.innerHTML = '<select class="form-control"><option>Animal Shelter</option><option>Senior Care Home</option><option>Food Bank</option></select>';
-                let options = '<option value="">Select NPO</option>';
+                let options = `<option value="">${T.select_npo}</option>`;
 
                 npos.forEach(npo => {
                     options += `<option value="${npo.id}">${npo.name}</option>`;
@@ -1267,7 +1324,7 @@
                 `;
 
             } else if (type === 'discretionary') {
-                display.innerHTML = '<strong>Community Garden Project</strong><br><small>Discretionary Activity Month</small>';
+                display.innerHTML = T.discretionary_address;
             }
         }
 
@@ -1276,7 +1333,7 @@
             const pin = document.getElementById('pinInput').value;
 
             if (pin.length !== 4) {
-                alert("Please enter a 4-digit PIN");
+                alert(T.enter_pin_alert);
                 return;
             }
 
@@ -1291,17 +1348,22 @@
                 errors.push(`❌ Maximum ${ACTIVITY_RULES.maxItems} items allowed. You have ${totalItems}.`);
             }*/
 
-            if (totalSpent < ACTIVITY_RULES.minZeds) {
-                errors.push(`❌ Minimum spend is ${ACTIVITY_RULES.minZeds} Z. You have ${formatZed(totalSpent)} Z.`);
-            }
+            if (window.ZV_LIST) {
+                const state = zvListRender(cart, totalSpent);
+                if (!state.canPay) errors.push(state.message);
+            } else {
+                if (totalSpent < ACTIVITY_RULES.minZeds) {
+                    errors.push(t(T.min_spend_error, { min: ACTIVITY_RULES.minZeds, spent: formatZed(totalSpent) }));
+                }
 
-            if (totalSpent > ACTIVITY_RULES.maxZeds) {
-                errors.push(`❌ Maximum spend is ${ACTIVITY_RULES.maxZeds} Z. You have ${formatZed(totalSpent)} Z.`);
+                if (totalSpent > ACTIVITY_RULES.maxZeds) {
+                    errors.push(t(T.max_spend_error, { max: ACTIVITY_RULES.maxZeds, spent: formatZed(totalSpent) }));
+                }
             }
 
             // ❌ STOP if validation fails
             if (errors.length) {
-                alert("⚠️ Cannot checkout — Requirements not met:\n\n" + errors.join('\n'));
+                alert(T.cannot_checkout + "\n\n" + errors.join('\n'));
                 return;
             }
 
@@ -1317,7 +1379,8 @@
                     cart: cart,
                     total: totalSpent,
                     catalog: 'supermarkets',
-                    activity_id: @json($activity->id ?? null)
+                    activity_id: @json($activity->id ?? null),
+                    pay_with: window.zvPayWith ? zvPayWith() : 'account'
                 })
             })
                 .then(res => res.json())
@@ -1327,22 +1390,22 @@
                         return;
                     }
 
-                    document.getElementById('deliveryMessage').innerHTML = `
-                    Payment of <strong>${formatZed(totalSpent)} Z</strong> successful.<br>
-                    Remaining Balance: <strong>${res.balance} Z</strong>
-                `;
+                    // paid with the credit card: what is left on it (partials/pay-with)
+                    document.getElementById('deliveryMessage').innerHTML = ((window.zvPaidWith && zvPaidWith(res)) || t(T.payment_done, { amount: res.total_text, balance: res.balance_text }))
+                        + (res.list_message ? '<br><strong>' + res.list_message + '</strong>' : '');
 
                     document.getElementById('overlay').classList.add('show');
                     resetCart();
                 })
                 .catch(() => {
-                    alert('Payment error. Please try again.');
+                    alert(T.payment_error);
                 });
         }
 
         // ── Close Success ─────────────────────────────────────
         function closeSuccessMessage() {
             document.getElementById('overlay').classList.remove('show');
+            if (window.ZV_LIST) location.reload(); // the list as it is now
         }
 
         // ── Reset Cart ────────────────────────────────────────
@@ -1368,7 +1431,8 @@
                 .addEventListener('click', processPayment);
 
             // Load saved cart
-            fetch('/cart/get?store_type=supermarket')
+            // not with a shopping list: the basket starts empty
+            if (!window.ZV_LIST) fetch('/cart/get?store_type=supermarket')
                 .then(res => res.json())
                 .then(data => {
                     if (!data.cart || data.cart.length === 0) {

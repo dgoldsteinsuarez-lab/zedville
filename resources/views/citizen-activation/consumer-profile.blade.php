@@ -6,7 +6,9 @@
 
 <div class="grid grid-cols-1 gap-5">
 
-    <div class="page-shell">
+    {{-- wide, with little above the survey, so each of its steps fits the screen
+         without scrolling - as in Settings (Daniel, 2026-10-28) --}}
+    <div class="page-shell page-shell--survey">
 
         {{-- Progress Bar --}}
         @include('citizen-activation.layouts.progress',['step'=>5])
@@ -14,51 +16,25 @@
         <div class="step-header">
 
             <div class="step-eyebrow">
-                Step 5 of 6 — Consumer Profile
+                {{ __('citizen.eyebrow', ['step' => 5, 'total' => 6, 'name' => __('citizen.profile.step')]) }}
             </div>
 
             <div class="ca-step-title">
-                What kind of spender are you?
+                {{ __('citizen.profile.title') }}
             </div>
 
             <div class="step-subtitle">
-                Answer a short <span class="term">consumer profile</span> survey — your answers
-                will set your personal monthly expenses inside Zedville.
+                {!! __('citizen.profile.subtitle') !!}
             </div>
 
         </div>
 
         <div class="step-body">
 
-            <div class="narrative">
-                In real life, your <strong>consumer profile</strong> is shaped by your lifestyle
-                choices—what you eat, how you travel and what you do for fun.
-
-                Your answers here will generate your personal monthly expenses inside Zedville.
-
-                Choose honestly—this becomes your financial reality in the city.
-            </div>
             <div class="survey-options">
              <!-- Consumer profile code -->
               @include('citizen-activation.layouts.surveys')
              <!-- Consumer profile code -->
-            </div>
-            {{-- The survey above is a client-side-only quiz that never
-                 submits to the server (bugs.md: "Consumer profile survey
-                 never actually submits") - this is a temporary way to get
-                 past this step until that's fixed for real. --}}
-            <div class="btn-row">
-                <a href="{{ route('CitizenActivation.autoDebit') }}"
-                    class="ca-btn-secondary">
-                    ← Back
-                </a>
-
-                <form action="{{ route('CitizenActivation.consumerProfile.skip') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="ca-btn-primary">
-                        Skip for now →
-                    </button>
-                </form>
             </div>
         </div>
 
@@ -67,3 +43,27 @@
 </div>
 
 @endsection
+
+@push('styles')
+<style>
+    main:has(.page-shell--survey) { padding-top: 20px; padding-bottom: 4px; position: relative; }
+    main:has(.page-shell--survey) > .zv-page-back { position: absolute; top: 20px; left: 32px; }
+    main:has(.page-shell--survey) > .zv-page-back > a { margin-bottom: 0; }
+    .page-shell--survey { width: 100%; max-width: 1140px; padding: 0; }
+    .page-shell--survey .progress-header { margin-bottom: 8px; padding-left: 120px; min-height: 38px; }
+    .page-shell--survey .step-header { padding: 0 0 6px; margin-bottom: 8px; }
+    .page-shell--survey .step-eyebrow { display: none; } /* the progress bar says which step this is */
+    .page-shell--survey .ca-step-title { font-size: 1.2rem; margin-bottom: 2px; }
+    .page-shell--survey .step-subtitle { font-size: .88rem; line-height: 1.45; }
+    /* answers one under the other still fit the screen (Daniel, 2026-10-29: "not two
+       columns of the choices"): the subtitle only with the survey's first step - it says
+       the same on every step - and the page's title stands for the survey's own */
+    .page-shell--survey:has(.zvq > section:first-of-type[style*="display: none"]) .step-subtitle { display: none; }
+    .page-shell--survey .zvq-title { display: none; }
+    .page-shell--survey .zvq { padding-bottom: 12px; }
+    .page-shell--survey .step-body { padding: 0; }
+    .page-shell--survey .survey-options { margin-bottom: 0; }
+    /* "Skip for now" in the middle of the Back / Next row, not on a row of its own */
+    .page-shell--survey .zvq > form { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); margin: 0 !important; }
+</style>
+@endpush

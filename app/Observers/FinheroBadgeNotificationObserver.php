@@ -11,7 +11,9 @@ class FinheroBadgeNotificationObserver
 
     public function saved(FinheroBadgeRecord $record): void
     {
-        if (! $record->wasChanged('monthly_badge')) {
+        // a month's first calculation creates the record - it has to count too
+        // (2026-10-30: only an update did, so the notice almost never came)
+        if (! $record->wasRecentlyCreated && ! $record->wasChanged('monthly_badge')) {
             return;
         }
 

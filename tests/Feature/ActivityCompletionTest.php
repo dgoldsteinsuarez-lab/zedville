@@ -27,6 +27,7 @@ use Tests\TestCase;
 class ActivityCompletionTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\OpensRealExams;
 
     private function student(): User
     {
@@ -96,7 +97,8 @@ class ActivityCompletionTest extends TestCase
     {
         $student = $this->student();
         $this->withFunds($student, 500);
-        $activityId = DB::table('activities')->value('id');
+        $activityId = DB::table('activities')->insertGetId(['type' => 'high', 'number' => 99, 'title' => 'Free shopping', 'mission' => 'Buy what you like.',
+            'shop' => 'Tech Hub', 'destination' => 'Your Own Home', 'created_at' => now(), 'updated_at' => now()]); // no shopping list: any basket
         DB::table('mba_position')->insert([
             'user_id' => $student->id, 'activity_key' => 'hba_position', 'activity_id' => $activityId,
             'sid' => '1', 'cid' => $student->grade, 'required' => 1, 'optional' => 0,
@@ -170,6 +172,7 @@ class ActivityCompletionTest extends TestCase
         $question = CurriculumQuestion::create(['item_id' => $exam->id, 'question_text' => 'Q', 'sort_order' => 1]);
         $option = CurriculumQuestionOption::create(['question_id' => $question->id, 'option_text' => 'A', 'is_correct' => true, 'sort_order' => 1]);
         $eventId = $this->requiredEvent($student, 'exam-Year Exam');
+        $this->openExamFor($student, $exam);
 
         $this->actingAs($student)->post(route('academy.item.submit', $exam), ['answers' => [$question->id => $option->id]])->assertOk();
 

@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\EmailCampaign;
 use App\Models\EmailTemplate;
 use App\Models\Grade;
+use App\Models\SchoolClass;
 use App\Models\SchoolDomain;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -106,8 +107,10 @@ class AdminEmailTemplateControllerTest extends TestCase
         $admin = $this->superAdmin();
         $school = SchoolDomain::create(['school_name' => 'Zedville Academy', 'school_code' => 'ZED1', 'school_domain' => 'zed1.test']);
         $grade = Grade::create(['sid' => $school->id, 'name' => 'Grade 5']);
+        $class = SchoolClass::create(['sid' => $school->id, 'name' => '5A', 'grade_id' => $grade->id]);
 
-        $inGrade = User::factory()->create(['role' => 4, 'sid' => $school->id, 'grade' => $grade->id]);
+        // users.grade is the student's Class, in Grade 5
+        $inGrade = User::factory()->create(['role' => 4, 'sid' => $school->id, 'grade' => $class->id]);
         $otherGrade = User::factory()->create(['role' => 4, 'sid' => $school->id, 'grade' => null]);
 
         $template = EmailTemplate::create(['name' => 'Test', 'subject' => 'Hi {{name}}', 'content' => 'Hello {{name}}!']);

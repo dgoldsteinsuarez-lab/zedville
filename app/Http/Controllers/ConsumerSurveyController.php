@@ -57,6 +57,13 @@ class ConsumerSurveyController extends Controller
         $notificationPreferences = collect(NotificationPreference::CATEGORIES)
             ->mapWithKeys(fn ($category) => [$category => $savedPrefs->get($category, true)]);
 
+        // The page includes the profile form, which shows the student's own
+        // street address - same lookup as ProfileController::edit(). Without
+        // it the page crashed (Undefined variable $myAddress).
+        $myAddress = $user->isStudent()
+            ? \App\Services\AddressService::assignForStudent($user)?->load('street')
+            : null;
+
         return view('profile.consumer-profile-survey', [
             'user' => $user,
             'mascots' => $mascots,
@@ -66,6 +73,7 @@ class ConsumerSurveyController extends Controller
             'itemNames' => $itemNames,
             'hasBankAccount' => $hasBankAccount,
             'notificationPreferences' => $notificationPreferences,
+            'myAddress' => $myAddress,
         ]);
     }
 
@@ -75,23 +83,34 @@ class ConsumerSurveyController extends Controller
         $user = Auth::user();
 
         /* ============================
-           1️⃣ Find first free survey month
+           1️⃣ Once per calendar month (Daniel, 2026-10-23: the survey is the
+           only way to change diet, and only once a month). The first answered
+           survey applies this month; a later one applies from next month.
         ============================ */
-        $month = Carbon::now()->startOfMonth();
-
-        while (true) {
-            $surveyMonth = $month->format('M-Y');
-
-            $exists = ConsumerSurvey::where('user_id', $userId)
-                ->where('survey_month', $surveyMonth)
-                ->exists();
-
-            if (!$exists) {
-                break;
-            }
-
-            $month->addMonth();
+        if (ConsumerSurvey::doneThisMonth($userId)) {
+            return response()->json([
+                'status' => false,
+                'message' => __('surveys.once_per_month', ['date' => now()->startOfMonth()->addMonth()->translatedFormat('j F')]),
+            ], 422);
         }
+
+        // The amounts come from the page: a negative one (lunch -450) let the
+        // groceries through without money and took the balance below zero.
+        $request->validate([
+            'diet' => ['required', \Illuminate\Validation\Rule::in(array_keys(trans('surveys.diets', [], 'en')))],
+            'groceries' => ['nullable', 'array'],
+            'groceries.*.total_price' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'lunch' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'transport' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'activities' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'restaurants' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+        ]);
+
+        $month = ConsumerSurvey::targetMonthFor($userId);
+        $surveyMonth = $month->format('M-Y');
+        // Next month's profile isn't paid now - charging this month for next
+        // month's habits would charge the student twice this month.
+        $chargeNow = $month->isSameMonth(now());
 
         /* ============================
            2️⃣ Get available balance
@@ -123,14 +142,13 @@ class ConsumerSurveyController extends Controller
         /* ============================
            4️⃣ BLOCK if insufficient balance
         ============================ */
-        if ($availableBalance < $totalRequired) {
+        if ($chargeNow && $availableBalance < $totalRequired) {
             return response()->json([
                 'status' => false,
-                'message' => 'Your Survey not completed. Insufficient balance. Your available balance is '
-                    . number_format($availableBalance, 2)
-                    . ' Z. Required amount is '
-                    . number_format($totalRequired, 2)
-                    . ' Z.'
+                'message' => __('surveys.insufficient_balance', [
+                    'balance' => number_format($availableBalance, 2),
+                    'required' => number_format($totalRequired, 2),
+                ])
             ], 422);
         }
 
@@ -149,15 +167,17 @@ class ConsumerSurveyController extends Controller
             ============================ */
             $availableBalance = BalanceService::lockedBalance($userId);
 
-            if ($availableBalance < $totalRequired) {
+            if ($chargeNow && $availableBalance < $totalRequired) {
                 throw new \Exception('Insufficient balance');
             }
 
             /* ============================
                6️⃣ Store survey
             ============================ */
-            $survey = ConsumerSurvey::create([
+            $survey = ConsumerSurvey::updateOrCreate([
                 'user_id' => $userId,
+                'survey_month' => $surveyMonth,
+            ], [
                 'sid' => $user->sid,
                 'diet' => $request->diet,
                 'groceries' => $request->groceries,
@@ -167,7 +187,6 @@ class ConsumerSurveyController extends Controller
                 'activities' => $request->activities,
                 'restaurants' => $request->restaurants,
                 'total_cost' => $request->totalCost,
-                'survey_month' => $surveyMonth,
             ]);
 
             /* ============================
@@ -187,7 +206,7 @@ class ConsumerSurveyController extends Controller
                 }
             }
 
-            if ($groceryTotal > 0) {
+            if ($chargeNow && $groceryTotal > 0) {
                 LedgerService::post(
                     $userId,
                     'debit',
@@ -216,7 +235,7 @@ class ConsumerSurveyController extends Controller
 
                 $amount = $request->$field ?? 0;
 
-                if ($amount > 0) {
+                if ($chargeNow && $amount > 0) {
                     LedgerService::post(
                         $userId,
                         'debit',
@@ -239,8 +258,13 @@ class ConsumerSurveyController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => "Survey stored for $surveyMonth",
+                'message' => $chargeNow
+                    ? __('surveys.stored', ['month' => $month->translatedFormat('F Y')])
+                    : __('surveys.stored_next', ['month' => $month->translatedFormat('F Y')]),
                 'data' => $survey,
+                // The student's consumer type for the survey's last screen.
+                'profile' => $survey->profile(),
+                'starts_next_month' => !$chargeNow,
             ]);
 
         } catch (\Exception $e) {
@@ -249,7 +273,7 @@ class ConsumerSurveyController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Survey failed. Please try again.',
+                'message' => __('surveys.failed'),
                 'error' => $e->getMessage()
             ], 500);
         }

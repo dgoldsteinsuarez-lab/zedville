@@ -392,7 +392,7 @@
             }
 
             .cart-item-sub {
-                font-size: 11px;
+                font-size: 12px;
                 color: var(--text-muted);
             }
 
@@ -457,7 +457,7 @@
 
             .form-group label {
                 display: block;
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 700;
                 margin-bottom: 4px;
                 color: #546e7a;
@@ -592,11 +592,6 @@
             </h1>
             <p class="text-gray-500 mb-5">Secure Student Shopping Portal</p>
         </div>
-
-        <!-- Right Back button -->
-        <button onclick="history.back()" class="zvBackBtn px-4 py-2 text-sm font-semibold rounded">
-            ← Back
-        </button>
     </div>
     <div class="grid grid-cols-1 gap-5 ">
         <div class="themeTabspills">
@@ -706,7 +701,7 @@
                                     <div class="form-group">
                                         <label>Student Name</label>
                                         <input type="text" class="form-control" placeholder="Daniel Goldstein"
-                                            value="{{$user->nickname}}">
+                                            value="{{ $user->display_name }}">
                                     </div>
 
                                     <div class="form-group">
@@ -749,7 +744,7 @@
         <option value="">Select Classmate</option>
         @foreach($classmates as $classmate)
             <option value="{{ $classmate->id }}">
-                {{ $classmate->nickname }}
+                {{ $classmate->display_name }}
             </option>
         @endforeach
     </select>
@@ -759,9 +754,9 @@
         foreach ($products as $p) {
             $storeItems[] = [
                 'id' => $p->id,
-                'name' => $p->product_name,
+                'name' => \App\Support\ContentTranslations::get('products', $p->product_name),
                 'price' => $p->price,
-                'image' => url('public/uploads/products/' . $p->image),
+                'image' => \App\Support\ProductImage::url($p),
                 'quantity' => 0,
                 'type' => $p->type,           // extra data
                 'category' => $p->category,   // extra data

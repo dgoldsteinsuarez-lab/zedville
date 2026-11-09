@@ -56,6 +56,39 @@ class NeedsWantsSavingsMatchTest extends TestCase
         $response->assertJson(['pointsAwarded' => 2]);
     }
 
+    public function test_the_points_follow_the_finhero_point_defaults_row(): void
+    {
+        // Daniel, 2026-10-23: one place in Admin - FinHero Point Defaults.
+        \App\Models\FinheroActivityDefault::where('activity_key', 'needs_wants_savings_match')->update(['max_points' => 5]);
+
+        $this->actingAs($this->student())->postJson(route('education.storemba'), ['budget' => ['needs' => []], 'mistakes' => 0])
+            ->assertJson(['pointsAwarded' => 5]);
+        $this->actingAs($this->student())->postJson(route('education.storemba'), ['budget' => ['needs' => []], 'mistakes' => 1])
+            ->assertJson(['pointsAwarded' => 4]);
+        $this->actingAs($this->student())->postJson(route('education.storemba'), ['budget' => ['needs' => []], 'mistakes' => 9])
+            ->assertJson(['pointsAwarded' => 3]);
+    }
+
+    /** Daniel, 2026-10-31: inside FinHero Task Activity, as a tab - no menu entry of its own. */
+    public function test_admin_lists_the_activity_once_under_finhero(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+
+        $menu = $this->actingAs($admin)->get(url('admin/finhero/point-defaults'))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('FinHero: Needs, Wants', $menu);
+        $this->actingAs($admin)->get(url('admin/finhero/activities'))->assertOk()
+            ->assertSeeInOrder(['Tasks 1–4', 'Needs, Wants &amp; Savings Match'], false);
+        $this->actingAs($admin)->get(url('admin/education/monthly-budget-activity'))->assertOk()
+            ->assertSeeInOrder(['Tasks 1–4', 'Needs, Wants &amp; Savings Match', 'Assign the activity to a class here'], false);
+        $this->assertStringNotContainsString('Savings Match Position', $menu);
+        $this->assertStringNotContainsString('Match Needs and Wants', $menu);
+        // Daniel, 2026-11-03: the menu by level had brought it back as an entry of its own
+        $this->assertStringContainsString('<span class="navTxt">FinHero tasks</span>', $menu);
+        $this->assertStringNotContainsString('<span class="navTxt">Needs, Wants', $menu);
+        $this->assertStringContainsString('needs_wants_savings_match', $menu);   // the points row
+    }
+
     public function test_three_or_more_mistakes_earns_one_point(): void
     {
         $student = $this->student();

@@ -16,6 +16,18 @@ return [
     'nav_pisa' => 'PISA',
     'nav_calendar' => 'Calendar',
     'nav_settings' => 'Settings',
+    'nav_city_map' => 'City Map',
+    'nav_city_hall' => 'City Hall',
+    'nav_city_mall' => 'City Mall',
+    'nav_supermarket' => 'Supermarket',
+    'nav_npos' => 'NPOs',
+    'nav_city_mood' => 'City Mood',
+
+    // Sidebar greeting (by the student's local time)
+    'greeting_morning' => 'Good morning',
+    'greeting_afternoon' => 'Good afternoon',
+    'greeting_evening' => 'Good evening',
+    'greeting_night' => 'Good night',
 
     // Common actions
     'save' => 'Save',

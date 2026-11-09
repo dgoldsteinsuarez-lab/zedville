@@ -1,10 +1,11 @@
 @extends('layouts.profile')
+@section('no_page_back', '1'){{-- has its own back link at the top --}}
 
 @section('title', $title)
 
 @section('content')
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <a href="{{ route('academy.monthly') }}" class="text-sm text-gray-500">&larr; {{ __('academy.monthly_title') }}</a>
+    <a href="{{ route('academy.monthly') }}" class="zvBackBtn inline-flex items-center gap-2 py-2 px-4 mb-3 text-sm">&larr; {{ __('academy.monthly_title') }}</a>
 </div>
 
 <div class="grid grid-cols-1 gap-5 mt-2">
@@ -43,13 +44,13 @@
                                                 <h4 class="text-xl font-semibold">{{ __('academy.question') }} {{ $index + 1 }}</h4>
                                                 <span class="text-sm font-semibold">{{ $index + 1 }}/{{ $questions->count() }}</span>
                                             </div>
-                                            <h2 class="questionTitle text-2xl font-semibold">{{ $question->question }}</h2>
+                                            <h2 class="questionTitle text-2xl font-semibold">{{ ct('daily_questions', $question->question) }}</h2>
                                         </div>
                                         <div class="questionLists p-4">
                                             @foreach ($question->options as $option)
                                                 <div class="quizItems">
                                                     <input type="radio" class="hidden" name="answers[{{ $question->id }}]" value="{{ $option->id }}" id="opt{{ $option->id }}">
-                                                    <label for="opt{{ $option->id }}" class="quizLabel">{{ $option->option_text }}</label>
+                                                    <label for="opt{{ $option->id }}" class="quizLabel">{{ ct('daily_questions', $option->option_text) }}</label>
                                                 </div>
                                             @endforeach
                                         </div>

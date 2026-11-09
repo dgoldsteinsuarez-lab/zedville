@@ -5,13 +5,13 @@
         <div class="fieldsItems border-b border-[#D2DDDB] pb-8">
             <div class="uderImgUploadSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-bold text-black mb-1">Profile Picture</h4>
-                    <h6 class="text-xs text-[#5C5C5C]">Change or set your profile picture</h6>
+                    <h4 class="text-base font-bold text-black mb-1">{{ __('profile.profile_picture') }}</h4>
+                    <h6 class="text-xs text-[#5C5C5C]">{{ __('profile.picture_text') }}</h6>
                 </div>
                 <div class="rightImgUpload flex flex-wrap md:flex-nowrap items-center gap-x-8 gap-y-6">
                     <div class="uploadImg">
                         <div class="userImg relative">
-                            <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png')) }}" alt="User Image" class="w-24 h-24 rounded-full object-cover" id="previewImage">
+                            <img src="{{ asset('asset/front/images/' . ($selectedAvatar->name ?? 'default-avatar.png')) }}" alt="{{ __('profile.profile_picture') }}" class="w-24 h-24 rounded-full object-cover" id="previewImage">
                             <button type="button" @click="changeImageModal = true" class="changeImg w-6 h-6 absolute top-0 right-0 rounded-full bg-[#F9F9F9] border border-color-[#E9EBF0] text-black hover:text-themegreen focus:outline-none transition flex items-center justify-center">
                                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M8.66797 3.95605C9.10473 3.70046 9.64527 3.70046 10.082 3.95605C10.2487 4.05358 10.3992 4.20784 10.5957 4.4043C10.7922 4.60075 10.9464 4.75132 11.0439 4.91797C11.2995 5.35473 11.2995 5.89527 11.0439 6.33203C10.9493 6.49368 10.8004 6.63924 10.6123 6.82715L10.6113 6.83008L6.2998 11.1416C6.12025 11.3212 5.98009 11.4655 5.80371 11.5654C5.62725 11.6653 5.43103 11.7108 5.18457 11.7725L4.03027 12.0605L4.0166 12.0645L4.00195 12.0674C3.84377 12.107 3.68525 12.1473 3.55371 12.1602C3.40937 12.1743 3.18632 12.1687 3.00879 11.9912C2.83126 11.8137 2.82573 11.5906 2.83984 11.4463C2.85348 11.3069 2.89759 11.1372 2.93945 10.9697L3.22754 9.81543C3.28915 9.56897 3.33466 9.37275 3.43457 9.19629C3.53446 9.01991 3.67885 8.87975 3.8584 8.7002L8.1543 4.4043C8.35075 4.20784 8.50132 4.05358 8.66797 3.95605Z" stroke="currentColor" stroke-width="0.8" />
@@ -33,7 +33,7 @@
                                         <path d="M4.16699 13.3333L4.16699 14.1667C4.16699 15.0871 4.91318 15.8333 5.83366 15.8333L14.167 15.8333C15.0875 15.8333 15.8337 15.0871 15.8337 14.1667V13.3333" stroke="currentColor" stroke-width="1.2" />
                                     </svg>
                                 </span>
-                                Upload Image
+                                {{ __('profile.upload_image') }}
                             </button>
                             <button type="button" class="whiteBtn flex align-center gap-1 py-1 px-4" onclick="document.getElementById('fileInput').value = ''; previewImage(event);">
                                 <span class="icon">
@@ -44,10 +44,10 @@
                                         <path d="M8.39045 2.80883C8.48541 2.72023 8.69465 2.64194 8.98572 2.5861C9.2768 2.53027 9.63343 2.5 10.0003 2.5C10.3672 2.5 10.7239 2.53027 11.0149 2.5861C11.306 2.64194 11.5152 2.72023 11.6102 2.80883" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
                                     </svg>
                                 </span>
-                                Remove
+                                {{ __('bank.remove') }}
                             </button>
                         </div>
-                        <h6 class="text-xs text-[#5C5C5C] mt-3">We support PNGs, JPEGs, GIFs under 10 MB</h6>
+                        <h6 class="text-xs text-[#5C5C5C] mt-3">{{ __('profile.image_formats') }}</h6>
                     </div>
                 </div>
             </div>
@@ -55,11 +55,11 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">User Name <br/>(write two names, but not your family name)</h4>
+                    <h4 class="text-base font-medium text-black">{!! __('profile.user_name_hint') !!}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
-                        <input type="text" name="name" id="editableName" class="form-control" placeholder="User Name" value="{{ old('name', $user->name) }}" minlength="3" maxlength="8" readonly>
+                        <input type="text" name="name" id="editableName" class="form-control" placeholder="{{ __('profile.user_name') }}" value="{{ old('name', $user->name) }}" minlength="3" maxlength="8" readonly>
                         <button type="button" class="bg-transparent text-black hover:text-themegreen focus:outline-none transition absolute inset-y-3 right-3 flex items-center" onclick="
                                 const input = document.getElementById('editableName');
                                 input.removeAttribute('readonly');
@@ -79,11 +79,11 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Nickname <br/>(what others see — never your family name)</h4>
+                    <h4 class="text-base font-medium text-black">{!! __('profile.nickname_hint') !!}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
-                        <input type="text" name="nickname" id="editableNickname" class="form-control" placeholder="Nickname" value="{{ old('nickname', $user->nickname) }}" minlength="3" maxlength="15" pattern="\S+" readonly>
+                        <input type="text" name="nickname" id="editableNickname" class="form-control" placeholder="{{ __('profile.nickname') }}" value="{{ old('nickname', $user->nickname) }}" minlength="3" maxlength="15" pattern="\S+" readonly>
                         <button type="button" class="bg-transparent text-black hover:text-themegreen focus:outline-none transition absolute inset-y-3 right-3 flex items-center" onclick="
                                 const input = document.getElementById('editableNickname');
                                 input.removeAttribute('readonly');
@@ -104,11 +104,11 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Email Address</h4>
+                    <h4 class="text-base font-medium text-black">{{ __('bank.email_address') }}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
-                        <input type="email" name="email" id="noneditaleEmail" class="form-control" placeholder="Enter your email" value="{{ old('email', $user->email) }}" disabled>
+                        <input type="email" name="email" id="noneditaleEmail" class="form-control" placeholder="{{ __('profile.enter_your_email') }}" value="{{ old('email', $user->email) }}" disabled>
                     </div>
                 </div>
             </div>
@@ -117,11 +117,11 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8" style="display:none">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Age</h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.age') }}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
-                        <input type="text" id="editableAge" name="age" class="form-control" placeholder="Enter your Age" value="{{ old('age', $user->age) }}" readonly>
+                        <input type="text" id="editableAge" name="age" class="form-control" placeholder="{{ __('profile.enter_your_age') }}" value="{{ old('age', $user->age) }}" readonly>
                         <button type="button" class="bg-transparent text-black hover:text-themegreen focus:outline-none transition absolute inset-y-3 right-3 flex items-center" onclick="
                                 const ageinput = document.getElementById('editableAge');
                                 ageinput.removeAttribute('readonly');
@@ -140,12 +140,12 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8" style="display: none;">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Grade Level</h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.grade_level') }}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
                         <select name="grade" class="form-select">
-                            <option value="">Select Grade Level</option>
+                            <option value="">{{ __('profile.select_grade_level') }}</option>
                             @foreach($grades as $grade)
                             <option value="{{ $grade->id }}" {{ $user->grade == $grade->id ? 'selected' : '' }}>{{ $grade->name }}</option>
                             @endforeach
@@ -157,11 +157,11 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Citizen ID</h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.citizen_id') }}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
-                        <input type="text" id="citizenID" class="form-control" placeholder="Enter Citizen ID" value="{{ old('citizenId', $user->citizenId) }}" disabled>
+                        <input type="text" id="citizenID" class="form-control" placeholder="{{ __('profile.enter_citizen_id') }}" value="{{ old('citizenId', $user->citizenId) }}" disabled>
                     </div>
                 </div>
             </div>
@@ -170,7 +170,7 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">My City Address</h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.my_city_address') }}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
@@ -183,11 +183,11 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Address</h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.address') }}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
-                        <input type="text" id="editAddress" name="address" class="form-control" placeholder="Enter your address" value="{{ old('address', $user->address) }}" readonly>
+                        <input type="text" id="editAddress" name="address" class="form-control" placeholder="{{ __('profile.enter_your_address') }}" value="{{ old('address', $user->address) }}" readonly>
                         <button type="button" class="bg-transparent text-black hover:text-themegreen focus:outline-none transition absolute inset-y-3 right-3 flex items-center" onclick="
                                 const addInput = document.getElementById('editAddress');
                                 addInput.removeAttribute('readonly');
@@ -206,12 +206,12 @@
         <div class="fieldsItems border-b border-[#D2DDDB] py-8"  style="display: none;">
             <div class="fieldsSec flex flex-wrap lg:flex-nowrap items-center gap-y-4">
                 <div class="leftContent max-w-full lg:max-w-[300px] w-full">
-                    <h4 class="text-base font-medium text-black">Select Mascot</h4>
+                    <h4 class="text-base font-medium text-black">{{ __('profile.select_mascot') }}</h4>
                 </div>
                 <div class="rightFields w-full">
                     <div class="relative">
                         <select name="mascot" class="form-select">
-                            <option value="">Select Mascot</option>
+                            <option value="">{{ __('profile.select_mascot') }}</option>
                             @foreach($mascots as $mascot)
                             <option value="{{ $mascot->id }}" {{ $user->mascot == $mascot->id ? 'selected' : '' }}>{{ $mascot->name }}</option>
                             @endforeach
@@ -224,10 +224,10 @@
 
     <div class="buttons text-center flex items-center justify-center gap-4 mt-8">
         <button type="submit" class="themeBtn ">
-            Save Changes
+            {{ __('profile.save_changes') }}
         </button>
         <button type="reset" class="whiteBtn ">
-            Cancel
+            {{ __('messages.cancel') }}
         </button>
     </div>
 </form>
@@ -258,8 +258,8 @@
                 <form method="post" action="{{ route('profile.updateAvatar') }}">
                 @csrf
                     <div class="heading text-center">
-                        <h4 class="text-xl xl:text-[28px] 2xl:text-[32px] font-semibold text-black mb-4">Profile Image</h4>
-                        <h5 class="text-md xl:text-base font-semibold text-black mb-10">Select an image from our characters</h5>
+                        <h4 class="text-xl xl:text-[28px] 2xl:text-[32px] font-semibold text-black mb-4">{{ __('profile.profile_image') }}</h4>
+                        <h5 class="text-md xl:text-base font-semibold text-black mb-10">{{ __('profile.choose_character') }}</h5>
                     </div>
                     <div class="avtarlists grid grid-cols-3 gap-8 mb-10">
                         @foreach($avatar as $avatars)
@@ -276,7 +276,7 @@
                     </div>
                     <div class="text-center">
                         <button @click="changeImageModal = false" class="themeBtn">
-                            Save
+                            {{ __('messages.save') }}
                         </button>
                     </div>
                 </form>

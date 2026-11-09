@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\EnsureCitizenActivation::class,
             \App\Http\Middleware\BlockWritesWhileImpersonating::class,
             \App\Http\Middleware\SetStudentLocale::class,
+            \App\Http\Middleware\RenderHybridText::class,
         ],
 
         'api' => [
@@ -57,11 +58,14 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
+        // an Admin activity screen works on one level (App\Support\AdminLevel, 2026-11-02)
+        'admin.level' => \App\Http\Middleware\AdminLevelScope::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'guest.locale' => \App\Http\Middleware\SetGuestLocale::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,

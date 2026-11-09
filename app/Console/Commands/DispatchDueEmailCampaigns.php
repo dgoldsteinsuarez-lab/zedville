@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\EmailCampaign;
 use App\Models\EmailCampaignSend;
+use App\Models\Grade;
 use App\Models\SchoolMonthSetting;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -105,8 +106,11 @@ class DispatchDueEmailCampaigns extends Command
         if ($campaign->trigger_type === 'relative_to_school_start') {
             // scope_school_id is required for this trigger type (validated
             // on create) - a single school's start_month drives the date,
-            // same as the "school" scope itself.
-            $startMonth = SchoolMonthSetting::where('school_id', $campaign->scope_school_id)->value('start_month');
+            // same as the "school" scope itself. For a Grade, its own start
+            // month if it has one (Daniel, 2026-10-31).
+            $startMonth = $campaign->scope_type === 'grade'
+                ? SchoolMonthSetting::startMonthForGrade(Grade::find($campaign->scope_grade_id), $campaign->scope_school_id)
+                : SchoolMonthSetting::schoolStartMonth($campaign->scope_school_id);
             if (!$startMonth) {
                 return null; // school hasn't configured a start month yet
             }

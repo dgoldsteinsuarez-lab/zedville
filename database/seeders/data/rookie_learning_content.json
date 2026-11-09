@@ -238,7 +238,7 @@
       "id": 1,
       "key": "task_1",
       "title": "Introduction to Budget",
-      "icon": "🐷",
+      "icon": "piggy-bank",
       "month": 2,
       "changes": "8 of the 10 original answers were b), so students could guess. Answers are now spread across a–d, near-duplicate questions (Q5/Q7 and Q9/Q10) were merged, and a first budget calculation was added.",
       "lesson": [
@@ -349,7 +349,7 @@
       "id": 4,
       "key": "task_4",
       "title": "Emergency Fund",
-      "icon": "🛟",
+      "icon": "☂️",
       "month": 5,
       "changes": "Fixed two salary-based questions: the 3–6 month guideline is about expenses, not salary. Three “which percentage?” questions became one calculation. Wrong answers like “diet plan” and “organizing a closet” replaced.",
       "lesson": [

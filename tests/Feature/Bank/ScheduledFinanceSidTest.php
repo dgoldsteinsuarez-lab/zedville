@@ -64,6 +64,10 @@ class ScheduledFinanceSidTest extends TestCase
         Carbon::setTestNow(Carbon::create(2026, 10, 10, 12, 0, 0, 'Europe/Berlin'));
 
         $student = $this->makeStudent(1002);
+        // enough money for the month's bills (they wait for it - no balance below zero)
+        Transaction1::create(['user_id' => $student->id, 'sid' => 1002, 'bank_account_id' => BankAccount::where('student_id', $student->id)->value('id'),
+            'transaction_date' => now()->startOfMonth(), 'description' => 'Opening balance', 'type' => 'credit', 'category' => 'Income',
+            'amount' => 3000, 'balance' => 3000, 'is_penalty' => false]);
 
         (new BankController())->ensureMonthlyBills($student);
 
@@ -78,15 +82,20 @@ class ScheduledFinanceSidTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_ensure_monthly_bills_floors_balance_at_zero_instead_of_going_negative(): void
+    /**
+     * Daniel, 2026-10-30: "we don't allow minus balance". A bill the money
+     * doesn't cover isn't written at all (it was written in full with the
+     * balance clamped at 0, so the statement didn't add up): it waits, and the
+     * bank tries again every day.
+     */
+    public function test_ensure_monthly_bills_waits_for_the_money_instead_of_going_negative(): void
     {
         Carbon::setTestNow(Carbon::create(2026, 10, 10, 12, 0, 0, 'Europe/Berlin'));
 
         $student = $this->makeStudent(1004);
 
-        // Starting balance (5) is far less than the combined fixed bills
-        // (Electricity + Water + Internet 20 + Rent 300 + School Fees 1000),
-        // so every one of them must clamp to 0 rather than go negative.
+        // Starting balance (5) is far less than any fixed bill
+        // (Electricity, Water, Internet 20, Rent 300, School Fees 1000).
         Transaction1::create([
             'user_id' => $student->id,
             'sid' => 1004,
@@ -102,11 +111,8 @@ class ScheduledFinanceSidTest extends TestCase
 
         (new BankController())->ensureMonthlyBills($student);
 
-        $bills = Transaction1::where('user_id', $student->id)->where('type', 'debit')->get();
-        $this->assertNotEmpty($bills);
-        foreach ($bills as $bill) {
-            $this->assertEquals(0.0, (float) $bill->balance, "Bill '{$bill->description}' should have floored at 0.");
-        }
+        $this->assertSame(0, Transaction1::where('user_id', $student->id)->where('type', 'debit')->count());
+        $this->assertEquals(5.0, (float) Transaction1::where('user_id', $student->id)->latest('id')->value('balance'));
 
         Carbon::setTestNow();
     }
@@ -133,9 +139,9 @@ class ScheduledFinanceSidTest extends TestCase
 
         (new BankController())->banks_penalty(app(\App\Services\StatementGenerator::class), $student);
 
-        $penalties = Transaction1::where('user_id', $student->id)->where('category', 'Penalty')->get();
+        $penalties = Transaction1::where('user_id', $student->id)->where('category', 'Fine')->get();
 
-        $this->assertNotEmpty($penalties, 'Expected at least one penalty transaction (expenses are 0%, well under the 91% threshold).');
+        $this->assertNotEmpty($penalties, 'Expected a penalty transaction (no plan of the month chosen, nothing spent).');
         foreach ($penalties as $penalty) {
             $this->assertEquals(1003, $penalty->sid);
         }
@@ -166,9 +172,11 @@ class ScheduledFinanceSidTest extends TestCase
 
         (new BankController())->banks_penalty(app(\App\Services\StatementGenerator::class), $student);
 
-        $penalties = Transaction1::where('user_id', $student->id)->where('category', 'Penalty')->get();
+        $penalties = Transaction1::where('user_id', $student->id)->where('category', 'Fine')->get();
         $this->assertNotEmpty($penalties);
         $this->assertEquals(0.0, (float) $penalties->last()->balance, 'Balance should have floored at 0, not gone negative.');
+        // and the line says what was really taken, so the statement adds up
+        $this->assertEquals(5.0, (float) $penalties->sum('amount'));
 
         Carbon::setTestNow();
     }

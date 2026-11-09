@@ -1,4 +1,5 @@
 @extends('layouts.profile')
+@section('no_page_back', '1'){{-- has its own back link at the top --}}
 
 @section('title', 'Civic Chamber - Educational Finance Department')
 
@@ -34,27 +35,6 @@
                 display: flex;
                 flex-direction: column;
                 gap: 1.25rem;
-            }
-
-            /* BREADCRUMB */
-            .cc-breadcrumb {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                font-size: 12px;
-                color: #5C5C5C;
-            }
-
-            .cc-breadcrumb a {
-                color: #5C5C5C;
-                text-decoration: none;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-            }
-
-            .cc-breadcrumb a:hover {
-                color: var(--gold);
             }
 
             /* HEADER */
@@ -102,28 +82,6 @@
                 margin-top: 2px;
             }
 
-            .cc-back {
-                font-size: 12px;
-                font-weight: 500;
-                color: #000;
-                background: #fff;
-                border: 1px solid #000;
-                box-shadow: 0 3px 0 #000;
-                border-radius: 30px;
-                padding: 6px 14px;
-                text-decoration: none;
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                transition: 0.2s;
-            }
-
-            .cc-back:hover {
-                background: #fff;
-                color: #000;
-                transform: translateY(3px);
-                box-shadow: 0 1px 0 #000;
-            }
 
             /* TABS */
             .cc-tabs {
@@ -173,7 +131,7 @@
             }
 
             .tab-count {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 500;
                 padding: 1px 7px;
                 border-radius: 8px;
@@ -202,7 +160,7 @@
             }
 
             .sec-label {
-                font-size: 11px;
+                font-size: 12px;
                 font-weight: 500;
                 text-transform: uppercase;
                 letter-spacing: 0.08em;
@@ -241,7 +199,7 @@
             }
 
             .ref-status {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 500;
                 padding: 3px 9px;
                 border-radius: 10px;
@@ -321,7 +279,7 @@
             }
 
             .ref-meta {
-                font-size: 11px;
+                font-size: 12px;
                 color: #999999;
                 margin-bottom: 0.85rem;
             }
@@ -424,7 +382,7 @@
             }
 
             .pet-status {
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: 500;
                 padding: 3px 9px;
                 border-radius: 10px;
@@ -456,7 +414,7 @@
             }
 
             .pet-meta {
-                font-size: 11px;
+                font-size: 12px;
                 color: #999999;
                 margin-bottom: 0.85rem;
             }
@@ -624,7 +582,7 @@
             }
 
             .form-hint {
-                font-size: 11px;
+                font-size: 12px;
                 color: #999999;
             }
 
@@ -710,56 +668,49 @@
             }
         </style>
     @endpush
+    {{-- Back top left, where every page has it (Daniel, 2026-10-27) --}}
+    <a href="{{ route('education.city-hall') }}" class="zvBackBtn cc-back inline-flex items-center gap-2 py-2 px-4 text-sm">
+        <span aria-hidden="true">&larr;</span> {{ __('cityhall.back_to_city_hall') }}
+    </a>
     <div class="cc-layout">
-
-        <!-- BREADCRUMB -->
-        <div class="cc-breadcrumb">
-            <a href="{{ route('education.main-hall') }}"><i class="ti ti-building-community" aria-hidden="true"></i> City
-                Hall</a>
-            <span style="color:#D2DDDB;">›</span>
-            <span>Civic Chamber</span>
-        </div>
 
         <!-- PAGE HEADER -->
         <div class="cc-header">
             <div class="cc-header-left">
                 <div class="cc-icon"><i class="ti ti-checkup-list" aria-hidden="true"></i></div>
                 <div>
-                    <div class="cc-title">Civic Chamber</div>
-                    <div class="cc-subtitle">Vote on referendums · Sign or start petitions</div>
+                    <div class="cc-title">{{ __('cityhall.civic_chamber') }}</div>
+                    <div class="cc-subtitle">{{ __('cityhall.civic_subtitle') }}</div>
                 </div>
             </div>
-            <a href="{{ route('education.city-hall') }}" class="cc-back">
-                <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to City Hall
-            </a>
         </div>
 
         <!-- CITY NAME / QUOTE PROPOSAL -->
         <div class="cc-header" id="city-proposal-card" style="flex-direction:column; align-items:stretch; gap:10px; {{ $topic ? '' : 'opacity:.9;' }}">
-            <div class="cc-title" style="font-size:15px;">Propose a city name or quote</div>
-            <div class="cc-subtitle">Your Tutor reviews it before it goes live in City Hall. One pending proposal of each type at a time.</div>
+            <div class="cc-title" style="font-size:15px;">{{ __('cityhall.propose_title') }}</div>
+            <div class="cc-subtitle">{{ __('cityhall.propose_text') }}</div>
             <div style="display:flex; gap:16px; flex-wrap:wrap;">
                 <form id="city-name-form" style="flex:1; min-width:220px;">
                     @csrf
-                    <label class="text-sm" style="display:block; margin-bottom:4px;">City name</label>
+                    <label class="text-sm" style="display:block; margin-bottom:4px;">{{ __('cityhall.city_name') }}</label>
                     @if ($myCityProposals->has('name'))
-                        <div class="text-sm" style="color:#7A5C00;">Pending: "{{ $myCityProposals['name']->value }}"</div>
+                        <div class="text-sm" style="color:#7A5C00;">{{ __('cityhall.pending', ['value' => $myCityProposals['name']->value]) }}</div>
                     @else
                         <div style="display:flex; gap:8px;">
-                            <input type="text" name="value" maxlength="255" required class="form-control" placeholder="New city name">
-                            <button type="submit" class="btn btn-sm btn-primary">Propose</button>
+                            <input type="text" name="value" maxlength="255" required class="form-control" placeholder="{{ __('cityhall.new_city_name') }}">
+                            <button type="submit" class="btn btn-sm btn-primary">{{ __('cityhall.propose') }}</button>
                         </div>
                     @endif
                 </form>
                 <form id="city-quote-form" style="flex:1; min-width:220px;">
                     @csrf
-                    <label class="text-sm" style="display:block; margin-bottom:4px;">City quote</label>
+                    <label class="text-sm" style="display:block; margin-bottom:4px;">{{ __('cityhall.city_quote') }}</label>
                     @if ($myCityProposals->has('quote'))
-                        <div class="text-sm" style="color:#7A5C00;">Pending: "{{ $myCityProposals['quote']->value }}"</div>
+                        <div class="text-sm" style="color:#7A5C00;">{{ __('cityhall.pending', ['value' => $myCityProposals['quote']->value]) }}</div>
                     @else
                         <div style="display:flex; gap:8px;">
-                            <input type="text" name="value" maxlength="255" required class="form-control" placeholder="New city quote">
-                            <button type="submit" class="btn btn-sm btn-primary">Propose</button>
+                            <input type="text" name="value" maxlength="255" required class="form-control" placeholder="{{ __('cityhall.new_city_quote') }}">
+                            <button type="submit" class="btn btn-sm btn-primary">{{ __('cityhall.propose') }}</button>
                         </div>
                     @endif
                 </form>
@@ -803,14 +754,12 @@
         <div class="cc-tabs" role="tablist">
             <button class="cc-tab active-ref" id="tab-ref" onclick="switchTab('referendum')" role="tab"
                 aria-selected="true">
-                <i class="ti ti-checkup-list" aria-hidden="true"></i> Referendums
-                <!-- IT TEAM: replace 1 with open referendum count from DB -->
-                <span class="tab-count tc-blue">1</span>
+                <i class="ti ti-checkup-list" aria-hidden="true"></i> {{ __('cityhall.referendums') }}
+                <span class="tab-count tc-blue">{{ $openReferendums->count() }}</span>
             </button>
             <button class="cc-tab" id="tab-pet" onclick="switchTab('petition')" role="tab" aria-selected="false">
-                <i class="ti ti-writing" aria-hidden="true"></i> Petitions
-                <!-- IT TEAM: replace 2 with open petition count from DB -->
-                <span class="tab-count tc-purple">2</span>
+                <i class="ti ti-writing" aria-hidden="true"></i> {{ __('cityhall.petitions') }}
+                <span class="tab-count tc-purple">{{ $activePetitions->count() }}</span>
             </button>
         </div>
 
@@ -818,7 +767,7 @@
         <div class="cc-section visible" id="section-referendum">
 
             <div class="sec-label">
-                Open votes
+                {{ __('cityhall.open_votes') }}
             </div>
 
             @forelse($openReferendums as $referendum)
@@ -856,9 +805,7 @@
                         </div>
 
                         <span class="ref-status rs-open">
-
-                            Open
-
+                            {{ __('cityhall.open') }}
                         </span>
 
                     </div>
@@ -868,9 +815,7 @@
                         <div class="ref-bar-row">
 
                             <span class="ref-bar-lbl">
-
-                                Yes
-
+                                {{ __('cityhall.yes') }}
                             </span>
 
                             <div class="ref-bar-track">
@@ -892,9 +837,7 @@
                         <div class="ref-bar-row">
 
                             <span class="ref-bar-lbl">
-
-                                No
-
+                                {{ __('cityhall.no') }}
                             </span>
 
                             <div class="ref-bar-track">
@@ -917,11 +860,9 @@
 
                     <div class="ref-meta">
 
-                        {{ $totalVotes }} Votes
-
+                        {{ trans_choice('cityhall.votes', $totalVotes) }}
                         @if($referendum->end_date)
-
-                            · Closes {{ \Carbon\Carbon::parse($referendum->end_date)->format('d M Y') }}
+                            · {{ __('cityhall.closes', ['date' => \Carbon\Carbon::parse($referendum->end_date)->translatedFormat('d M Y')]) }}
 
                         @endif
 
@@ -934,16 +875,14 @@
                             <button class="vote-btn vote-btn-yes" onclick="castVote({{ $referendum->id }},'yes')">
 
                                 <i class="ti ti-thumb-up"></i>
-
-                                Vote Yes
+                                {{ __('cityhall.vote_yes') }}
 
                             </button>
 
                             <button class="vote-btn vote-btn-no" onclick="castVote({{ $referendum->id }},'no')">
 
                                 <i class="ti ti-thumb-down"></i>
-
-                                Vote No
+                                {{ __('cityhall.vote_no') }}
 
                             </button>
 
@@ -954,8 +893,7 @@
                         <div class="signed-msg">
 
                             <i class="ti ti-circle-check"></i>
-
-                            You have already voted.
+                            {{ __('cityhall.already_voted') }}
 
                         </div>
 
@@ -968,8 +906,7 @@
                 <div class="empty-state">
 
                     <i class="ti ti-checkup-list"></i>
-
-                    No open referendums right now.
+                    {{ __('cityhall.no_open_referendums') }}
 
                 </div>
 
@@ -977,9 +914,7 @@
 
 
             <div class="sec-label mt-4">
-
-                Past Referendums
-
+                {{ __('cityhall.past_referendums') }}
             </div>
 
             @forelse($closedReferendums as $referendum)
@@ -1014,7 +949,7 @@
 
                         <span class="ref-status {{ $yesVotes >= $noVotes ? 'rs-yes' : 'rs-no' }}">
 
-                            {{ $yesVotes >= $noVotes ? 'Yes Won' : 'No Won' }}
+                            {{ $yesVotes >= $noVotes ? __('cityhall.yes_won') : __('cityhall.no_won') }}
 
                         </span>
 
@@ -1025,9 +960,7 @@
                         <div class="ref-bar-row">
 
                             <span class="ref-bar-lbl">
-
-                                Yes
-
+                                {{ __('cityhall.yes') }}
                             </span>
 
                             <div class="ref-bar-track">
@@ -1049,9 +982,7 @@
                         <div class="ref-bar-row">
 
                             <span class="ref-bar-lbl">
-
-                                No
-
+                                {{ __('cityhall.no') }}
                             </span>
 
                             <div class="ref-bar-track">
@@ -1074,7 +1005,7 @@
 
                     <div class="ref-meta">
 
-                        {{ $totalVotes }} Votes · Closed
+                        {{ trans_choice('cityhall.votes', $totalVotes) }} · {{ __('cityhall.closed') }}
 
                     </div>
 
@@ -1085,8 +1016,7 @@
                 <div class="empty-state">
 
                     <i class="ti ti-history"></i>
-
-                    No previous referendums.
+                    {{ __('cityhall.no_past_referendums') }}
 
                 </div>
 
@@ -1102,8 +1032,7 @@
             <button class="new-pet-btn" id="newPetBtn" onclick="togglePetitionForm()">
 
                 <i class="ti ti-plus"></i>
-
-                Start a new petition
+                {{ __('cityhall.start_petition') }}
 
             </button>
 
@@ -1111,17 +1040,13 @@
             <div class="new-pet-form" id="newPetForm">
 
                 <div class="form-title">
-
-                    Start a new petition
-
+                    {{ __('cityhall.start_petition') }}
                 </div>
 
                 <div class="form-group">
 
                     <label class="form-label">
-
-                        Petition Title
-
+                        {{ __('cityhall.petition_title') }}
                     </label>
 
                     <input type="text" id="petTitle" class="form-input" maxlength="200">
@@ -1131,9 +1056,7 @@
                 <div class="form-group">
 
                     <label class="form-label">
-
-                        Description
-
+                        {{ __('cityhall.description') }}
                     </label>
 
                     <textarea id="petDesc" class="form-textarea"></textarea>
@@ -1142,25 +1065,21 @@
 
                 <div class="form-group">
 
-                    <label class="form-label">Visible to</label>
+                    <label class="form-label">{{ __('cityhall.visible_to') }}</label>
 
-                    <label><input type="radio" name="petScope" value="class" checked> Just my class</label>
-                    <label><input type="radio" name="petScope" value="grade"> My whole Grade</label>
+                    <label><input type="radio" name="petScope" value="class" checked> {{ __('cityhall.just_my_class') }}</label>
+                    <label><input type="radio" name="petScope" value="grade"> {{ __('cityhall.my_whole_grade') }}</label>
 
                 </div>
 
                 <div class="form-actions">
 
                     <button class="btn-submit" onclick="submitPetition()">
-
-                        Submit Petition
-
+                        {{ __('cityhall.submit_petition') }}
                     </button>
 
                     <button class="btn-cancel" onclick="togglePetitionForm()">
-
-                        Cancel
-
+                        {{ __('cityhall.cancel') }}
                     </button>
 
                 </div>
@@ -1169,9 +1088,7 @@
 
 
             <div class="sec-label">
-
-                Active Petitions
-
+                {{ __('cityhall.active_petitions') }}
             </div>
 
 
@@ -1217,7 +1134,7 @@
 
                         <span class="pet-status ps-collecting">
 
-                            {{ ucfirst($petition->status) }}
+                            {{ __('cityhall.petition_status.' . $petition->status) }}
 
                         </span>
 
@@ -1245,9 +1162,7 @@
 
                             <i class="ti ti-pencil"></i>
 
-                            {{ $signatureCount }}
-
-                            Signatures
+                            {{ trans_choice('cityhall.signatures', $signatureCount) }}
 
                         </span>
 
@@ -1258,13 +1173,9 @@
 
                         @if($isOwner)
 
-                            You started this petition
-
+                            {{ __('cityhall.you_started') }}
                         @else
-
-                            Started
-
-                            {{ $petition->created_at->diffForHumans() }}
+                            {{ __('cityhall.started', ['time' => $petition->created_at->diffForHumans()]) }}
 
                         @endif
 
@@ -1278,8 +1189,7 @@
                                  color:var(--gold);">
 
                             <i class="ti ti-star"></i>
-
-                            This is your petition.
+                            {{ __('cityhall.your_petition') }}
 
                         </div>
 
@@ -1288,8 +1198,7 @@
                         <div class="signed-msg">
 
                             <i class="ti ti-circle-check"></i>
-
-                            You already signed this petition.
+                            {{ __('cityhall.already_signed') }}
 
                         </div>
 
@@ -1298,8 +1207,7 @@
                         <button class="sign-btn" onclick="signPetition({{ $petition->id }})">
 
                             <i class="ti ti-pencil"></i>
-
-                            Sign Petition
+                            {{ __('cityhall.sign_petition') }}
 
                         </button>
 
@@ -1312,8 +1220,7 @@
                 <div class="empty-state">
 
                     <i class="ti ti-writing"></i>
-
-                    No Active Petitions
+                    {{ __('cityhall.no_active_petitions') }}
 
                 </div>
 
@@ -1322,9 +1229,7 @@
 
 
             <div class="sec-label mt-4">
-
-                Past Petitions
-
+                {{ __('cityhall.past_petitions') }}
             </div>
 
 
@@ -1342,7 +1247,7 @@
 
                             <span class="pet-status">
 
-                                {{ ucfirst($petition->status) }}
+                                {{ __('cityhall.petition_status.' . $petition->status) }}
 
                             </span>
 
@@ -1350,12 +1255,7 @@
 
                         <div class="pet-meta">
 
-                            {{ \App\Models\PetitionSignature::where(
-                    'petition_id',
-                    $petition->id
-                )->count() }}
-
-                            Signatures
+                            {{ trans_choice('cityhall.signatures', \App\Models\PetitionSignature::where('petition_id', $petition->id)->count()) }}
 
                         </div>
 
@@ -1363,11 +1263,7 @@
 
                             <div class="pet-feedback">
 
-                                <strong>
-
-                                    Tutor:
-
-                                </strong>
+                                <strong>{{ __('cityhall.tutor') }}</strong>
 
                                 {{ $petition->tutor_feedback }}
 
@@ -1382,8 +1278,7 @@
                 <div class="empty-state">
 
                     <i class="ti ti-history"></i>
-
-                    No Previous Petitions
+                    {{ __('cityhall.no_past_petitions') }}
 
                 </div>
 
@@ -1394,6 +1289,9 @@
     </div><!-- /cc-layout -->
 
     <script>
+        // Texts in the student's language (lang/<language>/cityhall.php).
+        const CC_T = {{ \Illuminate\Support\Js::from(__('cityhall.js')) }};
+
         // ── TAB SWITCHER ──
         function switchTab(tab) {
             const isRef = tab === 'referendum';
@@ -1411,7 +1309,7 @@
 
         // ── CAST VOTE ──
         function castVote(referendumId, vote) {
-            if (!confirm('Vote ' + vote.toUpperCase() + ' on this referendum? You cannot change your vote afterwards.')) return;
+            if (!confirm(CC_T.vote_confirm.replace(':vote', vote === 'yes' ? CC_T.yes : CC_T.no))) return;
 
             // IT TEAM: replace URL with Laravel route
             fetch('/education/referendum/' + referendumId + '/vote', {
@@ -1426,25 +1324,18 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        // Update bars
-                        document.querySelector('#ref-card-' + referendumId + ' .fill-yes').style.width = data.yes_pct + '%';
-                        document.querySelector('#ref-card-' + referendumId + ' .fill-no').style.width = data.no_pct + '%';
-                        document.getElementById('yes-pct-' + referendumId).textContent = data.yes_pct + '%';
-                        document.getElementById('no-pct-' + referendumId).textContent = data.no_pct + '%';
-                        document.getElementById('ref-meta-' + referendumId).textContent = data.total_votes + ' students voted';
-                        // Replace vote buttons with voted message
-                        document.getElementById('vote-row-' + referendumId).outerHTML =
-                            '<div class="voted-msg"><i class="ti ti-circle-check" aria-hidden="true"></i> You have already voted on this referendum</div>';
+                        // The page shows the updated result after reloading.
+                        location.reload();
                     } else {
-                        alert(data.message || 'Something went wrong. Please try again.');
+                        alert(data.message || CC_T.went_wrong);
                     }
                 })
-                .catch(() => alert('Connection error. Please try again.'));
+                .catch(() => alert(CC_T.connection_error));
         }
 
         // ── SIGN PETITION ──
         function signPetition(petitionId) {
-            if (!confirm('Sign this petition? Your name will not be shown — only the total count.')) return;
+            if (!confirm(CC_T.sign_confirm)) return;
 
             // IT TEAM: replace URL with Laravel route
             fetch('/education/petition/' + petitionId + '/sign', {
@@ -1457,14 +1348,12 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('sig-count-' + petitionId).textContent = data.signature_count;
-                        document.getElementById('sign-btn-' + petitionId).outerHTML =
-                            '<div class="signed-msg"><i class="ti ti-circle-check" aria-hidden="true"></i> You have signed this petition</div>';
+                        location.reload();
                     } else {
-                        alert(data.message || 'Something went wrong. Please try again.');
+                        alert(data.message || CC_T.went_wrong);
                     }
                 })
-                .catch(() => alert('Connection error. Please try again.'));
+                .catch(() => alert(CC_T.connection_error));
         }
 
         // ── PETITION FORM ──
@@ -1479,8 +1368,8 @@
         function submitPetition() {
             const title = document.getElementById('petTitle').value.trim();
             const desc = document.getElementById('petDesc').value.trim();
-            if (!title) { alert('Please write a title for your petition.'); return; }
-            if (!desc) { alert('Please write a description for your petition.'); return; }
+            if (!title) { alert(CC_T.title_required); return; }
+            if (!desc) { alert(CC_T.description_required); return; }
             const scope = document.querySelector('input[name="petScope"]:checked').value;
 
             // IT TEAM: replace URL with Laravel route
@@ -1495,15 +1384,15 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Your petition has been submitted. Your tutor will review it shortly.');
+                        alert(CC_T.petition_submitted);
                         document.getElementById('petTitle').value = '';
                         document.getElementById('petDesc').value = '';
                         togglePetitionForm();
                     } else {
-                        alert(data.message || 'Something went wrong. Please try again.');
+                        alert(data.message || CC_T.went_wrong);
                     }
                 })
-                .catch(() => alert('Connection error. Please try again.'));
+                .catch(() => alert(CC_T.connection_error));
         }
     </script>
 @endsection

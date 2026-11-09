@@ -18,7 +18,8 @@ use App\Services\NotificationService;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Display the login view - design 3c, the skyline under a bright sky,
+     * which Daniel chose from his shortlist on 2026-10-25.
      */
     public function create(): View
     {
@@ -45,33 +46,24 @@ class AuthenticatedSessionController extends Controller
             'user_id' => $user->id,     // optional but useful
         ]);
 
-        // Penalty on LAST DAY of month
+        // The month-end fine on the LAST DAY of the month, for a student without the
+        // plan of the month - once a month, the first month too (MonthEndPenaltyService
+        // decides; Daniel, 2026-11-07: "el primer mes también debe haber penalización").
         $today = now();
         $isLastDayOfMonth = $today->isSameDay($today->copy()->endOfMonth());
-
-        $accountCreatedBeforeThisMonth =
-            $user->created_at->lessThan(now()->startOfMonth());
-
-        $penaltyExists = \App\Models\Transaction1::where('user_id', $user->id)
-            ->where('category', 'Penalty')
-            ->whereYear('transaction_date', $today->year)
-            ->whereMonth('transaction_date', $today->month)
-            ->exists();
 
         if (
             $user->isStudent() &&
             !config('zedville.auto_penalty') &&   // when the scheduled job is on, it does this for everyone
-            $isLastDayOfMonth &&
-            !$penaltyExists &&
-            $accountCreatedBeforeThisMonth
+            $isLastDayOfMonth
         ) {
             app(\App\Http\Controllers\BankController::class)->banks_penalty(app(StatementGenerator::class), $user);
         }
         // ✅ ADD PREVIOUS MONTH STATEMENT MAIL HERE 👇👇👇
         // ----------------------------------------------
 
-        // 📅 Previous month calculation
-        $prevMonthDate = now()->subMonth();
+        // 📅 Previous month calculation (from the 1st: on the 31st subMonth() gave this month)
+        $prevMonthDate = now()->startOfMonth()->subMonth();
         $prevMonth = $prevMonthDate->month;
         $prevYear = $prevMonthDate->year;
 
@@ -81,13 +73,16 @@ class AuthenticatedSessionController extends Controller
 
             $accountOpenedBeforePrevMonth =
                 Carbon::parse($bankAccount->created_at)
-                    ->lessThan($prevMonthDate->startOfMonth());
+                    ->lessThan($prevMonthDate->copy()->endOfMonth());
 
             if ($accountOpenedBeforePrevMonth) {
 
-                $statementExists = BankStatement::where('user_id', $user->id)
-                    ->where('month', $prevMonth)
-                    ->where('year', $prevYear)
+                // A month with money on the account has a statement (bank review,
+                // 2026-10-29: this waited for bank_statements rows, which only the
+                // first month gets - the mail never came).
+                $statementExists = \App\Models\Transaction1::where('user_id', $user->id)
+                    ->whereYear('transaction_date', $prevYear)
+                    ->whereMonth('transaction_date', $prevMonth)
                     ->exists();
 
                 if ($statementExists) {
@@ -99,12 +94,11 @@ class AuthenticatedSessionController extends Controller
 
                     if (!$mailAlreadySent) {
 
-                        $prevMonthEnd = now()->subMonth()->endOfMonth();
+                        $prevMonthEnd = $prevMonthDate->copy()->endOfMonth();
 
                         $content = view('mailbox_templates.monthly-statement', [
                             'user' => $user,
-                            'month' => $prevMonthDate->format('F'),
-                            'year' => $prevYear,
+                            'month' => $prevMonthDate->format('Y-m'),
                         ])->render();
 
                         Mailbox::create([
@@ -112,6 +106,9 @@ class AuthenticatedSessionController extends Controller
                             'subject' => 'Your ' . $prevMonthDate->format('F Y') . ' Bank Statement',
                             'content' => $content,
                             'type' => 'primary',
+                            // Shown in the reader's language when opened (Mailbox model).
+                            'template' => 'monthly-statement',
+                            'template_data' => ['month' => $prevMonthDate->format('Y-m')],
                             'read' => 0,
                             'created_at' => $prevMonthEnd,
                             'updated_at' => $prevMonthEnd,

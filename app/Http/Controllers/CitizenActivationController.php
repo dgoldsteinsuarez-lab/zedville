@@ -17,16 +17,53 @@ use App\Models\ConsumerSurvey;
 class CitizenActivationController extends Controller
 {
     /**
-     * Step 1 - Welcome
+     * Step 1 - Welcome: the Mayor's announcement (Daniel, 2026-10-23). A
+     * live city broadcast, the Mayor explaining the salary and the bills
+     * it must cover, a first needs-vs-wants decision, the citizenship
+     * letter to sign and the mission briefing - what Zedville is and what
+     * it trains for real life. Personalised with the student's own name,
+     * citizen number, street and salary.
+     *
+     * Shown until the bank account is open (so "Back" from that step can
+     * replay it) and again any time after activation; mid-activation it
+     * sends the student on to the step they're on.
      */
     public function index()
     {
-        if ($redirect = $this->redirectIfCompleted()) {
-            return $redirect;
+        $user = Auth::user();
+        $nextRoute = app(\App\Services\CitizenActivationService::class)->getNextRoute($user);
+
+        if ($nextRoute && BankAccount::where('student_id', $user->id)->exists()) {
+            return redirect($nextRoute);
         }
+
+        $address = $user->isStudent() ? \App\Services\AddressService::assignForStudent($user)?->load('street') : null;
+        $salary = ConsumerSurvey::salaryFor($user->id);
+        // The fixed bills every citizen has (same as the simulated first
+        // bank statement in the Needs, Wants & Savings Match).
+        $bills = ['rent' => 300.00, 'school_fees' => 1000.00, 'electricity' => 86.00, 'water' => 59.00, 'internet' => 20.00];
+
+        return view('citizen-activation.index', [
+            'user' => $user,
+            'firstName' => \Illuminate\Support\Str::before(trim((string) ($user->nickname ?: $user->name)), ' ') ?: $user->name,
+            'citizenId' => $user->citizenId ?: str_pad((string) $user->id, 6, '0', STR_PAD_LEFT),
+            'address' => $address ? $address->house_number . ' ' . $address->street->name : null,
+            'salary' => $salary,
+            'bills' => $bills,
+            'leftAfterBills' => $salary - array_sum($bills),
+        ]);
+    }
+
+    /** The student accepted the mission at the end of the welcome. */
+    public function acceptWelcome()
+    {
         $user = Auth::user();
 
-        return view('citizen-activation.index', compact('user'));
+        if (!$user->welcome_seen_at) {
+            $user->forceFill(['welcome_seen_at' => now()])->save();
+        }
+
+        return redirect(app(\App\Services\CitizenActivationService::class)->getNextRoute($user) ?? route('dashboard'));
     }
 
     /**
@@ -38,15 +75,27 @@ class CitizenActivationController extends Controller
             return $redirect;
         }
         $user = Auth::user();
+        // Daniel, 2026-10-25: the address field was empty - every student
+        // already has a street and number in their Grade's city, so it is
+        // filled in (like the Citizen ID) instead of typed.
+        $cityAddress = $this->cityAddressFor($user);
 
-        return view('citizen-activation.bank-account', compact('user'));
+        return view('citizen-activation.bank-account', compact('user', 'cityAddress'));
+    }
+
+    /** The student's Zedville address, e.g. "1 Adam Smith Avenue, Zedville" (null without a Class). */
+    private function cityAddressFor($user): ?string
+    {
+        return $user->isStudent()
+            ? \App\Services\AddressService::assignForStudent($user)?->load('street')->label()
+            : null;
     }
     //Post Bank account
     public function store(Request $request, StatementGenerator $generator)
     {
         $user = auth()->user();
         if (!$user) {
-            return redirect()->back()->withErrors('You must be logged in.');
+            return redirect()->back()->withErrors(__('citizen.flash.login_required'));
         }
 
         //$salary=3952.40; // Set your salary amount here
@@ -59,6 +108,9 @@ class CitizenActivationController extends Controller
             'rcvaccemail' => 'nullable|string',
             'tandc' => 'nullable|string',
         ]);
+        // The city address always wins over what the form sent (the field is
+        // read-only); the typed one is only for a student with no Class yet.
+        $validated['homeAddress'] = $this->cityAddressFor($user) ?? ($validated['homeAddress'] ?? null);
         // ✅ Update user address if not already set
         if (empty($user->address) && !empty($validated['homeAddress'])) {
             $user->address = $validated['homeAddress'];
@@ -117,7 +169,7 @@ class CitizenActivationController extends Controller
 
         $bankAccount = BankAccount::create($data);
 
-        return redirect()->route('CitizenActivation.salaryAuthorization')->with('success', 'Bank account created successfully!');
+        return redirect()->route('CitizenActivation.salaryAuthorization')->with('success', __('citizen.flash.bank_created'));
     }
     /**
      * Step 3 - Salary Authorization
@@ -162,7 +214,7 @@ class CitizenActivationController extends Controller
         ]);*/
         return redirect()
             ->route('CitizenActivation.autoDebit')
-            ->with('success', 'Salary Created Sucessfully');
+            ->with('success', __('citizen.flash.salary_created'));
     }
     /**
      * Step 4 - Auto Debit
@@ -205,6 +257,10 @@ class CitizenActivationController extends Controller
         | 1️⃣ SAVE AUTO DEBIT AUTHORIZATION (NO CHANGE)
         |--------------------------------------------------------------------------
         */
+        // The address lives on the bank account, not the user ($user->student_address
+        // never exists - every auto-debit was saved without one, found 2026-10-25).
+        $serviceAddress = BankAccount::where('student_id', $user->id)->value('student_address') ?: $user->address;
+
         foreach ($request->services as $key => $accountNumber) {
 
             $meta = $request->services_meta[$key] ?? null;
@@ -218,7 +274,7 @@ class CitizenActivationController extends Controller
             if ($alreadySubmitted) {
                 return redirect()
                     ->back()
-                    ->with('error', 'You have already submitted auto-debit for one or more services.');
+                    ->with('error', __('citizen.flash.auto_debit_exists'));
             }
 
             AutoDebitRequest::create([
@@ -228,7 +284,7 @@ class CitizenActivationController extends Controller
                 'accountno' => $meta['account'],
                 'fullname' => $user->name,
                 'email' => $user->email,
-                'serviceaddress' => $user->student_address,
+                'serviceaddress' => $serviceAddress,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => $meta['amount'] ?? 0,
@@ -251,7 +307,7 @@ class CitizenActivationController extends Controller
                 'accountno' => 'RENT-AUTO', // static / dummy
                 'fullname' => $user->name,
                 'email' => $user->email,
-                'serviceaddress' => $user->student_address,
+                'serviceaddress' => $serviceAddress,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.rent', 300), // fixed rent
@@ -273,7 +329,7 @@ class CitizenActivationController extends Controller
                 'accountno' => $billers[3]->account_number ?? 'SCHOOL-AUTO',
                 'fullname' => $user->name,
                 'email' => $user->email,
-                'serviceaddress' => $user->student_address,
+                'serviceaddress' => $serviceAddress,
                 'bankname' => $request->bankname,
                 'bankaccountnumber' => $request->bankaccountnumber,
                 'amount' => config('zedville.school_fees', 1000),
@@ -335,35 +391,32 @@ class CitizenActivationController extends Controller
                 continue;
             }
 
-            $exists = Transaction1::where('user_id', $user->id)
-                ->where('description', $description)
-                ->whereDate('transaction_date', $salaryDate->toDateString())
-                ->exists();
+            // Once a month, like BankController::ensureMonthlyBills (it checked
+            // today only: done after the 7th, the month's bills - already charged
+            // by the nightly run - were charged a second time). Locked, through
+            // the ledger, so the running balance is right.
+            \Illuminate\Support\Facades\DB::transaction(function () use ($user, $bankAccount, $description, $fixedTransactions, $salaryDate) {
+                if ($bankAccount) {
+                    BankAccount::whereKey($bankAccount->id)->lockForUpdate()->first();
+                }
+                $exists = Transaction1::where('user_id', $user->id)
+                    ->where('description', $description)
+                    ->whereYear('transaction_date', $salaryDate->year)
+                    ->whereMonth('transaction_date', $salaryDate->month)
+                    ->exists();
 
-            if ($exists) {
-                continue;
-            }
+                if ($exists) {
+                    return;
+                }
 
-            $latestTxn = Transaction1::where('user_id', $user->id)
-                ->latest('id')
-                ->first();
-
-            $lastBalance = $latestTxn ? $latestTxn->balance : 0;
-            $amount = $fixedTransactions[$description];
-            $newBalance = max(0, $lastBalance - $amount);
-
-            Transaction1::create([
-                'user_id' => $user->id,
-                'sid' => $user->sid,
-                'bank_account_id' => $bankAccount->id ?? null,
-                'transaction_date' => $salaryDate,
-                'description' => $description,
-                'type' => 'debit',
-                'category' => 'Needs',
-                'amount' => $amount,
-                'balance' => $newBalance,
-                'is_penalty' => false,
-            ]);
+                \App\Services\LedgerService::post($user->id, 'debit', 'Needs', (float) $fixedTransactions[$description], $description, [
+                    'sid' => $user->sid,
+                    'bank_account_id' => $bankAccount->id ?? null,
+                    'transaction_date' => $salaryDate,
+                    // not enough money: nothing now, the month's bills try again from the 7th
+                    'only_if_enough' => true,
+                ]);
+            });
         }
 
         /*
@@ -373,7 +426,7 @@ class CitizenActivationController extends Controller
         */
         return redirect()
             ->route('CitizenActivation.consumerProfile')
-            ->with('success', 'Congratulations, your auto debit is set up. Now complete the survey.');
+            ->with('success', __('citizen.flash.auto_debit_done'));
     }
     /**
      * Step 5 - Consumer Profile
@@ -390,18 +443,11 @@ class CitizenActivationController extends Controller
     }
 
     /**
-     * Temporary unblock for Step 5 (bugs.md: "Consumer profile survey never
-     * actually submits"). citizen-activation.layouts.surveys is a purely
-     * client-side quiz - it computes and shows results in the browser but
-     * never POSTs anything, so ConsumerSurvey::exists() never becomes true
-     * and a student can never pass this step. Creates a zero-cost default
-     * record (no groceries/lunch/transport/etc selected, so no balance is
-     * touched) purely to satisfy CitizenActivationService::getNextRoute()'s
-     * gate and let onboarding continue. Does NOT reflect anything the
-     * student actually answered - the real fix (wiring the quiz's already-
-     * computed answers to a real submit, the same way
-     * ConsumerSurveyController::storesurvey already works for the monthly
-     * redo) is still open, see bugs.md.
+     * "Skip for now" on Step 5. The survey itself saves through
+     * ConsumerSurveyController::storesurvey (surveys.js) and then moves on to
+     * Step 6 by itself; this is for a student who doesn't answer it. Creates
+     * a zero-cost record (no groceries/lunch/transport/etc, so no balance is
+     * touched) to satisfy CitizenActivationService::getNextRoute()'s gate.
      */
     public function skipConsumerProfile()
     {
@@ -424,7 +470,7 @@ class CitizenActivationController extends Controller
 
         return redirect()
             ->route('CitizenActivation.activationComplete')
-            ->with('success', 'Consumer profile skipped for now - you can fill in a real one later from your profile.');
+            ->with('success', __('citizen.flash.profile_skipped'));
     }
     //Post comsure profile
     /**
@@ -436,8 +482,11 @@ class CitizenActivationController extends Controller
             return $redirect;
         }
         $user = Auth::user();
+        // The page used to show the same sample numbers to every student.
+        $bankAccount = BankAccount::where('student_id', $user->id)->first();
+        $survey = ConsumerSurvey::where('user_id', $user->id)->latest('id')->first();
 
-        return view('citizen-activation.activation-complete', compact('user'));
+        return view('citizen-activation.activation-complete', compact('user', 'bankAccount', 'survey'));
     }
     protected function redirectIfCompleted()
     {

@@ -1,10 +1,11 @@
 @extends('layouts.profile')
+@section('no_page_back', '1'){{-- has its own back link at the top --}}
 
 @section('title', $title . ' - Results')
 
 @section('content')
 <div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <a href="{{ route('academy.monthly') }}" class="text-sm text-gray-500">&larr; {{ __('academy.monthly_title') }}</a>
+    <a href="{{ route('academy.monthly') }}" class="zvBackBtn inline-flex items-center gap-2 py-2 px-4 mb-3 text-sm">&larr; {{ __('academy.monthly_title') }}</a>
 </div>
 
 <div class="max-w-[600px] mx-auto w-full bg-white border border-color-[#D2DDDB] rounded p-8">
@@ -28,8 +29,8 @@
     </div>
 
     <div class="flex justify-center gap-4 mt-6">
-        <a href="{{ $retryUrl }}" class="themeBtn">{{ __('academy.try_again') }}</a>
-        <a href="{{ route('academy.monthly') }}" class="secondaryBtn">{{ __('academy.back_to') }} {{ __('academy.monthly_title') }}</a>
+        <a href="{{ $retryUrl }}" class="secondaryBtn">{{ __('academy.try_again') }}</a>
+        @include('partials.finish', ['inline' => true, 'to' => route('academy.monthly')])
     </div>
 </div>
 @endsection

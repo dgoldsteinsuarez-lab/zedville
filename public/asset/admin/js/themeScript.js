@@ -35,9 +35,10 @@
     $(window).on('load', function () {
         $("#pageLoad").hide();
     });
-    // Outside Click hide collaspe
+    // Outside Click hide collaspe - only for the icon bar (1200px and up); below
+    // that the open menu's submenus open and close with their own toggles
     $(document).click(function(e) {
-        if (!$(e.target).is('.subnav')) {
+        if (window.innerWidth >= 1200 && !$(e.target).is('.subnav')) {
             $('.aside-minimize .collapse').collapse('hide');	    
         }
     });

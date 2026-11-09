@@ -24,7 +24,7 @@ class SubstituteGoodsPageTest extends TestCase
         $response = $this->actingAs($student)->get(route('engagement.substitute-goods'));
 
         $response->assertOk();
-        $response->assertSee('Shopping Basket Update');
+        $response->assertSee('Substitute Goods: My Shopping Basket');
         $response->assertSee('substitute good');
     }
 }

@@ -37,12 +37,13 @@ class CitizenActivationGateTest extends TestCase
 
         $response = $this->actingAs($student)->get('/dashboard');
 
-        $response->assertRedirect(route('CitizenActivation.bankAccount'));
+        // The Mayor's welcome announcement comes first (2026-10-23).
+        $response->assertRedirect(route('CitizenActivation.index'));
     }
 
     public function test_the_wizard_itself_stays_reachable_mid_onboarding(): void
     {
-        $student = User::factory()->create(['role' => 4]);
+        $student = User::factory()->create(['role' => 4, 'welcome_seen_at' => now()]);
 
         $response = $this->actingAs($student)->get(route('CitizenActivation.bankAccount'));
 

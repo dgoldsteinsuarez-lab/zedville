@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E1E2E"/><stop offset="1" stop-color="#2D2B55"/></linearGradient></defs><rect width="400" height="250" fill="url(#bg)"/>
+<rect x="70" y="40" width="260" height="150" rx="10" fill="#37474F"/><rect x="80" y="50" width="240" height="130" fill="#0D1117"/>
+<g font-family="Consolas, monospace" font-size="13"><text x="92" y="74" fill="#FF79C6">function</text><text x="160" y="74" fill="#50FA7B">myApp</text><text x="208" y="74" fill="#F8F8F2">() {</text>
+ <text x="108" y="96" fill="#8BE9FD">let</text><text x="134" y="96" fill="#F8F8F2">zeds = </text><text x="192" y="96" fill="#BD93F9">100</text>
+ <text x="108" y="118" fill="#8BE9FD">save</text><text x="144" y="118" fill="#F8F8F2">(zeds);</text><text x="92" y="140" fill="#F8F8F2">}</text></g>
+<path d="M50 190 H350 L370 210 H30 Z" fill="#546E7A"/>
+<g transform="translate(320 120)"><rect x="0" y="0" width="56" height="96" rx="10" fill="#ECEFF1"/><rect x="6" y="10" width="44" height="72" rx="4" fill="#7C4DFF"/><circle cx="28" cy="46" r="12" fill="#fff"/></g></svg>

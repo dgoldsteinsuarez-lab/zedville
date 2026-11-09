@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid">
     <p class="mb-1"><a href="{{ url('admin/finhero/task-activities') }}">&larr; Library Activities</a></p>
-    <h2 class="mb-2">{{ $module->icon }} {{ $module->title }} - Questions</h2>
+    <h2 class="mb-2">{!! \App\Support\ModuleIcon::html($module->icon) !!} {{ $module->title }} - Questions</h2>
     <p class="text-muted mb-1">
         These questions are shared by every school, grade and class this module is assigned to.
     </p>
@@ -20,6 +20,18 @@
     @if ($errors->any())
         <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
     @endif
+
+    {{-- Which levels the module is for: the Library screen of each level offers only its modules (2026-11-02). --}}
+    <div class="card mb-4">
+        <div class="card-header"><strong>Levels</strong> <span class="text-muted small">· {{ \App\Support\AdminLevel::names($module->levels) }}</span></div>
+        <div class="card-body">
+            <form method="POST" action="{{ url('admin/finhero/library-modules/' . $module->id . '/levels') }}" class="row g-2">
+                @csrf
+                @include('admin.partials.levels-field', ['levels' => $module->levels, 'fieldId' => 'module-levels'])
+                <div class="col-12"><button class="btn btn-sm btn-outline-primary">Save levels</button></div>
+            </form>
+        </div>
+    </div>
 
     <div class="card mb-4">
         <div class="card-header"><strong>Add a Question</strong></div>

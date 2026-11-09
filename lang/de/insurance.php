@@ -1,0 +1,62 @@
+<?php
+
+// Die Krankenversicherung, ab dem Intermediate (App\Services\InsuranceService), und die FinHero-Aufgabe 15
+// „Wähle deine Krankenversicherung“ (App\Services\Finhero\Insurance\ChoosePlan). Begriffe: Beitrag,
+// Selbstbehalt, Zuzahlung, Wartezeit.
+return [
+    // with a soft hyphen: on a phone the comparison table breaks the long word there
+    'plan_basic' => "Grund\u{00AD}schutz",
+    'plan_complete' => "Komplett\u{00AD}schutz",
+    'row_premium' => 'Beitrag',
+    'note_premium' => 'jeden Monat, mit den Rechnungen',
+    'row_deductible' => 'Selbstbehalt',
+    'note_deductible' => "was du bei jedem Gesundheits\u{00AD}problem zuerst selbst zahlst",
+    'row_copay' => 'Zuzahlung',
+    'note_copay' => 'dein Anteil am Rest',
+    'row_wait' => 'Wartezeit',
+    'wait_dentist' => ':months Monate für den Zahnarzt; Notfälle immer versichert',
+    'wait_none' => 'Keine',
+
+    // die Karte der Bank (bank/partials/insurance)
+    'card_title' => 'Krankenversicherung',
+    'card_none' => 'Du hast noch keine Krankenversicherung. In Zedville gibt es keine gesetzliche Krankenversicherung: Ohne Versicherung zahlst du alle Arztrechnungen selbst.',
+    'card_none_hy' => 'Du hast noch keine Krankenversicherung.',
+    'card_plan' => ':plan · :premium im Monat, mit den Rechnungen',
+    'card_terms' => 'Selbstbehalt :deductible · Zuzahlung :copay',
+    'card_auto' => 'Diesen Tarif hat dir das Rathaus gegeben. Du kannst noch deinen eigenen wählen.',
+    'card_choose' => 'Meine Versicherung wählen',
+    'card_see' => 'Tarife ansehen',
+
+    'choose' => [
+        'title' => 'Wähle deine Krankenversicherung',
+        'intro' => 'In Zedville gibt es keine gesetzliche Krankenversicherung: Alle Einwohner brauchen eine Krankenversicherung. Es gibt zwei Tarife. Rechne aus, was jeder in diesen Fällen kostet, und wähle dann deinen. Du kannst ihn einmal im Jahr wechseln.',
+        'intro_hy' => 'Alle Einwohner brauchen eine Krankenversicherung. Rechne diese Fälle aus und wähle deinen Tarif. Du kannst ihn einmal im Jahr wechseln.',
+        'chart' => 'Die zwei Tarife',
+        'have' => 'Dein Tarif: :plan, seit dem :date.',
+        'have_auto' => 'Weil du nicht gewählt hattest, hat dir das Rathaus am :date den :plan gegeben. Wähle jetzt deinen eigenen.',
+        'change_now' => 'Du kannst ihn jetzt wechseln.',
+        'change_from' => 'Du kannst ihn ab dem :date wechseln.',
+        'q_year' => 'Ein ganzes Jahr ohne Gesundheitsprobleme. Wie viel zahlst du insgesamt mit dem Grundschutz?',
+        'why_year' => 'Zwölf Beiträge von :basic: :year. Mit dem Komplettschutz zwölf von :complete: :complete_year.',
+        'q_filling' => 'Du brauchst beim Zahnarzt eine Füllung (:cost). Wie viel zahlst du mit dem Grundschutz?',
+        'why_filling' => 'Bei jedem Gesundheitsproblem zahlst du zuerst bis zu :deductible selbst (der Selbstbehalt): die ganze Füllung, :cost. Mit dem Komplettschutz zahlst du :copay: :complete.',
+        'q_arm' => 'Du brichst dir den Arm (:cost). Wie viel zahlst du mit dem Grundschutz?',
+        'why_arm' => 'Den Selbstbehalt, :deductible, plus :copay der restlichen :rest, also :share: insgesamt :total. Mit dem Komplettschutz :complete_copay von :cost: :complete.',
+        'q_big' => 'Eine Blinddarmoperation kostet :cost. Mit den zwölf Beiträgen: Welcher Tarif ist in diesem Jahr günstiger?',
+        'a_complete' => 'Der Komplettschutz',
+        'a_basic' => 'Der Grundschutz',
+        'a_same' => 'Beide kosten gleich viel',
+        'why_big' => 'Grundschutz: :basic_year an Beiträgen, der Selbstbehalt von :deductible und :copay der restlichen :rest, insgesamt :basic. Komplettschutz: :complete_year an Beiträgen und :complete_copay von :cost, insgesamt :complete.',
+        'q_when' => 'Wann lohnt sich der Grundschutz mehr?',
+        'a_nothing' => 'In einem Jahr ohne etwas Schlimmes',
+        'a_operation' => 'In einem Jahr mit einer teuren Operation',
+        'a_always' => 'Immer, weil er jeden Monat billiger ist',
+        'why_when' => 'Du zahlst jeden Monat weniger, aber ein schweres Problem kostet dich viel mehr. Der Komplettschutz kostet jeden Monat mehr und schützt dich vor dem Schlimmen.',
+        'now_choose' => 'Alles richtig! Wähle jetzt deinen Tarif.',
+        'your_choice' => 'Deine Wahl',
+        'pick' => ':plan wählen',
+        'per_month' => ':premium im Monat',
+        'premium_when' => 'Der Beitrag wird jeden Monat mit den Rechnungen am 7. abgebucht, ab diesem Monat.',
+        'chosen' => 'Erledigt: Ab heute hast du den :plan. Sein Beitrag, :premium im Monat, wird mit den Rechnungen abgebucht. Du kannst ihn ab dem :date wechseln.',
+    ],
+];

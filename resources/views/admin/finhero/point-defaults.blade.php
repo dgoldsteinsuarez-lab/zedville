@@ -57,11 +57,11 @@
                 @csrf
                 <div class="col-md-3">
                     <label class="form-label">Activity key</label>
-                    <input type="text" name="activity_key" class="form-control" placeholder="task_5" required>
+                    <input type="text" name="activity_key" class="form-control" placeholder="task_6" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Display name</label>
-                    <input type="text" name="activity_name" class="form-control" placeholder="Match Needs and Wants">
+                    <input type="text" name="activity_name" class="form-control" placeholder="New activity name">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Type</label>

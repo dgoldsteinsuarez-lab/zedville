@@ -3,11 +3,11 @@ namespace App\Services;
 
 use App\Models\Transaction1;
 use App\Models\BankStatement;
-use App\Models\PenaltyWant;
 use App\Models\GroceryCost;
 use App\Models\BudgetConfig;
 use App\Models\BankAccount;
 use App\Models\User;
+use App\Services\SavingsLedger;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -27,8 +27,18 @@ class StatementGenerator
         return DB::transaction(function () use ($userId, $manualWants) {
 
             $user = User::findOrFail($userId);
-            $bankAccount = BankAccount::where('student_id', $userId)->first();
+            $bankAccount = BankAccount::where('student_id', $userId)->lockForUpdate()->first();
             $now = Carbon::now();
+
+            // The bank's first month (onboarding) only - a student whose bank has
+            // any line already is running: this used to start the balance again
+            // from 0 with a second salary each time the direct-deposit form was
+            // sent again, and every month for tutors (bank review, 2026-10-29).
+            // The monthly salary and bills come from BankController::
+            // creditMonthlySalary() / ensureMonthlyBills().
+            if (Transaction1::where('user_id', $userId)->exists()) {
+                return null;
+            }
             //Monthaly Gurd
             // 🔐 MONTHLY GUARD (ADD HERE)
 
@@ -98,10 +108,10 @@ class StatementGenerator
             //$salaryDate = Carbon::create($now->year, $now->month, 10, 9, 0, 0);
             //$salaryDate = Carbon::create($now->year, $now->month, 6, 9, 0, 0);
             if (!$hasAnyStatement) {
-                // 🆕 First time salary → current / account creation date
-                $salaryDate = $user->created_at
-                    ? $user->created_at->copy()->setTime(9, 0)
-                    : Carbon::now();
+                // 🆕 First time salary → now. (It was the user's creation date: for a
+                // student imported in an earlier month that put this month's salary
+                // in that month, and the monthly credit then paid a second one.)
+                $salaryDate = Carbon::now();
             } else {
                 // 📅 Normal monthly salary → first Friday (6th in your case)
                 //$salaryDate = $this->getFirstFridayOfMonth($now->year, $now->month);
@@ -140,12 +150,8 @@ class StatementGenerator
 
                 $runningBalance -= $emergencyAmount;
 
-                $previousEmergency = $bankAccount->emergency_fund_account_amount ?? 0;
-                $newEmergencyTotal = $previousEmergency + $emergencyAmount;
-
-                $bankAccount->update([
-                    'emergency_fund_account_amount' => $newEmergencyTotal
-                ]);
+                SavingsLedger::post($bankAccount, 'emergency', 'credit', 'Monthly transfer', $emergencyAmount,
+                    'Monthly transfer from your current account', null, $salaryDate);
 
                 // Add to statement
                 $statement['transactions'][] = [
@@ -176,6 +182,11 @@ class StatementGenerator
             // 2) Fixed needs
             $fixedNeeds = DB::table('city_mall_items')->where('item_type', 'needs_fixed')->get();
             foreach ($fixedNeeds as $need) {
+                // never below zero (Daniel, 2026-10-30): a need the salary can't
+                // cover isn't charged here - the month's bills try again from the 7th
+                if ($runningBalance < (float) $need->price) {
+                    continue;
+                }
                 $date = $this->randomDateInMonth($now->year, $now->month, $need->due_date ?? 6, $need->due_date ?? 6);
                 $runningBalance -= (float) $need->price;
 
@@ -243,6 +254,11 @@ class StatementGenerator
                 'statement_data' => json_encode($statement),
                 'penalty_applied' => 0
             ]);
+
+            // A plan of the month chosen while the bank was being set up, before
+            // any money, is paid with this first salary (Daniel, 2026-11-02: "se
+            // descuenta justo cuando llegue el salario").
+            WantsPlanService::chargeDue($user->id);
 
             return [
                 'statement' => $statement,

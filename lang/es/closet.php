@@ -1,0 +1,42 @@
+<?php
+
+// Mi armario (pestaña del perfil y página del armario) - los bienes duraderos del estudiante.
+return [
+    'my_closet_zedville' => 'Mi armario — Zedville',
+    'durable_goods' => 'Bienes duraderos',
+    'used_over_time' => 'Se usan durante mucho tiempo',
+    'physical_items_that_last_3_or' => 'Objetos físicos que duran 3 años o más y no se gastan en un solo uso. Pierden valor poco a poco por la depreciación.',
+    'no_durable_goods_purchased' => 'No has comprado bienes duraderos',
+    'non_durable_goods' => 'Bienes no duraderos',
+    'consumed_quickly' => 'Se gastan rápido',
+    'items_used_up_in_less_than' => 'Cosas que se gastan en menos de 3 años, a menudo en un solo uso. Una vez gastadas, desaparecen y hay que reponerlas.',
+    'no_non_durable_goods_purchased' => 'No has comprado bienes no duraderos',
+    'only_durable_goods_appear_in_your' => 'En tu armario solo aparecen los bienes duraderos',
+    'my_closet' => 'Mi armario',
+    'n0_items' => '0 objetos',
+    'items_owned' => 'Objetos que tienes',
+    'total_value' => 'Valor total',
+    'oldest_item' => 'Objeto más antiguo',
+    'loading_closet' => 'Cargando el armario…',
+    'no_durable_goods_yet_start_spending' => 'Todavía no tienes bienes duraderos. ¡Empieza a comprar para llenar tu armario!',
+    'no_items_in_this_category_yet' => 'Todavía no hay objetos en esta categoría.',
+    'js' => [
+        'student_closet' => 'Armario del estudiante',
+        'load_error' => 'No se pudo cargar el armario. Inténtalo de nuevo.',
+        'item' => ':count objeto',
+        'items' => ':count objetos',
+        'zeds' => ':amount zeds',
+        'all' => 'Todo',
+        'age' => 'Edad: :years años',
+        'life' => 'Vida útil: :years años',
+        'per_year' => ':amount zeds/año',
+        'categories' => [
+            'tech' => 'Tecnología',
+            'transport' => 'Transporte',
+            'home' => 'Hogar',
+            'clothing' => 'Ropa',
+            'tools' => 'Herramientas',
+            'other' => 'Otros',
+        ],
+    ],
+];

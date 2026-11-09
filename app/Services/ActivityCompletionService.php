@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\DB;
  * that activity - that's how the Engagement badge knows whether it was
  * required or optional (BadgeCalculatorService). activity_type holds the
  * activity's key, which the EFD blackboard uses to hide finished ones.
- * Recorded once per activity per month.
+ * Recorded once per activity per month. Activities done on the student's
+ * own, not on the calendar, go through completeOwn().
  */
 class ActivityCompletionService
 {
@@ -39,6 +40,42 @@ class ActivityCompletionService
             // so the blackboard marks it done, but no badge rule matches id 0.
             'activity_id' => $this->calendarEventId($studentId, $calendarTitle) ?? 0,
             'activity_type' => $activityKey,
+            'completed_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return true;
+    }
+
+    /**
+     * An activity the student did on their own - not on their class calendar
+     * (e.g. a Money Factory activity answered all right as practice). With no
+     * calendar event (activity_id 0) and its own key ("own:<type>"), so it
+     * never stands in for the class's Required or Optional run of it; in a
+     * month with no Optional activity it counts towards Gold (Daniel,
+     * 2026-11-02: "Oro si hace otras actividades no asignadas"). Once a month.
+     *
+     * @return bool true if this is the first time this month
+     */
+    public function completeOwn(int $studentId, string $type): bool
+    {
+        $key = 'own:' . $type;
+        $alreadyCompleted = DB::table('activity_completions')
+            ->where('student_id', $studentId)
+            ->where('activity_type', $key)
+            ->whereMonth('completed_at', now()->month)
+            ->whereYear('completed_at', now()->year)
+            ->exists();
+
+        if ($alreadyCompleted) {
+            return false;
+        }
+
+        DB::table('activity_completions')->insert([
+            'student_id' => $studentId,
+            'activity_id' => 0,
+            'activity_type' => $key,
             'completed_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),

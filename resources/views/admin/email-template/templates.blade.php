@@ -29,6 +29,7 @@
                             <th>Subject</th>
                             <th>School</th>
                             <th>Linked Event</th>
+                            <th>Languages</th>
                             <th width="150">Action</th>
                         </tr>
                     </thead>
@@ -40,12 +41,18 @@
                                 <td>{{ optional($template->school)->school_name ?? 'All schools' }}</td>
                                 <td>{{ $template->trigger_event ?? '—' }}</td>
                                 <td>
+                                    <span class="badge bg-secondary">EN</span>
+                                    @foreach (array_keys($template->versions()) as $locale)
+                                        <span class="badge bg-success">{{ strtoupper($locale) }}</span>
+                                    @endforeach
+                                </td>
+                                <td>
                                     <a href="{{ url('admin/email-templates/' . $template->id . '/edit') }}" class="btn btn-sm btn-outline-primary">Edit</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">No templates yet - create your first one.</td>
+                                <td colspan="6" class="text-center">No templates yet - create your first one.</td>
                             </tr>
                         @endforelse
                     </tbody>

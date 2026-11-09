@@ -1,82 +1,199 @@
-@extends('layouts.front')
+<!DOCTYPE html>
+{{-- The log-in page - design 3c, chosen by Daniel on 2026-10-25: the city's
+     skyline (Courthouse, City Hall, the Library) under a clear blue sky, the
+     golden Zed coin as the sun, "Hello Citizen, Welcome back to Zedville" in
+     a log-in box on the right above the rooftops, and "What is Zedville?"
+     for schools below. In the visitor's language (SetGuestLocale). --}}
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" translate="no">
+<head>
+    <meta charset="utf-8">
+    {{-- Zedville shows the class's language on purpose (a German class reads German):
+         the browser must not machine-translate it (Daniel, 2026-10-25). --}}
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ __('login.title') }}</title>
+    <link rel="icon" href="{{ asset('asset/front/images/favicon.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        html, body { margin: 0; padding: 0; }
+        body { font-family: "Manrope", sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; background: #FFF6EA; color: #0F2A22; }
+        a { color: inherit; }
+        button { font: inherit; cursor: pointer; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-@section('title', 'Login')
+        /* The log-in form. */
+        :root { --lf-text: #0F2A22; --lf-muted: #5E7069; --lf-line: #DDE5E1; --lf-input: #fff; --lf-accent: #00A47D; --lf-accent-text: #fff; --lf-radius: 14px; --lf-focus: rgba(0, 164, 125, .18); }
+        .lf { display: grid; gap: 16px; color: var(--lf-text); }
+        .lf-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 7px; letter-spacing: .01em; }
+        .lf-input { width: 100%; height: 52px; padding: 0 16px; font: 500 16px "Manrope", sans-serif; color: var(--lf-text); background: var(--lf-input); border: 1.5px solid var(--lf-line); border-radius: var(--lf-radius); outline: none; transition: border-color .2s, box-shadow .2s; }
+        .lf-input::placeholder { color: var(--lf-muted); opacity: .7; }
+        .lf-input:focus { border-color: var(--lf-accent); box-shadow: 0 0 0 4px var(--lf-focus); }
+        .lf-pw { position: relative; display: block; }
+        .lf-pw .lf-input { padding-right: 52px; }
+        .lf-eye { position: absolute; right: 6px; top: 6px; width: 40px; height: 40px; border: 0; background: none; color: var(--lf-muted); border-radius: 10px; display: grid; place-items: center; }
+        .lf-eye:hover { color: var(--lf-text); }
+        .lf-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; color: var(--lf-muted); }
+        .lf-remember { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+        .lf-remember input { width: 17px; height: 17px; accent-color: var(--lf-accent); }
+        .lf-row a { font-weight: 700; color: var(--lf-text); text-decoration: none; text-align: right; }
+        .lf-row a:hover { text-decoration: underline; }
+        .lf-submit { height: 54px; border: 0; border-radius: var(--lf-radius); background: var(--lf-accent); color: var(--lf-accent-text); font: 800 16px "Manrope", sans-serif; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; transition: transform .15s, filter .2s; }
+        .lf-submit:hover { filter: brightness(1.07); transform: translateY(-1px); }
+        .lf-submit svg { transition: transform .2s; }
+        .lf-submit:hover svg { transform: translateX(3px); }
+        .lf-alt { text-align: center; font-size: 14px; color: var(--lf-muted); margin: 4px 0 0; }
+        .lf-alt a { font-weight: 800; color: var(--lf-accent); text-decoration: none; }
+        .lf-error { padding: 12px 14px; border-radius: 12px; background: #FDECEC; color: #9B1C1C; font-size: 14px; font-weight: 600; border: 1px solid #F5C2C2; }
 
-@section('content')
-<section class="registerSection xl:my-20 lg:my-16 md:my-12 sm:my-10 my-8">
-    <div class="container mx-auto">
-        <div class="max-w-[600px] mx-auto p-[20px] lg:p-[20px] xl:p-[60px] accountFormSection" style="max-width: 600px;">
-            
-            <div class="contentHead text-center mb-10">
-                <h1 class="heading text-3xl font-bold mb-3">Log In</h1>
-                <p class="text-base leading-26">Lets get inside and start your money management, practice hard every month to become financially independent.</p>
+        .o3 { --city-h: max(150px, 21.28vw); --ground-h: 26px; --sun-size: 120px; --sun-x: 28%;
+            position: relative; min-height: 100vh; overflow: hidden; display: flex; flex-direction: column; padding: 24px clamp(16px, 4vw, 40px) 0;
+            background: linear-gradient(180deg, #3FA9F0 0%, #6DC0F5 24%, #A7DBF9 48%, #DCF1FB 70%, #FFF3DA 100%); }
+        .o3-top { position: relative; z-index: 6; display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 12px 22px; }
+        .o3-logo { height: 24px; display: block; }
+        .o3-links { display: flex; gap: 8px; }
+        .o3-links a, .o3-langs a { color: #3D4F7A; background: rgba(255, 255, 255, .6); font-size: 14px; font-weight: 800; text-decoration: none; padding: 8px 14px; border-radius: 999px; backdrop-filter: blur(6px); }
+        .o3-langs { display: flex; gap: 4px; margin-left: auto; }
+        .o3-langs a { padding: 8px 10px; font-size: 13px; letter-spacing: .04em; }
+        .o3-langs a[aria-current] { background: #0E7FC1; color: #fff; }
+
+        /* The sun: the golden Zed coin with a soft glow, high in the sky. */
+        .o3-sunwrap { position: absolute; z-index: 1; left: calc(var(--sun-x) - var(--sun-size) / 2); bottom: calc(var(--city-h) * 1.25 + var(--ground-h)); width: var(--sun-size); height: var(--sun-size); animation: o3rise 3.2s cubic-bezier(.2, .8, .2, 1) both; }
+        @keyframes o3rise { from { transform: translateY(150px); } }
+        .o3-glow { position: absolute; inset: -40%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 240, 180, .9) 0 34%, rgba(255, 218, 130, .35) 48%, transparent 68%); animation: o3pulse 5s ease-in-out infinite; }
+        @keyframes o3pulse { 50% { transform: scale(1.06); opacity: .85; } }
+        .o3-sun { position: absolute; inset: 0; border-radius: 50%; background: repeating-conic-gradient(#E3A11F 0deg 3deg, #FFD45E 3deg 6deg); box-shadow: 0 0 0 3px rgba(255, 255, 255, .45), 0 10px 26px rgba(214, 135, 20, .3), 0 0 50px 14px rgba(255, 205, 100, .45); }
+        .o3-face { position: absolute; inset: 7%; border-radius: 50%; overflow: hidden; display: grid; place-items: center;
+            background: radial-gradient(circle at 34% 28%, #FFF8D6 0, #FFE27F 28%, #F7C548 58%, #E2A020 100%);
+            box-shadow: inset 0 0 0 3px rgba(255, 246, 205, .65), inset 0 -10px 18px rgba(170, 100, 0, .28), inset 0 8px 14px rgba(255, 255, 255, .5); }
+        .o3-face::before { content: ''; position: absolute; inset: 11%; border-radius: 50%; border: 2px solid rgba(176, 108, 8, .35); }
+        .o3-face span { position: relative; font: 800 calc(var(--sun-size) * .44) / 1 "Manrope", sans-serif; color: #C98A1A; text-shadow: 0 2px 0 #FFF2BE, 0 -1px 0 rgba(130, 75, 0, .35); }
+        .o3-face::after { content: ''; position: absolute; top: -50%; left: -70%; width: 38%; height: 200%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent); transform: rotate(25deg); animation: o3shine 7s ease-in-out infinite 2s; }
+        @keyframes o3shine { 0%, 70% { left: -70%; } 100% { left: 140%; } }
+
+        /* Clouds, birds, haze, the city and the street. */
+        .o3-cloud { position: absolute; z-index: 2; height: 38px; border-radius: 999px; background: #fff; animation: o3drift linear infinite; filter: drop-shadow(0 6px 10px rgba(120, 170, 220, .25)); }
+        .o3-cloud::before, .o3-cloud::after { content: ''; position: absolute; bottom: 8px; border-radius: 50%; background: inherit; }
+        .o3-cloud::before { left: 18%; width: 68px; height: 68px; }
+        .o3-cloud::after { left: 48%; width: 48px; height: 48px; }
+        @keyframes o3drift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
+        .o3-bird { position: absolute; z-index: 2; width: 22px; animation: o3fly linear infinite; }
+        .o3-bird svg { width: 100%; display: block; animation: o3flap .5s ease-in-out infinite alternate; }
+        @keyframes o3fly { from { transform: translate(-10vw, 0); } to { transform: translate(110vw, -60px); } }
+        @keyframes o3flap { to { transform: scaleY(.45); } }
+        .o3-haze { position: absolute; z-index: 0; left: 0; right: 0; bottom: var(--ground-h); height: calc(var(--city-h) + 140px); background: linear-gradient(0deg, rgba(255, 245, 235, .6) 40%, transparent); pointer-events: none; }
+        .o3-city { position: absolute; z-index: 3; left: 0; right: 0; bottom: var(--ground-h); height: var(--city-h); width: 100%; object-fit: cover; object-position: 50% 100%; pointer-events: none; user-select: none; }
+        .o3-ground { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; height: var(--ground-h); background: linear-gradient(#D8CFBF 0 7px, #4A5058 7px); }
+        .o3-ground::after { content: ''; position: absolute; left: 0; right: 0; top: 16px; height: 2px; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .7) 0 26px, transparent 26px 52px); }
+
+        /* The log-in on the right side, below the top bar and above the rooftops. */
+        .o3-card { position: absolute; z-index: 7; top: 110px; right: 7vw; width: min(410px, calc(100% - 32px)); background: rgba(255, 255, 255, .8); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); border: 1px solid rgba(255, 255, 255, .9); border-radius: 26px; padding: 30px 30px 24px; box-shadow: 0 30px 60px rgba(30, 80, 130, .18); animation: o3card .8s .2s both cubic-bezier(.2, .8, .2, 1); }
+        @keyframes o3card { from { opacity: 0; transform: translateY(16px); } }
+        .o3-kicker { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #0E7FC1; }
+        .o3-card h1 { font-size: 30px; letter-spacing: -.02em; line-height: 1.1; margin: 8px 0 8px; }
+        .o3-card > p { margin: 0 0 20px; color: #5E7069; line-height: 1.55; }
+        .o3-spacer { flex: 1; min-height: calc(var(--city-h) + var(--ground-h) + 40px); }
+
+        /* Short screens (laptops): a more compact log-in, so the city fits under it. */
+        @media (min-width: 701px) and (max-height: 860px) {
+            .o3-card { top: 90px; padding: 22px 26px 18px; }
+            .o3-card h1 { font-size: 24px; margin: 4px 0 12px; }
+            .o3-card > p { display: none; }
+            .o3 .lf { gap: 10px; }
+            .o3 .lf-label { margin-bottom: 5px; }
+            .o3 .lf-input { height: 44px; }
+            .o3 .lf-eye { top: 2px; }
+            .o3 .lf-submit { height: 46px; }
+        }
+        @media (max-width: 480px) {
+            .o3-logo { height: 18px; }
+            .o3-links a, .o3-langs a { font-size: 12px; padding: 6px 8px; }
+        }
+        @media (max-width: 700px) {
+            .o3 { --sun-size: 96px; --sun-x: 22%; }
+            .o3-top { justify-content: space-between; }
+            .o3-langs { margin-left: 0; }
+            .o3-card { position: relative; top: auto; right: auto; width: 100%; margin-top: 18px; padding: 26px 20px 22px; }
+        }
+    </style>
+</head>
+<body>
+<div class="o3" id="top">
+    <div class="o3-haze" aria-hidden="true"></div>
+    <div class="o3-sunwrap" aria-hidden="true"><div class="o3-glow"></div><div class="o3-sun"><div class="o3-face"><span>Ƶ</span></div></div></div>
+
+    <div class="o3-cloud" style="top:16%;width:130px;animation-duration:80s;animation-delay:-20s" aria-hidden="true"></div>
+    <div class="o3-cloud" style="top:30%;width:96px;animation-duration:60s;animation-delay:-48s;opacity:.8" aria-hidden="true"></div>
+    <div class="o3-cloud" style="top:9%;width:170px;animation-duration:100s;animation-delay:-70s" aria-hidden="true"></div>
+    <div class="o3-cloud" style="top:42%;width:110px;animation-duration:70s;animation-delay:-5s;opacity:.7" aria-hidden="true"></div>
+    @foreach ([[22, 26, 0], [26, 30, -1.2], [30, 24, -2.1], [55, 34, -9], [58, 38, -10.4]] as [$top, $dur, $delay])
+        <div class="o3-bird" style="top:{{ $top }}%;animation-duration:{{ $dur }}s;animation-delay:{{ $delay }}s" aria-hidden="true"><svg viewBox="0 0 24 10"><path d="M1 8 Q6 1 12 7 Q18 1 23 8" fill="none" stroke="#5A4A6E" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    @endforeach
+
+    <header class="o3-top">
+        <a href="{{ url('/') }}"><img class="o3-logo" src="{{ asset('asset/front/images/logo.svg') }}" alt="Zedville"></a>
+        <div class="o3-links"><a href="#about">{{ __('login.what_is') }}</a></div>
+        <nav class="o3-langs" aria-label="{{ __('login.language') }}">
+            @foreach (config('zedville.languages') as $code => $language)
+                <a href="{{ url()->current() }}?lang={{ $code }}" lang="{{ $code }}" title="{{ $language }}" @if (app()->getLocale() === $code) aria-current="true" @endif>{{ strtoupper($code) }}</a>
+            @endforeach
+        </nav>
+    </header>
+
+    <main class="o3-card">
+        <div class="o3-kicker">{{ __('login.hello') }}</div>
+        <h1>{{ __('login.welcome') }}</h1>
+        <p>{{ __('login.intro') }}</p>
+
+        <form method="POST" action="{{ route('login') }}" class="lf">
+            @csrf
+            @if ($errors->any())
+                <div class="lf-error" role="alert">{{ $errors->first('email') ?: $errors->first() }}</div>
+            @endif
+            <label>
+                <span class="lf-label">{{ __('login.email') }}</span>
+                <input class="lf-input" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="{{ __('login.email_placeholder') }}">
+            </label>
+            <label>
+                <span class="lf-label">{{ __('login.password') }}</span>
+                <span class="lf-pw">
+                    <input class="lf-input" type="password" name="password" required autocomplete="current-password" placeholder="{{ __('login.password_placeholder') }}">
+                    <button type="button" class="lf-eye" data-toggle-pw data-show="{{ __('login.show_password') }}" data-hide="{{ __('login.hide_password') }}" aria-label="{{ __('login.show_password') }}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </span>
+            </label>
+            <div class="lf-row">
+                <label class="lf-remember"><input type="checkbox" name="remember"> {{ __('login.remember') }}</label>
+                <a href="{{ route('password.request') }}">{{ __('login.forgot') }}</a>
             </div>
-            <div class="themeForm iconForm">
-                @if ($errors->has('email'))
-                    <div class="mb-4 text-red-600 bg-red-100 border border-red-300 rounded p-3">
-                        {{ $errors->first('email') }}
-                    </div>
-                @endif
-                <form method="POST" action="{{ route('login') }}">
-                    @csrf
-                    <div class="relative form-group mb-5">
-                        <label for="" class="form-label mb-2">Email <span class="text-gray-800">*</span></label>
-                        <div class="relative haveIcon">
-                            <span class="absolute inset-y-3 left-3 flex items-center">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 15.7143V8.28571C3 7.02335 4.07452 6 5.4 6H18.6C19.9255 6 21 7.02335 21 8.28571V15.7143C21 16.9767 19.9255 18 18.6 18H5.4C4.07452 18 3 16.9767 3 15.7143Z" stroke="currentColor"/>
-                                    <path d="M7 9L12 12L17 9" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                            <input type="email" name="email" :value="old('email')" required autofocus autocomplete="username" class="form-control" placeholder="Enter your email address">
-                        </div>
-                    </div>
-                    
-                    <div class="relative form-group mb-5">
-                        <label for="" class="form-label mb-2">Password <span class="text-gray-800">*</span></label>
-                        <div class="relative haveIcon pswtoggle">
-                            <span class="absolute inset-y-0 left-3 flex items-center">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M16.8 16.4L15 17.75C13.2222 19.0833 10.7778 19.0833 9 17.75L7.2 16.4C5.18555 14.8892 4 12.5181 4 10V6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V10C20 12.5181 18.8144 14.8892 16.8 16.4Z" stroke="currentColor" stroke-linecap="round"/>
-                                    <circle cx="12" cy="10" r="1" fill="currentColor"/>
-                                    <circle cx="9" cy="10" r="1" fill="currentColor"/>
-                                    <circle cx="15" cy="10" r="1" fill="currentColor"/>
-                                </svg>
-                            </span>
-                            <input type="password" class="form-control pswfield" placeholder="Enter password" name="password"
-                            required autocomplete="current-password">
-                            <span class="absolute togglePsw inset-y-0 right-3 flex items-center">
-                                <svg class="showPsw" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="3.5" stroke="currentColor"/>
-                                    <path d="M20.188 10.9343C20.5762 11.4056 20.7703 11.6412 20.7703 12C20.7703 12.3588 20.5762 12.5944 20.188 13.0657C18.7679 14.7899 15.6357 18 12 18C8.36427 18 5.23206 14.7899 3.81197 13.0657C3.42381 12.5944 3.22973 12.3588 3.22973 12C3.22973 11.6412 3.42381 11.4056 3.81197 10.9343C5.23206 9.21014 8.36427 6 12 6C15.6357 6 18.7679 9.21014 20.188 10.9343Z" stroke="currentColor"/>
-                                </svg>
-                                <svg class="hidePsw" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.39453 10.5156C9.1445 10.9535 9 11.4596 9 12C9 13.6569 10.3431 15 12 15C12.5402 15 13.0455 14.8544 13.4834 14.6045L14.2109 15.332C13.5774 15.7532 12.8178 16 12 16C9.79086 16 8 14.2091 8 12C8 11.1821 8.24569 10.4217 8.66699 9.78809L9.39453 10.5156ZM12 8C14.2091 8 16 9.79086 16 12C16 12.2736 15.9722 12.5407 15.9199 12.7988L14.9961 11.875C14.9322 10.3173 13.6819 9.06629 12.124 9.00293L11.2002 8.0791C11.4586 8.02668 11.7262 8 12 8Z" fill="currentColor"/>
-                                    <path d="M7.21777 8.33887C5.92029 9.30039 4.86765 10.4393 4.19824 11.252C3.77388 11.7672 3.72949 11.8565 3.72949 12C3.72949 12.1435 3.77388 12.2328 4.19824 12.748C4.8934 13.592 6.00033 14.79 7.36719 15.7734C8.73818 16.7598 10.3282 17.5 12 17.5C13.1985 17.5 14.3541 17.1179 15.418 16.5391L16.1523 17.2734C14.9184 17.987 13.5099 18.4999 12 18.5C10.0362 18.5 8.24221 17.6346 6.7832 16.585C5.32033 15.5325 4.15073 14.2639 3.42578 13.3838C3.07382 12.9565 2.72949 12.5741 2.72949 12C2.72949 11.4259 3.07382 11.0435 3.42578 10.6162C4.10362 9.79325 5.16942 8.63002 6.50098 7.62207L7.21777 8.33887ZM12 5.5C13.9638 5.50007 15.7578 6.36537 17.2168 7.41504C18.6797 8.46756 19.8493 9.73608 20.5742 10.6162C20.9262 11.0435 21.2705 11.4259 21.2705 12C21.2705 12.5741 20.9262 12.9565 20.5742 13.3838C20.0937 13.9672 19.416 14.7192 18.5889 15.4678L17.8809 14.7598C18.6764 14.0438 19.3335 13.3165 19.8018 12.748C20.226 12.2329 20.2705 12.1435 20.2705 12C20.2705 11.8565 20.226 11.7671 19.8018 11.252C19.1066 10.408 17.9997 9.20998 16.6328 8.22656C15.2619 7.24022 13.6717 6.50007 12 6.5C11.3058 6.5 10.6259 6.62876 9.96973 6.84863L9.18945 6.06836C10.0693 5.71793 11.0134 5.5 12 5.5Z" fill="currentColor"/>
-                                    <path d="M5 2L21 18" stroke="currentColor"/>
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="mt-10 text-center">
-                        <button type="submit" class="themeBtn flex items-center justify-center mx-auto gap-2">
-                            Log In to Get Inside
-                            <span class="icon">
-                                <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4.08008 10.3H15.0801M15.0801 10.3L9.80008 5.79999M15.0801 10.3L9.80008 14.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                        </button>
-                    </div>
-                    <div class="mt-10 text-center flex justify-between items-center">
-                        <div class="text-base leading-6 text-black"><a href="{{ route('password.request') }}" class="theme-text-color font-semibold">Need a password reset?</a></div>
-                        <div class="text-base leading-6 text-black">Need an account? <a href="{{ route('register') }}" class="theme-text-color font-semibold">Register</a></div>
-                    </div>
-                    
-                </form>
-            </div>
-        </div>
-    </div>
-    
-</section>
-@endsection
+            <button type="submit" class="lf-submit">
+                {{ __('login.submit') }}
+                <svg width="18" height="18" viewBox="0 0 19 19" fill="none"><path d="M4 10h11m0 0-5.3-4.5M15 10l-5.3 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <p class="lf-alt">{{ __('login.new') }} <a href="{{ route('register') }}">{{ __('login.create_account') }}</a></p>
+        </form>
+    </main>
+    <div class="o3-spacer"></div>
+
+    <img class="o3-city" src="{{ asset('asset/front/images/city/skyline.webp') }}"
+         srcset="{{ asset('asset/front/images/city/skyline-1800.webp') }} 1800w, {{ asset('asset/front/images/city/skyline.webp') }} 3600w" sizes="100vw"
+         alt="{{ __('login.skyline') }}">
+    <div class="o3-ground" aria-hidden="true"></div>
+</div>
+
+@include('auth.partials.login-about')
+
+<script>
+    document.querySelectorAll('[data-toggle-pw]').forEach(btn => btn.addEventListener('click', () => {
+        const input = btn.parentElement.querySelector('input');
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? btn.dataset.hide : btn.dataset.show);
+    }));
+</script>
+</body>
+</html>

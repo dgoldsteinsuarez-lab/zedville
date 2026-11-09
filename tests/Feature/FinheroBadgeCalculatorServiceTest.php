@@ -24,6 +24,14 @@ class FinheroBadgeCalculatorServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // mid-month, so points earned "up to 13 days ago" are all in this month
+        // (on the 1st-13th of a month some fell in the month before)
+        \Carbon\Carbon::setTestNow('2026-11-20 10:00');
+    }
+
     public function test_the_command_runs_without_crashing(): void
     {
         User::factory()->create(['role' => 4]);

@@ -1,0 +1,42 @@
+<?php
+
+// Ma garde-robe (onglet du profil et page de la garde-robe) - les biens durables de l'élève.
+return [
+    'my_closet_zedville' => 'Ma garde-robe — Zedville',
+    'durable_goods' => 'Biens durables',
+    'used_over_time' => 'Utilisés dans la durée',
+    'physical_items_that_last_3_or' => 'Des objets physiques qui durent 3 ans ou plus et ne s\'épuisent pas en une seule utilisation. Ils perdent de la valeur peu à peu : c\'est l\'amortissement.',
+    'no_durable_goods_purchased' => 'Aucun bien durable acheté',
+    'non_durable_goods' => 'Biens non durables',
+    'consumed_quickly' => 'Consommés rapidement',
+    'items_used_up_in_less_than' => 'Des choses utilisées en moins de 3 ans — souvent en une seule fois. Une fois utilisées, elles disparaissent et il faut les remplacer.',
+    'no_non_durable_goods_purchased' => 'Aucun bien non durable acheté',
+    'only_durable_goods_appear_in_your' => 'Seuls les biens durables apparaissent dans ta garde-robe',
+    'my_closet' => 'Ma garde-robe',
+    'n0_items' => '0 objet',
+    'items_owned' => 'Objets possédés',
+    'total_value' => 'Valeur totale',
+    'oldest_item' => 'Objet le plus ancien',
+    'loading_closet' => 'Chargement de la garde-robe…',
+    'no_durable_goods_yet_start_spending' => 'Pas encore de biens durables. Commence à dépenser pour remplir ta garde-robe !',
+    'no_items_in_this_category_yet' => 'Pas encore d\'objets dans cette catégorie.',
+    'js' => [
+        'student_closet' => 'Garde-robe de l\'élève',
+        'load_error' => 'Impossible de charger la garde-robe. Réessaie.',
+        'item' => ':count objet',
+        'items' => ':count objets',
+        'zeds' => ':amount zeds',
+        'all' => 'Tout',
+        'age' => 'Âge : :years ans',
+        'life' => 'Durée de vie : :years ans',
+        'per_year' => ':amount zeds/an',
+        'categories' => [
+            'tech' => 'Technologie',
+            'transport' => 'Transport',
+            'home' => 'Maison',
+            'clothing' => 'Vêtements',
+            'tools' => 'Outils',
+            'other' => 'Autres',
+        ],
+    ],
+];

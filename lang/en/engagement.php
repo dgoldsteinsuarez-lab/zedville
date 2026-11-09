@@ -1,0 +1,50 @@
+<?php
+
+// Engagement challenges - Shopping Basket Update (substitute goods).
+return [
+    'substitute_goods_title' => 'Substitute Goods: My Shopping Basket',
+    'shopping_basket_update' => 'Substitute Goods: My Shopping Basket',
+    'special_challenge_shopping_basket_update' => '🛒 Shop alert: some items are out of stock!',
+    'a_few_items_in_your_shopping' => 'Oh no - a few items in your shopping basket are <strong>out of stock</strong> at the supermarket this month. That happens in real life all the time: suppliers run out, prices jump, or a product disappears from the shelves. Smart shoppers adapt! A product that can do the same job as another one is called a <strong>substitute good</strong> (think chicken and tofu, or butter and margarine).',
+    'your_challenge' => 'Your mission:',
+    'look_at_your_current_shopping_basket' => 'Go to the Supermarket, to the section of your own diet, and find "My Shopping Basket".',
+    'unavailable_rule' => 'Every item marked <strong>"Out of stock"</strong> needs a substitute.',
+    'choose_a_replacement_from_the_other' => 'Swap it for another product from your diet section.',
+    'keep_your_basket_at_the_same' => 'It\'s a straight swap: one out, one in. Your basket keeps the same number of items.',
+    'substitution_strategy' => 'Tips for a smart swap:',
+    'try_to_replace_an_item_with' => 'Pick something that does the same job - a protein for a protein, a vegetable for a vegetable.',
+    'consider_the_cost_difference_your_swap' => 'Check the price - your swap changes how much your basket costs.',
+    'think_about_how_the_replacement_affects' => 'Think about why you chose the first item, and keep that goal.',
+    'choose_the_best_alternative_available_not' => 'The cheapest isn\'t always the best - go for the best value.',
+    'checking_your_basket' => 'Checking your basket…',
+    'one_item_needs' => ':count item still needs a substitute.',
+    'items_need' => ':count items still need a substitute.',
+    'nothing_in_your_basket_needs_a' => '✅ All done - nothing in your basket needs a substitute right now.',
+    'not_assigned' => 'This activity hasn\'t started for your class yet - your teacher will switch it on.',
+    'go_to_my_supermarket' => 'Go to my Supermarket →',
+
+    // Easy activities (Admin > Engagement > Easy Activities, 2026-10-29).
+    'easy_tag' => 'Easy activity',
+    'easy_required' => 'Required',
+    'easy_optional' => 'Optional',
+    'easy_badge' => 'Counts for your :badge badge',
+    'easy_until' => 'Until :date',
+    'easy_done' => 'Done! Your transfer arrived.',
+    'easy_start' => 'Make the transfer',
+    'easy_transfer_step1' => 'Ask a classmate for their account number (or IBAN) and their name as it is on their account. They find both in Bank → Card & details.',
+    'easy_transfer_step2' => 'Go to Pay & transfer → Send to a friend. Fill in their details and the amount, and under Reference write what the money is for.',
+    'easy_transfer_step2_min' => 'Go to Pay & transfer → Send to a friend. Send them at least :amount, and under Reference write what the money is for.',
+    'easy_transfer_step3' => 'Check the summary and confirm. The activity is done when the money reaches their account.',
+
+    // Match the words (Hybrid Classes > Language Activities, 2026-10-29).
+    'words_intro' => 'Match each word with its meaning in English.',
+    'words_how' => 'Tap a word, then its meaning.',
+    'words_word' => 'Word',
+    'words_meaning' => 'Meaning',
+    'words_try_again' => 'Not quite - try another meaning.',
+    'words_pick_first' => 'First tap a word on the left.',
+    'words_done' => 'Well done! You matched all the words.',
+    'words_counted' => 'It counts for your Engagement badge.',
+    'words_already' => 'You have already done this activity. You can play again to practise.',
+    'words_practice' => 'This activity isn’t running for your class now: you can practise, but it doesn’t count.',
+];

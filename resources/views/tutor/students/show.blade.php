@@ -15,12 +15,15 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">Bank account &amp; budget</div>
+        <div class="card-header">Bank account &amp; budget <span class="text-muted small">(this month)</span></div>
         <div class="card-body">
             <div class="row text-center">
                 <div class="col-6 col-md-3 mb-3 mb-md-0">
-                    <div class="text-muted small mb-1">Current balance</div>
-                    <div class="fs-4 fw-bold">{{ number_format($balance, 2) }} zeds</div>
+                    <div class="text-muted small mb-1">Current account</div>
+                    <div class="fs-4 fw-bold">Ƶ {{ number_format($balance, 2) }}</div>
+                    @foreach ($savingsAccounts as $label => $amount)
+                        <div class="small text-muted mt-1">{{ $label }}: Ƶ {{ number_format($amount, 2) }}</div>
+                    @endforeach
                 </div>
                 @if ($budget)
                     <div class="col-6 col-md-3 mb-3 mb-md-0">
@@ -36,7 +39,7 @@
                         <div class="fs-5 fw-bold">{{ number_format($budget['totalSavings'] ?? 0, 2) }} ({{ $budget['savingsPercentage'] ?? 0 }}%)</div>
                     </div>
                 @else
-                    <div class="col-md-9 text-muted">No monthly statement generated yet.</div>
+                    <div class="col-md-9 text-muted">No bank account yet.</div>
                 @endif
             </div>
         </div>
@@ -96,7 +99,7 @@
                                     <tr>
                                         <td>{{ \Carbon\Carbon::create($r->year, $r->month, 1)->format('M Y') }}</td>
                                         <td>{{ $r->required_completed }}/{{ $r->required_assigned }}</td>
-                                        <td>{{ $r->optional_completed }}</td>
+                                        <td>{{ $r->optional_completed }}/{{ $r->optional_assigned }}@if ($r->own_completed) (+{{ $r->own_completed }} own)@endif</td>
                                         <td>{{ $r->participation_points }}</td>
                                         <td><span style="color:{{ $m['text'] }}">{{ $m['emoji'] }} {{ $m['label'] }}</span></td>
                                     </tr>

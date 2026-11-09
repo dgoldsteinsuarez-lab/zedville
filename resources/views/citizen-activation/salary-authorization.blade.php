@@ -14,16 +14,15 @@
         <div class="step-header">
 
             <div class="step-eyebrow">
-                Step 3 of 6 — Salary Setup
+                {{ __('citizen.eyebrow', ['step' => 3, 'total' => 6, 'name' => __('citizen.salary.step')]) }}
             </div>
 
             <div class="ca-step-title">
-                Get paid — set up your salary
+                {{ __('citizen.salary.title') }}
             </div>
 
             <div class="step-subtitle">
-                Authorise a <span class="term">direct deposit</span> so your monthly Zeds salary goes
-                straight into your Universal Bank account on payday.
+                {!! __('citizen.salary.subtitle') !!}
             </div>
 
         </div>
@@ -31,11 +30,7 @@
         <div class="step-body">
 
             <div class="narrative">
-                A <strong>direct deposit</strong> means the city automatically transfers your salary
-                into your bank account on payday — no action needed from you each month.
-                This is how most workers receive their wages in real life.
-
-                You are authorising <strong>100% of your salary</strong> to be deposited directly.
+                {!! __('citizen.salary.narrative') !!}
             </div>
 
             <div class="definition">
@@ -43,13 +38,8 @@
                 <span class="definition-icon">💡</span>
 
                 <div>
-                    <strong>Financial literacy:</strong>
-
-                    A <strong>direct deposit authorisation</strong> is a signed instruction
-                    from you to your employer, giving them permission to transfer your wages
-                    electronically into your bank account.
-
-                    It is faster and safer than a paper cheque.
+                    <strong>{{ __('citizen.financial_literacy') }}</strong>
+                    {!! __('citizen.salary.definition') !!}
                 </div>
 
             </div>
@@ -57,34 +47,29 @@
             <div class="info-box">
 
                 <div class="info-row">
-                    <span class="info-label">Account Holder</span>
-                    <span>{{ $user->nickname }}</span>
+                    <span class="info-label">{{ __('citizen.salary.account_holder') }}</span>
+                    <span>{{ $bankAccount->student_name ?? $user->name }}</span>
                 </div>
 
                 <div class="info-row">
-                    <span class="info-label">Bank</span>
+                    <span class="info-label">{{ __('citizen.salary.bank') }}</span>
                     <span>{{ $bankAccount->bank_name }}</span>
                 </div>
 
                 <div class="info-row">
-                    <span class="info-label">Account Number</span>
+                    <span class="info-label">{{ __('citizen.salary.account_number') }}</span>
                     <span>{{ $bankAccount->primary_savings_account_number }}</span>
                 </div>
 
                 <div class="info-row">
-                    <span class="info-label">Deposit Amount</span>
-                    <span>100% of Monthly Salary</span>
+                    <span class="info-label">{{ __('citizen.salary.deposit_amount') }}</span>
+                    <span>{{ __('citizen.salary.deposit_value') }}</span>
                 </div>
 
             </div>
 
             <div class="legal-block">
-                "I hereby authorise Zedville City Hall to initiate electronic deposits
-                of my salary into the designated bank account.
-
-                I understand I may cancel this authorisation at any time.
-
-                I confirm that the bank information provided is accurate."
+                {{ __('citizen.salary.legal') }}
             </div>
 
             <form action="{{ route('CitizenActivation.authorize-direct-deposit') }}" method="post">
@@ -106,7 +91,7 @@
                         <div class="check-text">
 
                             <span class="check-title">
-                                Deposit 100% of my salary into the account above
+                                {{ __('citizen.salary.deposit_check') }}
                             </span>
 
                         </div>
@@ -119,12 +104,12 @@
 
                     <a href="{{ route('CitizenActivation.bankAccount') }}"
                        class="ca-btn-secondary">
-                        ← Back
+                        {{ __('citizen.back') }}
                     </a>
 
                     <button type="submit"
                             class="ca-btn-primary">
-                        Authorise Direct Deposit →
+                        {{ __('citizen.salary.submit') }}
                     </button>
 
                 </div>

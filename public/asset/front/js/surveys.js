@@ -1,5 +1,13 @@
 
 let currentStep = 1;
+
+// Texts in the student's language - set by profile/partials/surveys
+// (lang/<language>/surveys.php). Falls back to the key's English meaning.
+function surveyText(key, params) {
+    let text = (window.ZV_SURVEY && window.ZV_SURVEY[key]) || key;
+    Object.keys(params || {}).forEach(name => { text = text.split(':' + name).join(params[name]); });
+    return text;
+}
 const totalSteps = 9;
 const surveyData = {};
 
@@ -106,19 +114,19 @@ function validateStep(step) {
     switch(step) {
         case 1:
             if (!document.getElementById('agreement1').checked) {
-                showError('Please agree to the terms to continue.');
+                showError(surveyText('agree_first'));
                 return false;
             }
             break;
         case 2:
             if (!document.querySelector('input[name="diet"]:checked')) {
-                showError('Please select your diet type.');
+                showError(surveyText('select_diet'));
                 return false;
             }
             break;
         case 3:
             if (!document.getElementById('agreement2').checked) {
-                showError('Please agree to the terms to continue.');
+                showError(surveyText('agree_first'));
                 return false;
             }
             break;
@@ -126,7 +134,7 @@ function validateStep(step) {
             const selectedGroceries = document.querySelectorAll('#groceryList input[type="checkbox"]:checked');
             if (selectedGroceries.length !== 11) {
                 //showError(`Please select exactly 10 items. Currently selected: ${selectedGroceries.length}`);
-                showError(`Please select 10 items (Cooking Oil is added automatically). Selected: ${selectedGroceries - 1}`);
+                showError(surveyText('select_ten', { count: selectedGroceries.length - 1 }));
                 return false;
             }
             break;
@@ -220,8 +228,11 @@ function populateGroceries() {
     const groceryList = document.getElementById('groceryList');
     groceryList.innerHTML = '';
 
-    fetch(`/api/groceries/${diet}`)
-        .then(response => response.json())
+    fetch(`/api/groceries/${diet}`, { headers: { 'Accept': 'application/json' } })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
         .then(items => {
 
             items.forEach(item => {
@@ -246,8 +257,8 @@ function populateGroceries() {
                         >
                         <label style="padding-left: 30px; display: block;" for="grocery_${item.id}">
                             ${item.product_name} 
-                            <span style="color:green; display:block; font-weight:bold;">${item.price} Zed × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} Zed</span>
-                            <span style="color:green; font-weight:bold;">(Auto-included)</span>
+                            <span style="color:green; display:block; font-weight:bold;">${item.price} ${surveyText('zed')} × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ${surveyText('zed')}</span>
+                            <span style="color:green; font-weight:bold;">${surveyText('auto_included')}</span>
                         </label>
                     `;
 
@@ -280,7 +291,7 @@ function populateGroceries() {
                     >
                     <label style="padding-left: 30px; display: block;" for="grocery_${item.id}">
                         ${item.product_name} 
-                          <span style="color:green; display:block; font-weight:bold;">${item.price} Zed × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} Zed</span>
+                          <span style="color:green; display:block; font-weight:bold;">${item.price} ${surveyText('zed')} × ${item.quantity} = ${(item.price * item.quantity).toFixed(2)} ${surveyText('zed')}</span>
                     </label>
                 `;
 
@@ -296,7 +307,12 @@ function populateGroceries() {
             // Update selected count because oil is already selected
             updateGrocerySelection();
         })
-        .catch(error => console.error('Error fetching groceries:', error));
+        .catch(error => {
+            // Without the list the student can't pick 10 items - say so
+            // instead of leaving them stuck on "Selected: -1".
+            console.error('Error fetching groceries:', error);
+            showError(surveyText('groceries_failed'));
+        });
 }
 
 
@@ -390,7 +406,7 @@ function showResults() {
     document.getElementById('activitiesCost').textContent = `${activitiesCost} Zed`;
     document.getElementById('restaurantsCost').textContent = `${restaurantsCost} Zed`;
     document.getElementById('totalCost').textContent = `${totalCost} Zed`;*/
-    const formatZed = value => `${Number(value).toFixed(2)} Zed`;
+    const formatZed = value => `${Number(value).toFixed(2)} ${surveyText('zed')}`;
 
     document.getElementById('basketCost').textContent = formatZed(basketCost);
     document.getElementById('lunchCost').textContent = formatZed(lunchCost);
@@ -441,7 +457,7 @@ function showResults() {
 
     Swal.fire({
         icon: 'error',
-        title: 'Survey Failed',
+        title: surveyText('failed_title'),
         text: data.message,
         confirmButtonColor: '#dc3545'
     });
@@ -451,7 +467,7 @@ function showResults() {
 
 Swal.fire({
     icon: 'success',
-    title: 'Survey Completed',
+    title: surveyText('completed_title'),
     text: data.message,
     timer: 3000,
     timerProgressBar: true,
@@ -460,7 +476,7 @@ Swal.fire({
 
 })
 .catch(error => {
-    alert('Something went wrong. Please try again.');
+    alert(surveyText('went_wrong'));
     console.error(error);
 });
 
@@ -468,7 +484,7 @@ Swal.fire({
 }
 
 function restartSurvey() {
-    if (confirm('Are you sure you want to start a new survey? This will clear your current responses.')) {
+    if (confirm(surveyText('restart_confirm'))) {
         location.reload();
     }
 }

@@ -7,6 +7,7 @@ use App\Models\CurriculumAttempt;
 use App\Models\CurriculumAttemptAnswer;
 use App\Models\CurriculumCategory;
 use App\Models\CurriculumItem;
+use App\Models\ExamSession;
 use App\Services\FinheroPointService;
 use App\Services\ParticipationService;
 use Illuminate\Http\Request;
@@ -98,6 +99,7 @@ class AcademyController extends Controller
     public function item(CurriculumItem $item)
     {
         abort_unless($this->canAccessCategory($item->category), 403);
+        abort_unless($item->is_active, 404);
 
         if ($item->type !== 'quiz') {
             return view('education.academy.content', compact('item'));
@@ -109,11 +111,22 @@ class AcademyController extends Controller
         if ($item->is_real_exam) {
             $existingAttempt = CurriculumAttempt::where('item_id', $item->id)
                 ->where('student_id', Auth::id())
-                ->with('answers.question', 'answers.option')
+                ->with('answers.question.options', 'answers.option')
                 ->first();
 
             if ($existingAttempt) {
-                return view('education.academy.results', ['item' => $item, 'attempt' => $existingAttempt]);
+                return view('education.academy.results', ['item' => $item, 'attempt' => $existingAttempt,
+                    'released' => (bool) ExamSession::forStudent($item, Auth::user())?->results_released_at]);
+            }
+
+            // Only on the day the tutor opened it for the class, and with
+            // their password (Daniel, 2026-10-31).
+            $session = ExamSession::forStudent($item, Auth::user());
+            if (!$session || !$session->isOpen()) {
+                return view('education.academy.exam-locked', ['item' => $item, 'session' => $session, 'askPassword' => false]);
+            }
+            if (!session($session->unlockKey())) {
+                return view('education.academy.exam-locked', ['item' => $item, 'session' => $session, 'askPassword' => true]);
             }
         }
 
@@ -128,16 +141,41 @@ class AcademyController extends Controller
         return view('education.academy.item', compact('item', 'questions'));
     }
 
+    /** The real exam's password, typed once; then the exam opens. */
+    public function unlock(Request $request, CurriculumItem $item)
+    {
+        abort_unless($this->canAccessCategory($item->category) && $item->is_real_exam && $item->is_active, 404);
+
+        $session = ExamSession::forStudent($item, Auth::user());
+        if (!$session || !$session->isOpen()) {
+            return redirect()->route('academy.item', $item);
+        }
+        if (!$session->passwordMatches($request->input('password'))) {
+            return back()->withErrors(['password' => __('exams.password_wrong')]);
+        }
+
+        session([$session->unlockKey() => true]);
+
+        return redirect()->route('academy.item', $item);
+    }
+
     public function submit(Request $request, CurriculumItem $item)
     {
         abort_unless($this->canAccessCategory($item->category), 403);
         abort_unless($item->type === 'quiz', 404);
+        abort_unless($item->is_active, 404);
 
         if ($item->is_real_exam) {
             $alreadyCompleted = CurriculumAttempt::where('item_id', $item->id)
                 ->where('student_id', Auth::id())
                 ->exists();
             abort_if($alreadyCompleted, 403, "You've already completed this exam.");
+
+            // closed meanwhile (the day is over, or the tutor closed it): nothing is saved
+            $session = ExamSession::forStudent($item, Auth::user());
+            if (!$session || !$session->isOpen() || !session($session->unlockKey())) {
+                return redirect()->route('academy.item', $item)->with('error', __('exams.closed_meanwhile'));
+            }
         }
 
         $questions = $item->questions()->with('options')->get();
@@ -240,8 +278,8 @@ class AcademyController extends Controller
             }
         }
 
-        $attempt->load('answers.question', 'answers.option');
+        $attempt->load('answers.question.options', 'answers.option');
 
-        return view('education.academy.results', compact('item', 'attempt'));
+        return view('education.academy.results', compact('item', 'attempt') + ['released' => false]);
     }
 }

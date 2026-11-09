@@ -56,6 +56,7 @@
                                 <th>School Code</th>
                                 <th>Phone Number</th>
                                 <th>Country/Region</th>
+                                <th>Time Zone</th>
                                 <th>School Domain</th>
                                 <th class="rightText">Action</th>
                             </tr>
@@ -74,10 +75,11 @@
                                 <td valign="middle">{{ $domain->school_code}}</td>
                                 <td valign="middle">{{ $domain->school_phone}}</td>
                                 <td valign="middle">{{ $domain->country_region}}</td>
+                                <td valign="middle">{{ $domain->timezone }}</td>
                                 <td valign="middle">{{ $domain->school_domain}}</td>
                                 <td valign="middle">
                                     <div class="actionBtns d-flex align-items-center justify-content-end">
-                                        <a href="#" class="tableActionBtn me-3 edit-role-btn" data-bs-toggle="modal" data-bs-target="#editmodel" data-id="{{ $domain->id }}" data-school_name="{{ $domain->school_name }}" data-school_code="{{ $domain->school_code }}" data-school_phone="{{ $domain->school_phone }}" data-country_region="{{ $domain->country_region }}" data-school_domain="{{ $domain->school_domain }}">
+                                        <a href="#" class="tableActionBtn me-3 edit-role-btn" data-bs-toggle="modal" data-bs-target="#editmodel" data-id="{{ $domain->id }}" data-school_name="{{ $domain->school_name }}" data-school_code="{{ $domain->school_code }}" data-school_phone="{{ $domain->school_phone }}" data-country_region="{{ $domain->country_region }}" data-timezone="{{ $domain->timezone }}" data-school_domain="{{ $domain->school_domain }}">
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit">
                                                 <path d="M16 4.99994L19 7.99994" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
                                                 <path d="M4.50001 16.4994L18.4999 2.49994L21.5004 5.49994L7.50041 19.4999L3 20.9995L4.50001 16.4994Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -142,6 +144,21 @@
                         </div>
                         <div class="themeForm">
                             <div class="form-group mab-20">
+                                <label for="" class="form-label">Time Zone</label>
+                                <select class="form-select" name="timezone" required>
+                                    @foreach (\App\Support\SchoolTime::options() as $region => $zones)
+                                        <optgroup label="{{ $region }}">
+                                            @foreach ($zones as $zone)
+                                                <option value="{{ $zone }}" @selected($zone === \App\Support\SchoolTime::DEFAULT)>{{ $zone }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Used for the students' greeting and other school-day times.</small>
+                            </div>
+                        </div>
+                        <div class="themeForm">
+                            <div class="form-group mab-20">
                                 <label for="" class="form-label">School Domain </label>
                                 <input class="form-control" type="text" name="school_domain" placeholder="Please School Domain ">
                             </div>
@@ -192,6 +209,21 @@
                             <div class="form-group mab-20">
                                 <label for="" class="form-label">Country/Region </label>
                                 <input class="form-control" type="text" name="country_region" id="country_region" placeholder="Please Country/Region ">
+                            </div>
+                        </div>
+                        <div class="themeForm">
+                            <div class="form-group mab-20">
+                                <label for="" class="form-label">Time Zone</label>
+                                <select class="form-select" name="timezone" id="timezone" required>
+                                    @foreach (\App\Support\SchoolTime::options() as $region => $zones)
+                                        <optgroup label="{{ $region }}">
+                                            @foreach ($zones as $zone)
+                                                <option value="{{ $zone }}" @selected($zone === \App\Support\SchoolTime::DEFAULT)>{{ $zone }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Used for the students' greeting and other school-day times.</small>
                             </div>
                         </div>
                         <div class="themeForm">
@@ -286,6 +318,7 @@ $(document).ready(function() {
         $('#school_code1').val(school_code);
         $('#school_phone').val(school_phone);
         $('#country_region').val(country_region);
+        $('#timezone').val($(this).data('timezone') || 'Europe/Berlin');
         $('#school_domain').val(school_domain);
     });
 

@@ -1,29 +1,30 @@
 @extends('layouts.profile')
+@section('no_page_back', '1'){{-- Back is beside the picture --}}
 
 @section('title', $district['name'])
 
 @section('content')
-<div class="flex items-center justify-between pb-6">
-    <div>
-        <a href="{{ route('education.city') }}" class="text-sm text-gray-500">← Back to City Map</a>
-        <h1 class="text-xl font-bold whitespace-nowrap">{{ $district['name'] }}</h1>
-        @if ($myAddress)
-            <p class="text-gray-500 mb-0">You live at {{ $myAddress->house_number }} {{ $myAddress->street->name }}</p>
-        @endif
-    </div>
-</div>
-
+@php
+    $picture = \App\Http\Controllers\CityController::districtPicture($district);
+    $where = __('city.district_number', ['number' => $district['number']])
+        . ($myAddress ? ' · ' . __('city.you_live_at', ['number' => $myAddress->house_number, 'street' => $myAddress->street->name]) : '');
+@endphp
 <div class="grid grid-cols-1 gap-5" x-data="{ modalTitle: '', modalBody: '', showModal: false }">
 
-    {{-- The real zoomed-in district image + positioned building hotspots
-    go here once Daniel supplies it - same technique as education/city-mall
-    .blade.php. Until then this is a plain clickable directory. --}}
-    <div class="rounded-lg border border-dashed border-[#D2DDDB] bg-[#F8FAF9] p-10 text-center text-gray-500">
-        {{ $district['name'] }} image coming soon.
-    </div>
+    {{-- Daniel's 3D view of this division (ZED_Infra - 3D View - nD), the whole
+         of it on the first screen like the City Map (Daniel, 2026-10-28: "make it
+         in all photos that has this scrolling"): Back beside it, its name and
+         where you live above it, the hint under it. --}}
+    <x-city-scene class="zs--map zs--flat zv-street-map" labels-outside :image="$picture['url']"
+        :width="$picture['width']" :height="$picture['height']" :crop-top="$picture['cropTop']" :crop-bottom="$picture['cropBottom']"
+        :title="$district['name']" :subtitle="$where" :alt="__('city.district_alt', ['name' => $district['name']])"
+        :hint="count($buildingSpots) || count($streetLabels) ? __('city.district_hint') : null" :fallback="route('education.city')">
+            @include('education.city._building-spots')
+            @include('education.city._street-labels')
+    </x-city-scene>
 
     <div class="tailCard w-full rounded-lg p-6">
-        <h2 class="text-lg font-bold mb-4">Buildings</h2>
+        <h2 class="text-lg font-bold mb-4">{{ __('city.buildings_title') }}</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             @forelse ($buildings as $building)
                 @if ($building['route'])
@@ -33,25 +34,25 @@
                     </a>
                 @else
                     <button type="button"
-                        @click="modalTitle = @js($building['name']); modalBody = 'Coming soon.'; showModal = true"
+                        @click="modalTitle = @js($building['name']); modalBody = @js(__('city.coming_soon')); showModal = true"
                         class="block w-full text-left rounded-md border border-[#D2DDDB] px-4 py-3 text-sm font-semibold text-gray-400 hover:bg-[#F1F1F1]">
                         {{ $building['name'] }}
                     </button>
                 @endif
             @empty
-                <p class="text-gray-500">No buildings listed for this district yet.</p>
+                <p class="text-gray-500">{{ __('city.no_buildings') }}</p>
             @endforelse
         </div>
     </div>
 
     @if ($streets->isNotEmpty())
     <div class="tailCard w-full rounded-lg p-6">
-        <h2 class="text-lg font-bold mb-2">Street Plaques</h2>
-        <p class="text-gray-500 mb-4">Click a street to read who it's named after.</p>
+        <h2 class="text-lg font-bold mb-2">{{ __('city.street_plaques') }}</h2>
+        <p class="text-gray-500 mb-4">{{ __('city.street_plaques_text') }}</p>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             @foreach ($streets as $street)
                 <button type="button"
-                    @click="modalTitle = @js($street->name); modalBody = @js($street->bio); showModal = true;
+                    @click="modalTitle = @js($street->name); modalBody = @js($street->localized_bio); showModal = true;
                         fetch('{{ route('participation.award') }}', {
                             method: 'POST',
                             headers: {
@@ -79,7 +80,7 @@
             <div class="modalContent bg-white py-8 px-10 rounded-lg border border-[#D2DDDB]">
                 <h4 class="text-xl font-semibold text-black mb-3" x-text="modalTitle"></h4>
                 <p class="text-gray-600" x-text="modalBody"></p>
-                <button type="button" @click="showModal = false" class="themeBtn w-full mt-6">Close</button>
+                <button type="button" @click="showModal = false" class="themeBtn w-full mt-6">{{ __('city.close') }}</button>
             </div>
         </div>
     </div>

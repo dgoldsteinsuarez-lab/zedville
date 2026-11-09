@@ -92,7 +92,7 @@
     .intro-bank-tile-icon { font-size: 16px; }
 
     .intro-bank-tile-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: #64748B;
     }
@@ -104,7 +104,7 @@
     }
 
     .intro-bank-tile-pct {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
     }
 
@@ -270,7 +270,7 @@
       position: absolute;
       top: -18px;
       transform: translateX(-50%);
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       white-space: nowrap;
     }
@@ -282,7 +282,7 @@
     }
 
     .comparison-bar-footer span {
-      font-size: 10px;
+      font-size: 12px;
       color: #94A3B8;
     }
 
@@ -381,7 +381,7 @@
     .question-card.done-revealed .question-number { background: #F59E0B; }
 
     .question-tag {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       color: #0D9488;
       text-transform: uppercase;
@@ -567,7 +567,7 @@
     .attempt-dot.current { background: #0D9488; }
 
     .attempts-label {
-      font-size: 11px;
+      font-size: 12px;
       color: #94A3B8;
       margin-left: 4px;
       font-weight: 600;
@@ -684,7 +684,7 @@
     }
 
     .stat-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: #64748B;
       text-transform: uppercase;
@@ -757,21 +757,17 @@
   }
   </style>
   @endpush
-  <div class="flex items-center justify-between pb-6">
+  @include('finhero._intro_fit')
+<div class="zv-task-head flex items-center justify-between pb-6">
     <h1 class="text-xl font-bold whitespace-nowrap">
-        Task 4
+        {{ __('finhero.task4.heading') }}
     </h1>
-
-    <a href="{{ url()->previous() }}"
-       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">
-        ← Back
-    </a>
 </div>
  <!-- ─── Loading screen ───────────────────────────────────────── -->
   <div id="loading-screen" class="screen">
     <div>
       <div id="loading-emoji">📋</div>
-      <p id="loading-text">Loading your bank statement...</p>
+      <p id="loading-text">{{ __('finhero.task4.loading') }}</p>
     </div>
   </div>
 
@@ -779,9 +775,9 @@
   <div id="intro-screen" class="screen hidden">
     <div class="intro-card">
       <div class="intro-icon">📋</div>
-      <h1 class="intro-title">Budget Reality Check</h1>
+      <h1 class="intro-title">{{ __('finhero.task4.title') }}</h1>
       <p class="intro-description">
-        Now let's compare your REAL spending from your bank statement with the perfect 50/30/20 rule. How close are you?
+        {{ __('finhero.task4.intro') }}
       </p>
 
       <div class="intro-bank">
@@ -790,10 +786,10 @@
       </div>
 
       <div class="intro-points-note">
-        <p><strong>Finhero Badge Points: up to 24</strong> — up to 3 points per question. Get it right on your first approach for 3 points; each time you use up your tries, the hint gets stronger and the points available go down: 2, then 1, then 0 — but you can always keep trying. Compare your actual spending against the 50/30/20 ideal!</p>
+        <p>{!! __('finhero.task4.points_note') !!}</p>
       </div>
 
-      <button class="start-button" id="start-button">Let's Go! 📋</button>
+      <button class="start-button" id="start-button">{{ __('finhero.task4.start') }}</button>
     </div>
   </div>
 
@@ -801,13 +797,13 @@
   <div id="game-screen" class="hidden">
     <div class="container">
       <div class="header">
-        <h1 class="game-title">Task 4: Budget Reality Check</h1>
-        <p class="game-subtitle">Your real spending vs the 50/30/20 ideal</p>
+        <h1 class="game-title">{{ __('finhero.task4.game_title') }}</h1>
+        <p class="game-subtitle">{{ __('finhero.task4.game_subtitle') }}</p>
       </div>
 
       <div class="stats-row">
-        <div class="stat-pill points" id="stat-points">🏆 Finhero Badge Points: 0 / 24</div>
-        <div class="stat-pill done" id="stat-done">✅ 0 / 8 done</div>
+        <div class="stat-pill points" id="stat-points">{{ __('finhero.common.points_of', ['points' => 0, 'total' => 24]) }}</div>
+        <div class="stat-pill done" id="stat-done">{{ __('finhero.common.done_of', ['done' => 0, 'total' => 8]) }}</div>
       </div>
 
       <div class="comparison-panel">
@@ -819,7 +815,7 @@
         <span class="ref-needs"   id="ref-needs"></span>
         <span class="ref-wants"   id="ref-wants"></span>
         <span class="ref-savings" id="ref-savings"></span>
-        <span class="ref-ideal">| Ideal: 50% / 30% / 20%</span>
+        <span class="ref-ideal">{{ __('finhero.task4.ideal_ref') }}</span>
       </div>
 
       <div class="progress-bar">
@@ -839,31 +835,37 @@
         </div>
         <div class="completion-card">
           <div class="completion-icon">📋</div>
-          <h2 class="completion-title">Budget Reality Check Complete!</h2>
+          <h2 class="completion-title">{{ __('finhero.task4.complete_title') }}</h2>
           <p class="completion-text" id="completion-text"></p>
 
           <div class="health-summary">
-            <div class="health-summary-title">Your Budget Health:</div>
+            <div class="health-summary-title">{{ __('finhero.task4.health_title') }}</div>
             <div id="health-summary-rows"></div>
             <div class="health-summary-note">
-              Healthy ranges: Needs 45–55% | Wants 25–35% | Savings 15–25%
+              {{ __('finhero.task4.health_note') }}
             </div>
           </div>
 
           <div class="stat-box">
-            <div class="stat-label">Finhero Badge Points</div>
+            <div class="stat-label">{{ __('finhero.common.points_label') }}</div>
             <div class="stat-value">
               <span id="final-points">0</span>
               <span class="stat-divisor">/ <span id="final-total">24</span></span>
             </div>
           </div>
         </div>
+
+        @include('finhero._finished')
       </div>
     </div>
   </div>
  @endsection
 @push('scripts')
+ @include('finhero._i18n')
  <script>
+    // Texts in the student's language (lang/<language>/finhero.php).
+    const T = {{ \Illuminate\Support\Js::from(['common' => __('finhero.common'), 'task' => __('finhero.task4')]) }};
+
     // ───────────────────────────────────────────────────────────────
     // CONFIG (same as JSX original)
     // ───────────────────────────────────────────────────────────────
@@ -900,9 +902,9 @@
     // ║  🎯 HEALTHY RANGES — IT team can adjust if needed          ║
     // ╚════════════════════════════════════════════════════════════╝
     const HEALTHY_RANGES = {
-      needs:   { ideal: 50, min: 45, max: 55, label: "Needs",   emoji: "🏠", color: "#059669", bg: "#D1FAE5", border: "#6EE7B7" },
-      wants:   { ideal: 30, min: 25, max: 35, label: "Wants",   emoji: "🎮", color: "#2563EB", bg: "#DBEAFE", border: "#93C5FD" },
-      savings: { ideal: 20, min: 15, max: 25, label: "Savings", emoji: "🏦", color: "#7C3AED", bg: "#EDE9FE", border: "#C4B5FD" },
+      needs:   { key: "needs",   ideal: 50, min: 45, max: 55, label: T.common.needs,   emoji: "🏠", color: "#059669", bg: "#D1FAE5", border: "#6EE7B7" },
+      wants:   { key: "wants",   ideal: 30, min: 25, max: 35, label: T.common.wants,   emoji: "🎮", color: "#2563EB", bg: "#DBEAFE", border: "#93C5FD" },
+      savings: { key: "savings", ideal: 20, min: 15, max: 25, label: T.common.savings, emoji: "🏦", color: "#7C3AED", bg: "#EDE9FE", border: "#C4B5FD" },
     };
 
     // ───────────────────────────────────────────────────────────────
@@ -910,19 +912,20 @@
     // ───────────────────────────────────────────────────────────────
     function getStatus(actualPct, range) {
       if (actualPct >= range.min && actualPct <= range.max) return "healthy";
-      if (range.label === "Savings") return actualPct < range.min ? "low" : "high";
+      if (range.key === "savings") return actualPct < range.min ? "low" : "high";
       return actualPct > range.max ? "over" : "under";
     }
 
-    function getStatusLabel(status, catLabel) {
-      if (status === "healthy") return "ON TRACK ✅";
-      if (catLabel === "Savings") return status === "low" ? "BELOW TARGET ⚠️" : "ABOVE TARGET 🌟";
-      return status === "over" ? "OVERSPENDING ⚠️" : "UNDERSPENDING";
+    // catKey is the category's internal key (needs / wants / savings), never its translated label.
+    function getStatusLabel(status, catKey) {
+      if (status === "healthy") return T.task.on_track;
+      if (catKey === "savings") return status === "low" ? T.task.below_target : T.task.above_target;
+      return status === "over" ? T.task.overspending : T.task.underspending;
     }
 
-    function getStatusColor(status, catLabel) {
+    function getStatusColor(status, catKey) {
       if (status === "healthy") return "#059669";
-      if (catLabel === "Savings" && status === "high") return "#7C3AED";
+      if (catKey === "savings" && status === "high") return "#7C3AED";
       if (status === "over") return "#DC2626";
       return "#CA8A04";
     }
@@ -946,9 +949,10 @@
       const wantsDiff   = Math.abs(actualWants   - idealWants);
       const savingsDiff = Math.abs(actualSavings - idealSavings);
 
-      const needsDir   = actualNeeds   > idealNeeds   ? "MORE" : actualNeeds   < idealNeeds   ? "LESS" : "EXACTLY RIGHT";
-      const wantsDir   = actualWants   > idealWants   ? "MORE" : actualWants   < idealWants   ? "LESS" : "EXACTLY RIGHT";
-      const savingsDir = actualSavings > idealSavings ? "MORE" : actualSavings < idealSavings ? "LESS" : "EXACTLY RIGHT";
+      // Choice answers are internal codes; the buttons show T.task[code].
+      const needsDir   = actualNeeds   > idealNeeds   ? "more" : actualNeeds   < idealNeeds   ? "less" : "exactly_right";
+      const wantsDir   = actualWants   > idealWants   ? "more" : actualWants   < idealWants   ? "less" : "exactly_right";
+      const savingsDir = actualSavings > idealSavings ? "more" : actualSavings < idealSavings ? "less" : "exactly_right";
 
       const leftover = salary - actualNeeds - actualWants - actualSavings;
 
@@ -956,73 +960,75 @@
       const overNeeds = actualNeeds - idealNeeds;
       const overWants = actualWants - idealWants;
       const diffs = [
-        { cat: "Needs", over: overNeeds },
-        { cat: "Wants", over: overWants },
+        { cat: T.common.needs, over: overNeeds },
+        { cat: T.common.wants, over: overWants },
       ];
       const biggestOver = diffs.reduce((a, b) => b.over > a.over ? b : a);
       const moveAmount  = biggestOver.over > 0 ? biggestOver.over : 0;
 
-      const fmt = n => n.toLocaleString();
+      const fmt = n => zvNum(n);
+      const zeds = T.common.zeds;
+      const diffQuestion = (category, ideal, pct, actual) => zvT(T.task.diff_question, { category: category, ideal: fmt(ideal), pct: pct, actual: fmt(actual) });
+      const diffHint = (a, b) => zvT(T.task.diff_hint, { big: fmt(Math.max(a, b)), small: fmt(Math.min(a, b)) });
+      const dirHint = (category, actual, ideal) => zvT(T.task.dir_hint, { category: category, actual: fmt(actual), ideal: fmt(ideal) });
+      const CHOICES = ["more", "less", "exactly_right"];
 
       const questions = [
         {
           id: 1, type: "number",
-          question: `The 50/30/20 rule says Needs should be ${fmt(idealNeeds)} zeds (50%). Your actual Needs is ${fmt(actualNeeds)} zeds. What is the difference?`,
+          question: diffQuestion(T.common.needs, idealNeeds, 50, actualNeeds),
           answer: needsDiff,
-          hint: `Subtract the smaller from the bigger: ${fmt(Math.max(actualNeeds, idealNeeds))} − ${fmt(Math.min(actualNeeds, idealNeeds))}`,
-          steps: `${fmt(Math.max(actualNeeds, idealNeeds))} − ${fmt(Math.min(actualNeeds, idealNeeds))} = ${fmt(needsDiff)} zeds`,
-          tag: "🏠 Needs: Ideal vs Actual",
+          hint: diffHint(actualNeeds, idealNeeds),
+          steps: `${fmt(Math.max(actualNeeds, idealNeeds))} − ${fmt(Math.min(actualNeeds, idealNeeds))} = ${fmt(needsDiff)} ${zeds}`,
+          tag: zvT(T.task.diff_tag, { emoji: "🏠", category: T.common.needs }),
         },
         {
           id: 2, type: "choice",
-          question: "Are you spending MORE or LESS on Needs than the 50/30/20 rule recommends?",
+          question: T.task.dir_question_needs,
           answer: needsDir,
-          options: ["MORE", "LESS", "EXACTLY RIGHT"],
-          hint: `Your actual Needs: ${fmt(actualNeeds)} zeds. The rule says: ${fmt(idealNeeds)} zeds. Which number is bigger?`,
-          steps: `Actual ${fmt(actualNeeds)} vs Ideal ${fmt(idealNeeds)} → You spend ${needsDir}`,
-          tag: "🏠 Needs: Over or Under?",
+          options: CHOICES,
+          hint: dirHint(T.common.needs, actualNeeds, idealNeeds),
+          tag: zvT(T.task.dir_tag, { emoji: "🏠", category: T.common.needs }),
         },
         {
           id: 3, type: "number",
-          question: `The 50/30/20 rule says Wants should be ${fmt(idealWants)} zeds (30%). Your actual Wants is ${fmt(actualWants)} zeds. What is the difference?`,
+          question: diffQuestion(T.common.wants, idealWants, 30, actualWants),
           answer: wantsDiff,
-          hint: `Subtract the smaller from the bigger: ${fmt(Math.max(actualWants, idealWants))} − ${fmt(Math.min(actualWants, idealWants))}`,
-          steps: `${fmt(Math.max(actualWants, idealWants))} − ${fmt(Math.min(actualWants, idealWants))} = ${fmt(wantsDiff)} zeds`,
-          tag: "🎮 Wants: Ideal vs Actual",
+          hint: diffHint(actualWants, idealWants),
+          steps: `${fmt(Math.max(actualWants, idealWants))} − ${fmt(Math.min(actualWants, idealWants))} = ${fmt(wantsDiff)} ${zeds}`,
+          tag: zvT(T.task.diff_tag, { emoji: "🎮", category: T.common.wants }),
         },
         {
           id: 4, type: "choice",
-          question: "Are you spending MORE or LESS on Wants than the 50/30/20 rule recommends?",
+          question: T.task.dir_question_wants,
           answer: wantsDir,
-          options: ["MORE", "LESS", "EXACTLY RIGHT"],
-          hint: `Your actual Wants: ${fmt(actualWants)} zeds. The rule says: ${fmt(idealWants)} zeds. Which number is bigger?`,
-          steps: `Actual ${fmt(actualWants)} vs Ideal ${fmt(idealWants)} → You spend ${wantsDir}`,
-          tag: "🎮 Wants: Over or Under?",
+          options: CHOICES,
+          hint: dirHint(T.common.wants, actualWants, idealWants),
+          tag: zvT(T.task.dir_tag, { emoji: "🎮", category: T.common.wants }),
         },
         {
           id: 5, type: "number",
-          question: `The 50/30/20 rule says Savings should be ${fmt(idealSavings)} zeds (20%). Your actual Savings is ${fmt(actualSavings)} zeds. What is the difference?`,
+          question: diffQuestion(T.common.savings, idealSavings, 20, actualSavings),
           answer: savingsDiff,
-          hint: `Subtract the smaller from the bigger: ${fmt(Math.max(actualSavings, idealSavings))} − ${fmt(Math.min(actualSavings, idealSavings))}`,
-          steps: `${fmt(Math.max(actualSavings, idealSavings))} − ${fmt(Math.min(actualSavings, idealSavings))} = ${fmt(savingsDiff)} zeds`,
-          tag: "🏦 Savings: Ideal vs Actual",
+          hint: diffHint(actualSavings, idealSavings),
+          steps: `${fmt(Math.max(actualSavings, idealSavings))} − ${fmt(Math.min(actualSavings, idealSavings))} = ${fmt(savingsDiff)} ${zeds}`,
+          tag: zvT(T.task.diff_tag, { emoji: "🏦", category: T.common.savings }),
         },
         {
           id: 6, type: "choice",
-          question: "Are you saving MORE or LESS than the 50/30/20 rule recommends?",
+          question: T.task.dir_question_savings,
           answer: savingsDir,
-          options: ["MORE", "LESS", "EXACTLY RIGHT"],
-          hint: `Your actual Savings: ${fmt(actualSavings)} zeds. The rule says: ${fmt(idealSavings)} zeds. Which number is bigger?`,
-          steps: `Actual ${fmt(actualSavings)} vs Ideal ${fmt(idealSavings)} → You save ${savingsDir}`,
-          tag: "🏦 Savings: Over or Under?",
+          options: CHOICES,
+          hint: dirHint(T.common.savings, actualSavings, idealSavings),
+          tag: zvT(T.task.dir_tag, { emoji: "🏦", category: T.common.savings }),
         },
         {
           id: 7, type: "number",
-          question: `After Needs (${fmt(actualNeeds)}), Wants (${fmt(actualWants)}), and Savings (${fmt(actualSavings)}), how much of your ${fmt(salary)} zeds is unaccounted for?`,
+          question: zvT(T.task.q7, { needs: fmt(actualNeeds), wants: fmt(actualWants), savings: fmt(actualSavings), salary: fmt(salary) }),
           answer: leftover,
-          hint: `Subtract all three from your salary: ${fmt(salary)} − ${fmt(actualNeeds)} − ${fmt(actualWants)} − ${fmt(actualSavings)}`,
-          steps: `${fmt(salary)} − ${fmt(actualNeeds)} = ${fmt(salary - actualNeeds)}\n${fmt(salary - actualNeeds)} − ${fmt(actualWants)} = ${fmt(salary - actualNeeds - actualWants)}\n${fmt(salary - actualNeeds - actualWants)} − ${fmt(actualSavings)} = ${fmt(leftover)} zeds`,
-          tag: "💸 Unaccounted money",
+          hint: zvT(T.task.q7_hint, { salary: fmt(salary), needs: fmt(actualNeeds), wants: fmt(actualWants), savings: fmt(actualSavings) }),
+          steps: `${fmt(salary)} − ${fmt(actualNeeds)} = ${fmt(salary - actualNeeds)}\n${fmt(salary - actualNeeds)} − ${fmt(actualWants)} = ${fmt(salary - actualNeeds - actualWants)}\n${fmt(salary - actualNeeds - actualWants)} − ${fmt(actualSavings)} = ${fmt(leftover)} ${zeds}`,
+          tag: T.task.q7_tag,
         },
       ];
 
@@ -1030,20 +1036,20 @@
       if (moveAmount > 0) {
         questions.push({
           id: 8, type: "number",
-          question: `To match the 50/30/20 rule, you would move ${fmt(moveAmount)} zeds from ${biggestOver.cat} to Savings. What would your new Savings be?`,
+          question: zvT(T.task.q8_move, { amount: fmt(moveAmount), category: biggestOver.cat }),
           answer: actualSavings + moveAmount,
-          hint: `Add the move amount to your current Savings: ${fmt(actualSavings)} + ${fmt(moveAmount)}`,
-          steps: `${fmt(actualSavings)} + ${fmt(moveAmount)} = ${fmt(actualSavings + moveAmount)} zeds`,
-          tag: "🔄 Budget adjustment",
+          hint: zvT(T.task.q8_move_hint, { savings: fmt(actualSavings), amount: fmt(moveAmount) }),
+          steps: `${fmt(actualSavings)} + ${fmt(moveAmount)} = ${fmt(actualSavings + moveAmount)} ${zeds}`,
+          tag: T.task.q8_move_tag,
         });
       } else {
         questions.push({
           id: 8, type: "number",
-          question: `If you could increase your Savings by 10% of your salary, what would your new Savings total be?`,
+          question: T.task.q8_boost,
           answer: actualSavings + (salary * 0.1),
-          hint: `Find 10% of salary (${fmt(salary)} ÷ 10), then add to current Savings`,
-          steps: `${fmt(salary)} ÷ 10 = ${fmt(salary * 0.1)}\n${fmt(actualSavings)} + ${fmt(salary * 0.1)} = ${fmt(actualSavings + salary * 0.1)} zeds`,
-          tag: "🔄 Savings boost",
+          hint: zvT(T.task.q8_boost_hint, { salary: fmt(salary) }),
+          steps: `${fmt(salary)} ÷ 10 = ${fmt(salary * 0.1)}\n${fmt(actualSavings)} + ${fmt(salary * 0.1)} = ${fmt(actualSavings + salary * 0.1)} ${zeds}`,
+          tag: T.task.q8_boost_tag,
         });
       }
 
@@ -1063,11 +1069,7 @@
       { maxWrongAttempts: Infinity, points: 0, hint: "full" },
     ];
 
-    function redactFinalStep(stepsText) {
-      const lines = stepsText.split("\n");
-      const last = lines[lines.length - 1].replace(/=\s*[\d.,]+%?\s*(zeds)?\s*$/, "= ?");
-      return [...lines.slice(0, -1), last].join("\n");
-    }
+    const redactFinalStep = zvRedactLastStep;
 
     const state = {
       data: null,
@@ -1120,19 +1122,19 @@
     // ───────────────────────────────────────────────────────────────
     function buildIntroBank() {
       $("intro-bank-title").textContent =
-        `💰 Your Real Bank Statement — ${state.data.salary.toLocaleString()} zeds/month`;
+        zvT(T.task.bank_title, { salary: zvMoney(state.data.salary) });
 
       const items = [
-        { label: "Needs",   val: state.data.actualNeeds,   pct: state.pcts.needs,   ideal: 50, icon: "🏠", colorClass: "needs"   },
-        { label: "Wants",   val: state.data.actualWants,   pct: state.pcts.wants,   ideal: 30, icon: "🎮", colorClass: "wants"   },
-        { label: "Savings", val: state.data.actualSavings, pct: state.pcts.savings, ideal: 20, icon: "🏦", colorClass: "savings" },
+        { label: T.common.needs,   val: state.data.actualNeeds,   pct: state.pcts.needs,   ideal: 50, icon: "🏠", colorClass: "needs"   },
+        { label: T.common.wants,   val: state.data.actualWants,   pct: state.pcts.wants,   ideal: 30, icon: "🎮", colorClass: "wants"   },
+        { label: T.common.savings, val: state.data.actualSavings, pct: state.pcts.savings, ideal: 20, icon: "🏦", colorClass: "savings" },
       ];
 
       $("intro-bank-grid").innerHTML = items.map(item => `
         <div class="intro-bank-tile">
           <div class="intro-bank-tile-icon">${item.icon}</div>
           <div class="intro-bank-tile-label">${item.label}</div>
-          <div class="intro-bank-tile-val">${item.val.toLocaleString()}</div>
+          <div class="intro-bank-tile-val">${zvNum(item.val)}</div>
           <div class="intro-bank-tile-pct ${item.colorClass}">${item.pct}% <span class="ideal">/ ${item.ideal}%</span></div>
         </div>
       `).join("");
@@ -1143,7 +1145,7 @@
     // ───────────────────────────────────────────────────────────────
     function buildComparisonPanel() {
       $("comparison-title").textContent =
-        `📊 Your Budget vs the 50/30/20 Rule — ${state.data.salary.toLocaleString()} zeds/month`;
+        zvT(T.task.comparison_title, { salary: zvMoney(state.data.salary) });
 
       const bars = [
         { range: HEALTHY_RANGES.needs,   actualPct: state.pcts.needs,   idealPct: 50 },
@@ -1153,8 +1155,8 @@
 
       $("comparison-bars").innerHTML = bars.map(({ range, actualPct, idealPct }) => {
         const status      = getStatus(actualPct, range);
-        const statusLabel = getStatusLabel(status, range.label);
-        const statusColor = getStatusColor(status, range.label);
+        const statusLabel = getStatusLabel(status, range.key);
+        const statusColor = getStatusColor(status, range.key);
         const statusBg    = getStatusBg(status);
         const fillWidth   = Math.min(actualPct, 100);
 
@@ -1173,11 +1175,11 @@
                    style="width:${fillWidth}%;
                           background:linear-gradient(90deg, ${range.color}88, ${range.color});"></div>
               <div class="actual-pct-label">${actualPct}%</div>
-              <div class="ideal-label-top" style="left:${idealPct}%; color:${range.color};">Ideal: ${idealPct}%</div>
+              <div class="ideal-label-top" style="left:${idealPct}%; color:${range.color};">${zvT(T.task.ideal_pct, { pct: idealPct })}</div>
             </div>
             <div class="comparison-bar-footer">
               <span>0%</span>
-              <span class="healthy-range" style="color:${range.color};">Healthy: ${range.min}–${range.max}%</span>
+              <span class="healthy-range" style="color:${range.color};">${zvT(T.task.healthy_range, { min: range.min, max: range.max })}</span>
               <span>100%</span>
             </div>
           </div>
@@ -1189,13 +1191,13 @@
     // BUILD STICKY REFERENCE
     // ───────────────────────────────────────────────────────────────
     function buildReference() {
-      $("ref-needs").textContent   = `🏠 Needs: ${state.data.actualNeeds.toLocaleString()} (${state.pcts.needs}%)`;
-      $("ref-wants").textContent   = `🎮 Wants: ${state.data.actualWants.toLocaleString()} (${state.pcts.wants}%)`;
-      $("ref-savings").textContent = `🏦 Savings: ${state.data.actualSavings.toLocaleString()} (${state.pcts.savings}%)`;
+      $("ref-needs").textContent   = zvT(T.task.ref_line, { emoji: "🏠", category: T.common.needs, amount: zvNum(state.data.actualNeeds), pct: state.pcts.needs });
+      $("ref-wants").textContent   = zvT(T.task.ref_line, { emoji: "🎮", category: T.common.wants, amount: zvNum(state.data.actualWants), pct: state.pcts.wants });
+      $("ref-savings").textContent = zvT(T.task.ref_line, { emoji: "🏦", category: T.common.savings, amount: zvNum(state.data.actualSavings), pct: state.pcts.savings });
 
       const totalQs = state.questions.length;
-      $("stat-points").textContent = `🏆 Finhero Badge Points: 0 / ${TASK4_TOTAL_POINTS}`;
-      $("stat-done").textContent   = `✅ 0 / ${totalQs} done`;
+      $("stat-points").textContent = zvT(T.common.points_of, { points: 0, total: TASK4_TOTAL_POINTS });
+      $("stat-done").textContent   = zvT(T.common.done_of, { done: 0, total: totalQs });
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -1222,17 +1224,17 @@
           <div class="msg-hint hidden"></div>
           <div class="msg-revealed hidden"></div>
           <div class="msg-correct hidden"></div>
-          <div class="msg-wrong hidden">Not quite right, try again! ✨</div>
+          <div class="msg-wrong hidden">${T.common.not_quite}</div>
         `;
 
         if (q.type === "number") {
           inner += `
             <div class="input-row">
               <div class="input-wrapper">
-                <input type="text" inputmode="numeric" placeholder="Type your answer..." />
-                <span class="currency-suffix">zeds</span>
+                <input type="text" inputmode="numeric" placeholder="${T.common.type_answer}" />
+                <span class="currency-suffix">${T.common.zeds}</span>
               </div>
-              <button class="check-button" disabled>Check</button>
+              <button class="check-button" disabled>${T.common.check}</button>
             </div>
           `;
         } else {
@@ -1240,7 +1242,7 @@
           inner += `
             <div class="choice-row">
               ${q.options.map(opt =>
-                `<button class="choice-button" data-option="${opt}">${opt}</button>`
+                `<button class="choice-button" data-option="${opt}">${T.task[opt]}</button>`
               ).join("")}
             </div>
           `;
@@ -1251,7 +1253,7 @@
             <div class="attempt-dot current"></div>
             <div class="attempt-dot"></div>
             <div class="attempt-dot"></div>
-            <span class="attempts-label">First try — 1 point!</span>
+            <span class="attempts-label">${zvT(T.common.approach_points_many, { n: 1, total: APPROACH_TIERS.length, points: APPROACH_TIERS[0].points })}</span>
           </div>
         `;
 
@@ -1289,7 +1291,7 @@
     function checkNumber(qid) {
       const q  = state.questions.find(x => x.id === qid);
       const qs = state.qState[qid];
-      const num = parseInt(qs.input.replace(/,/g, ""), 10);
+      const num = zvParseNumber(qs.input);
       if (isNaN(num)) return;
 
       const correct = Math.abs(num - q.answer) <= 5;
@@ -1331,7 +1333,7 @@
             if (data.success === false) {
               const extraFeedback = document.getElementById("extra-feedback");
               extraFeedback.className = "feedback error";
-              extraFeedback.textContent = "You’ve already finished this task, but feel free to give it another go!";
+              extraFeedback.textContent = T.common.already_finished;
               setTimeout(() => {
                 extraFeedback.classList.remove("show");
                 extraFeedback.classList.add("hide");
@@ -1389,7 +1391,7 @@
       // (e.g. "which number is bigger?"), so it stands in for "full" too.
       const hintEl = card.querySelector(".msg-hint");
       if (tier.hint === "light" && !done) {
-        hintEl.innerHTML = `💡 <strong>Hint:</strong> ${q.hint}`;
+        hintEl.innerHTML = `💡 <strong>${T.common.hint}</strong> ${q.hint}`;
         hintEl.classList.remove("hidden");
       } else {
         hintEl.classList.add("hidden");
@@ -1405,12 +1407,12 @@
         const stepsHtml = redactFinalStep(q.steps).split("\n")
           .map(line => `<div class="msg-revealed-step">${line}</div>`).join("");
         revEl.innerHTML = `
-          <div class="msg-revealed-title">📝 Here's the setup — you finish the last step:</div>
+          <div class="msg-revealed-title">${T.common.setup_title}</div>
           ${stepsHtml}
         `;
         revEl.classList.remove("hidden");
       } else if (q.type === "choice" && tier.hint === "full" && !done) {
-        hintEl.innerHTML = `💡 <strong>Hint:</strong> ${q.hint}`;
+        hintEl.innerHTML = `💡 <strong>${T.common.hint}</strong> ${q.hint}`;
         hintEl.classList.remove("hidden");
         revEl.classList.add("hidden");
       } else {
@@ -1420,12 +1422,11 @@
       // Correct
       const corrEl = card.querySelector(".msg-correct");
       if (done) {
-        const answerSuffix = q.type === "number" ? " zeds" : "";
-        const answerDisplay = q.answer.toLocaleString ? q.answer.toLocaleString() : q.answer;
-        const ptsText = qs.earned > 0 ? ` +${qs.earned} Finhero Badge Point${qs.earned === 1 ? '' : 's'}!` : '';
+        const answerDisplay = q.type === "number" ? zvNum(q.answer) + " " + T.common.zeds : T.task[q.answer];
+        const ptsText = qs.earned > 0 ? zvT(qs.earned === 1 ? T.common.plus_points_one : T.common.plus_points_many, { points: qs.earned }) : '';
         corrEl.innerHTML = `
           <span class="msg-correct-icon">🎉</span>
-          <span>${answerDisplay}${answerSuffix} — Correct!${ptsText}</span>
+          <span>${zvT(T.common.correct_answer, { answer: answerDisplay })}${ptsText}</span>
         `;
         corrEl.classList.remove("hidden");
       } else {
@@ -1469,7 +1470,7 @@
         });
 
         const label = card.querySelector(".attempts-label");
-        label.textContent = `Approach ${qs.tier + 1} of ${APPROACH_TIERS.length} — ${tier.points} point${tier.points === 1 ? '' : 's'} if correct`;
+        label.textContent = zvT(tier.points === 1 ? T.common.approach_points_one : T.common.approach_points_many, { n: qs.tier + 1, total: APPROACH_TIERS.length, points: tier.points });
       }
     }
 
@@ -1481,8 +1482,8 @@
       const totalPoints    = Object.values(state.scores).reduce((a, b) => a + b, 0);
       const totalQs        = state.questions.length;
 
-      $("stat-points").textContent = `🏆 Finhero Badge Points: ${totalPoints} / ${TASK4_TOTAL_POINTS}`;
-      $("stat-done").textContent   = `✅ ${completedCount} / ${totalQs} done`;
+      $("stat-points").textContent = zvT(T.common.points_of, { points: totalPoints, total: TASK4_TOTAL_POINTS });
+      $("stat-done").textContent   = zvT(T.common.done_of, { done: completedCount, total: totalQs });
       $("progress-fill").style.width = ((completedCount / totalQs) * 100) + "%";
     }
 
@@ -1504,9 +1505,9 @@
       const totalPoints = Object.values(state.scores).reduce((a, b) => a + b, 0);
 
       let message;
-      if (totalPoints >= 18)      message = "Excellent! You clearly understand how your real spending compares to the ideal budget! 🌟";
-      else if (totalPoints >= 9)  message = "Good work! You're building awareness of where your money goes.";
-      else                        message = "Now you can see exactly where your budget differs from the 50/30/20 rule. That awareness is powerful!";
+      if (totalPoints >= 18)      message = T.task.msg_excellent;
+      else if (totalPoints >= 9)  message = T.task.msg_good;
+      else                        message = T.task.msg_keep;
 
       $("completion-text").textContent = message;
       $("final-points").textContent    = totalPoints;
@@ -1527,8 +1528,8 @@
             <span class="health-summary-cat ${cat.colorClass}">${cat.label}</span>
             <span class="health-summary-pct">${cat.pct}%</span>
             <span class="health-summary-status"
-                  style="color:${getStatusColor(st, cat.label)};background:${getStatusBg(st)};">
-              ${getStatusLabel(st, cat.label)}
+                  style="color:${getStatusColor(st, cat.key)};background:${getStatusBg(st)};">
+              ${getStatusLabel(st, cat.key)}
             </span>
           </div>
         `;

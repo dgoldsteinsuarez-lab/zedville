@@ -26,6 +26,7 @@ use Tests\TestCase;
 class AcademyControllerTest extends TestCase
 {
     use RefreshDatabase;
+    use \Tests\Concerns\OpensRealExams;
 
     private function studentAtLevel(string $levelName): User
     {
@@ -119,8 +120,8 @@ class AcademyControllerTest extends TestCase
         $response = $this->actingAs($student)->get(route('academy.item', $item));
 
         $response->assertOk();
-        // data-correct is the prototype's (quiz-multiple-question.blade.php)
-        // actual leak mechanism - the real page must never use it. (Not
+        // data-correct was the old static budget quizzes' (since removed)
+        // leak mechanism - the real page must never use it. (Not
         // asserting against the bare substring "is_correct" - the shared
         // layouts/profile.blade.php already contains it legitimately, as a
         // JSON field name in the unrelated daily login-quiz widget's JS.)
@@ -163,6 +164,7 @@ class AcademyControllerTest extends TestCase
         $item->update(['is_real_exam' => true]);
         $question = $item->questions()->with('options')->first();
         $correctOptionId = $question->options->firstWhere('is_correct', true)->id;
+        $this->openExamFor($student, $item);
 
         $this->actingAs($student)->post(route('academy.item.submit', $item), [
             'answers' => [$question->id => $correctOptionId],
@@ -183,6 +185,7 @@ class AcademyControllerTest extends TestCase
         $item->update(['is_real_exam' => true]);
         $question = $item->questions()->with('options')->first();
         $correctOptionId = $question->options->firstWhere('is_correct', true)->id;
+        $this->openExamFor($student, $item);
 
         $this->actingAs($student)->post(route('academy.item.submit', $item), [
             'answers' => [$question->id => $correctOptionId],
@@ -190,8 +193,11 @@ class AcademyControllerTest extends TestCase
 
         $response = $this->actingAs($student)->get(route('academy.item', $item));
 
+        // Daniel, 2026-10-22: the real exam's result is only for the tutor
+        // and school - the student sees that it was handed in, not the score.
         $response->assertOk();
-        $response->assertSee('1 / 1');
+        $response->assertSee('Exam submitted');
+        $response->assertDontSee('1 / 1');
         $response->assertDontSee('startQuiz', false);
     }
 

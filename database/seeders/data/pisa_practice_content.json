@@ -1,0 +1,1424 @@
+{
+    "_about": "Original Zedville practice material. Most activities are adapted from the PISA financial literacy units released by the OECD (PISA 2012 and PISA 2018 released items): names, figures and graphics are changed, the currency is the zed, and each activity sits at the official level of the item it is based on ('adapted_from'). Not affiliated with or endorsed by the OECD/PISA. 'correct' is the 0-based index of the right option.",
+    "practice": [
+        {
+            "level": "Below Level 1",
+            "title": "Kai's Corner Shop Receipt",
+            "description": "Kai bought a few things at the corner shop and got this receipt. Read it carefully.",
+            "image": "pisa_corner_shop_receipt.svg",
+            "questions": [
+                {
+                    "question": "How much did Kai's shopping cost in total?",
+                    "options": [
+                        "Ƶ 11.20",
+                        "Ƶ 20.00",
+                        "Ƶ 8.80",
+                        "Ƶ 4.50"
+                    ],
+                    "correct": 0,
+                    "explanation": "The TOTAL line adds up all the items: 2.40 + 1.10 + 3.20 + 4.50 = 11.20 zeds. Ƶ 20.00 is the note Kai paid with, not the cost."
+                },
+                {
+                    "question": "Kai paid with a Ƶ 20.00 note. How much change should he get back?",
+                    "options": [
+                        "Ƶ 9.20",
+                        "Ƶ 8.80",
+                        "Ƶ 11.20",
+                        "Ƶ 7.80"
+                    ],
+                    "correct": 1,
+                    "explanation": "Change = money given - total cost = 20.00 - 11.20 = 8.80 zeds."
+                },
+                {
+                    "question": "Which item on the receipt cost the most?",
+                    "options": [
+                        "Bread",
+                        "Milk",
+                        "Apples (1 kg)",
+                        "Notebook"
+                    ],
+                    "correct": 3,
+                    "explanation": "The notebook cost Ƶ 4.50, more than any other item on the receipt."
+                },
+                {
+                    "question": "Why is it a good idea to keep a receipt?",
+                    "options": [
+                        "You need it to enter the shop again",
+                        "It gives you a discount next time",
+                        "You can check you paid the right amount and return an item if needed",
+                        "It shows how much money is in your bank account"
+                    ],
+                    "correct": 2,
+                    "explanation": "A receipt is proof of what you bought and paid. You can check the shop charged you correctly, and you usually need it to return or exchange something."
+                }
+            ]
+        },
+        {
+            "level": "Below Level 1",
+            "title": "Lina's Week with 50 Zeds",
+            "description": "Lina has Ƶ 50 for the whole week. She must pay her school bus ticket (Ƶ 12) and her lunches (Ƶ 20). She would also like a new phone case (Ƶ 15) and a cinema ticket (Ƶ 9).",
+            "image": null,
+            "questions": [
+                {
+                    "question": "Which of these is a NEED for Lina this week?",
+                    "options": [
+                        "The phone case",
+                        "The cinema ticket",
+                        "The bus ticket to school",
+                        "A new video game"
+                    ],
+                    "correct": 2,
+                    "explanation": "A need is something you must have, like getting to school. The phone case, cinema and games are wants: nice to have, but not necessary."
+                },
+                {
+                    "question": "How much money does Lina have left after paying the bus ticket and her lunches?",
+                    "options": [
+                        "Ƶ 32",
+                        "Ƶ 18",
+                        "Ƶ 38",
+                        "Ƶ 26"
+                    ],
+                    "correct": 1,
+                    "explanation": "Needs cost 12 + 20 = 32 zeds. 50 - 32 = 18 zeds left."
+                },
+                {
+                    "question": "Can Lina buy both the phone case and the cinema ticket this week?",
+                    "options": [
+                        "Yes, she has enough",
+                        "No, together they cost Ƶ 24 and she only has Ƶ 18 left",
+                        "Yes, if she skips the bus ticket",
+                        "No, because cinema tickets are a need"
+                    ],
+                    "correct": 1,
+                    "explanation": "15 + 9 = 24 zeds, but after her needs she only has 18 zeds. Skipping the bus ticket would mean not getting to school - needs come first."
+                },
+                {
+                    "question": "What is a sensible choice for Lina?",
+                    "options": [
+                        "Borrow money from a friend for both",
+                        "Buy one of the wants now and save for the other",
+                        "Skip lunch to buy both",
+                        "Spend everything on the first day"
+                    ],
+                    "correct": 1,
+                    "explanation": "Choosing one want now and saving for the other keeps Lina inside her money without giving up her needs or going into debt."
+                }
+            ]
+        },
+        {
+            "level": "Level 1",
+            "title": "Zedville Bus Fares",
+            "description": "Zedville City Buses sell three kinds of tickets. Look at the fare table.",
+            "image": "pisa_bus_fares.svg",
+            "questions": [
+                {
+                    "question": "Omar takes the bus 7 times this month. Which ticket is the cheapest for him?",
+                    "options": [
+                        "Single rides",
+                        "One 10-ride card",
+                        "The monthly pass",
+                        "They all cost the same"
+                    ],
+                    "correct": 0,
+                    "explanation": "7 single rides cost 7 x 2.50 = 17.50 zeds. A 10-ride card costs 20 zeds and the monthly pass 48 zeds, so single rides are cheapest."
+                },
+                {
+                    "question": "Sara takes the bus 40 times this month. Which ticket is the cheapest for her?",
+                    "options": [
+                        "Single rides",
+                        "10-ride cards",
+                        "The monthly pass",
+                        "They all cost the same"
+                    ],
+                    "correct": 2,
+                    "explanation": "Single rides: 40 x 2.50 = 100 zeds. 10-ride cards: 4 x 20 = 80 zeds. The monthly pass is only 48 zeds."
+                },
+                {
+                    "question": "How much does one ride cost when you use a 10-ride card?",
+                    "options": [
+                        "Ƶ 2.50",
+                        "Ƶ 2.00",
+                        "Ƶ 1.00",
+                        "Ƶ 20.00"
+                    ],
+                    "correct": 1,
+                    "explanation": "The card costs 20 zeds for 10 rides: 20 / 10 = 2 zeds per ride."
+                },
+                {
+                    "question": "How much does Sara save with the monthly pass instead of paying for 40 single rides?",
+                    "options": [
+                        "Ƶ 52",
+                        "Ƶ 48",
+                        "Ƶ 32",
+                        "Ƶ 100"
+                    ],
+                    "correct": 0,
+                    "explanation": "40 single rides cost 100 zeds. The pass costs 48 zeds. 100 - 48 = 52 zeds saved."
+                }
+            ]
+        },
+        {
+            "level": "Level 1",
+            "title": "Sunny Fruit Stall",
+            "description": "The fruit stall at the Farmers Market sells fruit loose (by the kilo) or in packs.",
+            "image": "pisa_fruit_stall.svg",
+            "questions": [
+                {
+                    "question": "What is the price of 1 kg of tomatoes when you buy the 5 kg box?",
+                    "options": [
+                        "Ƶ 2.40",
+                        "Ƶ 2.00",
+                        "Ƶ 5.00",
+                        "Ƶ 10.00"
+                    ],
+                    "correct": 1,
+                    "explanation": "10.00 zeds for 5 kg: 10 / 5 = 2.00 zeds per kg - cheaper than 2.40 loose."
+                },
+                {
+                    "question": "Max needs 5 kg of tomatoes. How much does he save by buying the box instead of 5 kg loose?",
+                    "options": [
+                        "Ƶ 0.40",
+                        "Ƶ 1.00",
+                        "Ƶ 2.00",
+                        "Ƶ 12.00"
+                    ],
+                    "correct": 2,
+                    "explanation": "5 kg loose cost 5 x 2.40 = 12.00 zeds. The box costs 10.00 zeds. 12.00 - 10.00 = 2.00 zeds saved."
+                },
+                {
+                    "question": "Jonas needs only 1 kg of oranges and does not want to waste food. What is the best choice?",
+                    "options": [
+                        "Buy the 3 kg bag because it is cheaper per kilo",
+                        "Buy 1 kg loose for Ƶ 3.00",
+                        "Buy two 3 kg bags",
+                        "Buy tomatoes instead"
+                    ],
+                    "correct": 1,
+                    "explanation": "The bag is cheaper per kilo, but Jonas would pay 7.50 zeds and throw away fruit he does not need. A lower price per kilo only helps if you use everything."
+                },
+                {
+                    "question": "How much cheaper per kilo are the oranges in the 3 kg bag?",
+                    "options": [
+                        "Ƶ 0.50",
+                        "Ƶ 1.50",
+                        "Ƶ 2.50",
+                        "Ƶ 4.50"
+                    ],
+                    "correct": 0,
+                    "explanation": "Bag: 7.50 / 3 = 2.50 zeds per kg. Loose: 3.00 zeds per kg. 3.00 - 2.50 = 0.50 zeds cheaper per kg."
+                }
+            ]
+        },
+        {
+            "level": "Level 4",
+            "title": "Nora's Pay Slip",
+            "description": "Nora works at the Zedville Café. This is her pay slip for May.",
+            "image": "pisa_pay_slip.svg",
+            "questions": [
+                {
+                    "question": "How much money is paid into Nora's bank account for May?",
+                    "options": [
+                        "Ƶ 1,800.00",
+                        "Ƶ 1,368.00",
+                        "Ƶ 432.00",
+                        "Ƶ 2,232.00"
+                    ],
+                    "correct": 1,
+                    "explanation": "The money paid into the account is the NET PAY: gross pay minus all deductions, 1,800 - 432 = 1,368 zeds."
+                },
+                {
+                    "question": "Which of these is a deduction from Nora's pay?",
+                    "options": [
+                        "Gross pay",
+                        "Net pay",
+                        "Pension contribution",
+                        "Zedville Café"
+                    ],
+                    "correct": 2,
+                    "explanation": "Deductions are amounts taken off gross pay before it is paid: income tax, pension and health insurance."
+                },
+                {
+                    "question": "What percentage of Nora's gross pay goes to income tax?",
+                    "options": [
+                        "10%",
+                        "15%",
+                        "20%",
+                        "27%"
+                    ],
+                    "correct": 1,
+                    "explanation": "270 / 1,800 = 0.15, which is 15%."
+                },
+                {
+                    "question": "Next month Nora's gross pay rises to Ƶ 2,000 and her deductions stay at the same share of her pay (24%). What will her net pay be?",
+                    "options": [
+                        "Ƶ 1,568",
+                        "Ƶ 1,520",
+                        "Ƶ 1,600",
+                        "Ƶ 1,368"
+                    ],
+                    "correct": 1,
+                    "explanation": "Deductions are 432 / 1,800 = 24% of gross. 24% of 2,000 = 480. Net pay = 2,000 - 480 = 1,520 zeds."
+                }
+            ]
+        },
+        {
+            "level": "Level 2",
+            "title": "Choosing a Phone Plan",
+            "description": "ZedMobile offers three phone plans. Compare them before choosing.",
+            "image": "pisa_phone_plans.svg",
+            "questions": [
+                {
+                    "question": "Mia uses about 5 GB of data every month. How much would she pay each month with the Basic plan?",
+                    "options": [
+                        "Ƶ 8",
+                        "Ƶ 12",
+                        "Ƶ 20",
+                        "Ƶ 28"
+                    ],
+                    "correct": 2,
+                    "explanation": "Basic includes 2 GB, so Mia needs 3 extra GB: 3 x 4 = 12 zeds. 8 + 12 = 20 zeds per month."
+                },
+                {
+                    "question": "Which plan is the cheapest for Mia (5 GB per month)?",
+                    "options": [
+                        "Basic",
+                        "Plus",
+                        "Max",
+                        "Basic and Plus cost the same"
+                    ],
+                    "correct": 1,
+                    "explanation": "Basic would cost 20 zeds, Plus costs 14 zeds (6 GB included) and Max 22 zeds. Plus is cheapest."
+                },
+                {
+                    "question": "Toni uses only 1 GB per month. Which plan is the cheapest for him?",
+                    "options": [
+                        "Basic",
+                        "Plus",
+                        "Max",
+                        "All the same"
+                    ],
+                    "correct": 0,
+                    "explanation": "1 GB fits inside Basic's 2 GB, so Toni pays only 8 zeds."
+                },
+                {
+                    "question": "Every plan has a 24-month contract. What is the total cost of the Plus plan over the whole contract (with no extra data)?",
+                    "options": [
+                        "Ƶ 168",
+                        "Ƶ 288",
+                        "Ƶ 336",
+                        "Ƶ 528"
+                    ],
+                    "correct": 2,
+                    "explanation": "14 zeds x 24 months = 336 zeds. Always look at the total cost of a contract, not just the monthly price."
+                }
+            ]
+        },
+        {
+            "level": "Level 3",
+            "title": "Saving for a Bike",
+            "description": "Elif wants a bike that costs Ƶ 360. The chart shows how much she saved each month.",
+            "image": "pisa_bike_savings.svg",
+            "questions": [
+                {
+                    "question": "In which month did Elif save the most?",
+                    "options": [
+                        "February",
+                        "April",
+                        "May",
+                        "June"
+                    ],
+                    "correct": 1,
+                    "explanation": "April has the tallest bar: 50 zeds."
+                },
+                {
+                    "question": "How much has Elif saved in total after these six months?",
+                    "options": [
+                        "Ƶ 200",
+                        "Ƶ 220",
+                        "Ƶ 240",
+                        "Ƶ 360"
+                    ],
+                    "correct": 1,
+                    "explanation": "30 + 45 + 20 + 50 + 35 + 40 = 220 zeds."
+                },
+                {
+                    "question": "From now on Elif saves Ƶ 35 every month. How many more months does she need to buy the bike?",
+                    "options": [
+                        "3 months",
+                        "4 months",
+                        "5 months",
+                        "10 months"
+                    ],
+                    "correct": 1,
+                    "explanation": "She still needs 360 - 220 = 140 zeds. 140 / 35 = 4 months."
+                },
+                {
+                    "question": "About how much did Elif save on average per month?",
+                    "options": [
+                        "Ƶ 30.00",
+                        "Ƶ 36.67",
+                        "Ƶ 40.00",
+                        "Ƶ 45.00"
+                    ],
+                    "correct": 1,
+                    "explanation": "Average = total / number of months = 220 / 6 ≈ 36.67 zeds."
+                }
+            ]
+        },
+        {
+            "level": "Level 5",
+            "title": "A Strange Message from the 'Bank'",
+            "description": "Lucas receives this e-mail. It looks like it comes from his bank.",
+            "image": "pisa_suspicious_email.svg",
+            "questions": [
+                {
+                    "question": "What is the safest thing for Lucas to do?",
+                    "options": [
+                        "Click the button quickly so the account is not closed",
+                        "Reply with his card number but not his PIN",
+                        "Not click anything and contact his bank through its official app or phone number",
+                        "Forward the e-mail to his friends to ask them"
+                    ],
+                    "correct": 2,
+                    "explanation": "Never use links or contact details from a suspicious message. Contact the bank through a channel you already know is real."
+                },
+                {
+                    "question": "Which sign shows most clearly that the e-mail is a scam?",
+                    "options": [
+                        "It starts with 'Dear customer'",
+                        "It asks for his PIN",
+                        "It has a blue button",
+                        "It was sent in the morning"
+                    ],
+                    "correct": 1,
+                    "explanation": "A real bank never asks for your PIN. Pressure (24 hours!), threats and a strange sender address are other warning signs."
+                },
+                {
+                    "question": "What do we call a fake message that tries to steal your bank details?",
+                    "options": [
+                        "Phishing",
+                        "Direct debit",
+                        "Overdraft",
+                        "Inflation"
+                    ],
+                    "correct": 0,
+                    "explanation": "Phishing messages pretend to be a trusted company to 'fish' for passwords, card numbers or PINs."
+                },
+                {
+                    "question": "Lucas already typed his card number on the page. What should he do first?",
+                    "options": [
+                        "Wait to see if money disappears",
+                        "Call his bank straight away to block the card",
+                        "Delete the e-mail and forget it",
+                        "Change his e-mail password only"
+                    ],
+                    "correct": 1,
+                    "explanation": "Blocking the card quickly stops anyone using the stolen number. Then he should watch his statements for strange payments."
+                }
+            ]
+        },
+        {
+            "level": "Level 3",
+            "title": "ZedTech Share Price",
+            "description": "The chart shows the price of one ZedTech share at the end of each month last year.",
+            "image": "pisa_zedtech_shares.svg",
+            "questions": [
+                {
+                    "question": "At the end of which month was the share price the highest?",
+                    "options": [
+                        "May",
+                        "September",
+                        "November",
+                        "December"
+                    ],
+                    "correct": 3,
+                    "explanation": "December is the highest point on the line: 36 zeds."
+                },
+                {
+                    "question": "Ana bought 10 shares at the end of January and sold all of them at the end of May. How much did she gain (ignore fees)?",
+                    "options": [
+                        "Ƶ 11",
+                        "Ƶ 110",
+                        "Ƶ 310",
+                        "Ƶ 31"
+                    ],
+                    "correct": 1,
+                    "explanation": "The price went from 20 to 31 zeds: a gain of 11 zeds per share. 10 shares x 11 = 110 zeds."
+                },
+                {
+                    "question": "By what percentage did the share price change from January to December?",
+                    "options": [
+                        "16%",
+                        "36%",
+                        "80%",
+                        "180%"
+                    ],
+                    "correct": 2,
+                    "explanation": "Change = 36 - 20 = 16 zeds. 16 / 20 = 0.8 = 80%."
+                },
+                {
+                    "question": "Which statement is TRUE?",
+                    "options": [
+                        "The price will keep rising next year because it rose this year",
+                        "The price fell in some months, so share prices can go down as well as up",
+                        "Shares always pay more than a savings account",
+                        "The price never went below its January value"
+                    ],
+                    "correct": 1,
+                    "explanation": "The line goes down in March, June, July and October. Past rises never guarantee future rises - that is the risk of investing."
+                }
+            ]
+        },
+        {
+            "level": "Level 4",
+            "title": "Scooter Insurance",
+            "description": "SafeRide sells insurance for electric scooters. The yearly price (premium) depends on the rider's age.",
+            "image": "pisa_scooter_insurance.svg",
+            "questions": [
+                {
+                    "question": "Ana is 17. How much is her yearly premium?",
+                    "options": [
+                        "Ƶ 150",
+                        "Ƶ 210",
+                        "Ƶ 300",
+                        "Ƶ 420"
+                    ],
+                    "correct": 3,
+                    "explanation": "Riders aged 16 to 18 pay 420 zeds per year."
+                },
+                {
+                    "question": "Ana's scooter is damaged and the repair costs Ƶ 600. How much does the insurance company pay?",
+                    "options": [
+                        "Ƶ 600",
+                        "Ƶ 450",
+                        "Ƶ 150",
+                        "Ƶ 180"
+                    ],
+                    "correct": 1,
+                    "explanation": "Ana pays the excess, the first 150 zeds. The insurer pays the rest: 600 - 150 = 450 zeds."
+                },
+                {
+                    "question": "Why do younger riders pay a higher premium?",
+                    "options": [
+                        "They have more money",
+                        "The insurer expects them to have more accidents",
+                        "The law says so",
+                        "Their scooters are more expensive"
+                    ],
+                    "correct": 1,
+                    "explanation": "Premiums follow risk. If a group is expected to claim more often, the insurer charges that group more."
+                },
+                {
+                    "question": "Ben is 17 and makes no claim this year. How much will he pay next year (he is still 17)?",
+                    "options": [
+                        "Ƶ 420",
+                        "Ƶ 378",
+                        "Ƶ 300",
+                        "Ƶ 410"
+                    ],
+                    "correct": 1,
+                    "explanation": "With no claim he gets 10% off: 10% of 420 = 42. 420 - 42 = 378 zeds."
+                }
+            ]
+        },
+        {
+            "level": "Level 5",
+            "title": "Should Tom Switch His Loan?",
+            "description": "Tom still owes Ƶ 6,000 on a loan. Another bank offers him a lower interest rate, but there is a fee to switch.",
+            "image": "pisa_loan_offer.svg",
+            "questions": [
+                {
+                    "question": "How much interest does Tom pay per year on his current loan?",
+                    "options": [
+                        "Ƶ 120",
+                        "Ƶ 480",
+                        "Ƶ 720",
+                        "Ƶ 1,440"
+                    ],
+                    "correct": 2,
+                    "explanation": "12% of 6,000 = 0.12 x 6,000 = 720 zeds per year."
+                },
+                {
+                    "question": "What is the total cost of the new offer over the 2 years (interest plus the fee)?",
+                    "options": [
+                        "Ƶ 960",
+                        "Ƶ 1,260",
+                        "Ƶ 780",
+                        "Ƶ 1,440"
+                    ],
+                    "correct": 1,
+                    "explanation": "8% of 6,000 = 480 per year, so 960 over 2 years. Add the 300 fee: 960 + 300 = 1,260 zeds."
+                },
+                {
+                    "question": "How much would Tom save in total by switching?",
+                    "options": [
+                        "Ƶ 180",
+                        "Ƶ 300",
+                        "Ƶ 480",
+                        "Nothing - it costs more"
+                    ],
+                    "correct": 0,
+                    "explanation": "Current loan: 2 x 720 = 1,440 zeds. New offer: 1,260 zeds. 1,440 - 1,260 = 180 zeds saved - much less than the 4% rate difference suggests, because of the fee."
+                },
+                {
+                    "question": "What else should Tom check before switching?",
+                    "options": [
+                        "Whether his current bank charges a penalty for paying the loan back early",
+                        "The colour of the new bank's logo",
+                        "How many customers the new bank has",
+                        "Nothing, the interest rate is all that matters"
+                    ],
+                    "correct": 0,
+                    "explanation": "Hidden costs like early-repayment penalties can wipe out the saving. Compare the total cost, not just the rate."
+                }
+            ]
+        },
+        {
+            "level": "Level 5",
+            "title": "Zedville Income Tax",
+            "description": "Zedville taxes income in bands: each rate applies only to the part of the income that falls inside its band.",
+            "image": "pisa_income_tax.svg",
+            "questions": [
+                {
+                    "question": "Ben earns Ƶ 30,000 a year. How much income tax does he pay?",
+                    "options": [
+                        "Ƶ 6,000",
+                        "Ƶ 3,600",
+                        "Ƶ 2,400",
+                        "Ƶ 10,500"
+                    ],
+                    "correct": 1,
+                    "explanation": "The first 12,000 is tax-free. The next 18,000 (30,000 - 12,000) is taxed at 20%: 0.2 x 18,000 = 3,600 zeds."
+                },
+                {
+                    "question": "Clara earns Ƶ 50,000 a year. How much income tax does she pay?",
+                    "options": [
+                        "Ƶ 17,500",
+                        "Ƶ 10,000",
+                        "Ƶ 9,100",
+                        "Ƶ 5,600"
+                    ],
+                    "correct": 2,
+                    "explanation": "20% of 28,000 (from 12,000 to 40,000) = 5,600, plus 35% of 10,000 (above 40,000) = 3,500. Total 9,100 zeds."
+                },
+                {
+                    "question": "What is Clara's average tax rate (all her tax divided by all her income)?",
+                    "options": [
+                        "About 18%",
+                        "20%",
+                        "35%",
+                        "About 25%"
+                    ],
+                    "correct": 0,
+                    "explanation": "9,100 / 50,000 = 0.182, about 18% - much lower than her top rate of 35%."
+                },
+                {
+                    "question": "Clara gets a raise of Ƶ 1,000. How much more income tax will she pay?",
+                    "options": [
+                        "Ƶ 182",
+                        "Ƶ 200",
+                        "Ƶ 350",
+                        "All her income is now taxed at a higher rate"
+                    ],
+                    "correct": 2,
+                    "explanation": "The extra 1,000 falls in the top band, so only that 1,000 is taxed at 35%: 350 zeds. A raise never makes you lose money because of a higher band."
+                }
+            ]
+        },
+        {
+            "level": "Level 1",
+            "title": "The Nimbus Sportswear Invoice",
+            "image": "pisa_nimbus_invoice.svg",
+            "description": "Mia ordered sports clothes online. A few days later this invoice arrived with the parcel.",
+            "adapted_from": "Invoice (PISA 2012, Level 1-2)",
+            "questions": [
+                {
+                    "question": "Why was this invoice sent to Mia?",
+                    "options": [
+                        "Because Mia has to pay the money to Nimbus Sportswear",
+                        "Because Nimbus Sportswear has to pay money to Mia",
+                        "Because Mia has already paid",
+                        "Because Nimbus Sportswear has already paid Mia"
+                    ],
+                    "correct": 0,
+                    "explanation": "An invoice is a bill: the seller tells the buyer how much to pay and by when. \"Already paid: Ƶ 0.00\" shows Mia still has to pay."
+                },
+                {
+                    "question": "How much did Nimbus Sportswear charge for delivering the parcel?",
+                    "options": [
+                        "Ƶ 7.40",
+                        "Ƶ 6.00",
+                        "Ƶ 12.00",
+                        "Ƶ 87.40"
+                    ],
+                    "correct": 1,
+                    "explanation": "The line \"Delivery (fixed)\" shows Ƶ 6.00. Ƶ 7.40 is the tax."
+                },
+                {
+                    "question": "By which date must Mia pay?",
+                    "options": [
+                        "3 April",
+                        "12 April",
+                        "30 April",
+                        "There is no date"
+                    ],
+                    "correct": 2,
+                    "explanation": "The invoice says \"Please pay by 30 April\". 3 April is the date the invoice was issued."
+                }
+            ]
+        },
+        {
+            "level": "Level 1",
+            "title": "Moving into a Shared Flat",
+            "image": "pisa_flat_todo.svg",
+            "description": "Sara and two friends have just rented a flat together. They have no savings and have just been paid. They wrote this list.",
+            "adapted_from": "Spending choices (PISA 2012)",
+            "questions": [
+                {
+                    "question": "Which task on the list must come first?",
+                    "options": [
+                        "Sign up for a streaming service",
+                        "Pay the rent",
+                        "Buy garden chairs",
+                        "Get a bigger TV"
+                    ],
+                    "correct": 1,
+                    "explanation": "Rent is a need: without paying it they lose the flat. The others are wants that can wait."
+                },
+                {
+                    "question": "Which TWO tasks are needs?",
+                    "options": [
+                        "Pay the rent and buy food for the week",
+                        "Buy garden chairs and get a bigger TV",
+                        "Streaming service and food",
+                        "Rent and streaming service"
+                    ],
+                    "correct": 0,
+                    "explanation": "You need a home and food to live. Garden chairs, a bigger TV and streaming are nice to have."
+                },
+                {
+                    "question": "They have money left after the needs. What is the wisest plan?",
+                    "options": [
+                        "Buy everything on the list today",
+                        "Keep some money for the rest of the month and choose one want",
+                        "Borrow money to buy the TV",
+                        "Spend it all before the next pay day"
+                    ],
+                    "correct": 1,
+                    "explanation": "With no savings, keeping a cushion protects them from surprises. One want can be bought if money is left."
+                }
+            ]
+        },
+        {
+            "level": "Level 1",
+            "title": "A New Bank Card",
+            "image": "pisa_bank_card.svg",
+            "description": "Elena receives her first bank card from Universal Bank. The next day a letter with her secret PIN arrives.",
+            "adapted_from": "New credit card (PISA 2012)",
+            "questions": [
+                {
+                    "question": "What should Elena do with her PIN?",
+                    "options": [
+                        "Write it on a paper and keep it in her wallet",
+                        "Tell it to her best friends",
+                        "Write it on the back of the card",
+                        "Learn it by heart"
+                    ],
+                    "correct": 3,
+                    "explanation": "A PIN protects your money only if nobody else can find it. If the card is lost with the PIN written near it, anyone can use it."
+                },
+                {
+                    "question": "Somebody calls Elena, says they work for the bank and asks for her PIN. What should she do?",
+                    "options": [
+                        "Tell them the PIN, the bank needs it",
+                        "Hang up: a bank never asks for your PIN",
+                        "Give only the first two numbers",
+                        "Send the PIN by text message instead"
+                    ],
+                    "correct": 1,
+                    "explanation": "Banks never ask for your PIN by phone, e-mail or message. Anyone who asks is trying to steal from you."
+                },
+                {
+                    "question": "What does \"VALID THRU 09/29\" on the card mean?",
+                    "options": [
+                        "The card works until September 2029",
+                        "The PIN is 0929",
+                        "The card costs Ƶ 9.29",
+                        "Elena must pay on 9 September"
+                    ],
+                    "correct": 0,
+                    "explanation": "It is the expiry date: month 09, year 2029. After that the bank sends a new card."
+                }
+            ]
+        },
+        {
+            "level": "Level 2",
+            "title": "Who Pays the Phone Bill?",
+            "image": null,
+            "description": "Theo is too young to sign a phone contract. His father buys the phone and signs a one-year contract. Theo promises to pay the monthly bill. After two months, his father discovers that the bills have not been paid.",
+            "adapted_from": "Mobile phone contract (PISA 2018, Level 2)",
+            "questions": [
+                {
+                    "question": "Who is legally responsible for paying the bill?",
+                    "options": [
+                        "Theo, because he uses the phone",
+                        "Theo's father, because he signed the contract",
+                        "The phone shop",
+                        "Nobody, because Theo is young"
+                    ],
+                    "correct": 1,
+                    "explanation": "The person who signs a contract must keep it. Theo's promise is between him and his father, not with the phone company."
+                },
+                {
+                    "question": "Is this statement true or false? \"The phone shop must pay the bill if Theo and his father do not.\"",
+                    "options": [
+                        "True",
+                        "False"
+                    ],
+                    "correct": 1,
+                    "explanation": "The shop sold the phone and the service; it never agreed to pay the customer's bill."
+                },
+                {
+                    "question": "Is this statement true or false? \"If Theo gives the phone back to the shop, the bill does not have to be paid.\"",
+                    "options": [
+                        "True",
+                        "False"
+                    ],
+                    "correct": 1,
+                    "explanation": "The contract runs for one year. Giving the phone back does not cancel what was already used or agreed."
+                }
+            ]
+        },
+        {
+            "level": "Level 2",
+            "title": "A Call Asking for Donations",
+            "image": "pisa_donation_chat.svg",
+            "description": "Read the chat between Omar and Lucía.",
+            "adapted_from": "Charitable giving (PISA 2018, Level 2)",
+            "questions": [
+                {
+                    "question": "Why did Lucía take a financial risk?",
+                    "options": [
+                        "She gave too little money",
+                        "She gave her card details to a caller she did not know",
+                        "Animal charities are not allowed",
+                        "She paid by card instead of cash"
+                    ],
+                    "correct": 1,
+                    "explanation": "The caller may not be a real charity, and with her card number and the 3 security numbers they can take more money later."
+                },
+                {
+                    "question": "What would have been a safer way to donate?",
+                    "options": [
+                        "Give the card details again to check",
+                        "Find the charity's official website or office herself and donate there",
+                        "Donate to anyone who calls first",
+                        "Post her card details online so the charity can find them"
+                    ],
+                    "correct": 1,
+                    "explanation": "Contact an organisation through a channel you found yourself, so you know it is genuine."
+                },
+                {
+                    "question": "What should Lucía do now?",
+                    "options": [
+                        "Nothing, it was only a donation",
+                        "Call her bank to block the card and watch her statement",
+                        "Call the number back and ask for a receipt",
+                        "Share the number with her friends"
+                    ],
+                    "correct": 1,
+                    "explanation": "Blocking the card stops any further use of the details she gave away."
+                }
+            ]
+        },
+        {
+            "level": "Level 3",
+            "title": "Running a Family Car",
+            "image": null,
+            "description": "Mr Okafor borrows money to buy a family car. The loan has a fixed interest rate and fixed monthly repayments. The car also has fuel, repair and maintenance costs.",
+            "adapted_from": "Costs of running a car (PISA 2018, Level 3)",
+            "questions": [
+                {
+                    "question": "If the family drives the car much more, what happens to the monthly loan repayment?",
+                    "options": [
+                        "It increases",
+                        "It stays the same",
+                        "It decreases",
+                        "It stops"
+                    ],
+                    "correct": 1,
+                    "explanation": "The loan repayment is a fixed cost: it depends on the loan, not on how much you drive."
+                },
+                {
+                    "question": "If the family drives the car much more, what happens to the fuel cost?",
+                    "options": [
+                        "It increases",
+                        "It stays the same",
+                        "It decreases",
+                        "It disappears"
+                    ],
+                    "correct": 0,
+                    "explanation": "Fuel is a variable cost: the more you drive, the more fuel you buy."
+                },
+                {
+                    "question": "Which cost is variable, like fuel?",
+                    "options": [
+                        "Monthly loan repayment",
+                        "Repairs and maintenance",
+                        "The price the car was bought for",
+                        "The interest rate"
+                    ],
+                    "correct": 1,
+                    "explanation": "Driving more wears out tyres, brakes and parts, so repairs and maintenance go up with use."
+                }
+            ]
+        },
+        {
+            "level": "Level 3",
+            "title": "Saving for a Holiday",
+            "image": null,
+            "description": "Mateo works at a café 3 evenings a week. Each evening he works 5 hours and earns Ƶ 8 per hour. He also gets Ƶ 60 in tips every week. He saves exactly half of everything he earns each week.",
+            "adapted_from": "Money for travel (PISA 2012)",
+            "questions": [
+                {
+                    "question": "How much does Mateo earn in one week, including tips?",
+                    "options": [
+                        "Ƶ 120",
+                        "Ƶ 180",
+                        "Ƶ 90",
+                        "Ƶ 60"
+                    ],
+                    "correct": 1,
+                    "explanation": "3 evenings x 5 hours x Ƶ 8 = Ƶ 120. Plus Ƶ 60 tips = Ƶ 180."
+                },
+                {
+                    "question": "How much does he save each week?",
+                    "options": [
+                        "Ƶ 60",
+                        "Ƶ 90",
+                        "Ƶ 120",
+                        "Ƶ 180"
+                    ],
+                    "correct": 1,
+                    "explanation": "He saves half: 180 / 2 = Ƶ 90."
+                },
+                {
+                    "question": "Mateo wants to save Ƶ 720 for a holiday. How many weeks will it take?",
+                    "options": [
+                        "6 weeks",
+                        "8 weeks",
+                        "4 weeks",
+                        "12 weeks"
+                    ],
+                    "correct": 1,
+                    "explanation": "720 / 90 = 8 weeks."
+                }
+            ]
+        },
+        {
+            "level": "Level 3",
+            "title": "Pay Before or Pay After?",
+            "image": "pisa_phone_companies.svg",
+            "description": "In Zedville you can pay for your phone in advance (top-up credit, no monthly fee) or with a monthly plan billed at the end of the month. The table shows four monthly plans. Max says: \"I talk on the phone about 45 minutes every day, but I hardly ever send texts.\"",
+            "adapted_from": "Phone plans (PISA 2018, Level 3)",
+            "questions": [
+                {
+                    "question": "What is one financial advantage of paying in advance with top-up credit?",
+                    "options": [
+                        "You can never run out of credit",
+                        "You cannot spend more than you put in, so there are no surprise bills",
+                        "Calls are always free",
+                        "You get a new phone every month"
+                    ],
+                    "correct": 1,
+                    "explanation": "With top-up credit your spending is limited to what you paid in advance, which makes budgeting easier."
+                },
+                {
+                    "question": "Max talks about 1,350 minutes a month. Which monthly plan is cheapest for him?",
+                    "options": [
+                        "TalkNow",
+                        "ZedCall",
+                        "Ringo",
+                        "Vox"
+                    ],
+                    "correct": 1,
+                    "explanation": "TalkNow: 18 + 1,250 x 0.20 = 268. ZedCall: 18 + 1,250 x 0.18 = 243. Ringo: 25 + 1,150 x 0.22 = 278. Vox: 25 + 1,300 x 0.18 = 259. ZedCall is cheapest. Texts barely matter for Max."
+                },
+                {
+                    "question": "Which details matter MOST for Max?",
+                    "options": [
+                        "Price per text and free texts",
+                        "Monthly fee, price per minute and free minutes",
+                        "Only the monthly fee",
+                        "Only the number of free texts"
+                    ],
+                    "correct": 1,
+                    "explanation": "Max mostly makes calls, so the call costs decide the bill. Choose a plan by how you will actually use it."
+                }
+            ]
+        },
+        {
+            "level": "Level 4",
+            "title": "A Loan for a Sound System",
+            "image": "pisa_speaker_loan.svg",
+            "description": "Pablo borrows Ƶ 1,500 from his bank for a sound system. He can pay it back over 2 years or over 3 years, at the same yearly interest rate.",
+            "adapted_from": "Music system (PISA 2018, Level 4)",
+            "questions": [
+                {
+                    "question": "Compared with 2 years, what happens to the MONTHLY payment over 3 years?",
+                    "options": [
+                        "It is larger",
+                        "It is smaller",
+                        "It is the same",
+                        "It is zero in the third year"
+                    ],
+                    "correct": 1,
+                    "explanation": "The amount is spread over more months, so each payment is smaller."
+                },
+                {
+                    "question": "Compared with 2 years, what happens to the TOTAL interest over 3 years?",
+                    "options": [
+                        "It is larger",
+                        "It is smaller",
+                        "It is the same",
+                        "There is no interest"
+                    ],
+                    "correct": 0,
+                    "explanation": "He owes money for longer, so interest is charged for longer. Smaller payments cost more in total."
+                },
+                {
+                    "question": "Over 2 years, how much more than the price of the sound system does Pablo pay back?",
+                    "options": [
+                        "Ƶ 68.75",
+                        "Ƶ 150",
+                        "Ƶ 1,650",
+                        "Ƶ 1,500"
+                    ],
+                    "correct": 1,
+                    "explanation": "Total paid back 1,650 - 1,500 borrowed = Ƶ 150 of interest."
+                }
+            ]
+        },
+        {
+            "level": "Level 4",
+            "title": "Reading Mr Ruiz's Bank Statement",
+            "image": "pisa_bank_statement.svg",
+            "description": "Every week Mr Ruiz sends Ƶ 80 to his daughter Ana. His bank charges a fee for each transfer.",
+            "adapted_from": "Bank statement (PISA 2018, Level 4)",
+            "questions": [
+                {
+                    "question": "How much did the bank charge in transfer fees in March?",
+                    "options": [
+                        "Ƶ 1.20",
+                        "Ƶ 3.60",
+                        "Ƶ 4.80",
+                        "Ƶ 320"
+                    ],
+                    "correct": 2,
+                    "explanation": "There are 4 transfer fees of Ƶ 1.20: 4 x 1.20 = Ƶ 4.80. The fees are listed one by one, not as a total."
+                },
+                {
+                    "question": "How much did Mr Ruiz earn in wages in March?",
+                    "options": [
+                        "Ƶ 610",
+                        "Ƶ 1,830",
+                        "Ƶ 2,440",
+                        "Ƶ 2,269.10"
+                    ],
+                    "correct": 2,
+                    "explanation": "Four wage payments of Ƶ 610: 4 x 610 = Ƶ 2,440."
+                },
+                {
+                    "question": "What does the \"Interest\" line on 31 March mean?",
+                    "options": [
+                        "The bank took Ƶ 3.40 as a fee",
+                        "The bank paid Mr Ruiz Ƶ 3.40 for keeping money in the account",
+                        "Mr Ruiz paid his rent",
+                        "Ana sent money back"
+                    ],
+                    "correct": 1,
+                    "explanation": "It is in the \"In\" column: the bank paid interest on his balance."
+                }
+            ]
+        },
+        {
+            "level": "Level 4",
+            "title": "The Sticker Pack Offer",
+            "image": "pisa_sticker_ad.svg",
+            "description": "Lina sees this advert on a games website. She has Ƶ 25 of phone credit.",
+            "adapted_from": "Ring-tones (PISA 2018, Level 4)",
+            "questions": [
+                {
+                    "question": "Lina texts GLOW and then does not use her phone or add credit. She is charged on the first day and once every day after that. How much credit does she have after 7 charges?",
+                    "options": [
+                        "Ƶ 23",
+                        "Ƶ 11",
+                        "Ƶ 14",
+                        "Ƶ 25"
+                    ],
+                    "correct": 1,
+                    "explanation": "The small print says a new pack arrives (and is paid) every day: 7 x 2 = Ƶ 14. 25 - 14 = Ƶ 11."
+                },
+                {
+                    "question": "If Lina had texted STOP straight after the first pack, how much would the \"Ƶ 2\" offer have cost her?",
+                    "options": [
+                        "Ƶ 2",
+                        "Ƶ 4",
+                        "Ƶ 6",
+                        "Nothing"
+                    ],
+                    "correct": 2,
+                    "explanation": "First pack Ƶ 2 + cancelling Ƶ 4 = Ƶ 6 - three times the advertised price."
+                },
+                {
+                    "question": "What is the most important lesson from this advert?",
+                    "options": [
+                        "Big letters show the real price",
+                        "Read the small print before you agree to anything",
+                        "Stickers are always free",
+                        "Adverts on games websites are always honest"
+                    ],
+                    "correct": 1,
+                    "explanation": "The real cost (a daily subscription and a cancelling fee) was hidden in the small print."
+                }
+            ]
+        },
+        {
+            "level": "Level 4",
+            "title": "Buying Online at a Café",
+            "image": null,
+            "description": "Kai uses a public computer at an internet café. He visits an online shop and types his bank card details to buy football boots.",
+            "adapted_from": "Online shopping (PISA 2018, Level 4)",
+            "questions": [
+                {
+                    "question": "What could Kai have done to make his payment safer?",
+                    "options": [
+                        "Use his own device at home instead of a public computer",
+                        "Save his card details on the café computer",
+                        "Use the café computer but shout his card number",
+                        "Pay faster"
+                    ],
+                    "correct": 0,
+                    "explanation": "Public computers can record what you type. Your own device on a private connection is much safer."
+                },
+                {
+                    "question": "Which sign shows that the shop's payment page is more likely to be secure?",
+                    "options": [
+                        "The address starts with https and shows a lock",
+                        "The page has many colours",
+                        "The page asks for the PIN",
+                        "The page has a countdown timer"
+                    ],
+                    "correct": 0,
+                    "explanation": "https and the lock mean the connection is encrypted. An online shop never needs your PIN."
+                },
+                {
+                    "question": "Which payment method protects Kai's bank details best?",
+                    "options": [
+                        "Typing his card number into an unknown website",
+                        "Using a trusted payment service or a prepaid card",
+                        "Sending his card photo by message",
+                        "Giving his details by phone to the seller"
+                    ],
+                    "correct": 1,
+                    "explanation": "A trusted payment service or a prepaid card means the shop never sees his real card details."
+                }
+            ]
+        },
+        {
+            "level": "Level 4",
+            "title": "ZedRide Bike Sharing",
+            "image": "pisa_zedride_prices.svg",
+            "description": "Julia wants to use ZedRide to cycle to school. Each trip takes 30 minutes. Twice a month, at weekends, she also takes long rides of about 2 hours.",
+            "adapted_from": "ZCycle (PISA 2018, Level 4)",
+            "questions": [
+                {
+                    "question": "What would one month cost Julia with the monthly membership?",
+                    "options": [
+                        "Ƶ 18",
+                        "Ƶ 24",
+                        "Ƶ 28",
+                        "Ƶ 160"
+                    ],
+                    "correct": 2,
+                    "explanation": "Membership Ƶ 18. School trips are under 45 minutes, so free. Two rides of 91+ minutes: 2 x 5 = Ƶ 10. Total Ƶ 28."
+                },
+                {
+                    "question": "Which part of the price is a fixed cost for Julia?",
+                    "options": [
+                        "The monthly membership",
+                        "The long weekend rides",
+                        "The 30-minute trips",
+                        "None of it"
+                    ],
+                    "correct": 0,
+                    "explanation": "The membership costs the same however much she rides. The long rides are variable costs."
+                },
+                {
+                    "question": "How much would Julia pay in one month if she skipped the weekend rides?",
+                    "options": [
+                        "Ƶ 0",
+                        "Ƶ 18",
+                        "Ƶ 28",
+                        "Ƶ 10"
+                    ],
+                    "correct": 1,
+                    "explanation": "Only the membership remains, because rides up to 45 minutes are free."
+                }
+            ]
+        },
+        {
+            "level": "Level 5",
+            "title": "The Invoice Mistake",
+            "image": "pisa_nimbus_invoice.svg",
+            "description": "Look again at the Nimbus Sportswear invoice. Mia notices a mistake: she ordered and received ONE hoodie, not two. The delivery charge is fixed.",
+            "adapted_from": "Invoice Q03 (PISA 2012, Level 5 full credit / Level 3 partial)",
+            "questions": [
+                {
+                    "question": "What should the correct total due be?",
+                    "options": [
+                        "Ƶ 62.40",
+                        "Ƶ 59.90",
+                        "Ƶ 53.90",
+                        "Ƶ 87.40"
+                    ],
+                    "correct": 1,
+                    "explanation": "Total before tax: 74 - 25 = 49. New tax: 10% of 49 = 4.90. Delivery stays 6. Total: 49 + 4.90 + 6 = Ƶ 59.90. If you kept the old tax (7.40) you got 62.40 - the tax must change too."
+                },
+                {
+                    "question": "Why is Ƶ 62.40 NOT the right new total?",
+                    "options": [
+                        "Delivery should be removed",
+                        "The tax was calculated on the old amount and must be recalculated",
+                        "Hoodies have no tax",
+                        "The socks were also wrong"
+                    ],
+                    "correct": 1,
+                    "explanation": "Tax is 10% of the goods. Fewer goods means less tax: 4.90 instead of 7.40."
+                },
+                {
+                    "question": "How much money does the mistake cost Mia if she does not notice it?",
+                    "options": [
+                        "Ƶ 25.00",
+                        "Ƶ 27.50",
+                        "Ƶ 7.40",
+                        "Ƶ 6.00"
+                    ],
+                    "correct": 1,
+                    "explanation": "87.40 - 59.90 = Ƶ 27.50: the hoodie (25) plus its tax (2.50). Always check invoices against what you received."
+                }
+            ]
+        },
+        {
+            "level": "Level 5",
+            "title": "The Next Day on the Statement",
+            "image": "pisa_bank_statement.svg",
+            "description": "On 3 April, Mr Ruiz receives his wages of Ƶ 610 and makes his usual transfer of Ƶ 80 to Ana. He makes no other payments that day.",
+            "adapted_from": "Bank statement Q2 (PISA 2018, Level 5)",
+            "questions": [
+                {
+                    "question": "What is Mr Ruiz's balance at the end of 3 April?",
+                    "options": [
+                        "Ƶ 2,799.10",
+                        "Ƶ 2,797.90",
+                        "Ƶ 2,879.10",
+                        "Ƶ 2,189.10"
+                    ],
+                    "correct": 1,
+                    "explanation": "Start from the March closing balance 2,269.10 + 610 - 80 - 1.20 (the transfer fee) = Ƶ 2,797.90. Forgetting the fee gives 2,799.10."
+                },
+                {
+                    "question": "Mr Ruiz wants to avoid most of the transfer fees. What would save the most?",
+                    "options": [
+                        "Send Ƶ 320 once a month instead of Ƶ 80 every week",
+                        "Send Ƶ 40 twice a week",
+                        "Send the money in cash by post",
+                        "Ask the bank to show the fee in another colour"
+                    ],
+                    "correct": 0,
+                    "explanation": "One monthly transfer costs one fee (Ƶ 1.20) instead of four (Ƶ 4.80): about Ƶ 43 saved per year."
+                },
+                {
+                    "question": "In March, did Mr Ruiz spend more or less than he earned (wages and interest)?",
+                    "options": [
+                        "More",
+                        "Less",
+                        "Exactly the same",
+                        "You cannot tell from a statement"
+                    ],
+                    "correct": 1,
+                    "explanation": "The balance rose from 1,240.50 to 2,269.10, so money in was larger than money out."
+                }
+            ]
+        },
+        {
+            "level": "Level 5",
+            "title": "Monthly or Yearly Membership?",
+            "image": "pisa_zedride_bill.svg",
+            "description": "Leo uses ZedRide with a monthly membership. This is his bill for May. (Prices: membership Ƶ 18 per month or Ƶ 160 per year; rides up to 45 minutes free; 46-90 minutes Ƶ 3; 91 minutes or more Ƶ 5.)",
+            "adapted_from": "ZCycle Q2-Q4 (PISA 2018, Level 4-5)",
+            "questions": [
+                {
+                    "question": "Which line on Leo's bill is wrong?",
+                    "options": [
+                        "Monthly membership - 18",
+                        "Rides up to 45 minutes - 12",
+                        "Rides of 46 to 90 minutes - 0",
+                        "Rides of 91 minutes or more - 10"
+                    ],
+                    "correct": 1,
+                    "explanation": "Rides up to 45 minutes are free for monthly members, so that line should be 0, not 12."
+                },
+                {
+                    "question": "What should the correct total be?",
+                    "options": [
+                        "Ƶ 40",
+                        "Ƶ 28",
+                        "Ƶ 18",
+                        "Ƶ 30"
+                    ],
+                    "correct": 1,
+                    "explanation": "18 (membership) + 0 + 0 + 10 (two long rides) = Ƶ 28."
+                },
+                {
+                    "question": "Leo will ride like this for 6 months. Which is cheaper: 6 monthly memberships or one yearly membership, and by how much?",
+                    "options": [
+                        "Monthly is cheaper by Ƶ 8",
+                        "Yearly is cheaper by Ƶ 8",
+                        "Yearly is cheaper by Ƶ 52",
+                        "They cost the same"
+                    ],
+                    "correct": 1,
+                    "explanation": "Monthly: 6 x 28 = Ƶ 168. Yearly: Ƶ 160, long rides included. Yearly is Ƶ 8 cheaper, even though Leo only rides for 6 months."
+                }
+            ]
+        }
+    ],
+    "real_exam": {
+        "title": "End-of-Year Financial Literacy Exam",
+        "description": "12 questions from every PISA level. You can take this exam only once; your tutor and your school will see the result.",
+        "image": "pisa_exam_budget.svg",
+        "questions": [
+            {
+                "question": "A pen costs Ƶ 1.50. How much do 4 pens cost?",
+                "options": [
+                    "Ƶ 5.50",
+                    "Ƶ 6.00",
+                    "Ƶ 4.50",
+                    "Ƶ 7.50"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "Which of these is a WANT rather than a need?",
+                "options": [
+                    "Rent",
+                    "Electricity",
+                    "A concert ticket",
+                    "Food"
+                ],
+                "correct": 2
+            },
+            {
+                "question": "Shop A sells 6 eggs for Ƶ 2.40. Shop B sells 12 eggs for Ƶ 4.20. Which shop is cheaper per egg?",
+                "options": [
+                    "Shop A",
+                    "Shop B",
+                    "Both the same",
+                    "It depends on the day"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "Look at Jonas's budget in the chart. How much does he spend each month in total, including saving?",
+                "options": [
+                    "Ƶ 1,000",
+                    "Ƶ 1,100",
+                    "Ƶ 1,200",
+                    "Ƶ 900"
+                ],
+                "correct": 2
+            },
+            {
+                "question": "In Jonas's budget, which share of his money goes to rent?",
+                "options": [
+                    "About 25%",
+                    "About 42%",
+                    "About 50%",
+                    "About 60%"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "Your gross pay is Ƶ 2,400 and the deductions are Ƶ 600. What is your net pay?",
+                "options": [
+                    "Ƶ 3,000",
+                    "Ƶ 2,400",
+                    "Ƶ 1,800",
+                    "Ƶ 600"
+                ],
+                "correct": 2
+            },
+            {
+                "question": "Which document does a company send you to ask you to pay for goods or a service you received?",
+                "options": [
+                    "A receipt",
+                    "An invoice",
+                    "A pay slip",
+                    "A bank statement"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "A jacket costs Ƶ 60 and is on sale with 15% off. What is the sale price?",
+                "options": [
+                    "Ƶ 45",
+                    "Ƶ 51",
+                    "Ƶ 54",
+                    "Ƶ 9"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "You put Ƶ 500 in a savings account paying 4% interest per year. How much interest do you get after one year?",
+                "options": [
+                    "Ƶ 4",
+                    "Ƶ 20",
+                    "Ƶ 40",
+                    "Ƶ 504"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "You keep Ƶ 1,000 in an account for 2 years at 5% compound interest per year. How much is in the account after 2 years?",
+                "options": [
+                    "Ƶ 1,100.00",
+                    "Ƶ 1,102.50",
+                    "Ƶ 1,050.00",
+                    "Ƶ 1,010.00"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "Your insurance has an excess of Ƶ 200. The damage costs Ƶ 900. How much does the insurance company pay?",
+                "options": [
+                    "Ƶ 900",
+                    "Ƶ 700",
+                    "Ƶ 200",
+                    "Ƶ 1,100"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "Income up to Ƶ 10,000 is tax-free and every zed above that is taxed at 25%. Mila earns Ƶ 18,000. How much tax does she pay?",
+                "options": [
+                    "Ƶ 4,500",
+                    "Ƶ 2,000",
+                    "Ƶ 2,500",
+                    "Ƶ 8,000"
+                ],
+                "correct": 1
+            }
+        ]
+    }
+}

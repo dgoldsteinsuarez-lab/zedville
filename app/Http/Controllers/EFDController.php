@@ -24,24 +24,31 @@ use App\Models\ReferendumVote;
 use App\Models\PetitionSignature;
 use App\Models\CityProposal;
 use App\Services\FinheroPointService;
+use App\Support\Deadline;
 
 
 class EFDController extends Controller
 {
+    /**
+     * Needs, Wants & Savings Match: the student sorts last month's bank
+     * statement into Income / Needs / Wants / Savings.
+     *
+     * Daniel, 2026-10-22: a student in their first month (or who joined
+     * later in the school year) has no statement for last month yet, so
+     * they get a simulated typical Zedville month instead, with a note
+     * that it's a simulation because they just opened their account.
+     */
     public function index()
     {
         $user = auth()->user();
 
-        /*$transactions = Transaction1::where('user_id', $user->id)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->orderBy('id', 'desc')
-            ->get();*/
-        $start = now()->subMonth()->startOfMonth();
-        $end = now()->subMonth()->endOfMonth();
+        // last month, counted from the 1st (on the 31st subMonth() gave this month)
+        $start = now()->startOfMonth()->subMonth();
+        $end = $start->copy()->endOfMonth();
 
         $transactions = Transaction1::where('user_id', $user->id)
             ->whereBetween('created_at', [$start, $end])
+            ->where('amount', '!=', 0)   // "Autopilot - [Month]" history lines move no money
             ->orderBy('id', 'desc')
             ->get();
         $template = collect();
@@ -53,6 +60,8 @@ class EFDController extends Controller
             return strtolower($t->category) === 'penalty';
         });
 
+        // The month-end penalty is one "Entertainment" line (Daniel,
+        // 2026-10-22); penalties from before that were one line per item.
         if ($penaltyTransactions->isNotEmpty()) {
             $penaltyTotal = $penaltyTransactions->sum(function ($t) {
                 return $t->type === 'debit'
@@ -62,38 +71,126 @@ class EFDController extends Controller
 
             $template->push([
                 'id' => 'penalty',
-                'name' => 'Penalty: All Items',
+                'name' => txn_text($penaltyTransactions->count() === 1 ? $penaltyTransactions->first()->description : 'Entertainment'),
                 'amount' => $penaltyTotal,
-                'category' => 'penalty',
+                'category' => 'wants',
                 'type' => 'expense',
             ]);
         }
 
+        // Orders placed before one-line-per-order have one line per item
+        // ("Purchase: Chicken (Order #4)"): each order is one line, named like
+        // new ones - "Compra en el supermercado", "Compra: fiesta de
+        // cumpleaños" (App\Support\OrderLine, Daniel 2026-11-02).
+        $transactions = \App\Support\OrderLine::fold($transactions);
+
         /* ===============================
            ALL OTHER TRANSACTIONS
         =============================== */
+        // Not part of the budget to sort (bank review, 2026-10-29): money
+        // to or from classmates, money coming back from the student's own
+        // savings, and an admin's corrections. Moving money into savings is
+        // sorted as savings (budgetCategory) - it counted as a "want".
+        // A fine for an activity not done in time (ActivityFineService) is neither: not sorted either.
+        $notBudget = ['penalty', 'fund transfer', 'reversal', 'admin adjustment', 'fine'];
         $transactions
-            ->filter(function ($t) {
-                return strtolower($t->category) !== 'penalty';
+            ->filter(function ($t) use ($notBudget) {
+                $category = strtolower((string) $t->category);
+
+                return !in_array($category, $notBudget, true) && !($category === 'own transfer' && $t->type === 'credit');
             })
             ->each(function ($t) use ($template) {
                 $template->push([
-                    'id' => (string) $t->id,
-                    'name' => $t->description,
+                    'id' => (string) ($t->order_key ?? $t->id),
+                    'name' => txn_text($t->description),
                     'amount' => $t->type === 'debit'
                         ? -(float) $t->amount
                         : (float) $t->amount,
-                    'category' => strtolower($t->category),
+                    'category' => $t->type === 'credit' ? 'income' : self::budgetCategory($t->category, $t->description),
                     'type' => $t->type === 'credit' ? 'income' : 'expense',
                 ]);
             });
 
+        $simulated = $template->isEmpty();
+        if ($simulated) {
+            $template = $this->simulatedStatement($user);
+        }
+
         return view('education.index', [
             'user' => $user,
             'template' => $template->values(),
+            'simulated' => $simulated,
         ]);
     }
 
+    /**
+     * Which budget column a spending line belongs in. Shop purchases carry
+     * the product's own category ("Sports", "Music Instruments"...), so
+     * anything that isn't a need or a saving is a want.
+     */
+    public static function budgetCategory(?string $category, ?string $description = ''): string
+    {
+        $category = strtolower(trim((string) $category));
+        $description = strtolower((string) $description);
+
+        if (in_array($category, ['savings', 'own transfer'], true) || str_contains($category, 'emergency') || str_contains($description, 'savings account')) {
+            return 'savings';
+        }
+        if ($category === 'bill payment') {
+            return 'needs';
+        }
+
+        $needs = ['needs', 'groceries', 'food', 'personal care & household', 'household', 'health', 'transport', 'utilities', 'rent', 'education'];
+        if (in_array($category, $needs, true)) {
+            return 'needs';
+        }
+        foreach (['rent', 'school', 'utility', 'internet', 'electricity', 'water'] as $keyword) {
+            if (str_contains($description, $keyword)) {
+                return 'needs';
+            }
+        }
+
+        return 'wants';
+    }
+
+    /**
+     * A typical Zedville month for a student with no statement yet: their
+     * own salary (or the city's base salary), the fixed bills every citizen
+     * has, a few everyday needs and wants, and the 20% that goes to the
+     * Emergency Fund. Names come from lang/<language>/mba.php.
+     */
+    private function simulatedStatement($user)
+    {
+        $salary = (float) (Transaction1::where('user_id', $user->id)->where('category', 'Income')->where('type', 'credit')
+            ->latest('id')->value('amount') ?: config('zedville.monthly_salary', 3952.40));
+
+        // Mixed order, like a real statement - grouped by column it would
+        // give the answers away.
+        $lines = [
+            ['salary', $salary, 'income'],
+            ['rent', -300.00, 'needs'],
+            ['cinema', -25.00, 'wants'],
+            ['groceries', -210.00, 'needs'],
+            ['emergency_fund', -round($salary * 0.20, 2), 'savings'],
+            ['video_game', -60.00, 'wants'],
+            ['internet', -20.00, 'needs'],
+            ['school_fees', -1000.00, 'needs'],
+            ['restaurant', -45.00, 'wants'],
+            ['electricity', -86.00, 'needs'],
+            ['bus_pass', -48.00, 'needs'],
+            ['basketball', -70.00, 'wants'],
+            ['water', -59.00, 'needs'],
+            ['household', -15.00, 'needs'],
+        ];
+
+        return collect($lines)->map(fn ($line) => [
+            'id' => 'sim-' . $line[0],
+            'name' => __('mba.sample.' . $line[0]),
+            'amount' => $line[1],
+            'category' => $line[2],
+            'type' => $line[2] === 'income' ? 'income' : 'expense',
+        ]);
+    }
 
     public function educational_finance_department()
     {
@@ -115,6 +212,16 @@ class EFDController extends Controller
             ->where('sid', $user->sid)
             ->where('cid', $user->grade)
             ->first();
+        // On the board only while it runs, with its days left (Daniel, 2026-11-03:
+        // "reset all the activities that is showing when the deadline already ended").
+        $running = fn ($row) => $row && Deadline::running($row->start_date, $row->end_date) ? $row : null;
+        $mbaPosition = $running($mbaPosition);
+        $emmfundPosition = $running($emmfundPosition);
+        // «Resuelve tu imprevisto», the student's own, Required, with its 30 days (App\Services\EmergencyService)
+        $emergency = \App\Services\EmergencyService::open($user->id);
+        // the monthly donation (Daniel, 2026-11-08): on the board until the standing order is set up
+        $donationPosition = \App\Services\DonationService::active($user->id) ? null : $running(DB::table('mba_position')
+            ->where('activity_key', \App\Services\DonationService::KEY)->where('sid', $user->sid)->where('cid', $user->grade)->first());
         //Check Event Avilable or not
         $today = Carbon::today();
         $hasHBAActivity = DB::table('calendar_events')
@@ -123,31 +230,36 @@ class EFDController extends Controller
             ->whereDate('end', '>=', $today)   // ✅ not expired
             ->exists();
         $hbaPosition = null;
+        $lbaPosition = null;
         if ($hasHBAActivity) {
+            // and the Low Spending one (Daniel, 2026-10-31)
+            $lbaPosition = $running(DB::table('mba_position')->where('activity_key', 'lba_position')
+                ->where('sid', $user->sid)->where('cid', $user->grade)->first());
             //Check Event Avilable or not
-            $hbaPosition = DB::table('mba_position')
+            $hbaPosition = $running(DB::table('mba_position')
                 //->where('user_id', Auth::id())
                 //->where('id', 3)   // ✅ High Budget Activity
                 ->where('activity_key', 'hba_position')
                 ->where('sid', $user->sid)
                 ->where('cid', $user->grade)
-                ->first();
+                ->first());
         }
-        // lbaPosition (Low Budget Activity) removed (Daniel, 2026-10-21:
-        // "remove low spending activities from the system") - this was
-        // computed but never actually read by the blackboard view below,
-        // so nothing downstream needs it.
         $bankAccount = BankAccount::where('student_id', $user->id)->first();
         $isBankAccountOpen = $bankAccount !== null;
         //Emmargency Fund
         $salaryamount = config('zedville.monthly_salary', 3952.40);
         $emmsavingsPct = 20;
         $emmsavingsAmount = round($salaryamount * ($emmsavingsPct / 100), 2);
-        $emergencyFundInterest = $this->emergencyFundInterest($user->id);
-        $emmengercyfundtransactions = \App\Models\Transaction1::where('user_id', $user->id)
-            ->where('description', 'Auto Transfer to Savings Account')
-            //->orderBy('transaction_date', 'desc') // latest first
+        // The fund's own interest and movements (bank review, 2026-10-29: this read
+        // the current account's balance from the opening line, and listed only
+        // the opening deposit - not the monthly 20%, moves in and out, interest).
+        $emergencyFundInterest = app(\App\Http\Controllers\SavingsAccountController::class)->emergencyFundInterest($user->id);
+        $emmengercyfundtransactions = \App\Models\SavingsTransaction::where('user_id', $user->id)
+            ->where('account', 'emergency')
+            ->latest('id')
+            ->take(10)
             ->get();
+        $efGoals = \App\Support\EmergencyFundGoal::for($user->id, (float) optional($bankAccount)->emergency_fund_account_amount);
         //Select fin hero Task
         // Daniel, 2026-10-21: "classes have the same tasks, should be for
         // grade... one grade can have many classes" - a task assigned to
@@ -165,7 +277,9 @@ class EFDController extends Controller
             })
             ->where('is_active', 1)
             ->orderBy('id', 'ASC')
-            ->get();
+            ->get()
+            ->filter(fn ($task) => Deadline::running($task->start_date, $task->end_date))
+            ->values();
         // Daniel, 2026-10-21: "5. do it" - FinHero Library activities were
         // never read here at all before (only type='task' was), so an
         // admin-created Library item had nowhere to show up as a Required
@@ -181,8 +295,9 @@ class EFDController extends Controller
             })
             ->where('is_active', 1)
             ->orderBy('id', 'ASC')
-            ->get();
-        $libraryModalModules = $this->libraryModalModules($libraryActivities->pluck('activity_key')->all());
+            ->get()
+            ->filter(fn ($library) => Deadline::running($library->start_date, $library->end_date))
+            ->values();
         //Complease activity
         $completedActivities = DB::table('activity_completions')
             ->where('student_id', $user->id)
@@ -190,7 +305,15 @@ class EFDController extends Controller
             ->whereMonth('completed_at', now()->month)
             ->pluck('activity_type')
             ->toArray();
-        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'bankAccount', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'taskActivities', 'libraryActivities', 'libraryModalModules', 'completedActivities'));
+        $libraryModalModules = $this->libraryModalModules($libraryActivities->pluck('activity_key')->all(), $completedActivities);
+        // Easy activities (Engagement) running for the class, not done yet.
+        $easyActivities = app(\App\Services\EasyActivityService::class)->forStudent($user)->reject(fn ($activity) => $activity->done);
+        // The Library's level badge: the student's real Level (Rookie,
+        // Intermediate...), same lookup as the Academy heading.
+        $libraryLevel = optional(optional(optional($user->gradeRelation)->grade)->level)->name;
+        // what a Required activity not done in time costs (App\Services\ActivityFineService)
+        $fineAmount = \App\Models\ActivityFineSetting::current()->amount;
+        return view('education.educational-finance-departmentex', compact('posters', 'mbaPosition', 'emmfundPosition', 'emergency', 'donationPosition','bankAccount', 'emmsavingsAmount', 'emergencyFundInterest', 'emmengercyfundtransactions', 'isBankAccountOpen', 'hbaPosition', 'lbaPosition', 'taskActivities', 'libraryActivities', 'libraryModalModules', 'completedActivities', 'libraryLevel', 'easyActivities', 'efGoals', 'fineAmount'));
     }
 
     /**
@@ -198,14 +321,15 @@ class EFDController extends Controller
      * public/asset/front/js/modules.js had, plus question/option ids so
      * "Check Answers" can send the answers to the server, and whether the
      * module is assigned to this student (only assigned modules earn
-     * points). The pop-up writes these strings into innerHTML, so every
-     * piece of text is HTML-escaped here.
+     * points), and whether it was already completed this month. The pop-up
+     * writes these strings into innerHTML, so every piece of text is
+     * HTML-escaped here.
      */
-    private function libraryModalModules(array $assignedKeys): array
+    private function libraryModalModules(array $assignedKeys, array $completedActivities = []): array
     {
         $subtopic = fn (array $section) => [
-            'title' => e($section['title'] ?? ''),
-            'text' => array_map(fn ($line) => e($line), $section['lines'] ?? []),
+            'title' => e(ct('library', $section['title'] ?? '')),
+            'text' => array_map(fn ($line) => e(ct('library', $line)), $section['lines'] ?? []),
         ];
 
         return \App\Models\FinheroLibraryModule::with('questions.options')
@@ -215,16 +339,17 @@ class EFDController extends Controller
                 'id' => $module->id,
                 'activity_key' => $module->module_key,
                 'assigned' => in_array($module->module_key, $assignedKeys, true),
-                'title' => e($module->title),
-                'icon' => e($module->icon),
+                'done' => in_array('library_' . $module->module_key, $completedActivities, true),
+                'title' => e(ct('library', $module->title)),
+                'icon' => \App\Support\ModuleIcon::html($module->icon), // an emoji, escaped, or a drawn icon
                 'color' => 'from-emerald-400 to-teal-500',
                 'content' => [
                     'subtopic1' => $subtopic($module->lesson[0] ?? []),
                     'subtopic2' => $subtopic($module->lesson[1] ?? []),
                     'questions' => $module->questions->map(fn ($question) => [
                         'qid' => $question->id,
-                        'q' => e($question->question_text),
-                        'options' => $question->options->map(fn ($option) => e($option->option_text))->values()->all(),
+                        'q' => e(ct('library', $question->question_text)),
+                        'options' => $question->options->map(fn ($option) => e(ct('library', $option->option_text)))->values()->all(),
                         'option_ids' => $question->options->pluck('id')->values()->all(),
                         'correct' => $question->options->search(fn ($option) => $option->is_correct),
                     ])->values()->all(),
@@ -232,64 +357,6 @@ class EFDController extends Controller
             ])
             ->values()
             ->all();
-    }
-    public function emergencyFundInterest($userId)
-    {
-        // 1️⃣ Get previous month info
-        $previousMonth = Carbon::now()->subMonth();
-        $monthName = $previousMonth->format('F');
-        $year = $previousMonth->year;
-
-        // 2️⃣ Interest config
-        $annualInterestRate = 0.02; // 2% per annum
-        $daysInMonth = $previousMonth->daysInMonth;
-        $daysInYear = $previousMonth->isLeapYear() ? 366 : 365;
-        $dailyRate = $annualInterestRate / $daysInYear;
-
-        // 3️⃣ Get ending balance (latest txn before end of month)
-        $endingBalance = Transaction1::where('user_id', $userId)
-            ->where('description', 'Auto Transfer to Savings Account')
-            ->where('transaction_date', '<=', $previousMonth->endOfMonth())
-            ->orderBy('transaction_date', 'desc')
-            ->value('balance');
-
-
-        if (is_null($endingBalance)) {
-            $endingBalance = 0;
-        }
-
-        // 4️⃣ Calculate monthly estimated interest
-        $grossMonthlyInterest = $endingBalance * $dailyRate * $daysInMonth;
-
-        // 5️⃣ Annual projection (approx)
-        $annualProjection = $endingBalance * $annualInterestRate;
-        $nextPaymentDate = Carbon::now()->addMonth()->setDay(1)->format('F j, Y');
-        // 6️⃣ Return for dashboard or API
-        return [
-            'month' => $monthName,
-            'year' => $year,
-            'ending_balance' => round($endingBalance, 2),
-            'estimated_interest' => round($grossMonthlyInterest, 2),
-            'annual_projection' => round($annualProjection, 2),
-            'annual_rate' => $annualInterestRate * 100,
-            'next_payment_date' => $nextPaymentDate,
-        ];
-    }
-    public function multipleChoiceEmail()
-    {
-        return view('education.multiple-choice-email');
-    }
-    public function quizMultipleChoiceQuestion()
-    {
-        return view('education.quiz-multiple-question');
-    }
-    public function budgetQuiz()
-    {
-        return view('education.budget-quiz');
-    }
-    public function budgetQuiz2()
-    {
-        return view('education.budget-quiz-2');
     }
     /**
      * Daniel, 2026-10-21: "the Match Needs and Wants, is the one called
@@ -303,7 +370,10 @@ class EFDController extends Controller
      * session, sent as `mistakes`. Tiered (stated explicitly since the
      * exact thresholds were my call, not spelled out): 0 mistakes = 3
      * points, 1-2 mistakes ("two attempts" of leeway) = 2 points, 3+ = 1
-     * point - never zero for actually finishing the activity.
+     * point - never zero for actually finishing the activity. The top
+     * score is the "Needs, Wants & Savings Match" row in Admin > FinHero
+     * Point Defaults (3 unless changed there); each tier is one less, never
+     * below 1.
      *
      * Only the first completion each month earns FinHero points (explicit
      * month/year check, not FinheroPointService's own per-day dedup, which
@@ -338,13 +408,14 @@ class EFDController extends Controller
 
         if (!$alreadyAwardedThisMonth) {
             $mistakes = (int) ($validated['mistakes'] ?? 0);
-            $pointsAwarded = $mistakes === 0 ? 3 : ($mistakes <= 2 ? 2 : 1);
+            $top = (int) (\App\Models\FinheroActivityDefault::where('activity_key', 'needs_wants_savings_match')->value('max_points') ?: 3);
+            $pointsAwarded = max(1, $mistakes === 0 ? $top : ($mistakes <= 2 ? $top - 1 : $top - 2));
             app(FinheroPointService::class)->addPoints($userId, 'activity', 'needs_wants_savings_match', $pointsAwarded);
         }
 
         return response()->json([
             'status' => true,
-            'message' => 'Needs, Wants & Savings Match saved successfully!',
+            'message' => __('mba.saved'),
             'data' => $mba,
             'pointsAwarded' => $pointsAwarded,
         ]);
@@ -358,8 +429,8 @@ class EFDController extends Controller
         //$endOfMonth = now()->endOfMonth();
 
         // Previous month range
-        $startOfMonth = now()->subMonth()->startOfMonth();
-        $endOfMonth = now()->subMonth()->endOfMonth();
+        $startOfMonth = now()->startOfMonth()->subMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
         // Fetch latest record for this month
         $mba = UserMba::where('user_id', $userId)
@@ -398,7 +469,7 @@ class EFDController extends Controller
             ->where('sid', $user->sid)
             ->where('grade', $user->grade)
             ->orderBy('citizenId')
-            ->get(['id', 'citizenId', 'nickname']);
+            ->get(['id', 'citizenId', 'nickname', 'name']);
 
         // URL → DB mapping
         $storeMap = [
@@ -428,6 +499,8 @@ class EFDController extends Controller
         $products = Product::where('type', $dbType)
             ->orderBy('product_name')
             ->get();
+        // the Intermediate's new prices, for the page only (App\Services\PriceRise)
+        \App\Services\PriceRise::reprice($user, $products, 'products');
 
         $latestTxn = Transaction1::where('user_id', $user->id)
             ->latest('id')
@@ -452,19 +525,23 @@ class EFDController extends Controller
             )
         );
     }
+    /**
+     * The student calendar, option A (Daniel, 2026-11-04: "Make option A for the
+     * calendar"): month, week and day without hours or scrolling, from the
+     * student's own activities (App\Support\StudentCalendar). "Today" is the
+     * school's day, in Berlin time, like the salary and the deadlines.
+     */
     public function calendar()
     {
-        $user = DB::table('users')
-            ->join('classes', 'users.grade', '=', 'classes.id')
-            ->select(
-                'users.id as user_id',
-                'users.name as user_name',
-                'classes.id as class_id',
-                'classes.name as class_name'
-            )
-            ->where('users.id', auth()->id())
-            ->first();
-        return view('calendar.index', compact('user'));
+        return view('calendar.index', [
+            'calendar' => [
+                'locale' => substr(app()->getLocale(), 0, 2),
+                'today' => Carbon::now('Europe/Berlin')->toDateString(),
+                'activities' => \App\Support\StudentCalendar::activities(auth()->user()),
+            ],
+            'fineAmount' => \App\Models\ActivityFineSetting::current()->amount,
+            'hybrid' => \App\Support\Hybrid::on(),
+        ]);
     }
 
     public function getEventsByUserClass()
@@ -490,7 +567,12 @@ class EFDController extends Controller
         $events = DB::table('calendar_events')
             ->where('classId', $classId)
             ->orderBy('created_at', 'asc')
-            ->get();
+            ->get()
+            ->map(function ($event) {
+                $event->description = \App\Support\CalendarTitle::descriptionForStudent($event->title, $event->description);
+                $event->title = \App\Support\CalendarTitle::forStudent($event->title);
+                return $event;
+            });
 
         return response()->json($events);
     }
@@ -508,36 +590,17 @@ class EFDController extends Controller
     {
         $userId = Auth::id();
 
-        if ($slug == 'animal-shelter') {
-            $name = 'Animal Shelter';
-            $accNO = '1234-5678-9012';
-        } elseif ($slug == 'senior-care-home') {
-            $name = 'Senior Care Home';
-            $accNO = '2345-6789-0123';
-        } elseif ($slug == 'childrens-orphanage') {
-            $name = "Children's Orphanage";
-            $accNO = '3456-7890-1234';
-        } elseif ($slug == 'food-bank') {
-            $name = 'Food Bank';
-            $accNO = '4567-8901-2345';
-        } elseif ($slug == 'local-library') {
-            $name = 'Local Library';
-            $accNO = '5678-9012-3456';
-        } elseif ($slug == 'community-center') {
-            $name = 'Community Center';
-            $accNO = '6789-0123-4567';
-        } elseif ($slug == 'ecofun') {
-            $name = 'EcoFun';
-            $accNO = '7890-1234-5678';
-        } else {
-            $name = 'Organization';
-        }
+        // Was a hard-coded list of the first 7 NPOs - any NPO an admin added
+        // later crashed this page (undefined $accNO). Read it from the table.
+        $npo = \App\Models\Npo::where('slug', $slug)->where('status', 1)->firstOrFail();
+        $name = $npo->name;
+        $accNO = trim((string) $npo->account_number);
 
         $bankAccount = DB::table('bank_accounts')
             ->where('student_id', $userId)
             ->first();
 
-        return view('npos.donate', compact('slug', 'name', 'accNO', 'bankAccount'));
+        return view('npos.donate', compact('slug', 'name', 'accNO', 'bankAccount', 'npo'));
     }
     public function storeDonation(Request $request)
     {
@@ -548,6 +611,14 @@ class EFDController extends Controller
         if (!$bank || (string) $bank->card_pin !== (string) $request->pin) {
             return response()->json([
                 'status' => false
+            ]);
+        }
+        // A zero or negative amount would be a debit of nothing - or, if
+        // negative, would add money to the account.
+        if (!is_numeric($request->amount) || (float) $request->amount <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => __('npos.server.invalid_amount'),
             ]);
         }
         try {
@@ -594,7 +665,7 @@ class EFDController extends Controller
             if ($e->getMessage() === 'INSUFFICIENT_BALANCE') {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Insufficient balance.'
+                    'message' => __('npos.server.insufficient_balance')
                 ]);
             }
             throw $e;
@@ -618,17 +689,16 @@ class EFDController extends Controller
         // assigned. Now resolves the real assignment the same way this
         // file's own educational_finance_department() already does above
         // (mba_position by activity_key + sid + cid).
-        $position = DB::table('mba_position')
-            ->where('activity_key', 'hba_position')
-            ->where('sid', $user->sid)
-            ->where('cid', $user->grade)
-            ->first();
+        // High and Low Spending, one of each (Daniel, 2026-10-31)
+        $assigned = collect(\App\Models\Activity::SLOTS)->map(function ($slot) use ($user) {
+            $position = DB::table('mba_position')->where('activity_key', $slot[0])
+                ->where('sid', $user->sid)->where('cid', $user->grade)->first();
 
-        $activity = $position && $position->activity_id
-            ? \App\Models\Activity::find($position->activity_id)
-            : null;
+            return $position && $position->activity_id ? \App\Models\Activity::find($position->activity_id) : null;
+        })->filter()->values();
+        $activity = $assigned->first();
 
-        return view('spendingActivities.high-spending-activities', compact('activity'));
+        return view('spendingActivities.high-spending-activities', compact('activity', 'assigned'));
     }
     // low_spending_activities() removed (Daniel, 2026-10-21: "remove low
     // spending activities from the system") - see bugs.md.
@@ -745,7 +815,7 @@ class EFDController extends Controller
 
         $student = Auth::user();
         $gradeId = optional($student->gradeRelation)->grade_id;
-        abort_unless($gradeId, 422, 'You must be assigned to a Class before proposing a city name or quote.');
+        abort_unless($gradeId, 422, __('cityhall.server.no_class'));
 
         $alreadyPending = CityProposal::where('proposed_by', $student->id)
             ->where('type', $data['type'])
@@ -755,7 +825,7 @@ class EFDController extends Controller
         if ($alreadyPending) {
             return response()->json([
                 'success' => false,
-                'message' => 'You already have a pending proposal of this type.',
+                'message' => __('cityhall.server.proposal_pending'),
             ]);
         }
 
@@ -770,7 +840,7 @@ class EFDController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Proposal submitted - your Tutor will review it.',
+            'message' => __('cityhall.server.proposal_submitted'),
         ]);
     }
     public function submitPetition(Request $request)
@@ -799,7 +869,7 @@ class EFDController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Petition submitted successfully.'
+            'message' => __('cityhall.server.petition_submitted')
         ]);
     }
 
@@ -815,7 +885,7 @@ class EFDController extends Controller
         if ($user->role != 4 && $user->role != '4') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only students are eligible to vote in referendums.'
+                'message' => __('cityhall.server.only_students_vote')
             ], 403);
         }
 
@@ -829,7 +899,7 @@ class EFDController extends Controller
         if (!$referendum) {
             return response()->json([
                 'success' => false,
-                'message' => 'This referendum is not available for voting.'
+                'message' => __('cityhall.server.referendum_unavailable')
             ], 404);
         }
 
@@ -840,7 +910,7 @@ class EFDController extends Controller
         if ($exists) {
             return response()->json([
                 'success' => false,
-                'message' => 'You already voted.'
+                'message' => __('cityhall.server.already_voted')
             ]);
         }
 
@@ -864,7 +934,7 @@ class EFDController extends Controller
         if ($student->role != 4 && $student->role != '4') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only students can sign petitions.'
+                'message' => __('cityhall.server.only_students_sign')
             ], 403);
         }
 
@@ -877,7 +947,7 @@ class EFDController extends Controller
         if (!$petition) {
             return response()->json([
                 'success' => false,
-                'message' => 'This petition is not available to sign.'
+                'message' => __('cityhall.server.petition_unavailable')
             ], 404);
         }
 
@@ -887,7 +957,7 @@ class EFDController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'You cannot sign your own petition.'
+                'message' => __('cityhall.server.own_petition')
             ]);
 
         }
@@ -900,7 +970,7 @@ class EFDController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Already signed.'
+                'message' => __('cityhall.server.already_signed')
             ]);
 
         }
@@ -912,7 +982,7 @@ class EFDController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Petition signed successfully.'
+            'message' => __('cityhall.server.petition_signed')
         ]);
     }
 

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'PISA',
+    'leaderboard' => 'Rangliste',
+    'what_is_pisa' => 'Was ist PISA?',
+    'explainer_p1' => 'PISA (das Programme for International Student Assessment) ist ein echter internationaler Test der OECD, den 15-Jährige in Dutzenden von Ländern schreiben - meistens in der :grade. Er prüft nicht nur, was du auswendig gelernt hast: Er gibt dir realistische Situationen aus dem Alltag und schaut, ob du dein Wissen wirklich anwenden kannst, um sie zu lösen.',
+    'explainer_grade' => '10. Klasse',
+    'explainer_p2' => 'Ein Teil von PISA ist die :fla - Geld und Zahlungen, Finanzen planen und verwalten, Risiko und Ertrag und die Finanzwelt verstehen. Die Aktivitäten hier sind genau dafür ein Training: die gleiche Art von Situationen, der gleiche Stil von Fragen, sortiert nach den gleichen Kompetenzstufen, die PISA selbst verwendet.',
+    'financial_literacy_assessment' => 'Bewertung der Finanzkompetenz',
+    'proficiency_levels' => 'Kompetenzstufen',
+    'proficiency_levels_hint' => 'Wähle eine Stufe zum Üben. Das sind keine Noten für dich - so beschreibt PISA, was Schüler auf jeder Stufe können, vom Erkennen eines Kassenbons bis zum Verstehen eines komplizierten Finanzprodukts.',
+    'no_levels_yet' => 'Noch keine PISA-Stufen eingerichtet - schau bald wieder vorbei.',
+    'activity_count' => '{0} Keine Aktivitäten|{1} :count Aktivität|[2,*] :count Aktivitäten',
+    'no_activities_for_your_grade' => 'Auf dieser Stufe gibt es für deine Klassenstufe noch keine Aktivitäten - schau bald wieder vorbei.',
+    'timed_play' => 'Auf Zeit spielen',
+    'leaderboard_title' => 'Rangliste',
+    'leaderboard_explainer' => 'Dein bestes Ergebnis bei jeder PISA-Aktivität in diesem Monat, zusammengezählt und verglichen mit deiner Stufe an deiner Schule. Spiel allein, wann du willst - dein Ergebnis erscheint hier automatisch. Die besten 3 am Monatsende bekommen einen FinHero-Bonus.',
+    'no_one_played_yet' => 'In diesem Monat hat noch niemand eine PISA-Aktivität gespielt - sei der Erste.',
+    'rank' => 'Platz',
+    'student' => 'Schüler',
+    'score' => 'Punkte',
+    'you' => 'du',
+    'ranked_this_month' => 'Du bist diesen Monat auf Platz :rank.',
+    'join_leaderboard_hint' => 'Spiel diesen Monat eine PISA-Aktivität, um in die Rangliste zu kommen.',
+];

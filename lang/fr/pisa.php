@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => "PISA",
+    'leaderboard' => "Classement",
+    'what_is_pisa' => "Qu'est-ce que PISA ?",
+    'explainer_p1' => "PISA (le Programme international pour le suivi des acquis des élèves) est un vrai test international organisé par l'OCDE et passé par des jeunes de 15 ans dans des dizaines de pays - c'est généralement en :grade. Il ne vérifie pas seulement ce que tu as appris par cœur : il te propose des situations réalistes de la vie quotidienne et regarde si tu sais vraiment utiliser ce que tu connais pour y faire face.",
+    'explainer_grade' => "seconde (10e année)",
+    'explainer_p2' => "Une partie de PISA est l':fla - l'argent et les transactions, planifier et gérer ses finances, le risque et le rendement, et comprendre le paysage financier dans son ensemble. Les activités ici servent à t'entraîner exactement pour cela : le même genre de situations, le même style de questions, classées selon les mêmes niveaux de compétence que PISA.",
+    'financial_literacy_assessment' => "évaluation de la culture financière",
+    'proficiency_levels' => "Niveaux de compétence",
+    'proficiency_levels_hint' => "Choisis un niveau pour t'entraîner. Ce ne sont pas des notes sur toi - c'est la façon dont PISA décrit ce qu'un élève sait faire à chaque étape, de reconnaître un ticket de caisse à analyser un produit financier complexe.",
+    'no_levels_yet' => "Aucun niveau PISA n'est encore configuré - reviens bientôt.",
+    'activity_count' => "{0} Aucune activité|{1} :count activité|[2,*] :count activités",
+    'no_activities_for_your_grade' => "Pas encore d'activités à ce niveau pour ta classe - reviens bientôt.",
+    'timed_play' => "Jouer en temps limité",
+    'leaderboard_title' => "Classement",
+    'leaderboard_explainer' => "Ton meilleur score à chaque activité PISA ce mois-ci, additionné et comparé aux élèves de ton niveau dans ton école. Joue seul quand tu veux - ton score s'affiche ici automatiquement. Les 3 premiers à la fin du mois gagnent un bonus FinHero.",
+    'no_one_played_yet' => "Personne n'a encore joué à une activité PISA ce mois-ci - sois le premier.",
+    'rank' => "Rang",
+    'student' => "Élève",
+    'score' => "Score",
+    'you' => "toi",
+    'ranked_this_month' => "Tu es classé n° :rank ce mois-ci.",
+    'join_leaderboard_hint' => "Joue à une activité PISA ce mois-ci pour entrer dans le classement.",
+];

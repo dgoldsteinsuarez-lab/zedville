@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="adminHeading">
-        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Emergency Fund Position</h1>
+        <h1 class="d-flex align-items-center gap-2 theme-text-dark fw-500 fs-16 mab-20">Emergency Fund Position @include('admin.partials.level-badge')</h1>
     </div>
     {{-- Daniel, 2026-10-21: "Emergency Fund Account should not be so
          relevant in Admin, but in Intermediate I will make activities
@@ -31,10 +31,11 @@
 
                                 <select class="form-select" name="cid" id="cid">
                                     <option value="">Select Class</option>
+                                    @include('admin.partials.assignment-scope-options')
 
                                     @foreach($classes as $class)
                                         <option value="{{ $class->id }}">
-                                            {{ $class->name }}
+                                            {{ $class->label }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -102,7 +103,7 @@
 
                                     <td>{{ $item->school_name ?? 'Default' }}</td>
 
-                                    <td>{{ $item->class_name }}</td>
+                                    <td>{{ \App\Support\ClassLabel::make($item->class_grade_name, $item->class_name) }}</td>
 
                                     <td>
                                         {{ $item->required ? 'Required' : 'Optional' }}

@@ -7,8 +7,6 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 use App\Models\User;
 use App\Helpers\MailboxScheduler;
-use App\Models\Transfer;
-use App\Jobs\ProcessScheduledTransfer;
 
 class Kernel extends ConsoleKernel
 {
@@ -28,29 +26,21 @@ class Kernel extends ConsoleKernel
             }
         })->everyMinute();
 
-        // ----- Scheduled Transfers -----
-        $schedule->call(function () {
-            // Process "Later" transfers (scheduled_at <= now)
-            $laterTransfers = Transfer::where('type', 'later')
-                ->where('scheduled_at', '<=', now())
-                ->get();
+        // ----- Scheduled transfers and bill payments -----
+        // The ones that are due, each date once (bank review, 2026-10-29: the
+        // old job here ran every past "later" transfer again every minute).
+        $schedule->command('transfers:run-due')
+            ->everyMinute()
+            ->name('transfers-run-due')
+            ->withoutOverlapping();
 
-            foreach ($laterTransfers as $transfer) {
-                ProcessScheduledTransfer::dispatch($transfer->id);
-            }
-
-            // Process "Recurring" transfers
-            $recurringTransfers = Transfer::where('type', 'recurring')
-                ->where(function ($query) {
-                    $query->where('start_date', '<=', now())
-                        ->where('end_date', '>=', now());
-                })
-                ->get();
-
-            foreach ($recurringTransfers as $transfer) {
-                ProcessScheduledTransfer::dispatch($transfer->id);
-            }
-        })->everyMinute(); // check every minute
+        // Interest on the Emergency Fund and Money Market accounts, for the month
+        // that just ended - the bank promises it "on the 1st of each month".
+        $schedule->command('savings:credit-interest --write')
+            ->monthlyOn(1, '01:00')
+            ->timezone('Europe/Berlin')
+            ->name('savings-credit-interest')
+            ->withoutOverlapping();
         // ✅ ADD THIS (Badge Calculation)
         $schedule->command('badges:calculate-monthly')
             ->lastDayOfMonth('23:59')
@@ -79,6 +69,13 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
+        // The plan of the month's payments on their Saturdays (2026-10-31), and
+        // those waiting for money (2026-11-02).
+        $schedule->command('plans:charge')
+            ->dailyAt('07:00')
+            ->name('plans-charge')
+            ->withoutOverlapping();
+
         // Autopilot month-end: records "Autopilot - [Month]" in the history of
         // accounts on Autopilot (no money moves).
         $schedule->command('autopilot:apply --write')
@@ -95,6 +92,21 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping();
         }
 
+        // The fine for each Required activity not done in time, the day after its
+        // deadline (Daniel, 2026-11-03). Its amount - 0 turns it off - is set in
+        // Admin > Bank > Activity Fines.
+        $schedule->command('fines:apply --write')
+            ->dailyAt('00:20')
+            ->name('activity-fines')
+            ->withoutOverlapping();
+
+        // Zed Directo's 6-month deposits that end today: their money and interest
+        // back to the savings account (App\Services\ZedDirecto)
+        $schedule->call(fn () => \App\Services\ZedDirecto::endDue())
+            ->dailyAt('00:25')
+            ->name('zed-directo-deposits')
+            ->withoutOverlapping();
+
         // ----- Monthly Salary & Bills Backfill -----
         // Salary is credited on/after the 6th, fixed bills (rent/school/electricity/
         // water/internet) on/after the 7th of every month. Previously this only ran
@@ -110,11 +122,8 @@ class Kernel extends ConsoleKernel
             // gates line up with the actual German calendar day.
             $now = \Carbon\Carbon::now('Europe/Berlin');
 
-            $isLastDayOfMonth = $now->isSameDay($now->copy()->endOfMonth());
-
             \App\Models\User::where('role', 4)
-                ->chunkById(100, function ($students) use ($now, $isLastDayOfMonth) {
-                    $statementGenerator = app(\App\Services\StatementGenerator::class);
+                ->chunkById(100, function ($students) use ($now) {
                     $bankController = app(\App\Http\Controllers\BankController::class);
 
                     foreach ($students as $student) {
@@ -132,6 +141,16 @@ class Kernel extends ConsoleKernel
                         }
 
                         try {
+                            // 0. The City Hall's letter about the Intermediate's new prices, and in its
+                            // third month the bank's and Zed Directo's letters, from the 1st
+                            \App\Services\PriceRise::announce($student);
+                            \App\Services\ZedDirecto::announce($student);
+                            // loan instalments (late ones into overdraft) and, from the 1st, a month that ended below zero
+                            \App\Services\LoanService::chargeDue($student);
+                            // the credit card's statement (from the 7th; a late one into overdraft)
+                            \App\Services\CreditCardService::settle($student);
+                            \App\Services\Overdraft::chargeMonthEnd($student);
+
                             // 1. Credit Salary on/after 6th (+ Emergency Fund 20% auto-transfer)
                             if ($now->day >= 6) {
                                 $bankController->creditMonthlySalary($student->id);
@@ -141,19 +160,14 @@ class Kernel extends ConsoleKernel
                             if ($now->day >= 7) {
                                 $bankController->ensureMonthlyBills($student);
                             }
-
-                            // 3. Month-end penalty on last day of month
-                            if ($isLastDayOfMonth) {
-                                $penaltyExists = \App\Models\Transaction1::where('user_id', $student->id)
-                                    ->where('category', 'Penalty')
-                                    ->whereYear('transaction_date', $now->year)
-                                    ->whereMonth('transaction_date', $now->month)
-                                    ->exists();
-
-                                if (!$penaltyExists) {
-                                    $bankController->banks_penalty($statementGenerator, $student);
-                                }
-                            }
+                            // 3. An unexpected expense not paid in its 30 days, taken (into overdraft if
+                            // need be); and on the month's last day, its emergency for whoever didn't come in
+                            \App\Services\EmergencyService::chargeDue($student);
+                            \App\Services\EmergencyService::arrive($student, true);
+                            // (The month-end penalty is not here: it ran for everyone at
+                            // 00:15 on the last day, before that day's spending and even
+                            // with the penalty switched off. penalty:apply (when
+                            // ZEDVILLE_AUTO_PENALTY is on) and the last-day login do it.)
                         } catch (\Throwable $e) {
                             \Illuminate\Support\Facades\Log::error('Monthly finance backfill failed for user', [
                                 'user_id' => $student->id,

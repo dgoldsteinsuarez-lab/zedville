@@ -3,19 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\BankAccount;
-use App\Models\Transaction1;
+use App\Models\SavingsTransaction;
 use App\Services\LedgerService;
 use App\Services\ParticipationService;
+use App\Services\SavingsLedger;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Emergency Fund and Money Market sub-accounts: opening them (debits the
- * primary balance) and the interest projection shown on the account pages.
- * Extracted out of BankController (planning.md Phase 3 #4) - emergencyFundInterest()/
- * moneymarketintrest() are pure calculation helpers, not HTTP endpoints,
- * called from BankController::index()/my_account() via
- * app(SavingsAccountController::class)->....
+ * Emergency Fund and Money Market sub-accounts: opening them and the interest
+ * shown on the account pages. Extracted out of BankController (planning.md
+ * Phase 3 #4) - emergencyFundInterest()/moneymarketintrest() are calculation
+ * helpers, not HTTP endpoints.
+ *
+ * Bank review, 2026-10-29: opening an account a second time (a double click, a
+ * stale tab) set its balance back - the Emergency Fund to its first deposit
+ * while taking that deposit again from the current account, the Money Market
+ * to 0. An open account now stays as it is. Interest is worked out on the
+ * account's own balance (it used the current account's) and really paid each
+ * month (savings:credit-interest).
  */
 class SavingsAccountController extends Controller
 {
@@ -26,164 +33,131 @@ class SavingsAccountController extends Controller
         $salaryamount = config('zedville.monthly_salary', 3952.40);
         $savingsPct = config('zedville.emargency_fund_persentage', 20);
         $savingsAmount = round($salaryamount * ($savingsPct / 100), 2);
-        $lastBalance = Transaction1::where('user_id', $user->id)
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;
 
-        if ($lastBalance < $savingsAmount) {
-            return redirect()->back()->with('error', "<strong>Insufficient funds</strong><br>
-                The payment will automatically be deducted next month on the same day, after your monthly statement is sent (1st–5th).");
-        }
+        $result = DB::transaction(function () use ($user, $savingsAmount) {
+            $bankAccount = BankAccount::where('student_id', $user->id)->lockForUpdate()->first();
+            if (!$bankAccount) {
+                return 'missing';
+            }
+            if (SavingsLedger::isOpen($bankAccount, 'emergency')) {
+                return 'open';
+            }
+            if (LedgerService::lockedBalance($user->id) < $savingsAmount) {
+                return 'poor';
+            }
 
-        // Update the bank account for this user
-        $updated = BankAccount::where('student_id', $user->id)
-            ->update([
-                'emergency_fund_account_amount' => $savingsAmount,
-                'is_open_emergency_account' => '1',
-            ]);
-        $bankAccount = BankAccount::where('student_id', $user->id)->first();
-        LedgerService::post(
-            $user->id,
-            'debit',
-            'Savings',
-            (float) $savingsAmount,
-            'Auto Transfer to Savings Account',
-            [
+            LedgerService::post($user->id, 'debit', 'Savings', (float) $savingsAmount, 'Auto Transfer to Savings Account', [
                 'sid' => $user->sid,
-                'bank_account_id' => $bankAccount->id ?? null,
+                'bank_account_id' => $bankAccount->id,
                 'transaction_date' => Carbon::now(),
-            ]
-        );
+            ]);
+            $bankAccount->is_open_emergency_account = 1;
+            SavingsLedger::post($bankAccount, 'emergency', 'credit', 'Opening deposit', (float) $savingsAmount, 'Opening deposit');
+
+            return $bankAccount;
+        });
+
+        if ($result === 'open') {
+            return redirect()->back()->with('success', e(__('flash.ef_already_open')));
+        }
+        if ($result === 'poor') {
+            return redirect()->back()->with('error', '<strong>' . e(__('flash.ef_insufficient_title')) . '</strong><br>' . e(__('flash.ef_insufficient_text')));
+        }
+        if (!$result instanceof BankAccount) {
+            return redirect()->back()->with('error', __('flash.ef_failed'));
+        }
 
         app(ParticipationService::class)->award($user->id, 'emergency_fund_open');
         app(\App\Services\ActivityCompletionService::class)->complete($user->id, 'emergency_fund', 'Emergency Fund');
 
-        if ($updated) {
-            return redirect()->back()->with('success', '
+        return redirect()->back()->with('success', '
         <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
-        <p class="font-semibold">Emergency fund updated successfully.</p>
+        <p class="font-semibold">' . e(__('flash.ef_updated')) . '</p>
 
-        <p class="mt-2"><strong>Thank you for opening your Emergency Fund Account with Universal Bank.</strong></p>
-        <p>Your account is now active with:</p>
+        <p class="mt-2"><strong>' . e(__('flash.ef_thanks')) . '</strong></p>
+        <p>' . e(__('flash.ef_active_with')) . '</p>
 
         <ul class="list-disc ml-6 mt-2">
-            <li><strong>Account number:</strong> ' . $bankAccount->emergency_fund_account_number . '</li>
-            <li><strong>Initial deposit:</strong> $' . $savingsAmount . '</li>
-            <li><strong>Auto-debit:</strong> 20% of monthly salary</li>
+            <li><strong>' . e(__('flash.ef_account_number')) . '</strong> ' . e($result->emergency_fund_account_number) . '</li>
+            <li><strong>' . e(__('flash.ef_initial_deposit')) . '</strong> ' . e(zeds($savingsAmount)) . '</li>
+            <li><strong>' . e(__('flash.ef_auto_debit')) . '</strong> ' . e(__('flash.ef_auto_debit_value', ['pct' => config('zedville.emargency_fund_persentage', 20)])) . '</li>
         </ul>
 
-        <p class="mt-2">Your automatic transfers have been set up as requested.</p>
+        <p class="mt-2">' . e(__('flash.ef_transfers_set')) . '</p>
 
         <p class="font-semibold mt-2">Universal Bank</p>
     </div>');
-        } else {
-            return redirect()->back()->with('error', 'Failed to update emergency fund.');
-        }
     }
 
     public function moneymarketamount()
     {
         $user = Auth::user();
-        $savingsAmount = 0;
-        $updated = BankAccount::where('student_id', $user->id)
-            ->update([
-                'money_market_account_amount' => $savingsAmount,
-                'is_open_money_market_account' => '1',
-            ]);
+
+        $result = DB::transaction(function () use ($user) {
+            $bankAccount = BankAccount::where('student_id', $user->id)->lockForUpdate()->first();
+            if (!$bankAccount) {
+                return 'missing';
+            }
+            if (SavingsLedger::isOpen($bankAccount, 'money_market')) {
+                return 'open';
+            }
+            $bankAccount->is_open_money_market_account = 1;
+            $bankAccount->money_market_account_amount = 0;
+            $bankAccount->save();
+
+            return 'opened';
+        });
+
+        if ($result === 'open') {
+            return redirect()->back()->with('success', e(__('flash.mm_already_open')));
+        }
+        if ($result !== 'opened') {
+            return redirect()->back()->with('error', __('flash.mm_failed'));
+        }
 
         app(ParticipationService::class)->award($user->id, 'money_market_open');
 
-        if ($updated) {
-            return redirect()->back()->with('success', 'Money Market Account Open successfully.');
-        } else {
-            return redirect()->back()->with('error', 'Failed to Open Money Market amount.');
-        }
+        return redirect()->back()->with('success', __('flash.mm_opened'));
     }
 
     public function emergencyFundInterest($userId)
     {
-        // 1️⃣ Get previous month info
-        $previousMonth = Carbon::now()->subMonth();
-        $monthName = $previousMonth->format('F');
-        $year = $previousMonth->year;
-
-        // 2️⃣ Interest config
-        $annualInterestRate = 0.02; // 2% per annum
-        $daysInMonth = $previousMonth->daysInMonth;
-        $daysInYear = $previousMonth->isLeapYear() ? 366 : 365;
-        $dailyRate = $annualInterestRate / $daysInYear;
-
-        // 3️⃣ Get ending balance (latest txn before end of month)
-        $endingBalance = Transaction1::where('user_id', $userId)
-            ->where(function ($q) {
-                $q->where('description', 'Auto Transfer to Savings Account')
-                    ->orWhere('description', 'Auto Transfer to Emergency Fund');
-            })
-            ->where('transaction_date', '<=', $previousMonth->endOfMonth())
-            ->orderBy('transaction_date', 'desc')
-            ->value('balance');
-
-        if (is_null($endingBalance)) {
-            $endingBalance = 0;
-        }
-
-        // 4️⃣ Calculate monthly estimated interest
-        $grossMonthlyInterest = $endingBalance * $dailyRate * $daysInMonth;
-
-        // 5️⃣ Annual projection (approx)
-        $annualProjection = $endingBalance * $annualInterestRate;
-        $nextPaymentDate = Carbon::now()->addMonth()->setDay(1)->format('F j, Y');
-        // 6️⃣ Return for dashboard or API
-        return [
-            'month' => $monthName,
-            'year' => $year,
-            'ending_balance' => round($endingBalance, 2),
-            'estimated_interest' => round($grossMonthlyInterest, 2),
-            'annual_projection' => round($annualProjection, 2),
-            'annual_rate' => $annualInterestRate * 100,
-            'next_payment_date' => $nextPaymentDate,
-        ];
+        return $this->interest((int) $userId, 'emergency');
     }
 
     public function moneymarketintrest($userId)
     {
-        // 1️⃣ Get previous month info
-        $previousMonth = Carbon::now()->subMonth();
-        $monthName = $previousMonth->format('F');
-        $year = $previousMonth->year;
+        return $this->interest((int) $userId, 'money_market');
+    }
 
-        // 2️⃣ Interest config
-        $annualInterestRate = 0.04; // 4% per annum
-        $daysInMonth = $previousMonth->daysInMonth;
-        $daysInYear = $previousMonth->isLeapYear() ? 366 : 365;
-        $dailyRate = $annualInterestRate / $daysInYear;
+    /**
+     * What the account earns: the interest it will get on the 1st (a month of
+     * its yearly rate on what's in it now), a year's worth at that balance,
+     * and the interest it has been paid so far.
+     */
+    public function interest(int $userId, string $key): array
+    {
+        $account = BankAccount::where('student_id', $userId)->first();
+        $balance = $account && SavingsLedger::isOpen($account, $key) ? SavingsLedger::balance($account, $key) : 0.0;
+        // the student's own rate: the Money Market pays 5 % from the Intermediate's third month (ZedDirecto)
+        $student = \App\Models\User::find($userId);
+        $rate = SavingsLedger::rate($key, $student);
+        $previousMonth = Carbon::now()->startOfMonth()->subMonth();
 
-        // 3️⃣ Get ending balance (latest txn before end of month)
-        $endingBalance = Transaction1::where('user_id', $userId)
-            ->where('description', 'Auto Transfer to Money Market Account')
-            ->where('transaction_date', '<=', $previousMonth->endOfMonth())
-            ->orderBy('transaction_date', 'desc')
-            ->value('balance');
+        // the Money Market's contract: a month with money taken out earns nothing
+        $withdrawn = $key === 'money_market' && SavingsLedger::withdrewIn($userId, $key, Carbon::now());
 
-        if (is_null($endingBalance)) {
-            $endingBalance = 0;
-        }
-
-        // 4️⃣ Calculate monthly estimated interest
-        $grossMonthlyInterest = $endingBalance * $dailyRate * $daysInMonth;
-
-        // 5️⃣ Annual projection (approx)
-        $annualProjection = $endingBalance * $annualInterestRate;
-        $nextPaymentDate = Carbon::now()->addMonth()->setDay(1)->format('F j, Y');
-        // 6️⃣ Return for dashboard or API
         return [
-            'month' => $monthName,
-            'year' => $year,
-            'ending_balance' => round($endingBalance, 2),
-            'estimated_interest' => round($grossMonthlyInterest, 2),
-            'annual_projection' => round($annualProjection, 2),
-            'annual_rate' => $annualInterestRate * 100,
-            'next_payment_date' => $nextPaymentDate,
+            'withdrawn' => $withdrawn,
+            'month' => $previousMonth->format('F'),
+            'year' => $previousMonth->year,
+            'ending_balance' => round($balance, 2),
+            'estimated_interest' => $withdrawn ? 0.0 : SavingsLedger::monthlyInterest($balance, $key, $student),
+            'annual_projection' => round($balance * $rate, 2),
+            'annual_rate' => $rate * 100,
+            'earned' => round((float) SavingsTransaction::where('user_id', $userId)->where('account', $key)
+                ->where('category', 'Interest')->sum('amount'), 2),
+            'next_payment_date' => Carbon::now()->startOfMonth()->addMonth()->locale(app()->getLocale())->isoFormat('LL'),
         ];
     }
 }

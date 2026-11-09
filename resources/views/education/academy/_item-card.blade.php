@@ -6,21 +6,29 @@
 <a href="{{ route('academy.item', $item) }}"
     class="block bg-white border border-color-[#D2DDDB] rounded p-5 hover:shadow transition">
     @if ($item->image)
-        <img src="{{ asset('uploads/curriculum/' . $item->image) }}" alt="" class="w-full rounded mb-3" style="height:120px;object-fit:cover;">
+        <img src="{{ ct_image($item->image) }}" alt="" class="w-full rounded mb-3" style="height:120px;object-fit:cover;">
     @endif
     <h3 class="text-lg font-semibold mb-1">
-        {{ $item->title }}
+        {{ ct('curriculum', $item->title) }}
         @if ($item->is_real_exam)
             <span class="inline-block text-xs font-semibold bg-red-100 text-red-700 rounded px-2 py-1 ms-1">{{ __('academy.real_exam') }}</span>
         @endif
     </h3>
     @if ($item->description)
-        <p class="text-sm text-gray-600 mb-2">{{ $item->description }}</p>
+        <p class="text-sm text-gray-600 mb-2">{{ ct('curriculum', $item->description) }}</p>
     @endif
     @if ($item->pisaLevel)
-        <span class="inline-block text-xs font-semibold bg-gray-100 rounded px-2 py-1 mb-2">{{ $item->pisaLevel->name }}</span>
+        <span class="inline-block text-xs font-semibold bg-gray-100 rounded px-2 py-1 mb-2">{{ ct('activities', $item->pisaLevel->name) }}</span>
     @endif
-    @if ($item->best_score)
+    @php $released = $item->is_real_exam && $item->best_score && \App\Models\ExamSession::forStudent($item, auth()->user())?->results_released_at; @endphp
+    @if ($released)
+        <p class="text-sm text-green-700 mb-0">{{ __('exams.your_result') }}: {{ $item->best_score->score }}/{{ $item->best_score->total_questions }}</p>
+    @elseif ($item->is_real_exam && $item->best_score)
+        {{-- The mark of a real exam is the tutor's until they release it. --}}
+        <p class="text-sm text-green-700 mb-0">{{ __('exams.submitted_title') }}</p>
+    @elseif ($item->is_real_exam)
+        <p class="text-sm text-gray-500 mb-0">{{ __('exams.opens_on_exam_day') }}</p>
+    @elseif ($item->best_score)
         <p class="text-sm text-green-700 mb-0">{{ __('academy.best_score') }}: {{ $item->best_score->score }}/{{ $item->best_score->total_questions }}</p>
     @elseif ($item->type === 'quiz')
         <p class="text-sm text-gray-500 mb-0">{{ __('academy.not_attempted_yet') }}</p>

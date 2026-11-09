@@ -251,7 +251,7 @@ class ClosetController extends Controller
             'purchaseDate' => $row->purchase_date,
             'pricePaidZeds' => (int) ($row->price_paid_zeds ?? 0),
             'ageYears' => $ageYears,
-            'name' => $row->name,
+            'name' => \App\Support\ContentTranslations::get('products', $row->name),
             'category' => $row->category,
 
             // Your products table has "image", not "icon"
@@ -268,7 +268,7 @@ class ClosetController extends Controller
     {
         return [
             'id' => $row->id,
-            'name' => $row->name,
+            'name' => \App\Support\ContentTranslations::get('products', $row->name),
             'category' => $row->category,
 
             // Your products table has "image"

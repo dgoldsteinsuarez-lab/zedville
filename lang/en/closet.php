@@ -1,0 +1,42 @@
+<?php
+
+// My Closet (profile tab and closet page) - durable goods the student owns.
+return [
+    'my_closet_zedville' => 'My Closet — Zedville',
+    'durable_goods' => 'Durable goods',
+    'used_over_time' => 'Used over time',
+    'physical_items_that_last_3_or' => 'Physical items that last 3 or more years and are not consumed in a single use. They lose value gradually through depreciation.',
+    'no_durable_goods_purchased' => 'No durable goods purchased',
+    'non_durable_goods' => 'Non-durable goods',
+    'consumed_quickly' => 'Consumed quickly',
+    'items_used_up_in_less_than' => 'Items used up in less than 3 years — often in a single use. Once spent, they are gone and must be replaced.',
+    'no_non_durable_goods_purchased' => 'No non-durable goods purchased',
+    'only_durable_goods_appear_in_your' => 'Only durable goods appear in your closet',
+    'my_closet' => 'My Closet',
+    'n0_items' => '0 items',
+    'items_owned' => 'Items owned',
+    'total_value' => 'Total value',
+    'oldest_item' => 'Oldest item',
+    'loading_closet' => 'Loading closet…',
+    'no_durable_goods_yet_start_spending' => 'No durable goods yet. Start spending to fill your closet!',
+    'no_items_in_this_category_yet' => 'No items in this category yet.',
+    'js' => [
+        'student_closet' => 'Student Closet',
+        'load_error' => 'Could not load closet. Please try again.',
+        'item' => ':count item',
+        'items' => ':count items',
+        'zeds' => ':amount zeds',
+        'all' => 'All',
+        'age' => 'Age: :years yr',
+        'life' => 'Life: :years yr',
+        'per_year' => ':amount zeds/year',
+        'categories' => [
+            'tech' => 'Tech',
+            'transport' => 'Transport',
+            'home' => 'Home',
+            'clothing' => 'Clothing',
+            'tools' => 'Tools',
+            'other' => 'Other',
+        ],
+    ],
+];

@@ -44,9 +44,8 @@ class AutopilotReport extends Command
 
             $activities = DB::table('activity_completions')->whereIn('student_id', $students)
                 ->whereBetween('completed_at', [$from, $to])->count();
-            $spend = (float) DB::table('transactions1')->whereIn('user_id', $students)
-                ->where('type', 'debit')->where('is_penalty', 0)
-                ->whereBetween('transaction_date', [$from, $to])->sum('amount');
+            // spending as the bank counts it: not transfers, own moves or corrections
+            $spend = $students->sum(fn ($id) => \App\Services\BankTransferService::spentThisMonth($id, \Carbon\Carbon::create($year, $month, 1)));
 
             $n = $students->count();
             $this->line('');

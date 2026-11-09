@@ -1,21 +1,17 @@
-<p>Dear Student,</p>
-<p>Set up your account today to:</p>
+{{-- Rendered in the reader's language when the message is opened (App\Models\Mailbox). --}}
+<p>{{ __('mail.open-city-bank-account.dear') }}</p>
+<p>{{ __('mail.open-city-bank-account.why') }}</p>
 <ul>
-    <li>Receive your salary</li>
-    <li>Track expenses easily</li>
-    <li>Pay bills online</li>
-    <li>Save money for the future</li>
+    @foreach (__('mail.open-city-bank-account.reasons') as $line)<li>{{ $line }}</li>@endforeach
 </ul>
-<p>Benefits:</p>
+<p>{{ __('mail.open-city-bank-account.benefits_title') }}</p>
 <ul>
-    <li>Zero maintenance fees (2 years)</li>
-    <li>Earn interest p.a. on your savings account</li>
+    @foreach (__('mail.open-city-bank-account.benefits') as $line)<li>{{ $line }}</li>@endforeach
 </ul>
-<p>Get started:</p>
+<p>{{ __('mail.open-city-bank-account.start_title') }}</p>
 <ul style="list-style: none;">
-    <li>1. Visit universalbank.com/students</li>
-    <li>2. Create account</li>
+    @foreach (__('mail.open-city-bank-account.start') as $i => $line)<li>{{ $i + 1 }}. {{ $line }}</li>@endforeach
 </ul>
-<p>Got questions? Visit our FAQ at <strong><a href="https://universalbank.com/faq" target="_blank">universalbank.com/faq</a></strong></p>
-<br><br>Best regards,
-<br>City Bank
+<p>{{ __('mail.open-city-bank-account.questions') }}</p>
+<br><br>{{ __('mail.regards') }}
+<br>{{ __('mail.open-city-bank-account.signature') }}

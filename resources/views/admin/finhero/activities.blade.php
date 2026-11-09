@@ -5,10 +5,13 @@
 @section('content')
 
     <div class="adminHeading">
-        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">
-            FinHero {{ $type }} Activity Manager
+        <h1 class="d-flex align-items-center gap-2 theme-text-dark fw-500 fs-16 mab-20">
+            FinHero {{ $type }} Activity Manager @include('admin.partials.level-badge')
         </h1>
     </div>
+    @if ($type == 'task')
+        @include('admin.finhero._task-tabs')
+    @endif
 
     <div class="themeCard card card-custom card-stretch gutter-b mab-15">
         <div class="card-body pall-30">
@@ -48,7 +51,7 @@
                                     <td>{{ $a->id }}</td>
                                     <td>{{ $a->activity_key }}</td>
                                     <td>{{ $a->activity_name }}</td>
-                                    <td>{{ $a->class_name ?? ($a->grade_name ? $a->grade_name . ' (all classes)' : '—') }}</td>
+                                    <td>{{ $a->class_name ? \App\Support\ClassLabel::make($a->class_grade_name, $a->class_name) : ($a->grade_name ? $a->grade_name . ' (all classes)' : '—') }}</td>
                                     @if($type == 'task')
                                         {{-- Show salary only for task --}}
                                         <td>{{ number_format($a->salary ?? 0, 2) }} zeds</td>
@@ -63,12 +66,14 @@
                                     <td>{{ $a->start_date ?? '—' }}</td>
                                     <td>{{ $a->end_date ?? '—' }}</td>
                                     <td>
-                                        <div class="actionBtns d-flex justify-content-end">
+                                        <div class="actionBtns d-flex align-items-center justify-content-end">
 
                                             @php $libraryModule = $type == 'library' ? $libraryModules->firstWhere('module_key', $a->activity_key) : null; @endphp
                                             @if ($libraryModule && auth()->user()->isSuperAdmin())
-                                                <!-- QUESTIONS (shared by every class the module is assigned to - Super Admin only) -->
-                                                <a href="{{ url('admin/finhero/library-modules/' . $libraryModule->id . '/questions') }}" class="tableActionBtn me-3">
+                                                <!-- QUESTIONS (shared by every class the module is assigned to - Super Admin only).
+                                                     A text button, not tableActionBtn: that one is a 24px icon square and
+                                                     broke the word into letters over the rows below (Daniel, 2026-10-27). -->
+                                                <a href="{{ url('admin/finhero/library-modules/' . $libraryModule->id . '/questions') }}" class="btn btn-sm btn-outline-primary text-nowrap me-3">
                                                     Questions
                                                 </a>
                                             @endif
@@ -134,10 +139,31 @@
                                         <option value="{{ $module->module_key }}">{{ $module->title }}</option>
                                     @endforeach
                                 @else
+                                    {{-- Tasks 3 and 4 teach 50/30/20, for Junior and Rookie; Task 5 replaces them
+                                         and the Match from the Intermediate on (Daniel, 2026-11-04) --}}
+                                    @php $taskLevel = (int) optional(\App\Support\AdminLevel::current())->sort_order; @endphp
                                     <option value="task_1">Classify Your Salary</option>
                                     <option value="task_2">Budget Calculations</option>
-                                    <option value="task_3">Budget Rule</option>
-                                    <option value="task_4">IT TASK 4 Budgeting</option>
+                                    @if (!$taskLevel || $taskLevel < \App\Support\Level::INTERMEDIATE)
+                                        <option value="task_3">Budget Rule</option>
+                                        <option value="task_4">IT TASK 4 Budgeting</option>
+                                    @endif
+                                    @if (!$taskLevel || $taskLevel >= \App\Support\Level::INTERMEDIATE)
+                                        <option value="task_5">How much have I saved? (Intermediate and up)</option>
+                                        {{-- compound interest (Daniel, 2026-11-08): financial education, not the Money Factory --}}
+                                        <option value="task_6">The snowball: compound interest (Intermediate and up)</option>
+                                        <option value="task_7">Who will have more? (Intermediate and up)</option>
+                                        <option value="task_8">The rule of 72 (Intermediate and up)</option>
+                                        {{-- the price rise of the level's second month (App\Services\PriceRise) --}}
+                                        <option value="task_9">What went up? (Intermediate, from month 2)</option>
+                                        <option value="task_10">My shopping, before and after (Intermediate, from month 2)</option>
+                                        <option value="task_11">What is my salary worth? (Intermediate, from month 2)</option>
+                                        <option value="task_12">How much is left to save? (Intermediate, from month 2)</option>
+                                        <option value="task_13">What is my money worth? (Intermediate, from month 2)</option>
+                                        <option value="task_14">Move the line: supply and demand (Intermediate, from month 2)</option>
+                                        {{-- the health insurance (App\Services\InsuranceService): Required in the level's first month --}}
+                                        <option value="task_15">Choose your health insurance (Intermediate, month 1, Required)</option>
+                                    @endif
                                 @endif
                             </select>
 
@@ -155,6 +181,7 @@
                             <label>Grade</label>
                             <select name="grade_id" id="grade_id" class="form-control">
                                 <option value="">Select Grade</option>
+                                @include('admin.partials.assignment-scope-options', ['noun' => 'grades'])
                                 @foreach($grades as $grade)
                                     <option value="{{ $grade->id }}">{{ $grade->name }}</option>
                                 @endforeach
@@ -174,7 +201,7 @@
 
                                 @foreach($classes as $class)
                                     <option value="{{ $class->id }}" data-grade-id="{{ $class->grade_id }}">
-                                        {{ $class->name }}
+                                        {{ $class->label }}
                                     </option>
                                 @endforeach
                             </select>

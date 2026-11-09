@@ -9,6 +9,21 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    /**
+     * [category, description] of the single bank line an order becomes. A
+     * Spending Activity's line says which one, so the student sees what the
+     * purchase was for - "Compra: fiesta de cumpleaños" (Daniel, 2026-11-02;
+     * App\Support\OrderLine).
+     */
+    public static function statementLine(string $catalogTable, bool $forSpendingActivity, ?string $activityTitle = null): array
+    {
+        if ($forSpendingActivity) {
+            return ['Wants', $activityTitle ? 'Spending Activity: ' . $activityTitle : 'Spending Activity'];
+        }
+
+        return $catalogTable === 'supermarkets' ? ['Needs', 'Supermarket'] : ['Wants', 'City Mall'];
+    }
+
     public function placeOrder(Request $request)
     {
         $request->validate([
@@ -30,7 +45,11 @@ class OrderController extends Controller
             // Sent by the Spending Activity shops (spendingActivities/*):
             // the activity this shopping trip is for.
             'activity_id' => 'nullable|integer',
+            // from the Intermediate, the City Mall and the spending activities take the
+            // credit card too (App\Services\CreditCardService, partials/pay-with)
+            'pay_with' => 'nullable|in:account,card',
         ]);
+        $byCard = $request->input('pay_with') === 'card';
 
         $catalogTable = $request->input('catalog') === 'supermarkets' ? 'supermarkets' : 'products';
 
@@ -44,7 +63,7 @@ class OrderController extends Controller
         if (!$bankAccount) {
             return response()->json([
                 'status' => false,
-                'message' => 'Bank account not found.'
+                'message' => __('shop.server.no_bank_account')
             ], 404);
         }
 
@@ -52,7 +71,7 @@ class OrderController extends Controller
         if ((string) $request->pin !== (string) $bankAccount->card_pin) {
             return response()->json([
                 'status' => false,
-                'message' => 'Invalid PIN.'
+                'message' => __('shop.server.invalid_pin')
             ], 422);
         }
 
@@ -68,20 +87,35 @@ class OrderController extends Controller
             if (!$product) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'One or more products are no longer available.'
+                    'message' => __('shop.server.product_unavailable')
                 ], 422);
             }
 
             $quantity = (int) $item['quantity'];
-            $price = (float) $product->price;
+            // in the Intermediate, the new prices the shop shows (App\Services\PriceRise)
+            $price = \App\Services\PriceRise::productPrice($user, $product, $catalogTable);
             $itemSubtotal = $price * $quantity;
             $serverTotal += $itemSubtotal;
 
             $validatedCart[] = [
                 'product' => $product,
                 'quantity' => $quantity,
+                'price' => $price,
                 'subtotal' => $itemSubtotal,
             ];
+        }
+
+        // A Spending Activity with a shopping list (Daniel, 2026-10-31): only
+        // what is on the list, one of each, within the budget - the same
+        // check the shop page shows while the student shops.
+        $activity = $request->filled('activity_id') ? \App\Models\Activity::find($request->activity_id) : null;
+        $listMode = $activity && !empty($activity->shopping_list);
+        if ($listMode) {
+            $error = \App\Services\ShoppingList::checkoutError($activity, $user,
+                array_map(fn ($c) => [$c['product'], $catalogTable, $c['quantity']], $validatedCart), (float) $serverTotal);
+            if ($error !== null) {
+                return response()->json(['status' => false, 'message' => $error], 422);
+            }
         }
 
         DB::beginTransaction();
@@ -91,16 +125,20 @@ class OrderController extends Controller
             // so two concurrent orders can't both read the same stale
             // balance and both pass this check (see bugs.md #5).
             $lastBalance = \App\Services\LedgerService::lockedBalance($user->id);
+            $card = $byCard ? \App\Services\CreditCardService::card($user->id) : null;
+            if ($byCard && (!$card || \App\Services\CreditCardService::available($card) + 0.001 < $serverTotal)) {
+                DB::rollBack();
+                return response()->json(['status' => false, 'message' => __('flash.' . ($card ? 'card_limit' : 'card_none'))], 422);
+            }
 
-            if ($lastBalance < $serverTotal) {
+            if (!$byCard && $lastBalance < $serverTotal) {
                 DB::rollBack();
                 return response()->json([
                     'status' => false,
-                    'message' => 'Insufficient balance. Your available balance is '
-                        . number_format($lastBalance, 2)
-                        . ' Z. Required amount is '
-                        . number_format($serverTotal, 2)
-                        . ' Z.'
+                    'message' => __('shop.server.insufficient_balance', [
+                        'balance' => number_format($lastBalance, 2),
+                        'required' => number_format($serverTotal, 2),
+                    ])
                 ], 422);
             }
 
@@ -109,6 +147,7 @@ class OrderController extends Controller
                 'user_id' => $user->id,
                 'total' => $serverTotal,
                 'status' => 'paid',
+                'activity_id' => $activity->id ?? null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -120,7 +159,9 @@ class OrderController extends Controller
                 $quantity = $cartItem['quantity'];
                 $itemSubtotal = $cartItem['subtotal'];
 
-                $runningBalance -= $itemSubtotal;
+                if (!$byCard) {
+                    $runningBalance -= $itemSubtotal;
+                }
 
                 if ($runningBalance < 0) {
                     throw new \Exception('Insufficient balance.');
@@ -128,9 +169,11 @@ class OrderController extends Controller
 
                 DB::table('order_items')->insert([
                     'order_id' => $orderId,
+                    'product_id' => $product->id,
+                    'catalog' => $catalogTable,
                     'sid' => $user->sid,
                     'name' => $product->product_name,
-                    'price' => $product->price,
+                    'price' => $cartItem['price'],
                     'qty' => $quantity,
                     'subtotal' => $itemSubtotal,
                     'type' => $product->type,
@@ -138,13 +181,24 @@ class OrderController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+            }
 
+            // One bank statement line per order, not one per item (Daniel,
+            // 2026-10-22: "I don't want the bank statement to be full of
+            // items"). The items stay in order_items. A Spending Activity is
+            // always a Want - whatever is in the cart, even a donation or
+            // groceries bought for it; a normal Supermarket trip is a Need.
+            [$category, $label] = self::statementLine($catalogTable, $request->filled('activity_id'), $activity->title ?? null);
+            if ($byCard) {
+                // on the card: owed to the bank, paid with next month's statement - the current account is untouched
+                \App\Services\CreditCardService::purchase($user, (float) $serverTotal, "{$label} (Order #{$orderId})", $orderId);
+            } else {
                 \App\Services\LedgerService::post(
                     $user->id,
                     'debit',
-                    $product->category ?? 'Wants',
-                    (float) $itemSubtotal,
-                    "Purchase: {$product->product_name} (Order #{$orderId})",
+                    $category,
+                    (float) $serverTotal,
+                    "{$label} (Order #{$orderId})",
                     [
                         'sid' => $user->sid,
                         'bank_account_id' => $bankAccount->id,
@@ -160,10 +214,14 @@ class OrderController extends Controller
             app(ParticipationService::class)->award($user->id, 'shopping', $catalogTable);
 
             // Checking out the Spending Activity assigned to the student's
-            // class finishes it (blackboard + Engagement badge).
-            if ($request->filled('activity_id')) {
+            // class finishes it (blackboard + Engagement badge) - with a
+            // shopping list, once the whole list is bought (it can take two
+            // shops).
+            $listState = $listMode ? \App\Services\ShoppingList::state($activity, $user) : null;
+            if ($activity && (!$listMode || $listState['complete'])) {
+                [$slotKey, $slotTitle, $slotType] = $activity->slot();
                 $assigned = DB::table('mba_position')
-                    ->where('activity_key', 'hba_position')
+                    ->where('activity_key', $slotKey)
                     ->where('sid', $user->sid)
                     ->where('cid', $user->grade)
                     ->where('activity_id', $request->activity_id)
@@ -171,16 +229,27 @@ class OrderController extends Controller
 
                 if ($assigned) {
                     app(\App\Services\ActivityCompletionService::class)
-                        ->complete($user->id, 'high_budget_activity', 'Spending budget activity');
+                        ->complete($user->id, $slotType, $slotTitle);
                 }
             }
 
             return response()->json([
                 'status' => true,
-                'message' => 'Order placed successfully.',
+                'message' => __('shop.server.order_placed'),
                 'order_id' => $orderId,
                 'balance' => $runningBalance,
                 'total' => $serverTotal,
+                // written like the bank writes money, in the student's language
+                'balance_text' => zeds($runningBalance),
+                'total_text' => zeds($serverTotal),
+                // paid with the credit card: what is left on it
+                'paid_with' => $byCard ? 'card' : 'account',
+                'card_available_text' => $byCard ? zeds(\App\Services\CreditCardService::available($card)) : null,
+                // the list after this order: done, or the next shop to go to
+                'list_complete' => $listState['complete'] ?? null,
+                'list_message' => $listState === null ? null : ($listState['complete']
+                    ? __('spending.list.already_complete')
+                    : __('spending.list.next_shop', ['shop' => collect($listState['lines'])->first(fn ($l) => $l['done'] < $l['qty'])['shop']])),
             ]);
 
         } catch (\Throwable $e) {
@@ -188,7 +257,7 @@ class OrderController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Unable to place order.',
+                'message' => __('shop.server.order_failed'),
                 'error' => $e->getMessage()
             ], 500);
         }

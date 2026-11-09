@@ -1,0 +1,226 @@
+<?php
+
+// Les messages de la ville dans la Boîte aux lettres de l'élève (resources/views/mailbox_templates),
+// affichés dans la langue de la personne qui les lit (Daniel, 2026-10-25).
+
+return [
+    'regards' => 'Bien cordialement,',
+    'sincerely' => 'Cordialement,',
+    'city_hall' => 'Mairie de Zedville',
+    'bank_team' => "L'équipe d'Universal Bank",
+    'treasury' => 'Trésor public de Zedville',
+    'hi' => 'Bonjour,',
+    'dear' => 'Bonjour :name,',
+    'citizen_id' => 'Identifiant citoyen officiel :',
+
+    'welcome' => [
+        'subject' => 'Bienvenue à Zedville, :name !',
+        'hello' => 'Bonjour :name',
+        'newest' => 'Félicitations ! Tu es officiellement <span style="color:#3c41fb">le ou la plus récent(e) citoyen(ne) de Zedville.</span>',
+        'citizen_id' => 'Ton identifiant citoyen :',
+        'how_title' => 'Comment ça marche :',
+        'how' => 'Chaque mois, tu <span style="color:#3c41fb">recevras un salaire en Zeds</span> (notre monnaie virtuelle). Utilise-le pour t\'entraîner à faire un budget, payer des factures et prendre des décisions sur ton argent, comme dans la vie d\'adulte !',
+        'start_title' => 'Commence dès maintenant :',
+        'step1' => 'Va à la <strong>Banque</strong>',
+        'step2' => '<span style="color:#3c41fb">Ouvre ton premier compte bancaire</span>',
+        'step3' => 'Attends l\'arrivée de ton premier salaire',
+        'city_hall' => '<strong>Mairie</strong> : fais des activités et utilise les services de la ville',
+        'efd' => '<strong>Département d\'éducation financière</strong> : apprends à gérer ton argent avec des leçons interactives',
+        'profile' => '<strong>Ton profil</strong> : personnalise tes informations de citoyen(ne)',
+        'closing' => 'Bienvenue dans ta nouvelle vie virtuelle ! Nous sommes ravis de t\'accueillir.',
+    ],
+
+    'auto-debit' => [
+        'subject' => 'Simplifie tes factures : passe au prélèvement automatique',
+        'intro' => 'Mets en place le prélèvement automatique pour tes services (école, internet, électricité et eau) afin d\'éviter les pénalités de retard et les paiements à la main.',
+        'authorize' => 'Tu autoriseras :',
+        'item' => 'Le prélèvement automatique du montant total de chaque facture tous les mois',
+        'button' => 'Mettre en place le prélèvement automatique',
+    ],
+
+    'utility' => [
+        'intro' => 'Pour payer cette facture par prélèvement automatique, remplis ce formulaire d\'autorisation. Le montant sera prélevé sur ton compte chaque mois : tes factures seront toujours payées à temps, sans paiement à la main ni pénalités de retard.',
+        'steps' => 'Étapes :',
+        'step1' => 'Indique ton nom, ton numéro de téléphone, ton e-mail et ton numéro de compte de l\'école.',
+        'step2' => 'Indique tes coordonnées bancaires (nom de la banque, numéro de compte, code SWIFT/BIC).',
+        'step3' => 'Coche l\'option d\'autorisation de paiement.',
+        'step4' => 'Confirme que tu acceptes les conditions.',
+        'button' => 'Remplir le formulaire',
+    ],
+    'water-auto-debit' => ['subject' => 'Paie ta facture d\'eau par prélèvement automatique'],
+    'school-auto-debit' => ['subject' => 'Paie tes frais de scolarité par prélèvement automatique'],
+    'internet-auto-debit' => ['subject' => 'Paie ta facture internet par prélèvement automatique'],
+    'electricity-auto-debit' => ['subject' => 'Paie ta facture d\'électricité par prélèvement automatique'],
+
+    'monthly-statement' => [
+        'subject' => 'Ton relevé bancaire de :month',
+        'ready' => 'Ton relevé bancaire de <strong>:month</strong> est disponible.',
+        'view_text' => 'Tu peux consulter ton relevé complet, avec tes revenus, tes dépenses et ton solde, ici :',
+        'link' => 'Voir le relevé bancaire de :month',
+        'anytime' => '(Tu le retrouveras aussi à tout moment dans la Banque.)',
+    ],
+
+    // la lettre de la mairie pour l'amende de fin de mois (App\Services\MonthEndPenaltyService)
+    'city-hall-fine' => [
+        'subject' => 'Amende de la mairie : ton plan de :month',
+        'what' => "En :month, tu n'as pas choisi ton plan du mois : la mairie t'a donc infligé une amende de :amount.",
+        'what_hy' => "Amende de la mairie de :amount : tu n'as pas choisi ton plan de :month.",
+        'why' => "Tu reçois un salaire pour préparer ton avenir et, comme tout citoyen adulte, tu as des obligations. Si tu ne les respectes pas, la mairie prélève sur ton compte ce que tu n'as pas dépensé du salaire de ce mois, jusqu'à 99 %.",
+        'next' => "Pour que cela ne se reproduise pas, choisis ton plan chaque mois : il apparaît quand tu te connectes, après la Question du jour.",
+        'next_hy' => 'Choisis ton plan chaque mois.',
+    ],
+
+    'bank-account-ready' => [
+        'subject' => 'Ton compte bancaire est prêt',
+        'intro' => 'Bonne nouvelle ! Ton compte Universal Bank est prêt à être utilisé.',
+        'visit' => 'Va à la Banque pour retrouver :',
+        'features' => ['Le résumé et le solde de ton compte', 'Les informations de ta carte de débit', 'L\'historique de tes opérations', 'Le paiement des factures', 'Les outils d\'épargne', 'Les alertes de ton compte'],
+        'starts' => 'Ta vie bancaire commence maintenant !',
+        'online' => 'Universal Bank – Banque en ligne',
+        'welcome' => 'Bienvenue, :name',
+        'account' => 'Compte :',
+        'student' => 'Élève',
+        'summary' => 'Résumé du compte',
+        'balance' => 'Solde disponible :',
+        'number' => 'Numéro de compte :',
+        'card' => 'Carte de débit :',
+        'latest' => 'Dernière opération :',
+        'none' => 'Aucune pour l\'instant',
+        'available' => 'Ce que tu peux faire',
+        'statement_title' => 'Consulter ton relevé bancaire',
+        'statement' => 'Vérifie toutes les opérations de ton compte.',
+        'card_title' => 'Gérer ta carte de débit',
+        'card_items' => ['Activer ou désactiver la carte', 'Changer le code secret', 'Bloquer la carte en cas de perte'],
+        'transfers_title' => 'Virements',
+        'transfers' => ['Virements entre tes comptes et vers d\'autres personnes', 'Paiement des factures (électricité, eau, internet)'],
+        'savings_title' => 'Outils d\'épargne',
+        'savings' => ['Fixer des objectifs d\'épargne', 'Rappels automatiques'],
+        'alerts_title' => 'Notifications et alertes',
+        'alerts' => 'Reçois des alertes sur ton solde et les opérations de ton compte.',
+        'questions' => 'Des questions ? Consulte la rubrique Aide de la Banque.',
+        'thanks' => 'Merci de faire confiance à Universal Bank',
+    ],
+
+    'salary-deposite' => [
+        'subject' => 'Ton premier salaire est arrivé',
+        'text' => 'Ton premier salaire mensuel a été versé sur ton compte :',
+        'amount' => 'Montant :',
+    ],
+
+    'direct-deposit' => [
+        'subject' => 'Remplis le formulaire de virement de ton salaire',
+        'hello' => 'Bonjour <strong>:name</strong>,',
+        'intro' => 'Il te reste <span style="color:#3c41fb">deux petites étapes</span> : autoriser le virement de ton salaire et le prélèvement automatique de tes factures.',
+        'title' => 'Fais virer ton salaire sur ton compte',
+        'text' => 'Autorise la ville à virer ton salaire mensuel directement sur ton compte : c\'est la façon la plus rapide et la plus sûre d\'être payé(e).',
+        'authorize' => 'Tu autoriseras :',
+        'item' => 'Le virement de 100 % de ton salaire sur ton compte Universal Bank',
+        'button' => 'Remplir le formulaire',
+    ],
+
+    'cityzenid' => [
+        'subject' => 'Ton identifiant citoyen',
+        'congrats' => '<strong>FÉLICITATIONS !</strong> Tu viens d\'arriver à Zedville et nous sommes ravis de t\'accueillir comme nouveau citoyen ou nouvelle citoyenne !',
+        'check' => '(Regarde ton profil pour voir ton nouvel identifiant numérique.)',
+    ],
+
+    'open-city-bank-account' => [
+        'subject' => 'Ouvre ton compte bancaire d\'élève dès aujourd\'hui !',
+        'dear' => 'Bonjour,',
+        'why' => 'Ouvre ton compte aujourd\'hui pour :',
+        'reasons' => ['Recevoir ton salaire', 'Suivre tes dépenses facilement', 'Payer tes factures en ligne', 'Épargner pour l\'avenir'],
+        'benefits_title' => 'Avantages :',
+        'benefits' => ['Aucuns frais de tenue de compte', 'Ton compte d\'épargne te rapporte des intérêts chaque année'],
+        'start_title' => 'Pour commencer :',
+        'start' => ['Va à la Banque', 'Ouvre ton compte'],
+        'questions' => 'Des questions ? Consulte la rubrique Aide de la Banque.',
+        'signature' => 'Universal Bank',
+    ],
+    'npo-thanks' => [
+        'subject' => 'Merci pour ton don de :month',
+    ],
+    // The City Hall's letter about the Intermediate's price rise (App\Services\PriceRise::announce)
+    'price-rise' => [
+        'subject' => "Les prix ont augmenté à Zedville",
+        'what' => "L'Office statistique de Zedville a publié son indice des prix : depuis :month, ce que nous achetons coûte en moyenne :index de plus.",
+        'what_hy' => "Depuis :month, les prix de Zedville ont augmenté de :index en moyenne.",
+        'why' => "Une sécheresse a abîmé la récolte de fruits, de légumes et d'olives, et le gaz, qui produit une partie de l'électricité, est plus cher. Tout n'augmente pas autant : l'huile augmente de :oil, Internet ne change pas et l'électronique baisse même.",
+        'you' => "Ton salaire n'augmente pas cette année scolaire. Tes factures et tes courses du mois passent de :before à :after : :extra de plus chaque mois.",
+        'you_hy' => "Ton salaire n'augmente pas. Tes factures et tes courses : de :before à :after par mois.",
+        'next' => "Regarde ce qui a augmenté, et de combien, à l'Office statistique :",
+        'link' => "Voir les nouveaux prix",
+    ],
+    // The Intermediate's third month: the bank's letter and Zed Directo's (App\Services\ZedDirecto::announce)
+    'rates-up' => [
+        'subject' => 'Ton compte à terme rapporte plus à partir de :month',
+        'what' => 'La banque centrale de Zedville a relevé ses taux d\'intérêt. À partir de :month, ton compte à terme rapporte :rate par an (avant, :old).',
+        'what_hy' => 'À partir de :month, ton compte à terme rapporte :rate par an (avant, :old).',
+        'why' => 'Elle les relève pour freiner la hausse des prix : quand épargner rapporte plus et emprunter coûte plus cher, les gens dépensent un peu moins et les prix augmentent moins vite.',
+        'real' => 'Avec des prix plus élevés de :index, le taux d\'intérêt réel de ton compte à terme est de :real.',
+    ],
+    'zed-directo-open' => [
+        'subject' => 'Zed Directo ouvre à Zedville',
+        'what' => 'Depuis :month, il y a une nouvelle banque à Zedville : Zed Directo, une banque en ligne.',
+        'offer' => 'Nous te proposons un compte d\'épargne à :savings par an et un dépôt de 6 mois qui rapporte la hausse des prix plus 3 % : cette année, :deposit. On ne peut pas toucher au dépôt pendant 6 mois : si tu retires l\'argent avant, tu perds les intérêts.',
+        'compare' => 'Compare nos conditions avec celles de ta banque avant de décider où épargner.',
+        'compare_hy' => 'Compare avant de décider.',
+        'link' => 'Découvrir Zed Directo',
+        'sign' => 'L\'équipe de Zed Directo',
+    ],
+    // The Intermediate's saver bonus (App\Services\SaverBonus)
+    'saver-bonus' => [
+        'subject' => 'Ta prime d\'épargne',
+        'welcome' => 'Bienvenue au niveau Intermédiaire. Pour récompenser ce que tu as épargné au niveau Rookie, la mairie t\'a versé :amount : :pct de ton épargne de précaution (au maximum :max).',
+        'quarter' => 'Prime du trimestre : la mairie t\'a versé :amount, :pct de ce que tu as épargné ces trois derniers mois (au maximum :max).',
+        'why' => 'La mairie te donne un salaire pour que tu sois responsable, et elle veut récompenser ceux qui épargnent. Cela existe vraiment dans certains pays : en Allemagne, l\'État ajoute de l\'argent à ce que les salariés épargnent sur leur salaire.',
+        'next' => 'Tous les trois mois, il y a une nouvelle prime : :pct de ce que tu épargnes sur ton épargne de précaution, ton compte à terme et chez Zed Directo.',
+    ],
+    // The overdraft (App\Services\Overdraft)
+    'overdraft' => [
+        'subject' => 'Ton compte courant est à découvert',
+        'what' => 'Tu n\'avais pas l\'argent pour payer « :what » à temps, alors la banque l\'a payé pour toi. Ton compte courant est à découvert : :balance.',
+        'cost' => 'Chaque mois qui se termine dans le rouge coûte :tae par an sur ce que tu dois, plus :fee de frais.',
+        'why' => 'Un découvert est un prêt que tu n\'as pas demandé, et l\'un des plus chers. C\'est pour ça qu\'une épargne de précaution est utile.',
+        'next' => 'Ton prochain salaire couvrira ce que tu dois. D\'ici là, ne dépense que pour l\'essentiel.',
+    ],
+    // L'assurance santé que la mairie donne à qui ne choisit pas (App\Services\InsuranceService::assignDefault)
+    'insurance-default' => [
+        'subject' => 'Ton assurance santé',
+        'given' => 'Chaque habitant de Zedville doit avoir une assurance santé, et tu n\'avais pas choisi la tienne pendant ton premier mois. La mairie t\'a donné la :plan : :premium par mois, avec les factures.',
+        'why' => 'Sans assurance, tu paierais toi-même tout ce que coûte une maladie ou un accident.',
+        'next' => 'Tu peux encore choisir ta formule une fois, dans la tâche FinHero « :task ».',
+    ],
+    // Un imprévu (App\Services\EmergencyService::arrive)
+    'emergency' => [
+        'subject' => 'Un imprévu',
+        'cost' => 'Ça coûte :cost.',
+        'insured' => 'Ça coûte :cost ; ta :plan couvre :covered, donc tu paies :amount.',
+        'no_insurance' => 'Ça coûte :cost. Tu n\'as pas d\'assurance santé, donc tu paies tout.',
+        'waiting' => 'Ça coûte :cost. Ta formule ne couvre pas encore le dentiste (délai de carence), donc tu paies tout.',
+        'deductible' => 'Ça coûte :cost. Ta :plan a une franchise de :deductible, donc tu paies tout.',
+        'due' => 'Tu as 30 jours pour le payer, jusqu\'au :date : dans « :activity », au tableau du Département d\'éducation financière.',
+        'why' => 'C\'est à ça que sert ton épargne de précaution. Si tu ne le paies pas à temps, il sera prélevé sur ton compte courant, même s\'il passe à découvert.',
+        'from' => [
+            'arm' => 'Hôpital de Zedville',
+            'filling' => 'Cabinet dentaire de Zedville',
+            'washing_machine' => 'Service de réparation de Zedville',
+            'phone' => 'Service de réparation de Zedville',
+            'bike' => 'Atelier vélo de Zedville',
+            'trip' => 'Ta famille',
+        ],
+    ],
+    // Les fraudes (App\Services\FraudService) : les objets des faux courriels, tels que la boîte les liste, et la lettre de la banque
+    'fraud-verify' => ['subject' => 'URGENT : votre compte va être bloqué'],
+    'fraud-refund' => ['subject' => 'Vous avez un remboursement de 450,00 Ƶ'],
+    'fraud-prize' => ['subject' => 'Félicitations ! Vous avez gagné un téléphone'],
+    'fraud-parcel' => ['subject' => 'Votre matériel scolaire est bloqué'],
+    'fraud-job' => ['subject' => 'Un job pour les élèves : gagnez 50,00 Ƶ par virement'],
+    'fraud-loss' => [
+        'subject' => 'Tu as été victime d\'une fraude',
+        'call' => 'Aujourd\'hui, tu as répondu à un appel de quelqu\'un qui se faisait passer pour « :caller » et tu as fait ce qu\'il demandait.',
+        'email' => 'Aujourd\'hui, tu as cliqué sur le lien d\'un courriel qui se faisait passer pour le Département d\'éducation financière.',
+        'lost' => 'C\'était une fraude : tu as perdu :amount.',
+        'cover' => 'Tu as 30 jours pour le couvrir avec ton épargne de précaution ou avec un prêt, dans « :activity ».',
+        'real' => 'Dans la vraie vie, si l\'escroc paie avec un code que tu lui as donné, la banque doit en général te rembourser (tu perds au plus 50 €) ; si c\'est toi qui fais le virement, dans l\'UE la banque n\'est pas obligée de le rembourser.',
+    ],
+];

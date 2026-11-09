@@ -1,17 +1,14 @@
 @extends('layouts.profile')
 
-@section('title', 'Frequently Asked Questions')
+@section('title', __('bank.frequently_asked_questions'))
 
 @section('content')
-<div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">Help & Support</h1>
-</div>
-
-<div class="grid grid-cols-1 gap-5 mt-6">
+<div class="zb-page">
+@include('bank.partials.nav')
+<div class="grid grid-cols-1 gap-5">
     <div class="themeTabspills">
         <div class="w-full">
-            @include('bank.partials.bankmenu')
-            <div class="py-6 lg:py-10 px-6 lg:px-8 w-full mt-4 border border-[#D2DDDB] rounded-lg">
+            <div class="py-6 lg:py-10 px-6 lg:px-8 w-full border border-[#D2DDDB] rounded-lg">
                 <div class="tab-content">
                     <div class="helpSection">
                         <div class="mb-8 text-center">
@@ -20,9 +17,14 @@
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                                     <path d="M12 17h.01"></path>
-                                </svg>Help &amp; Support
+                                </svg>{{ __('bank.help_support') }}
                             </h2>
-                            <p class="text-gray-600 mt-2 text-md lg:text-lg">Find answers to your questions and get the help you need</p>
+                            <p class="text-gray-600 mt-2 text-md lg:text-lg">{{ __('bank.find_answers_to_your_questions_and') }}</p>
+                        </div>
+                        {{-- the bank's official number: the one to call back after a suspicious call (App\Services\FraudService) --}}
+                        <div class="mb-8 max-w-2xl mx-auto rounded-xl border border-[#9FD9C3] bg-[#F0FBF7] p-4">
+                            <p class="font-semibold text-gray-900">📞 {{ __('fraud.bank_contact_title') }}: <span class="whitespace-nowrap">{{ \App\Services\FraudService::BANK_PHONE }}</span></p>
+                            <p class="text-gray-700 mt-1">{{ __('fraud.bank_contact_text', ['phone' => \App\Services\FraudService::BANK_PHONE]) }}</p>
                         </div>
                         <div class="mb-8">
                             <div class="relative max-w-2xl mx-auto">
@@ -30,33 +32,33 @@
                                     <circle cx="11" cy="11" r="8"></circle>
                                     <path d="m21 21-4.3-4.3"></path>
                                 </svg>
-                                <input placeholder="Search for help topics, FAQs, or guides..." class="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:border-gray-400 text-lg" id="searchFaq" type="text" />
+                                <input placeholder="{{ __('bank.search_for_help_topics_faqs_or') }}" class="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:border-gray-400 text-lg" id="searchFaq" type="text" />
                             </div>
                         </div>
                         <div class="categorySec grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Help Categories</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('bank.help_categories') }}</h3>
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-2">
                                     <a href="javascript:void(0);" class="w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border border-gray-200 hover:bg-gray-50 text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open">
                                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                                             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                                         </svg>
-                                        <span class="font-medium text-sm">All Topics</span>
+                                        <span class="font-medium text-sm">{{ __('bank.all_topics') }}</span>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border border-gray-200 hover:bg-gray-50 text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user">
                                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                                             <circle cx="12" cy="7" r="4"></circle>
                                         </svg>
-                                        <span class="font-medium text-sm">Account Management</span>
+                                        <span class="font-medium text-sm">{{ __('bank.account_management') }}</span>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border border-gray-200 hover:bg-gray-50 text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smartphone">
                                             <rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect>
                                             <path d="M12 18h.01"></path>
                                         </svg>
-                                        <span class="font-medium text-sm">Online Banking</span>
+                                        <span class="font-medium text-sm">{{ __('bank.online_banking') }}</span>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border border-gray-200 hover:bg-gray-50 text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-right">
@@ -65,20 +67,20 @@
                                             <path d="m16 21 4-4-4-4"></path>
                                             <path d="M20 17H4"></path>
                                         </svg>
-                                        <span class="font-medium text-sm">Transfers &amp; Payments</span>
+                                        <span class="font-medium text-sm">{{ __('bank.transfers_payments') }}</span>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border border-gray-200 hover:bg-gray-50 text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card">
                                             <rect width="20" height="14" x="2" y="5" rx="2"></rect>
                                             <line x1="2" x2="22" y1="10" y2="10"></line>
                                         </svg>
-                                        <span class="font-medium text-sm">Cards</span>
+                                        <span class="font-medium text-sm">{{ __('bank.cards') }}</span>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border border-gray-200 hover:bg-gray-50 text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield">
                                             <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
                                         </svg>
-                                        <span class="font-medium text-sm">Security</span>
+                                        <span class="font-medium text-sm">{{ __('bank.security') }}</span>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left border border-gray-200 hover:bg-gray-50 text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text">
@@ -88,12 +90,12 @@
                                             <path d="M16 13H8"></path>
                                             <path d="M16 17H8"></path>
                                         </svg>
-                                        <span class="font-medium text-sm">Statements</span>
+                                        <span class="font-medium text-sm">{{ __('bank.statements') }}</span>
                                     </a>
                                 </div>
                             </div>
                             <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('bank.quick_actions') }}</h3>
                                 <div class="space-y-2">
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50  border border-gray-200 transition-colors text-left">
                                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -103,8 +105,8 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Reset Password</p>
-                                            <p class="text-xs text-gray-500">Quickly reset your online banking password</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.reset_password') }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('bank.quickly_reset_your_online_banking_password') }}</p>
                                         </div>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left">
@@ -113,8 +115,8 @@
                                                 <path d="m21 21-4.3-4.3"></path>
                                             </svg></div>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Find ATM/Branch</p>
-                                            <p class="text-xs text-gray-500">Locate the nearest ATM or branch</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.find_atm_branch') }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('bank.locate_the_nearest_atm_or_branch') }}</p>
                                         </div>
                                     </a>
                                     <a href="#" class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left">
@@ -126,8 +128,8 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Report Fraud</p>
-                                            <p class="text-xs text-gray-500">Report suspicious account activity</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.report_fraud') }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('bank.report_suspicious_account_activity') }}</p>
                                         </div>
                                     </a>
 
@@ -142,20 +144,20 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Account Statements</p>
-                                            <p class="text-xs text-gray-500">Access your account statements</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.account_statements') }}</p>
+                                            <p class="text-xs text-gray-500">{{ __('bank.access_your_account_statements') }}</p>
                                         </div>
                                     </a>
                                 </div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Popular Help Topics</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('bank.popular_help_topics') }}</h3>
                             <div class="populartopicLists space-y-2">
                                 <a href="#" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        <span class="font-medium text-gray-900">How do I reset my online banking password?</span>
+                                        <span class="font-medium text-gray-900">{{ __('bank.how_do_i_reset_my_online') }}</span>
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <span class="text-xs text-gray-500">15,234 views</span>
@@ -167,7 +169,7 @@
                                 <a href="#" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        <span class="font-medium text-gray-900">How to set up a money transfer</span>
+                                        <span class="font-medium text-gray-900">{{ __('bank.how_to_set_up_a_money') }}</span>
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <span class="text-xs text-gray-500">12,856 views</span>
@@ -179,7 +181,7 @@
                                 <a href="#" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        <span class="font-medium text-gray-900">Understanding account fees</span>
+                                        <span class="font-medium text-gray-900">{{ __('bank.understanding_account_fees') }}</span>
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <span class="text-xs text-gray-500">11,492 views</span>
@@ -191,7 +193,7 @@
                                 <a href="#" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        <span class="font-medium text-gray-900">How to download bank statements</span>
+                                        <span class="font-medium text-gray-900">{{ __('bank.how_to_download_bank_statements') }}</span>
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <span class="text-xs text-gray-500">9,781 views</span>
@@ -203,7 +205,7 @@
                                 <a href="#" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                        <span class="font-medium text-gray-900">Card security features</span>
+                                        <span class="font-medium text-gray-900">{{ __('bank.card_security_features') }}</span>
                                     </div>
                                     <div class="flex items-center space-x-3">
                                         <span class="text-xs text-gray-500">8,634 views</span>
@@ -215,54 +217,54 @@
                             </div>
                         </div>
                         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Frequently Asked Questions</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('bank.frequently_asked_questions') }}</h3>
                             <div class="themeAccordian" id="faqaccordians">
                                 <div class="accordion mb-4 rounded-lg border border-black/20 bg-themeyellow">
                                     <button class="accordion-toggle w-full pl-[30px] py-4 pr-10 text-left font-medium text-md xl:text-[16px] text-black">
-                                        How do I update my personal information?
+                                        {{ __('bank.how_do_i_update_my_personal') }}
                                     </button>
                                     <div class="accordion-content px-6 text-black text-md xl:text-base leading-relaxed">
-                                        You can update your personal information by logging into your account and navigating to Profile & Settings. From there, you can edit your contact details, address, and other personal information. Some changes may require verification.
+                                        {{ __('bank.you_can_update_your_personal_information') }}
                                     </div>
                                 </div>
                                 <div class="accordion mb-4 rounded-lg border border-black/20 bg-themeyellow">
                                     <button class="accordion-toggle w-full pl-[30px] py-4 pr-10 text-left font-medium text-md xl:text-[16px] text-black">
-                                        Why am I locked out of my account?
+                                        {{ __('bank.why_am_i_locked_out_of') }}
                                     </button>
                                     <div class="accordion-content px-6 text-black text-md xl:text-base leading-relaxed">
-                                        Account lockouts typically occur after multiple unsuccessful login attempts for security reasons. You can unlock your account by using the "Forgot Password" link on the login page or by contacting our support team.
+                                        {{ __('bank.account_lockouts_typically_occur_after_multiple') }}
                                     </div>
                                 </div>
                                 <div class="accordion mb-4 rounded-lg border border-black/20 bg-themeyellow">
                                     <button class="accordion-toggle w-full pl-[30px] py-4 pr-10 text-left font-medium text-md xl:text-[16px] text-black">
-                                        What are the transfer limits?
+                                        {{ __('bank.what_are_the_transfer_limits') }}
                                     </button>
                                     <div class="accordion-content px-6 text-black text-md xl:text-base leading-relaxed">
-                                        Transfer limits vary based on your account type and verification level. Standard accounts have no daily limits for internal transfers between your own accounts. External transfers and new beneficiaries may have different limits for security.
+                                        {{ __('bank.transfer_limits_vary_based_on_your') }}
                                     </div>
                                 </div>
                                 <div class="accordion mb-4 rounded-lg border border-black/20 bg-themeyellow">
                                     <button class="accordion-toggle w-full pl-[30px] py-4 pr-10 text-left font-medium text-md xl:text-[16px] text-black">
-                                        How do I report a lost or stolen card?
+                                        {{ __('bank.how_do_i_report_a_lost') }}
                                     </button>
                                     <div class="accordion-content px-6 text-black text-md xl:text-base leading-relaxed">
-                                        Immediately lock your card through the mobile app or online banking. You can then order a replacement card, which will arrive within 3-5 business days. Your account remains protected with zero liability for unauthorized transactions.
+                                        {{ __('bank.immediately_lock_your_card_through_the') }}
                                     </div>
                                 </div>
                                 <div class="accordion mb-4 rounded-lg border border-black/20 bg-themeyellow">
                                     <button class="accordion-toggle w-full pl-[30px] py-4 pr-10 text-left font-medium text-md xl:text-[16px] text-black">
-                                        How do I set up two-factor authentication?
+                                        {{ __('bank.how_do_i_set_up_two') }}
                                     </button>
                                     <div class="accordion-content px-6 text-black text-md xl:text-base leading-relaxed">
-                                        Go to Security Settings in your account dashboard. Enable two-factor authentication and choose your preferred method (SMS or authenticator app). You will receive a verification code each time you log in from a new device.
+                                        {{ __('bank.go_to_security_settings_in_your') }}
                                     </div>
                                 </div>
                                 <div class="accordion mb-4 rounded-lg border border-black/20 bg-themeyellow">
                                     <button class="accordion-toggle w-full pl-[30px] py-4 pr-10 text-left font-medium text-md xl:text-[16px] text-black">
-                                        How far back can I access my statements?
+                                        {{ __('bank.how_far_back_can_i_access') }}
                                     </button>
                                     <div class="accordion-content px-6 text-black text-md xl:text-base leading-relaxed">
-                                        Digital statements are available for up to 7 years through your online banking account. You can view, download, or print statements from the Statements section. Older statements can be requested through our secure message center.
+                                        {{ __('bank.digital_statements_are_available_for_up') }}
                                     </div>
                                 </div>
                             </div>
@@ -271,7 +273,7 @@
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <path d="m21 21-4.3-4.3"></path>
                                     </svg>
-                                    <p class="text-gray-500">No results found. Try adjusting your search or category filter.</p>
+                                    <p class="text-gray-500">{{ __('bank.no_results_found_try_adjusting_your') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -281,7 +283,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield text-red-600">
                                     <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
                                 </svg>
-                                <h3 class="text-lg font-semibold text-gray-900">Security Tips</h3>
+                                <h3 class="text-lg font-semibold text-gray-900">{{ __('bank.security_tips') }}</h3>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-3">
@@ -290,8 +292,8 @@
                                             <path d="M20 6 9 17l-5-5"></path>
                                         </svg>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Use Strong Passwords</p>
-                                            <p class="text-xs text-gray-600">Create unique passwords with letters, numbers, and symbols</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.use_strong_passwords') }}</p>
+                                            <p class="text-xs text-gray-600">{{ __('bank.create_unique_passwords_with_letters_numbers') }}</p>
                                         </div>
                                     </div>
                                     <div class="flex items-start space-x-3">
@@ -299,8 +301,8 @@
                                             <path d="M20 6 9 17l-5-5"></path>
                                         </svg>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Enable Two-Factor Authentication</p>
-                                            <p class="text-xs text-gray-600">Add an extra layer of security to your account</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.enable_two_factor_authentication') }}</p>
+                                            <p class="text-xs text-gray-600">{{ __('bank.add_an_extra_layer_of_security') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -310,8 +312,8 @@
                                             <path d="M20 6 9 17l-5-5"></path>
                                         </svg>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Monitor Your Accounts</p>
-                                            <p class="text-xs text-gray-600">Regularly check for unauthorized transactions</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.monitor_your_accounts') }}</p>
+                                            <p class="text-xs text-gray-600">{{ __('bank.regularly_check_for_unauthorized_transactions') }}</p>
                                         </div>
                                     </div>
                                     <div class="flex items-start space-x-3">
@@ -319,8 +321,8 @@
                                             <path d="M20 6 9 17l-5-5"></path>
                                         </svg>
                                         <div>
-                                            <p class="font-medium text-gray-900 text-sm">Secure Your Devices</p>
-                                            <p class="text-xs text-gray-600">Keep your devices updated and use secure networks</p>
+                                            <p class="font-medium text-gray-900 text-sm">{{ __('bank.secure_your_devices') }}</p>
+                                            <p class="text-xs text-gray-600">{{ __('bank.keep_your_devices_updated_and_use') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -328,22 +330,22 @@
                         </div>
 
                         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Service Information</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('bank.service_information') }}</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <h3 class="font-medium text-gray-900 mb-3">Digital Banking</h3>
+                                    <h3 class="font-medium text-gray-900 mb-3">{{ __('bank.digital_banking') }}</h3>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><span class="text-gray-600">Online Banking:</span><span class="font-medium">24/7 Available</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-600">Mobile App:</span><span class="font-medium">24/7 Available</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-600">ATM Network:</span><span class="font-medium">24/7 Access</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">{{ __('bank.online_banking_2') }}</span><span class="font-medium">{{ __('bank.n24_7_available') }}</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">{{ __('bank.mobile_app') }}</span><span class="font-medium">{{ __('bank.n24_7_available') }}</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">{{ __('bank.atm_network') }}</span><span class="font-medium">{{ __('bank.n24_7_access') }}</span></div>
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 class="font-medium text-gray-900 mb-3">Support Response Times</h3>
+                                    <h3 class="font-medium text-gray-900 mb-3">{{ __('bank.support_response_times') }}</h3>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><span class="text-gray-600">Secure Messages:</span><span class="font-medium">Within 24 hours</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-600">Account Issues:</span><span class="font-medium">Same business day</span></div>
-                                        <div class="flex justify-between"><span class="text-gray-600">Fraud Reports:</span><span class="font-medium">Immediate response</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">{{ __('bank.secure_messages') }}</span><span class="font-medium">{{ __('bank.within_24_hours') }}</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">{{ __('bank.account_issues') }}</span><span class="font-medium">{{ __('bank.same_business_day') }}</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">{{ __('bank.fraud_reports') }}</span><span class="font-medium">{{ __('bank.immediate_response') }}</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -353,6 +355,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 @endsection

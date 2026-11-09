@@ -46,7 +46,7 @@ class SpendingActivityAssignmentTest extends TestCase
     {
         DB::table('mba_position')->insert([
             'user_id' => 1,
-            'activity_key' => 'hba_position',
+            'activity_key' => $activity->slot()[0],
             'activity_id' => $activity->id,
             'sid' => 1,
             'cid' => $class->id,
@@ -70,7 +70,7 @@ class SpendingActivityAssignmentTest extends TestCase
     public function test_high_spending_page_shows_the_assigned_activity_not_a_hardcoded_one(): void
     {
         [$student, $class] = $this->studentInClass();
-        $activity = Activity::where('type', 'high')->where('number', 5)->first();
+        $activity = Activity::where('title', 'Music Program Donation')->first();
         $this->assign($class, $activity);
 
         $response = $this->actingAs($student)->get('/education/high-spending-activities');
@@ -88,13 +88,24 @@ class SpendingActivityAssignmentTest extends TestCase
         $otherGrade = Grade::create(['sid' => 1, 'name' => 'Other Grade', 'grade_level_id' => GradeLevel::first()->id]);
         $otherClass = SchoolClass::create(['sid' => 1, 'grade_id' => $otherGrade->id, 'name' => 'Other Class']);
 
-        $this->assign($otherClass, Activity::where('type', 'high')->where('number', 1)->first());
-        $this->assign($class, Activity::where('type', 'high')->where('number', 9)->first());
+        $this->assign($otherClass, Activity::where('title', 'Birthday Party Budget')->first());
+        $this->assign($class, Activity::where('title', 'Computer Donation')->first());
 
         $response = $this->actingAs($student)->get('/education/high-spending-activities');
 
         $response->assertOk();
         $response->assertSee('Computer Donation');
         $response->assertDontSee('Birthday Party Budget');
+    }
+
+    /** Daniel, 2026-10-28: no "Home › Educational Finance Dept. › Spending Activity" trail - Back is enough. */
+    public function test_the_page_has_no_breadcrumb_trail(): void
+    {
+        [$student] = $this->studentInClass();
+
+        $this->actingAs($student)->get('/education/high-spending-activities')->assertOk()
+            ->assertSee('Spending Activity')
+            ->assertDontSee('class="breadcrumb"', false)
+            ->assertDontSee('Educational Finance Dept.');
     }
 }

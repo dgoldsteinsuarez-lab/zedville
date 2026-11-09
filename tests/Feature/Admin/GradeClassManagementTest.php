@@ -58,6 +58,86 @@ class GradeClassManagementTest extends TestCase
         ]);
     }
 
+    /**
+     * Daniel, 2026-10-22: French and German, and a beginner (A2/B1) version
+     * of every language that the teacher sets per class.
+     */
+    public function test_an_admin_can_set_a_class_to_french_or_german_at_beginner_level(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        [$school, $grade] = $this->schoolAndGrade();
+        session(['selected_school' => $school->id]);
+
+        $this->actingAs($admin)->post('/admin/grade/add', [
+            'name' => '8A', 'grade_id' => $grade->id,
+            'default_language' => 'fr', 'language_level' => 'beginner',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('classes', [
+            'name' => '8A', 'default_language' => 'fr', 'language_level' => 'beginner',
+        ]);
+
+        $class = SchoolClass::where('name', '8A')->firstOrFail();
+
+        $this->actingAs($admin)->put('/admin/grade/edit/' . $class->id, [
+            'name' => '8A', 'default_language' => 'de', 'language_level' => 'standard',
+        ])->assertRedirect();
+
+        $class->refresh();
+        $this->assertSame('de', $class->default_language);
+        $this->assertSame('standard', $class->language_level);
+    }
+
+    public function test_a_new_class_is_standard_level_unless_the_admin_picks_beginner(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        [$school, $grade] = $this->schoolAndGrade();
+        session(['selected_school' => $school->id]);
+
+        $this->actingAs($admin)->post('/admin/grade/add', [
+            'name' => '8B', 'grade_id' => $grade->id,
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('classes', ['name' => '8B', 'language_level' => 'standard']);
+    }
+
+    public function test_a_language_or_level_that_is_not_offered_is_rejected(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        [$school, $grade] = $this->schoolAndGrade();
+        session(['selected_school' => $school->id]);
+
+        $this->actingAs($admin)->post('/admin/grade/add', [
+            'name' => '8C', 'grade_id' => $grade->id, 'default_language' => 'it',
+        ])->assertSessionHasErrors('default_language');
+
+        $this->actingAs($admin)->post('/admin/grade/add', [
+            'name' => '8D', 'grade_id' => $grade->id, 'language_level' => 'expert',
+        ])->assertSessionHasErrors('language_level');
+
+        $this->assertDatabaseMissing('classes', ['name' => '8C']);
+        $this->assertDatabaseMissing('classes', ['name' => '8D']);
+    }
+
+    public function test_the_grade_page_offers_all_four_languages_and_the_beginner_level(): void
+    {
+        $admin = User::factory()->create(['role' => 1]);
+        [$school, $grade] = $this->schoolAndGrade();
+        SchoolClass::create([
+            'sid' => $school->id, 'name' => '8A', 'grade_id' => $grade->id,
+            'default_language' => 'de', 'language_level' => 'beginner',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.grades.general-information', $grade->id));
+
+        $response->assertOk();
+        foreach (['English', 'Español', 'Français', 'Deutsch'] as $language) {
+            $response->assertSee($language);
+        }
+        $response->assertSee('name="language_level"', false);
+        $response->assertSee('data-language-level="beginner"', false);
+    }
+
     public function test_an_unchecked_lock_on_update_leaves_the_class_free(): void
     {
         $admin = User::factory()->create(['role' => 1]);

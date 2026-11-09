@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Support\AssignmentScope;
 use App\Support\ClassColor;
 class FinheroAdminController extends Controller
 {
@@ -52,9 +53,12 @@ class FinheroAdminController extends Controller
 
         $query = DB::table('finhero_activity_registry as far')
             ->leftJoin('classes as c', 'far.cid', '=', 'c.id')
+            ->leftJoin('grades as cg', 'cg.id', '=', 'c.grade_id')
             ->leftJoin('grades as g', 'far.grade_id', '=', 'g.id')
-            ->select('far.*', 'c.name as class_name', 'g.name as grade_name')
-            ->where('far.type', 'task');
+            ->select('far.*', 'c.name as class_name', 'cg.name as class_grade_name', 'g.name as grade_name')
+            ->where('far.type', 'task')
+            // the level being worked on (the menu by level): its classes and grades only
+            ->when(\App\Support\AdminLevel::id(), fn ($q, $level) => $q->where(fn ($w) => $w->where('cg.grade_level_id', $level)->orWhere('g.grade_level_id', $level)));
 
         if (session()->has('selected_school')) {
             $query->where('far.sid', session('selected_school'));
@@ -81,16 +85,16 @@ class FinheroAdminController extends Controller
      */
     private function classesAndGrades(): array
     {
-        $classQuery = DB::table('classes');
         $gradeQuery = DB::table('grades');
 
         if (session()->has('selected_school')) {
-            $classQuery->where('sid', session('selected_school'));
             $gradeQuery->where('sid', session('selected_school'));
         }
+        // the level being worked on (the menu by level): its grades only
+        $gradeQuery->when(\App\Support\AdminLevel::id(), fn ($q, $level) => $q->where('grade_level_id', $level));
 
         return [
-            $classQuery->orderBy('id')->get(),
+            \App\Support\ClassLabel::classes(session('selected_school')),
             $gradeQuery->orderBy('id')->get(),
         ];
     }
@@ -108,9 +112,12 @@ class FinheroAdminController extends Controller
         //->where('type', 'library');
         $query = DB::table('finhero_activity_registry as far')
             ->leftJoin('classes as c', 'far.cid', '=', 'c.id')
+            ->leftJoin('grades as cg', 'cg.id', '=', 'c.grade_id')
             ->leftJoin('grades as g', 'far.grade_id', '=', 'g.id')
-            ->select('far.*', 'c.name as class_name', 'g.name as grade_name')
-            ->where('far.type', 'library');
+            ->select('far.*', 'c.name as class_name', 'cg.name as class_grade_name', 'g.name as grade_name')
+            ->where('far.type', 'library')
+            // the level being worked on (the menu by level): its classes and grades only
+            ->when(\App\Support\AdminLevel::id(), fn ($q, $level) => $q->where(fn ($w) => $w->where('cg.grade_level_id', $level)->orWhere('g.grade_level_id', $level)));
 
         if (session()->has('selected_school')) {
             $query->where('far.sid', session('selected_school'));
@@ -122,7 +129,8 @@ class FinheroAdminController extends Controller
 
         [$classes, $grades] = $this->classesAndGrades();
 
-        $libraryModules = \App\Models\FinheroLibraryModule::orderBy('sort_order')->get();
+        // the level's modules and those for every level (finhero_library_modules.levels)
+        $libraryModules = \App\Support\AdminLevel::scope(\App\Models\FinheroLibraryModule::query())->orderBy('sort_order')->get();
 
         $type = 'library';
 
@@ -230,9 +238,121 @@ class FinheroAdminController extends Controller
             ->with('success', 'Activity added successfully.');
     }*/
 
+    /**
+     * The activity for every grade in $grades (each in its own school),
+     * skipping grades that have it already - so it can be given again to
+     * new grades later without duplicates.
+     */
+    private function addActivityToGrades(Request $request, $grades)
+    {
+        $validated = $request->validate([
+            'activity_key' => 'required|string',
+            'activity_name' => 'nullable|string|max:255',
+            'position' => 'required|in:required,optional,free',
+            'type' => 'required|string',
+            'salary' => ['nullable', 'numeric', 'min:0'],
+            'is_active' => 'nullable|in:0,1',
+            'description' => 'nullable|string',
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        if ($grades->isEmpty()) {
+            return back()->withInput()->with('error', 'There are no grades to assign this to.');
+        }
+
+        $added = 0;
+        foreach ($grades as $grade) {
+            $has = DB::table('finhero_activity_registry')
+                ->where('activity_key', $validated['activity_key'])->where('type', $validated['type'])
+                ->where('sid', $grade->sid)->whereNull('cid')->where('grade_id', $grade->id)
+                ->exists();
+            if ($has) {
+                continue;
+            }
+
+            $this->insertActivity($validated, $grade->sid, null, $grade->id);
+            $this->syncFinheroActivityCalendar(
+                title: $validated['type'] . '-' . ($validated['activity_name'] ?: $validated['activity_key']),
+                position: $validated['position'],
+                description: $validated['description'] ?? '',
+                startDate: $validated['start_date'] ?? null,
+                endDate: $validated['end_date'] ?? null,
+                sid: (string) $grade->sid,
+                classId: null,
+                gradeId: $grade->id,
+            );
+            $added++;
+        }
+
+        $skipped = $grades->count() - $added;
+
+        return redirect($validated['type'] === 'task' ? '/admin/finhero/activities' : '/admin/finhero/task-activities')
+            ->with('success', "Activity added to {$added} " . \Illuminate\Support\Str::plural('grade', $added)
+                . ($skipped ? " ({$skipped} already had it)." : '.'));
+    }
+
+    /** One registry row: the activity for one grade or one class of a school. */
+    private function insertActivity(array $validated, $sid, ?int $classId, ?int $gradeId): void
+    {
+        DB::table('finhero_activity_registry')->insert([
+            'activity_key' => $validated['activity_key'],
+
+            // Not required - falls back to the activity_key itself so the
+            // list never shows a blank name.
+            'activity_name' => $validated['activity_name'] ?: $validated['activity_key'],
+
+            // Daniel, 2026-10-21: "i can still see all the unnecesarry
+            // settings here" (Max Points, redundant now that points come
+            // from badges separately per his earlier statement) - no
+            // longer collected per-activity at all. Always null here;
+            // FinheroStudentController already falls back to the global
+            // default (FinheroActivityDefault) for every activity whose
+            // own max_points is null, so the underlying mechanic is
+            // unchanged, just no longer manually overridden per activity.
+            'max_points' => null,
+
+            'position' => $validated['position'],
+
+            'type' => $validated['type'],
+
+            'sid' => $sid,
+
+            'cid' => $classId,
+            'grade_id' => $gradeId,
+
+            // Salary only for task - not required, falls back to the
+            // global default for this activity_key (FinheroActivityDefault,
+            // same philosophy as max_points), read at the point this is
+            // actually shown to a student (FinheroStudentController::
+            // taskPage()), not copied in here.
+            'salary' => $validated['type'] === 'task'
+                ? ($validated['salary'] ?? null)
+                : null,
+
+            // Not required - defaults to active.
+            'is_active' => $validated['is_active'] ?? 1,
+
+            'description' => $validated['description'] ?? null,
+
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
     public function addActivity(Request $request)
     {
         $selectedSchool = session('selected_school') ?: null;
+
+        // Daniel, 2026-10-26: "make all the activities available or
+        // repeatable for every school and classes made". "All grades" of
+        // this school, or of every school (super admins).
+        if (!$request->classId && AssignmentScope::isMany($request->grade_id)) {
+            return $this->addActivityToGrades($request, AssignmentScope::grades($request->grade_id, $selectedSchool));
+        }
 
         // Daniel, 2026-10-21: "classes have the same tasks, should be for
         // grade, the selection, by default, in case its not, there could
@@ -242,6 +362,12 @@ class FinheroAdminController extends Controller
         // explicit override. Exactly one of grade_id/cid ends up set.
         $classId = $request->classId ?: null;
         $gradeId = $classId ? null : ($request->grade_id ?: null);
+        // The grade's/class's own school: students only see activities of
+        // their school, so one saved while managing "all schools" (no
+        // school) never reached anyone (2026-10-26).
+        $selectedSchool = $selectedSchool ?: ($classId
+            ? DB::table('classes')->where('id', $classId)->value('sid')
+            : DB::table('grades')->where('id', $gradeId)->value('sid'));
 
         $validated = $request->validate([
 
@@ -330,52 +456,7 @@ class FinheroAdminController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $id = DB::table('finhero_activity_registry')->insertGetId([
-            'activity_key' => $validated['activity_key'],
-
-            // Not required - falls back to the activity_key itself so the
-            // list never shows a blank name.
-            'activity_name' => $validated['activity_name'] ?: $validated['activity_key'],
-
-            // Daniel, 2026-10-21: "i can still see all the unnecesarry
-            // settings here" (Max Points, redundant now that points come
-            // from badges separately per his earlier statement) - no
-            // longer collected per-activity at all. Always null here;
-            // FinheroStudentController already falls back to the global
-            // default (FinheroActivityDefault) for every activity whose
-            // own max_points is null, so the underlying mechanic is
-            // unchanged, just no longer manually overridden per activity.
-            'max_points' => null,
-
-            'position' => $validated['position'],
-
-            'type' => $validated['type'],
-
-            'sid' => $selectedSchool,
-
-            'cid' => $classId,
-            'grade_id' => $gradeId,
-
-            // Salary only for task - not required, falls back to the
-            // global default for this activity_key (FinheroActivityDefault,
-            // same philosophy as max_points), read at the point this is
-            // actually shown to a student (FinheroStudentController::
-            // taskPage()), not copied in here.
-            'salary' => $validated['type'] === 'task'
-                ? ($validated['salary'] ?? null)
-                : null,
-
-            // Not required - defaults to active.
-            'is_active' => $validated['is_active'] ?? 1,
-
-            'description' => $validated['description'] ?? null,
-
-            'start_date' => $validated['start_date'] ?? null,
-            'end_date' => $validated['end_date'] ?? null,
-
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $this->insertActivity($validated, $selectedSchool, $classId, $gradeId);
 
 
         /*
@@ -425,19 +506,22 @@ class FinheroAdminController extends Controller
         ?string $sid,
         ?int $classId,
         ?int $gradeId,
+        array $previousClassIds = [],
     ): void {
         $classIds = $classId
             ? [$classId]
             : DB::table('classes')->where('grade_id', $gradeId)->pluck('id')->all();
 
         // Editing an activity from "whole grade" down to one class (or
-        // vice versa) must drop calendar rows for classes no longer in
-        // scope - including a row with no class at all, left by activities
-        // saved before a class/grade was required.
+        // vice versa) drops the calendar rows of the classes it no longer
+        // covers - and any row with no class at all, left by activities
+        // saved before a class/grade was required. Only those: the same
+        // activity given to another grade of the school keeps its own rows
+        // (it used to delete them, 2026-10-26).
         DB::table('calendar_events')
             ->where('sid', $sid)
             ->where('title', $title)
-            ->where(fn ($q) => $q->whereNotIn('classId', $classIds)->orWhereNull('classId'))
+            ->where(fn ($q) => $q->whereIn('classId', array_values(array_diff($previousClassIds, $classIds)))->orWhereNull('classId'))
             ->delete();
 
         // See MbaPositionController - FullCalendar's end is exclusive, +1
@@ -446,8 +530,11 @@ class FinheroAdminController extends Controller
         $calendarEnd = !empty($endDate) ? \Carbon\Carbon::parse($endDate)->addDay()->startOfDay() : now();
 
         foreach ($classIds as $id) {
+            // The event belongs to the class's own school - saving while
+            // managing "all schools" used to add a second copy (2026-10-25).
+            $eventSid = $sid ?: DB::table('classes')->where('id', $id)->value('sid');
             $calendarEvent = DB::table('calendar_events')
-                ->where('sid', $sid)
+                ->where('sid', $eventSid)
                 ->where('classId', $id)
                 ->where('title', $title)
                 ->whereYear('created_at', now()->year)
@@ -467,7 +554,7 @@ class FinheroAdminController extends Controller
                 DB::table('calendar_events')->where('id', $calendarEvent->id)->update($fields);
             } else {
                 DB::table('calendar_events')->insert($fields + [
-                    'sid' => $sid,
+                    'sid' => $eventSid,
                     'classId' => $id,
                     'title' => $title,
                     'description' => $description ?? '',
@@ -584,6 +671,11 @@ class FinheroAdminController extends Controller
             unset($updateData['salary']);
         }
 
+        // The classes it covered before this edit (see syncFinheroActivityCalendar).
+        $previousClassIds = $activity->cid
+            ? [(int) $activity->cid]
+            : DB::table('classes')->where('grade_id', $activity->grade_id)->pluck('id')->all();
+
         DB::table('finhero_activity_registry')
             ->where('id', $id)
             ->update($updateData);
@@ -594,9 +686,10 @@ class FinheroAdminController extends Controller
             description: $validated['description'] ?? '',
             startDate: $validated['start_date'] ?? null,
             endDate: $validated['end_date'] ?? null,
-            sid: session('selected_school') ?: null,
+            sid: session('selected_school') ?: $activity->sid,
             classId: $classId,
             gradeId: $gradeId,
+            previousClassIds: $previousClassIds,
         );
 
         $route = $activity->type == 'task'
@@ -612,6 +705,22 @@ class FinheroAdminController extends Controller
     {
         if ($request->confirm_code != $request->delete_code) {
             return back()->with('error', 'Confirmation code does not match.');
+        }
+        // Its calendar events of this month and later go too: left behind, they
+        // still counted for this month's Engagement badge and - from 2026-11-03 -
+        // fined students for an activity that no longer exists
+        // (ActivityFineService). Earlier months' stay, as their history.
+        $activity = DB::table('finhero_activity_registry')->where('id', $id)->first();
+        if ($activity) {
+            $classIds = $activity->cid
+                ? [(int) $activity->cid]
+                : DB::table('classes')->where('grade_id', $activity->grade_id)->pluck('id')->all();
+            DB::table('calendar_events')
+                ->where('title', $activity->type . '-' . $activity->activity_name)
+                ->where(fn ($q) => $q->whereIn('classId', $classIds)
+                    ->orWhere(fn ($q) => $q->whereNull('classId')->where('sid', $activity->sid)))
+                ->where(fn ($q) => $q->where('end', '>', now())->orWhere('start', '>=', now()->startOfMonth()))
+                ->delete();
         }
         DB::table('finhero_activity_registry')->where('id', $id)->delete();
         //return response()->json(['success' => true, 'message' => 'Activity removed.']);
@@ -885,6 +994,16 @@ class FinheroAdminController extends Controller
         $questions = $module->questions()->with('options')->get();
 
         return view('admin.finhero.library-questions', compact('module', 'questions'));
+    }
+
+    /** The levels a Library module is for (the Admin menu by level, 2026-11-02); none checked: every level. */
+    public function saveLibraryModuleLevels(Request $request, int $moduleId)
+    {
+        $module = \App\Models\FinheroLibraryModule::findOrFail($moduleId);
+        $request->validate(['levels' => ['nullable', 'array'], 'levels.*' => ['integer']]);
+        $module->update(['levels' => \App\Support\AdminLevel::fromRequest($request->input('levels'))]);
+
+        return back()->with('success', '"' . $module->title . '" is for: ' . \App\Support\AdminLevel::names($module->levels) . '.');
     }
 
     private function uploadFinheroLibraryImage(Request $request): ?string

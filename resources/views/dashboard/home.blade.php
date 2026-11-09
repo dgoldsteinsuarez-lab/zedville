@@ -22,10 +22,58 @@
                 border-radius: 12px;
             }
 
+            /* Daniel, 2026-10-30: the whole home page on one screen, no scrolling,
+               no band that's mostly empty - the building links sit in the
+               "Enter Zedville" box, the mailbox next to the greeting. */
             .zvHome .zv-quicklink {
                 display: inline-flex;
                 align-items: center;
-                gap: 8px;
+                gap: 6px;
+                padding: 6px 12px;
+                border-radius: 999px;
+                background: #fff;
+                border: 1px solid #B7E3D6;
+                color: #014A38;
+                font-size: 13px;
+                font-weight: 600;
+                line-height: 1.2;
+                white-space: nowrap;
+            }
+
+            .zvHome .zv-quicklink:hover {
+                border-color: #00A47D;
+                color: #016950;
+            }
+
+            .zvHome .zv-mailchip {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 100%;
+                padding: 7px 8px 7px 14px;
+                border-radius: 999px;
+                background: #FFF9E9;
+                border: 1px solid #FFE48D;
+                color: #7A5B12;
+                font-size: 13px;
+            }
+
+            .zvHome .zv-mailchip.is-new {
+                font-weight: 600;
+                border-color: #F2C94C;
+            }
+
+            .zvHome .zv-mailchip-open {
+                flex-shrink: 0;
+                padding: 3px 10px;
+                border-radius: 999px;
+                background: #fff;
+                border: 1px solid #FFE48D;
+                font-weight: 600;
+            }
+
+            .zvHome .zv-mailchip:hover .zv-mailchip-open {
+                border-color: #E6D28C;
             }
 
             .zvHome .zv-section-label {
@@ -41,34 +89,41 @@
 
     <div class="zvHome max-w-5xl mx-auto space-y-4">
 
-        {{-- Header --}}
-        <div class="flex flex-col items-start justify-between pb-6 space-y-2 lg:flex-row lg:items-baseline lg:space-y-0">
+        {{-- Header, with the mailbox beside the greeting --}}
+        <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h1 class="text-xl font-bold whitespace-nowrap">{{ __('dashboard.welcome', ['name' => $studentName]) }}</h1>
-                <p class="text-sm text-gray-500 mt-1">{{ __('dashboard.citizen_of_zedville') }} · {{ $className }}</p>
+                <p class="text-sm text-gray-500 mt-0.5">{{ __('dashboard.citizen_of_zedville') }} · {{ $className }}</p>
             </div>
+            <a href="{{ route('profile.mailbox') }}" class="zv-mailchip {{ !empty($mailbox['unread']) ? 'is-new' : '' }}">
+                <span aria-hidden="true">✉️</span>
+                <span class="truncate">
+                    @if(!empty($mailbox['unread']))
+                        {{ trans_choice('dashboard.mailbox_new_messages', $mailbox['unread'], ['count' => $mailbox['unread']]) }}@if(!empty($mailbox['latest'])) — {{ $mailbox['latest'] }}@endif
+                    @else
+                        {{ __('dashboard.mailbox_no_new') }}
+                    @endif
+                </span>
+                <span class="zv-mailchip-open">{{ __('dashboard.open') }}</span>
+            </a>
         </div>
 
-        {{-- Enter Zedville banner + building quick links --}}
-        <section aria-label="Enter the city">
-            <div
-                class="rounded-xl border border-[#B7E3D6] bg-[#EEF9F5] px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-[#014A38]">{{ __('dashboard.enter_zedville') }}</h2>
-                    <p class="text-sm text-[#016950] mt-1">{{ __('dashboard.enter_zedville_sub') }}</p>
-                </div>
-                <a href="{{ url('education/city-hall') }}" class="themeBtn inline-flex items-center justify-center text-sm">
-                    {{ __('dashboard.go_to_the_city') }}
-                </a>
+        {{-- Enter Zedville, with the building quick links in the same box --}}
+        <section aria-label="Enter the city"
+            class="rounded-xl border border-[#B7E3D6] bg-[#EEF9F5] px-5 py-3 flex flex-col lg:flex-row lg:items-center gap-3">
+            <div class="lg:mr-auto">
+                <h2 class="text-lg font-bold text-[#014A38]">{{ __('dashboard.enter_zedville') }}</h2>
+                <p class="text-sm text-[#016950] mt-0.5">{{ __('dashboard.enter_zedville_sub') }}</p>
             </div>
-
-            <nav aria-label="Building quick links" class="flex flex-wrap gap-2 mt-3">
-                <a href="{{ url('education/city-mall') }}" class="whiteBtn zv-quicklink text-sm">🏬 {{ __('dashboard.city_mall') }}</a>
-                <a href="{{ url('supermarket') }}" class="whiteBtn zv-quicklink text-sm">🛒 {{ __('dashboard.supermarket') }}</a>
-                <a href="{{ route('bank.index') }}" class="whiteBtn zv-quicklink text-sm">🏦 {{ __('dashboard.bank') }}</a>
-                <a href="{{ route('education.educational_finance_department') }}" class="whiteBtn zv-quicklink text-sm">🎓
-                    {{ __('dashboard.education_finance_department') }}</a>
+            <nav aria-label="Building quick links" class="flex flex-wrap gap-2 lg:justify-end">
+                <a href="{{ url('education/city-mall') }}" class="zv-quicklink">🏬 {{ __('dashboard.city_mall') }}</a>
+                <a href="{{ url('supermarket') }}" class="zv-quicklink">🛒 {{ __('dashboard.supermarket') }}</a>
+                <a href="{{ route('bank.index') }}" class="zv-quicklink">🏦 {{ __('dashboard.bank') }}</a>
+                <a href="{{ route('education.educational_finance_department') }}" class="zv-quicklink">🎓 {{ __('dashboard.education_finance_department') }}</a>
             </nav>
+            <a href="{{ url('education/city-hall') }}" class="themeBtn inline-flex items-center justify-center text-sm whitespace-nowrap self-start lg:self-auto">
+                {{ __('dashboard.go_to_the_city') }}
+            </a>
         </section>
 
         {{-- Row 1: Activities | My bank --}}
@@ -76,7 +131,7 @@
 
             {{-- Activities to do --}}
             <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">{{ __('dashboard.activities_to_do') }}</h2>
+                <h2 class="zv-section-label mb-2">{{ __('dashboard.activities_to_do') }}</h2>
                 @if(count($activities))
                     <ul class="divide-y divide-gray-100">
                         @foreach($activities as $a)
@@ -88,17 +143,26 @@
                                     if ($diff < 0) {
                                         $due = [__('dashboard.overdue'), 'text-red-600'];
                                     } elseif ($diff <= 3) {
-                                        $due = [__('dashboard.due', ['day' => $d->format('D')]), 'text-red-600'];
+                                        $due = [__('dashboard.due', ['day' => $d->locale(app()->getLocale())->isoFormat('ddd')]), 'text-red-600'];
                                     } else {
-                                        $due = [$d->format('M j'), 'text-gray-400'];
+                                        $due = [$d->locale(app()->getLocale())->isoFormat(app()->getLocale() === 'en' ? 'MMM D' : 'D MMM'), 'text-gray-400'];
                                     }
                                 }
                             @endphp
-                            <li class="flex items-center justify-between py-2 gap-3">
-                                <span class="text-sm">{{ $a['title'] }}</span>
-                                @if($due)
-                                    <span class="text-xs font-medium whitespace-nowrap {{ $due[1] }}">{{ $due[0] }}</span>
-                                @endif
+                            <li>
+                                {{-- Daniel, 2026-10-25: each activity opens its own page. --}}
+                                <a @if(!empty($a['url'])) href="{{ $a['url'] }}" @endif
+                                   class="flex items-center justify-between py-1.5 gap-3 rounded-md -mx-2 px-2 {{ !empty($a['url']) ? 'hover:bg-emerald-50 group cursor-pointer' : '' }}">
+                                    <span class="text-sm {{ !empty($a['url']) ? 'group-hover:text-emerald-700' : '' }}">{{ $a['title'] }}</span>
+                                    <span class="flex items-center gap-2">
+                                        @if($due)
+                                            <span class="text-xs font-medium whitespace-nowrap {{ $due[1] }}">{{ $due[0] }}</span>
+                                        @endif
+                                        @if(!empty($a['url']))
+                                            <span class="text-gray-300 group-hover:text-emerald-600" aria-hidden="true">&rsaquo;</span>
+                                        @endif
+                                    </span>
+                                </a>
                             </li>
                         @endforeach
                     </ul>
@@ -110,24 +174,29 @@
                 @endif
             </div>
 
-            {{-- My bank --}}
-            <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">{{ __('dashboard.my_bank') }}</h2>
+            {{-- My bank: the statement row at the foot of the card, level with the
+                 end of the activities list beside it; the amounts in the middle
+                 of the room left above it --}}
+            <div class="zv-card px-5 py-4 flex flex-col">
+                <h2 class="zv-section-label mb-2">{{ __('dashboard.my_bank') }}</h2>
 
                 @if(!empty($bank['has_account']))
+                    <div class="flex-1 flex flex-col justify-center pb-3">
                     <div class="flex gap-8">
                         <div>
-                            <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.balance') }}</p>
-                            <p class="text-2xl font-bold">{{ number_format($bank['balance']) }} {{ __('dashboard.zeds') }}</p>
+                            <p class="text-xs text-gray-500 mb-0.5">{{ __('bank_ui.current') }}</p>
+                            <p class="text-2xl font-bold">{{ zeds($bank['balance']) }}</p>
                         </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.savings') }}</p>
-                            <p class="text-2xl font-bold text-[#016950]">{{ number_format($bank['savings']) }} {{ __('dashboard.zeds') }}</p>
-                        </div>
+                        @if($bank['ef_open'])
+                            <div>
+                                <p class="text-xs text-gray-500 mb-0.5">{{ __('bank_ui.emergency') }}</p>
+                                <p class="text-2xl font-bold text-[#016950]">{{ zeds($bank['savings']) }}</p>
+                            </div>
+                        @endif
                     </div>
 
-                    @if(!empty($bank['savings_goal']))
-                        @php $pct = min(100, round(($bank['savings'] / $bank['savings_goal']) * 100)); @endphp
+                    @if($bank['reserve_pct'] !== null)
+                        @php $pct = round($bank['reserve_pct']); @endphp
                         <div class="mt-3">
                             <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
                                 <div class="h-2 rounded-full bg-[#00A47D]" style="width: {{ $pct }}%"></div>
@@ -135,8 +204,9 @@
                             <p class="text-xs text-gray-500 mt-1.5">{{ __('dashboard.savings_goal_pct', ['pct' => $pct]) }}</p>
                         </div>
                     @endif
+                    </div>
 
-                    <div class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
+                    <div class="pt-3 border-t border-gray-100 flex items-center gap-2">
                         <label for="zv-statement-month" class="sr-only">{{ __('dashboard.choose_a_month') }}</label>
                         <select id="zv-statement-month"
                             class="flex-1 rounded-lg border border-[#D2DDDB] text-sm px-3 py-2 bg-white">
@@ -167,15 +237,17 @@
 
             {{-- My badges --}}
             <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">{{ __('dashboard.my_badges') }}</h2>
+                <h2 class="zv-section-label mb-2">{{ __('dashboard.my_badges') }}</h2>
                 @if(count($badges))
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @include('profile.partials.badge-medals')
+                    <div class="flex flex-wrap gap-x-6 gap-y-3">
                         @foreach($badges as $b)
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg {{ $b['type'] === 'finhero' ? 'bg-amber-100' : 'bg-[#EEF9F5]' }}"
-                                    aria-hidden="true">{{ $b['icon'] }}</div>
+                            <div class="flex items-start gap-3 flex-1 min-w-[14rem]">
+                                <svg viewBox="0 0 120 130" aria-hidden="true"
+                                    style="flex: none; width: 48px; height: 52px; filter: drop-shadow(0 3px 5px rgba(15, 42, 34, .18))"><use href="{{ $b['symbol'] }}"/></svg>
                                 <div>
                                     <p class="text-sm font-semibold">{{ $b['name'] }}</p>
+                                    @if (!empty($b['month']))<p class="text-xs font-semibold text-[#016950] mt-0.5" style="text-transform:capitalize">{{ $b['month'] }}</p>@endif
                                     <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">{{ $b['message'] }}</p>
                                 </div>
                             </div>
@@ -191,7 +263,7 @@
 
             {{-- Mood this month --}}
             <div class="zv-card px-5 py-4">
-                <h2 class="zv-section-label mb-3">{{ __('dashboard.mood_this_month') }}</h2>
+                <h2 class="zv-section-label mb-2">{{ __('dashboard.mood_this_month') }}</h2>
                 @if($mood)
                     @php
                         $getMoodIcon = function($moodId, $size = 44) {
@@ -237,19 +309,19 @@
                     @endphp
                     <div class="flex items-center">
                         <div class="flex-1 flex items-center gap-3">
-                            {!! $getMoodIcon($mood['my_mood']['mood'] ?? $mood['my_mood']['label'], 44) !!}
+                            {!! $getMoodIcon($mood['my_mood']['mood'] ?? $mood['my_mood']['label'], 40) !!}
                             <div>
                                 <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.my_mood') }}</p>
-                                <p class="text-xl font-bold">{{ $mood['my_mood']['label'] }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ $mood['my_mood']['detail'] }}</p>
+                                <p class="text-lg font-bold leading-tight">{{ $mood['my_mood']['label'] }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $mood['my_mood']['detail'] }}</p>
                             </div>
                         </div>
                         <div class="flex-1 border-l border-gray-100 pl-6 flex items-center gap-3">
-                            {!! $getMoodIcon($mood['city_mood']['mood'] ?? $mood['city_mood']['label'], 44) !!}
+                            {!! $getMoodIcon($mood['city_mood']['mood'] ?? $mood['city_mood']['label'], 40) !!}
                             <div>
                                 <p class="text-xs text-gray-500 mb-0.5">{{ __('dashboard.city_mood') }}</p>
-                                <p class="text-xl font-bold">{{ $mood['city_mood']['label'] }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ $mood['city_mood']['detail'] }}</p>
+                                <p class="text-lg font-bold leading-tight">{{ $mood['city_mood']['label'] }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $mood['city_mood']['detail'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -259,22 +331,6 @@
                         <p class="text-sm text-gray-500 mt-1">{{ __('dashboard.no_mood_hint') }}</p>
                     </div>
                 @endif
-            </div>
-        </section>
-
-        {{-- Mailbox strip --}}
-        <section aria-label="Mailbox">
-            <div class="rounded-xl bg-[#FFF9E9] border border-[#FFE48D] px-4 py-3 flex items-center gap-3">
-                <span aria-hidden="true">✉️</span>
-                <p class="flex-1 text-sm text-[#7A5B12]">
-                    @if(!empty($mailbox['unread']))
-                        {{ trans_choice('dashboard.mailbox_new_messages', $mailbox['unread'], ['count' => $mailbox['unread']]) }}@if(!empty($mailbox['latest'])) —
-                        {{ $mailbox['latest'] }}@endif
-                    @else
-                        {{ __('dashboard.mailbox_no_new') }}
-                    @endif
-                </p>
-                <a href="{{ route('profile.mailbox') }}" class="secondaryBtn text-sm">{{ __('dashboard.open') }}</a>
             </div>
         </section>
 

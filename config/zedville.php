@@ -88,4 +88,23 @@ return [
     'rent' => 300,
     'school_fees' => 1000,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Student languages
+    |--------------------------------------------------------------------------
+    |
+    | Languages students can use (lang/<code>/). Each also has a beginner
+    | version for A2/B1 learners in lang/<code>_easy/, which only needs the
+    | texts that are written more simply - anything missing there comes
+    | from the standard version (BeginnerTranslationLoader). A class's
+    | teacher chooses standard or beginner (classes.language_level).
+    |
+    */
+    'languages' => [
+        'en' => 'English',
+        'es' => 'Español',
+        'fr' => 'Français',
+        'de' => 'Deutsch',
+    ],
+
 ];

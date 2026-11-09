@@ -139,9 +139,10 @@ class RegisteredUserController extends Controller
         $content = view('mailbox_templates.welcome', ['user' => $user])->render();
         Mailbox::create([
             'student_id' => $user->id,
-            'subject' => 'Welcome to Zedville , ' . $user->nickname . '!',
+            'subject' => 'Welcome to Zedville, ' . ($user->nickname ?: $user->name) . '!',
             'content' => $content,
             'type' => 'primary',
+            'template' => 'welcome',   // shown in the reader's language (Mailbox model)
             'read' => 0,
             'created_at' => Carbon::now($timezone)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::now($timezone)->format('Y-m-d H:i:s'),
@@ -206,9 +207,10 @@ class RegisteredUserController extends Controller
         $content = view('mailbox_templates.welcome', ['user' => $staged])->render();
         Mailbox::create([
             'student_id' => $staged->id,
-            'subject' => 'Welcome to Zedville , ' . $staged->nickname . '!',
+            'subject' => 'Welcome to Zedville, ' . ($staged->nickname ?: $staged->name) . '!',
             'content' => $content,
             'type' => 'primary',
+            'template' => 'welcome',   // shown in the reader's language (Mailbox model)
             'read' => 0,
             'created_at' => Carbon::now($timezone)->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::now($timezone)->format('Y-m-d H:i:s'),

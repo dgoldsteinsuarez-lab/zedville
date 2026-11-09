@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FinheroPointService;
 use Illuminate\Http\Request;
 use App\Models\LoginQuestion;
+use App\Support\ContentTranslations;
 use App\Models\LoginOption;
 use App\Models\LoginQuizAttempt;
 use App\Models\Month;
@@ -38,12 +39,13 @@ class LoginQuizController extends Controller
     return response()->json([
         'show'     => true,
         'id'       => $question->id,
-        'question' => $question->question,
+        // Stored in English; shown in the student's language (2026-10-25).
+        'question' => ContentTranslations::get('daily_questions', $question->question),
         'type'     => $question->type,
         'options'  => $options->map(function ($opt) {
             return [
                 'id'   => $opt->id,
-                'text' => $opt->option_text,
+                'text' => ContentTranslations::get('daily_questions', $opt->option_text),
             ];
         }),
     ]);
@@ -52,9 +54,9 @@ class LoginQuizController extends Controller
     /**
      * Doc: "a monthly set of questions, determined by that month's School
      * Month Settings" - the student's Level (Class -> Grade -> Level) and
-     * the school's current progression month (start_month + elapsed
-     * calendar months). sid null applies to every school; a question with
-     * sid set only applies to that school.
+     * the current progression month (the Grade's start month - else the
+     * school's - plus elapsed calendar months). sid null applies to every
+     * school; a question with sid set only applies to that school.
      *
      * Daniel, 2026-10-21: questions should match the activity students are
      * doing that month. A month has 10 questions but more school days, so
@@ -68,7 +70,7 @@ class LoginQuizController extends Controller
         $answeredIds = LoginQuizAttempt::where('user_id', $user->id)->pluck('question_id');
 
         $gradeLevelId = optional(optional(optional($user->gradeRelation)->grade)->level)->id;
-        $progressionMonth = SchoolMonthSetting::currentProgressionMonthNumber($user->sid);
+        $progressionMonth = SchoolMonthSetting::progressionMonthForStudent($user);
 
         if ($gradeLevelId && $progressionMonth) {
             $reachedMonthIds = Month::whereIn('name', array_map(fn ($n) => "Month {$n}", range(1, $progressionMonth)))
@@ -144,7 +146,7 @@ class LoginQuizController extends Controller
         return response()->json([
             'success'      => true,
             'is_correct'   => $isCorrect,
-            'correct_text' => $correctOption ? $correctOption->option_text : '',
+            'correct_text' => $correctOption ? ContentTranslations::get('daily_questions', $correctOption->option_text) : '',
         ]);
     }
 }

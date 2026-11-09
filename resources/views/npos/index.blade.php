@@ -221,7 +221,7 @@
         padding: 2px 8px;
         background: var(--green-light);
         color: var(--green-text);
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
         border-radius: 20px;
         margin-bottom: 6px;
@@ -281,10 +281,10 @@
 
 <!-- Page Header -->
 <div class="page-header">
-    <h1>NPOs <span class="npo-count">— 7 organisations</span></h1>
+    <h1>{{ __('messages.nav_npos') }} <span class="npo-count">— {{ trans_choice('npos.organisations', $npos->count()) }}</span></h1>
     <div class="header-right">
         <div class="view-toggle" id="viewToggle">
-            <button id="btnList" class="active" onclick="setView('list')" title="List view">
+            <button id="btnList" class="active" onclick="setView('list')" title="{{ __('npos.list_view') }}">
                 <!-- List icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
@@ -292,15 +292,15 @@
                     <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
                     <line x1="3" y1="18" x2="3.01" y2="18"/>
                 </svg>
-                List
+                {{ __('npos.list') }}
             </button>
-            <button id="btnGrid" onclick="setView('grid')" title="Grid view">
+            <button id="btnGrid" onclick="setView('grid')" title="{{ __('npos.grid_view') }}">
                 <!-- Grid icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
                     <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
                 </svg>
-                Grid
+                {{ __('npos.grid') }}
             </button>
         </div>
     </div>
@@ -311,18 +311,18 @@
 @foreach($npos as $npo)
 <!-- Card 1: Animal Shelter -->
     <div class="npo-card">
-        <img src="{{ asset('public/uploads/npos/'.$npo->image) }}" class="card-img" alt="Animal Shelter">
+        <img src="{{ asset('public/uploads/npos/'.$npo->image) }}" class="card-img" alt="{{ ct('activities', $npo->name) }}">
         <div class="card-body">
-            <span class="npo-badge">{{ $npo->category }}</span>
-            <h3 class="card-title">{{ $npo->name }}</h3>
+            <span class="npo-badge">{{ ct('activities', $npo->category) }}</span>
+            <h3 class="card-title">{{ ct('activities', $npo->name) }}</h3>
             <p class="card-desc">
-                {{ $npo->content }}
+                {{ ct('activities', $npo->content) }}
             </p>
             <a href="{{ route('education.npos.donate', $npo->slug) }}" class="btn-donate">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
-                Donate Now
+                {{ __('npos.donate_now') }}
             </a>
         </div>
         <div class="card-action-col">
@@ -330,7 +330,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
-                Donate Now
+                {{ __('npos.donate_now') }}
             </a>
         </div>
     </div>

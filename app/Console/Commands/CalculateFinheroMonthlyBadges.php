@@ -45,7 +45,7 @@ class CalculateFinheroMonthlyBadges extends Command
         $now = Carbon::now();
 
         if ($this->option('previous-month')) {
-            $target = $now->copy()->subMonth();
+            $target = $now->copy()->startOfMonth()->subMonth(); // from the 1st: no overflow on the 31st
             $month  = (int) $target->month;
             $year   = (int) $target->year;
         } else {

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FC3F7"/><stop offset="1" stop-color="#B3E5FC"/></linearGradient></defs><rect width="400" height="250" fill="url(#bg)"/><g fill="#fff" opacity=".9" transform="translate(80 40) scale(1.0)"><ellipse cx="0" cy="0" rx="30" ry="11"/><ellipse cx="18" cy="-8" rx="18" ry="11"/><ellipse cx="-14" cy="-5" rx="14" ry="9"/></g>
+<path d="M260 70 Q330 40 400 70 V250 H220 Q250 160 260 70 Z" fill="#8D6E63"/><ellipse cx="320" cy="170" rx="26" ry="34" fill="#4E342E"/><ellipse cx="370" cy="140" rx="16" ry="22" fill="#4E342E"/>
+<g fill="#ECEFF1"><rect x="40" y="70" width="120" height="70"/></g><path d="M30 70 L100 40 L170 70 Z" fill="#CFD8DC"/>
+<g fill="#B0BEC5"><rect x="52" y="80" width="10" height="56"/><rect x="76" y="80" width="10" height="56"/><rect x="100" y="80" width="10" height="56"/><rect x="124" y="80" width="10" height="56"/><rect x="146" y="80" width="10" height="56"/></g>
+<text x="100" y="66" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#5D4037">Ƶ</text>
+<path d="M0 150 H260 Q250 200 220 250 H0 Z" fill="#0277BD"/>
+<g transform="translate(110 168)"><path d="M0 20 H90 L76 40 H14 Z" fill="#FAFAFA"/><rect x="30" y="0" width="30" height="20" fill="#E53935"/><path d="M44 0 V-20" stroke="#424242" stroke-width="3"/></g></svg>

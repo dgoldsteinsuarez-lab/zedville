@@ -1,5 +1,14 @@
 const template = window.templateData;
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
+
+// Texts and number formats in the student's language (lang/<language>/mba.php).
+const T = window.ZV_MBA;
+const LANG = document.documentElement.lang || 'en';
+const t = (text, params) => Object.keys(params || {})
+    .sort((a, b) => b.length - a.length)
+    .reduce((s, name) => s.split(':' + name).join(params[name]), text);
+const fmtPct = (pct) => Number(pct).toLocaleString(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const incomeLabel = (cell) => (T.income_labels[cell.id] !== undefined ? T.income_labels[cell.id] : cell.label);
 const BudgetingActivity = () => {
     const [bankItems, setBankItems] = useState(template);
 
@@ -8,6 +17,9 @@ const BudgetingActivity = () => {
     const [draggedItem, setDraggedItem] = useState(null);
     const [showMessage, setShowMessage] = useState(null);
     const [hasCompleted, setHasCompleted] = useState(false);
+    // every line sorted in this visit, and whether that was saved by itself
+    const [sorted, setSorted] = useState(false);
+    const autoSaved = useRef(false);
     // Daniel, 2026-10-21: "3 points if done all correct the first time, and
     // let two attempts before loosing one point" - a mis-drop never lands
     // (the drop is rejected below and the item stays in the bank), so the
@@ -103,42 +115,76 @@ const BudgetingActivity = () => {
             .then(data => console.log('Saved!', data));
         console.log(budget)
     };*/
+    // Lines on the statement that aren't in a box yet.
+    const unplacedCount = () => bankItems.filter(item =>
+        !Object.values(budget).some(cat => cat.some(cell => cell.item && cell.item.id === item.id))
+    ).length;
+
     const saveData = () => {
-    fetch('/education/store-mba', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-            budget: budget,
-            mistakes: mistakes
+        // Complete only once everything is sorted - otherwise "done" would be untrue.
+        const left = unplacedCount();
+        if (left > 0) {
+            Swal.fire({
+                icon: 'info',
+                title: T.not_finished_title,
+                text: t(left === 1 ? T.not_finished_one : T.not_finished_many, { count: left }),
+                confirmButtonColor: '#00A47D'
+            });
+            return;
+        }
+
+        fetch('/education/store-mba', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                budget: budget,
+                mistakes: mistakes
+            })
         })
-    })
-    .then(res => res.json())
-    .then(data => {
-        setShowMessage({
-            type: data.status ? 'success' : 'error',
-            text: data.pointsAwarded
-                ? `${data.message} +${data.pointsAwarded} FinHero points!`
-                : data.message
+            .then(res => res.json())
+            .then(data => {
+                if (!data.status) {
+                    Swal.fire({ icon: 'error', title: T.save_failed, text: data.message || '', confirmButtonColor: '#00A47D' });
+                    return;
+                }
+                setHasCompleted(true);
+                // A clear "done" with the FinHero points, like the other activities.
+                const points = data.pointsAwarded
+                    ? t(data.pointsAwarded === 1 ? T.points_earned_one : T.points_earned_many, { points: data.pointsAwarded })
+                    : T.points_already;
+                Swal.fire({
+                    icon: 'success',
+                    title: T.done_title,
+                    html: '<p style="margin:0 0 8px">' + T.done_text + '</p><p style="margin:0;font-weight:700;color:#016950">' + points + '</p>',
+                    confirmButtonText: T.done_button,
+                    confirmButtonColor: '#00A47D'
+                });
+            })
+            .catch(error => {
+                Swal.fire({ icon: 'error', title: T.save_failed, confirmButtonColor: '#00A47D' });
+                console.error(error);
+            });
+    };
+
+    // More boxes for one part of the budget, for a month with lots of lines.
+    const addSpace = (category) => {
+        const prefix = { income: 'inc', needs: 'need', wants: 'want', savings: 'save' }[category];
+        setBudget(prev => {
+            const cells = prev[category];
+            const extra = Array(category === 'income' ? 1 : 2).fill(null).map((_, i) => (
+                category === 'income'
+                    ? { id: `${prefix}x${cells.length + i}`, label: '', item: null }
+                    : { id: `${prefix}x${cells.length + i}`, item: null }
+            ));
+            return { ...prev, [category]: [...cells, ...extra] };
         });
-
-        setTimeout(() => setShowMessage(null), 3000);
-
-        console.log('Saved!', data);
-    })
-    .catch(error => {
-        setShowMessage({
-            type: 'error',
-            text: 'Something went wrong while saving.'
-        });
-
-        setTimeout(() => setShowMessage(null), 3000);
-
-        console.error(error);
-    });
-};
+    };
+    const AddSpace = ({ category }) => (
+        <button type="button" className="mba-add-space" onClick={() => addSpace(category)}>+ {T.add_space}</button>
+    );
     useEffect(() => {
         const getData = () => {
             fetch('/education/mba-data', {
@@ -201,7 +247,7 @@ const BudgetingActivity = () => {
         if (budget[category][cellIndex].item) {
             setShowMessage({
                 type: 'error',
-                text: 'This cell is already filled! Choose an empty cell.'
+                text: T.cell_filled
             });
             setTimeout(() => setShowMessage(null), 3000);
             return;
@@ -215,7 +261,7 @@ const BudgetingActivity = () => {
         if (isAlreadyPlaced) {
             setShowMessage({
                 type: 'error',
-                text: 'This item has already been placed in the budget!'
+                text: T.already_in_budget
             });
             setTimeout(() => setShowMessage(null), 3000);
             return;
@@ -259,7 +305,7 @@ const BudgetingActivity = () => {
             setMistakes(prev => prev + 1);
             setShowMessage({
                 type: 'error',
-                text: `Incorrect! "${draggedItem.name}" belongs in ${correctCategory.toUpperCase()}, not ${category.toUpperCase()}.`
+                text: t(T.incorrect, { item: draggedItem.name, correct: T.categories[correctCategory] || correctCategory.toUpperCase(), chosen: T.categories[category] || category.toUpperCase() })
             });
             setTimeout(() => setShowMessage(null), 3000);
             return;
@@ -274,7 +320,7 @@ const BudgetingActivity = () => {
 
         setShowMessage({
             type: 'success',
-            text: `✓ Great job! "${draggedItem.name}" correctly placed!`
+            text: t(T.correct, { item: draggedItem.name })
         });
         setTimeout(() => setShowMessage(null), 2000);
 
@@ -285,15 +331,20 @@ const BudgetingActivity = () => {
         if (allPlacedItems === bankItems.length && !hasCompleted) {
             setHasCompleted(true);
             setEngagementPoints(50);
-            setTimeout(() => {
-                setShowMessage({
-                    type: 'success',
-                    text: '🎉 Congratulations! You earned 50 Engagement Badge Points for completing this activity!'
-                });
-                setTimeout(() => setShowMessage(null), 5000);
-            }, 2000);
+            // everything is sorted: it saves by itself (see the effect below)
+            setSorted(true);
         }
     };
+
+    // Daniel, 2026-11-02: "Hice correctamente la actividad de Match pero aún
+    // aparece" - it only counted after Complete, easy to miss under the totals.
+    // Now the last right drop saves it (once; Complete still works).
+    useEffect(() => {
+        if (sorted && !autoSaved.current && unplacedCount() === 0) {
+            autoSaved.current = true;
+            saveData();
+        }
+    }, [sorted, budget]);
 
     const calculateTotals = () => {
         const totalIncome = budget.income.reduce((sum, cell) =>
@@ -319,7 +370,7 @@ const BudgetingActivity = () => {
     const totals = calculateTotals();
 
     const formatCurrency = (amount) => {
-        return amount ? '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') : '';
+        return amount ? 'Ƶ' + Number(amount).toLocaleString(LANG, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
     };
 
     const resetActivity = () => {
@@ -342,14 +393,14 @@ const BudgetingActivity = () => {
         ));
     };
 
-    const monthYear = new Date().toLocaleString('en-US', {
+    const monthYear = new Date().toLocaleString(LANG, {
         month: 'long',
         year: 'numeric'
     });
     const previousMonth = new Date();
     previousMonth.setMonth(previousMonth.getMonth() - 1);
 
-    const pmonthYear = previousMonth.toLocaleDateString('en-US', {
+    const pmonthYear = previousMonth.toLocaleDateString(LANG, {
         month: 'long',
         year: 'numeric'
     });
@@ -369,7 +420,7 @@ const BudgetingActivity = () => {
             <div style={{ maxWidth: '1600px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '24px' }}>
                 {/* LEFT: Bank Statement */}
                 <div style={{ backgroundColor: 'white', borderRadius: '8px', border: "1px solid #e5e7eb", padding: '16px' }}>
-                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#333', marginBottom: '6px' }}>BANK STATEMENT - {pmonthYear}</h2>
+                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#333', marginBottom: '6px' }}>{window.mbaSimulated ? T.bank_statement_simulated : t(T.bank_statement, { month: pmonthYear })}</h2>
 
 
                     <div style={{ maxHeight: '800px', overflowY: 'auto' }}>
@@ -402,7 +453,7 @@ const BudgetingActivity = () => {
                                             {item.amount > 0 ? '+' : ''}{formatCurrency(Math.abs(item.amount))}
                                         </span>
                                     </div>
-                                    {isPlaced && <p style={{ fontSize: '12px', color: '#999', marginTop: '4px', marginBottom: 0 }}>✓ Already placed</p>}
+                                    {isPlaced && <p style={{ fontSize: '12px', color: '#999', marginTop: '4px', marginBottom: 0 }}>{T.already_placed}</p>}
                                     {/*{isAdmin && (
                                         <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
                                             <select
@@ -427,23 +478,23 @@ const BudgetingActivity = () => {
 
                 {/* RIGHT: Monthly Budget Worksheet */}
                 <div style={{ borderRadius: '8px', border: "1px solid #e5e7eb", padding: '16px' }}>
-                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center', marginBottom: '6px', color: '#000' }}>MONTHLY BUDGET</h2>
+                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center', marginBottom: '6px', color: '#000' }}>{T.monthly_budget}</h2>
 
                     <div className="budget-header" style={{ marginBottom: '6px', paddingTop: "0px" }}>
-                        MONTH OF: {pmonthYear}
+                        {t(T.month_of, { month: pmonthYear })}
                     </div>
 
                     {/* Income and Needs Row */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                         {/* INCOME */}
                         <div className="budget-section" style={{ padding: '12px', borderRadius: '4px' }}>
-                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>INCOME</h3>
+                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>{T.income_heading}</h3>
                             {budget.income.map((cell, idx) => {
                                 if (!cell.hidden) {
                                     return <div key={cell.id} style={{ marginBottom: '8px' }}>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <div style={{ flex: '0 0 90px', borderRadius: "6px", padding: '8px', border: '1px solid #00a47d', backgroundColor: '#d4f1d4', fontSize: '12px', display: 'flex', alignItems: 'center' }}>
-                                                {cell.label}
+                                                {incomeLabel(cell)}
                                             </div>
                                             <div
                                                 className="budget-cell"
@@ -459,7 +510,7 @@ const BudgetingActivity = () => {
                                                         <div style={{ fontWeight: 'bold', color: '#4caf50' }}>{formatCurrency(cell.item.amount)}</div>
                                                     </div>
                                                 ) : (
-                                                    <div style={{ color: '#999', fontSize: '10px' }}>Drop here</div>
+                                                    <div style={{ color: '#999', fontSize: '10px' }}>{T.drop_here}</div>
                                                 )}
                                             </div>
                                         </div>
@@ -468,6 +519,7 @@ const BudgetingActivity = () => {
                                     return null
                                 }
                             })}
+                            <AddSpace category="income" />
                             {/* <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                                 <div style={{ flex: '0 0 90px', padding: '8px', border: '1px solid #00a47d', backgroundColor: '#d4f1d4', fontWeight: 'bold', fontSize: '12px' }}>Total Income</div>
                                 <div style={{ flex: 1, padding: '8px', border: '1px solid #00a47d', backgroundColor: '#d4f1d4', fontWeight: 'bold', fontSize: '12px', textAlign: 'center' }}>
@@ -477,7 +529,7 @@ const BudgetingActivity = () => {
                         </div>
                         {/* SAVINGS */}
                         <div className="budget-section" style={{ padding: '12px', borderRadius: '4px' }}>
-                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>SAVINGS (20%) _____ - {totals.savingsPercent}%</h3>
+                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>{t(T.savings_heading, { pct: fmtPct(totals.savingsPercent) })}</h3>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
                                 {budget.savings.map((cell, idx) => (
                                     <div
@@ -495,11 +547,12 @@ const BudgetingActivity = () => {
                                                 <div style={{ fontWeight: 'bold', color: '#f44336', fontSize: '10px' }}>{formatCurrency(Math.abs(cell.item.amount))}</div>
                                             </div>
                                         ) : (
-                                            <div style={{ color: '#999', fontSize: '9px' }}>Drop</div>
+                                            <div style={{ color: '#999', fontSize: '9px' }}>{T.drop}</div>
                                         )}
                                     </div>
                                 ))}
                             </div>
+                            <AddSpace category="savings" />
                         </div>
 
                     </div>
@@ -509,7 +562,7 @@ const BudgetingActivity = () => {
 
                         {/* NEEDS */}
                         <div className="budget-section" style={{ padding: '12px', borderRadius: '4px' }}>
-                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>NEEDS (50%) _____ - {totals.needsPercent}%</h3>
+                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>{t(T.needs_heading, { pct: fmtPct(totals.needsPercent) })}</h3>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
                                 {budget.needs.map((cell, idx) => (
                                     <div
@@ -527,18 +580,19 @@ const BudgetingActivity = () => {
                                                 <div style={{ fontWeight: 'bold', color: '#f44336', fontSize: '10px' }}>{formatCurrency(Math.abs(cell.item.amount))}</div>
                                             </div>
                                         ) : (
-                                            <div style={{ color: '#999', fontSize: '9px' }}>Drop</div>
+                                            <div style={{ color: '#999', fontSize: '9px' }}>{T.drop}</div>
                                         )}
                                     </div>
                                 ))}
                             </div>
+                            <AddSpace category="needs" />
                             <div style={{ marginTop: '8px', padding: '8px', border: '1px solid #00a47d', backgroundColor: '#d4f1d4', fontWeight: 'bold', textAlign: 'center', fontSize: '12px' }}>
-                                TOTAL: {formatCurrency(totals.totalNeeds)}
+                                {t(T.total, { amount: formatCurrency(totals.totalNeeds) })}
                             </div>
                         </div>
                         {/* WANTS */}
                         <div className="budget-section" style={{ padding: '12px', borderRadius: '4px' }}>
-                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>WANTS (30%) _____ - {totals.wantsPercent}%</h3>
+                            <h3 style={{ fontWeight: 'bold', marginBottom: '8px', fontSize: '14px' }}>{t(T.wants_heading, { pct: fmtPct(totals.wantsPercent) })}</h3>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
                                 {budget.wants.map((cell, idx) => (
                                     <div
@@ -556,13 +610,14 @@ const BudgetingActivity = () => {
                                                 <div style={{ fontWeight: 'bold', color: '#f44336', fontSize: '10px' }}>{formatCurrency(Math.abs(cell.item.amount))}</div>
                                             </div>
                                         ) : (
-                                            <div style={{ color: '#999', fontSize: '9px' }}>Drop</div>
+                                            <div style={{ color: '#999', fontSize: '9px' }}>{T.drop}</div>
                                         )}
                                     </div>
                                 ))}
                             </div>
+                            <AddSpace category="wants" />
                             <div style={{ marginTop: '8px', padding: '8px', border: '1px solid #00a47d', backgroundColor: '#d4f1d4', fontWeight: 'bold', textAlign: 'center', fontSize: '12px' }}>
-                                TOTAL: {formatCurrency(totals.totalWants)}
+                                {t(T.total, { amount: formatCurrency(totals.totalWants) })}
                             </div>
                         </div>
                     </div>
@@ -600,7 +655,7 @@ const BudgetingActivity = () => {
                         <div style={{ height: '80px', backgroundColor: 'white', borderRadius: '4px', border: '2px solid #ccc' }}></div>
                     </div>
                     <div style={{ justifyContent: "end" }} class="button-group">
-                        <button class="themeBtn" onClick={() => saveData()} >Complete</button>
+                        <button class="themeBtn" onClick={() => saveData()} >{T.complete}</button>
                     </div>
                 </div>
             </div>

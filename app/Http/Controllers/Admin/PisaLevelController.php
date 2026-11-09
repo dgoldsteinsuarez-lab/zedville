@@ -28,7 +28,13 @@ class PisaLevelController extends Controller
     {
         $levels = PisaProficiencyLevel::orderBy('domain')->orderBy('sort_order')->get();
 
-        return view('admin.pisa.index', compact('levels'));
+        // Real PISA exams cover every level, so they are listed here, not under one level.
+        $pisaCategory = CurriculumCategory::where('is_pisa_practice', true)->first();
+        $realExams = $pisaCategory
+            ? CurriculumItem::where('category_id', $pisaCategory->id)->where('is_real_exam', true)->withCount('questions')->orderBy('sort_order')->get()
+            : collect();
+
+        return view('admin.pisa.index', compact('levels', 'pisaCategory', 'realExams'));
     }
 
     public function store(Request $request)

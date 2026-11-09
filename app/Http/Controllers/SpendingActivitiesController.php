@@ -35,7 +35,7 @@ class SpendingActivitiesController extends Controller
     $activityId = $request->query('activity_id');
     if (!$activityId) {
     return redirect('/education/high-spending-activities')
-        ->with('error', 'Please select an activity first.');
+        ->with('error', __('spending.select_activity_first'));
     }
     
     return view(
@@ -70,7 +70,7 @@ public function supermarket(Request $request)
         ->where('sid', $user->sid)
         ->where('grade', $user->grade)
         ->orderBy('citizenId')
-        ->get(['id', 'citizenId', 'nickname']);
+        ->get(['id', 'citizenId', 'nickname', 'name']);
 
     // 🔹 URL type (omnivore / veg / etc.)
     $type = request()->segment(count(request()->segments()));
@@ -79,6 +79,8 @@ public function supermarket(Request $request)
     $products = Supermarket::where('type', $type)
         ->orderBy('id', 'ASC')
         ->get();
+    // the Intermediate's new prices, for the page only (App\Services\PriceRise)
+    \App\Services\PriceRise::reprice($user, $products, 'supermarkets');
 
     // 🔹 Last transaction balance
     $latestTxn = Transaction1::where('user_id', $user->id)
@@ -93,11 +95,13 @@ public function supermarket(Request $request)
 
     if (!$ConsumersurveyExists) {
         return redirect('/supermarket/market-list')
-            ->with('error', 'Please complete your monthly survey first.');
+            ->with('error', __('flash.survey_first'));
     }
 
     $groceries = $summary['groceryItems'];
     $itemNames = $summary['itemNames'];
+    // The basket swap only shows in the student's own diet section.
+    $basketDiet = $summary['diet'];
     $basketTotal = $summary['basketTotal'];
     $lunch = $summary['lunch'];
     $transport = $summary['transport'];
@@ -108,13 +112,17 @@ public function supermarket(Request $request)
     $activityId = $request->query('activity_id');
     if (!$activityId) {
     return redirect('/education/high-spending-activities')
-        ->with('error', 'Please select an activity first.');
+        ->with('error', __('spending.select_activity_first'));
     }
     $activity = null;
 
     if ($activityId) {
-        $activity = DB::table('activities')->where('id', $activityId)->first();
+        $activity = \App\Models\Activity::find($activityId);
     }
+    // its shopping list, as it stands for this student (Daniel, 2026-10-31)
+    $shoppingList = $activity && !empty($activity->shopping_list)
+        ? \App\Services\ShoppingList::forShop($activity, $user, 'Supermarket', $products, 'supermarkets')
+        : null;
     $npos = Npo::where('status', 1)
     ->orderBy('name')
     ->get(['id', 'name']);
@@ -136,9 +144,11 @@ public function supermarket(Request $request)
             'restaurants',
             'total',
             'itemNames',
+            'basketDiet',
             'ConsumersurveyExists',
             'activity',
-            'npos'
+            'npos',
+            'shoppingList'
         )
     );
 }
@@ -153,7 +163,7 @@ public function spending_tracker($type, Request $request)
         ->where('sid', $user->sid)
         ->where('grade', $user->grade)
         ->orderBy('citizenId')
-        ->get(['id', 'citizenId', 'nickname']);
+        ->get(['id', 'citizenId', 'nickname', 'name']);
 
     // URL → DB mapping
     $storeMap = [
@@ -183,6 +193,8 @@ public function spending_tracker($type, Request $request)
     $products = Product::where('type', $dbType)
         ->orderBy('product_name')
         ->get();
+    // the Intermediate's new prices, for the page only (App\Services\PriceRise)
+    \App\Services\PriceRise::reprice($user, $products, 'products');
 
     $latestTxn = Transaction1::where('user_id', $user->id)
         ->latest('id')
@@ -193,13 +205,16 @@ public function spending_tracker($type, Request $request)
     $activityId = $request->query('activity_id');
     if (!$activityId) {
     return redirect('/education/high-spending-activities')
-        ->with('error', 'Please select an activity first.');
+        ->with('error', __('spending.select_activity_first'));
     }
     $activity = null;
 
     if ($activityId) {
-        $activity = DB::table('activities')->where('id', $activityId)->first();
+        $activity = \App\Models\Activity::find($activityId);
     }
+    $shoppingList = $activity && !empty($activity->shopping_list)
+        ? \App\Services\ShoppingList::forShop($activity, $user, $dbType, $products, 'products')
+        : null;
     $npos = Npo::where('status', 1)
     ->orderBy('name')
     ->get(['id', 'name']);
@@ -216,7 +231,8 @@ public function spending_tracker($type, Request $request)
             'hasBankAccount',
             'activityId',
             'activity',  // was computed above but never passed - budget limits always fell back to defaults (bugs.md, 2026-10-21)
-            'npos'
+            'npos',
+            'shoppingList'
         )
     );
 }

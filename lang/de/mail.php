@@ -1,0 +1,226 @@
+<?php
+
+// Die Nachrichten der Stadt im Postfach der Schüler (resources/views/mailbox_templates),
+// in der Sprache der Leserin oder des Lesers angezeigt (Daniel, 2026-10-25).
+
+return [
+    'regards' => 'Viele Grüße',
+    'sincerely' => 'Mit freundlichen Grüßen',
+    'city_hall' => 'Rathaus Zedville',
+    'bank_team' => 'Dein Universal-Bank-Team',
+    'treasury' => 'Stadtkasse Zedville',
+    'hi' => 'Hallo,',
+    'dear' => 'Hallo :name,',
+    'citizen_id' => 'Offizielle Bürger-ID:',
+
+    'welcome' => [
+        'subject' => 'Willkommen in Zedville, :name!',
+        'hello' => 'Hallo :name',
+        'newest' => 'Glückwunsch! Du bist jetzt offiziell <span style="color:#3c41fb">die neueste Bürgerin bzw. der neueste Bürger von Zedville.</span>',
+        'citizen_id' => 'Deine Bürger-ID:',
+        'how_title' => 'So funktioniert es:',
+        'how' => 'Jeden Monat <span style="color:#3c41fb">bekommst du ein Gehalt in Zeds</span> (unserer virtuellen Währung). Damit übst du, ein Budget zu planen, Rechnungen zu bezahlen und Entscheidungen über dein Geld zu treffen – genau wie im Erwachsenenleben!',
+        'start_title' => 'Leg jetzt los:',
+        'step1' => 'Geh zur <strong>Bank</strong>',
+        'step2' => '<span style="color:#3c41fb">Eröffne dein erstes Bankkonto</span>',
+        'step3' => 'Warte, bis dein erstes Gehalt ankommt',
+        'city_hall' => '<strong>Rathaus</strong> – erledige Aktivitäten und nutze die Dienste der Stadt',
+        'efd' => '<strong>Abteilung für Finanzbildung</strong> – lerne mit interaktiven Lektionen, mit Geld umzugehen',
+        'profile' => '<strong>Dein Profil</strong> – passe deine Bürgerdaten an',
+        'closing' => 'Willkommen in deinem neuen virtuellen Leben! Wir freuen uns, dass du da bist.',
+    ],
+
+    'auto-debit' => [
+        'subject' => 'Rechnungen leicht gemacht: per Lastschrift bezahlen',
+        'intro' => 'Richte Lastschriften für deine Dienste ein (Schule, Internet, Strom und Wasser), damit du keine Mahngebühren zahlst und nichts von Hand überweisen musst.',
+        'authorize' => 'Du erlaubst:',
+        'item' => 'dass der volle Betrag jeder Rechnung jeden Monat automatisch abgebucht wird',
+        'button' => 'Lastschrift einrichten',
+    ],
+
+    'utility' => [
+        'intro' => 'Damit diese Rechnung automatisch bezahlt wird, füll dieses Formular aus. Der Betrag wird jeden Monat von deinem Konto abgebucht – so zahlst du immer pünktlich, ohne Überweisung von Hand und ohne Mahngebühren.',
+        'steps' => 'Schritte:',
+        'step1' => 'Trag deinen Namen, deine Telefonnummer, deine E-Mail-Adresse und deine Schul-Kontonummer ein.',
+        'step2' => 'Trag deine Bankdaten ein (Name der Bank, Kontonummer, SWIFT/BIC).',
+        'step3' => 'Kreuz die Option für die Zahlungsermächtigung an.',
+        'step4' => 'Bestätige, dass du den Bedingungen zustimmst.',
+        'button' => 'Formular ausfüllen',
+    ],
+    'water-auto-debit' => ['subject' => 'Wasserrechnung automatisch abbuchen lassen'],
+    'school-auto-debit' => ['subject' => 'Schulgeld automatisch abbuchen lassen'],
+    'internet-auto-debit' => ['subject' => 'Internetrechnung automatisch abbuchen lassen'],
+    'electricity-auto-debit' => ['subject' => 'Stromrechnung automatisch abbuchen lassen'],
+
+    'monthly-statement' => [
+        'subject' => 'Dein Kontoauszug für :month',
+        'ready' => 'Dein Kontoauszug für <strong>:month</strong> ist fertig.',
+        'view_text' => 'Hier siehst du deinen vollständigen Kontoauszug mit Einnahmen, Ausgaben und Kontostand:',
+        'link' => 'Kontoauszug für :month ansehen',
+        'anytime' => '(Du findest ihn auch jederzeit in der Bank.)',
+    ],
+
+    // der Brief des Rathauses zur Strafgebühr am Monatsende (App\Services\MonthEndPenaltyService)
+    'city-hall-fine' => [
+        'subject' => 'Strafgebühr des Rathauses: dein Plan für :month',
+        'what' => 'Im :month hast du deinen Monatsplan nicht gewählt, deshalb hat dir das Rathaus eine Strafgebühr von :amount berechnet.',
+        'what_hy' => 'Strafgebühr des Rathauses von :amount: Du hast deinen Plan für :month nicht gewählt.',
+        'why' => 'Du bekommst ein Gehalt, um dich auf deine Zukunft vorzubereiten, und wie jeder Erwachsene hast du Pflichten. Wenn du sie nicht erfüllst, zieht das Rathaus von deinem Konto ab, was du vom Gehalt dieses Monats nicht ausgegeben hast, bis zu 99 %.',
+        'next' => 'Damit das nicht wieder passiert, wähle jeden Monat deinen Plan: Er erscheint nach dem Einloggen, nach dem Tagesquiz.',
+        'next_hy' => 'Wähle jeden Monat deinen Plan.',
+    ],
+
+    'bank-account-ready' => [
+        'subject' => 'Dein Bankkonto ist bereit',
+        'intro' => 'Gute Nachrichten! Dein Konto bei der Universal Bank ist bereit.',
+        'visit' => 'In der Bank findest du:',
+        'features' => ['Kontoübersicht und Kontostand', 'Die Daten deiner Debitkarte', 'Deine Kontobewegungen', 'Rechnungen bezahlen', 'Spar-Werkzeuge', 'Konto-Benachrichtigungen'],
+        'starts' => 'Dein Bankleben beginnt jetzt!',
+        'online' => 'Universal Bank – Onlinebanking',
+        'welcome' => 'Willkommen, :name',
+        'account' => 'Konto:',
+        'student' => 'Schüler/in',
+        'summary' => 'Kontoübersicht',
+        'balance' => 'Verfügbarer Kontostand:',
+        'number' => 'Kontonummer:',
+        'card' => 'Debitkarte:',
+        'latest' => 'Letzte Bewegung:',
+        'none' => 'Noch keine',
+        'available' => 'Was du tun kannst',
+        'statement_title' => 'Kontoauszug ansehen',
+        'statement' => 'Prüfe alle Bewegungen auf deinem Konto.',
+        'card_title' => 'Debitkarte verwalten',
+        'card_items' => ['Karte aktivieren oder deaktivieren', 'PIN ändern', 'Karte sperren, wenn du sie verlierst'],
+        'transfers_title' => 'Überweisungen',
+        'transfers' => ['Überweisungen zwischen deinen Konten und an andere', 'Rechnungen bezahlen (Strom, Wasser, Internet)'],
+        'savings_title' => 'Spar-Werkzeuge',
+        'savings' => ['Sparziele festlegen', 'Automatische Erinnerungen'],
+        'alerts_title' => 'Benachrichtigungen',
+        'alerts' => 'Lass dich über deinen Kontostand und deine Kontobewegungen benachrichtigen.',
+        'questions' => 'Fragen? Schau in den Hilfe-Bereich der Bank.',
+        'thanks' => 'Danke, dass du bei der Universal Bank bist',
+    ],
+
+    'salary-deposite' => [
+        'subject' => 'Dein erstes Gehalt ist da',
+        'text' => 'Dein erstes Monatsgehalt wurde auf dein Konto überwiesen:',
+        'amount' => 'Betrag:',
+    ],
+
+    'direct-deposit' => [
+        'subject' => 'Bitte füll das Formular für deinen Gehaltseingang aus',
+        'hello' => 'Hallo <strong>:name</strong>,',
+        'intro' => 'Bitte erledige <span style="color:#3c41fb">zwei kurze Schritte</span>: den Gehaltseingang auf dein Konto und die Lastschriften für deine Rechnungen.',
+        'title' => 'Gehalt direkt aufs Konto',
+        'text' => 'Erlaube der Stadt, dein Monatsgehalt direkt auf dein Konto zu überweisen – der schnellste und sicherste Weg, bezahlt zu werden.',
+        'authorize' => 'Du erlaubst:',
+        'item' => 'dass 100 % deines Gehalts auf dein Konto bei der Universal Bank überwiesen werden',
+        'button' => 'Formular ausfüllen',
+    ],
+
+    'cityzenid' => [
+        'subject' => 'Deine Bürger-ID',
+        'congrats' => '<strong>HERZLICHEN GLÜCKWUNSCH!</strong> Du bist gerade in Zedville angekommen – schön, dass du unsere neueste Bürgerin bzw. unser neuester Bürger bist!',
+        'check' => '(Schau in dein Profil, um deine neue digitale ID zu sehen.)',
+    ],
+
+    'open-city-bank-account' => [
+        'subject' => 'Eröffne noch heute dein Schülerkonto!',
+        'dear' => 'Hallo,',
+        'why' => 'Eröffne heute dein Konto, um:',
+        'reasons' => ['dein Gehalt zu bekommen', 'deine Ausgaben einfach im Blick zu behalten', 'Rechnungen online zu bezahlen', 'für die Zukunft zu sparen'],
+        'benefits_title' => 'Vorteile:',
+        'benefits' => ['Keine Kontoführungsgebühren', 'Dein Sparkonto bringt jedes Jahr Zinsen'],
+        'start_title' => 'So startest du:',
+        'start' => ['Geh zur Bank', 'Eröffne dein Konto'],
+        'questions' => 'Fragen? Schau in den Hilfe-Bereich der Bank.',
+        'signature' => 'Universal Bank',
+    ],
+    'npo-thanks' => [
+        'subject' => 'Danke für deine Spende im :month',
+    ],
+    // The City Hall's letter about the Intermediate's price rise (App\Services\PriceRise::announce)
+    'price-rise' => [
+        'subject' => 'Die Preise in Zedville sind gestiegen',
+        'what' => 'Das Amt für Statistik Zedville hat seinen Preisindex veröffentlicht: Seit :month kostet das, was wir kaufen, im Durchschnitt :index mehr.',
+        'what_hy' => 'Seit :month sind die Preise in Zedville im Durchschnitt um :index gestiegen.',
+        'why' => 'Eine Dürre hat die Ernte von Obst, Gemüse und Oliven verdorben, und Gas, mit dem ein Teil des Stroms erzeugt wird, ist teurer geworden. Nicht alles steigt gleich: Öl wird :oil teurer, Internet bleibt gleich und Elektronik wird sogar billiger.',
+        'you' => 'Dein Gehalt steigt in diesem Schuljahr nicht. Deine Rechnungen und deine Einkäufe im Monat steigen von :before auf :after: :extra mehr jeden Monat.',
+        'you_hy' => 'Dein Gehalt steigt nicht. Rechnungen und Einkäufe: von :before auf :after im Monat.',
+        'next' => 'Schau beim Amt für Statistik nach, was teurer geworden ist und um wie viel:',
+        'link' => 'Die neuen Preise ansehen',
+    ],
+    // The Intermediate's third month: the bank's letter and Zed Directo's (App\Services\ZedDirecto::announce)
+    'rates-up' => [
+        'subject' => 'Dein Geldmarktkonto bringt ab :month mehr',
+        'what' => 'Die Zentralbank von Zedville hat den Leitzins erhöht. Ab :month bringt dein Geldmarktkonto :rate im Jahr (vorher :old).',
+        'what_hy' => 'Ab :month bringt dein Geldmarktkonto :rate im Jahr (vorher :old).',
+        'why' => 'Sie erhöht ihn, um den Preisanstieg zu bremsen: Wenn Sparen mehr bringt und Kredite mehr kosten, geben die Menschen etwas weniger aus und die Preise steigen langsamer.',
+        'real' => 'Bei Preisen, die um :index gestiegen sind, beträgt der Realzins deines Geldmarktkontos :real.',
+    ],
+    'zed-directo-open' => [
+        'subject' => 'Zed Directo eröffnet in Zedville',
+        'what' => 'Seit :month gibt es eine neue Bank in Zedville: Zed Directo, eine Onlinebank.',
+        'offer' => 'Wir bieten dir ein Tagesgeldkonto mit :savings Zinsen im Jahr und Festgeld für 6 Monate, das so viel bringt, wie die Preise steigen, plus 3 %: dieses Jahr :deposit. An das Festgeld kommst du 6 Monate lang nicht heran: Wenn du das Geld früher abhebst, verlierst du die Zinsen.',
+        'compare' => 'Vergleiche unsere Bedingungen mit denen deiner Bank, bevor du entscheidest, wo du sparst.',
+        'compare_hy' => 'Vergleiche, bevor du entscheidest.',
+        'link' => 'Zed Directo kennenlernen',
+        'sign' => 'Dein Zed-Directo-Team',
+    ],
+    // The Intermediate's saver bonus (App\Services\SaverBonus)
+    'saver-bonus' => [
+        'subject' => 'Deine Sparprämie',
+        'welcome' => 'Willkommen im Intermediate. Als Belohnung für das, was du im Rookie gespart hast, hat dir das Rathaus :amount überwiesen: :pct deines Notgroschens (höchstens :max).',
+        'quarter' => 'Prämie des Quartals: Das Rathaus hat dir :amount überwiesen, :pct von dem, was du in den letzten drei Monaten gespart hast (höchstens :max).',
+        'why' => 'Das Rathaus gibt dir ein Gehalt, damit du verantwortungsvoll damit umgehst, und es will belohnen, wer spart. In manchen Ländern gibt es das wirklich: In Deutschland legt der Staat Geld auf das drauf, was Beschäftigte von ihrem Lohn sparen.',
+        'next' => 'Alle drei Monate gibt es eine neue Prämie: :pct von dem, was du auf deinem Notgroschen-Konto, deinem Geldmarktkonto und bei Zed Directo sparst.',
+    ],
+    // The overdraft (App\Services\Overdraft)
+    'overdraft' => [
+        'subject' => 'Dein Girokonto ist überzogen',
+        'what' => 'Du hattest das Geld nicht, um „:what“ rechtzeitig zu bezahlen, also hat die Bank es für dich bezahlt. Dein Girokonto ist überzogen: :balance.',
+        'cost' => 'Jeder Monat, der im Minus endet, kostet :tae im Jahr auf das, was du schuldest, plus :fee Gebühr.',
+        'why' => 'Ein Dispo ist ein Kredit, um den du nicht gebeten hast, und einer der teuersten. Deshalb hilft ein Notgroschen.',
+        'next' => 'Dein nächstes Gehalt deckt, was du schuldest. Bis dahin gib nur das Nötigste aus.',
+    ],
+    // Die Krankenversicherung, die das Rathaus gibt, wer nicht wählt (App\Services\InsuranceService::assignDefault)
+    'insurance-default' => [
+        'subject' => 'Deine Krankenversicherung',
+        'given' => 'Alle Einwohner von Zedville müssen krankenversichert sein, und du hattest in deinem ersten Monat keinen Tarif gewählt. Das Rathaus hat dir den :plan gegeben: :premium im Monat, mit den Rechnungen.',
+        'why' => 'Ohne Versicherung müsstest du alles, was eine Krankheit oder ein Unfall kostet, selbst bezahlen.',
+        'next' => 'Du kannst deinen Tarif noch einmal selbst wählen, in der FinHero-Aufgabe „:task“.',
+    ],
+    // Eine unerwartete Ausgabe (App\Services\EmergencyService::arrive)
+    'emergency' => [
+        'subject' => 'Eine unerwartete Ausgabe',
+        'cost' => 'Es kostet :cost.',
+        'insured' => 'Es kostet :cost; dein :plan übernimmt :covered, also zahlst du :amount.',
+        'no_insurance' => 'Es kostet :cost. Du hast keine Krankenversicherung, also zahlst du alles.',
+        'waiting' => 'Es kostet :cost. Dein Tarif übernimmt den Zahnarzt noch nicht (Wartezeit), also zahlst du alles.',
+        'deductible' => 'Es kostet :cost. Dein :plan hat einen Selbstbehalt von :deductible, also zahlst du alles.',
+        'due' => 'Du hast 30 Tage Zeit, es zu bezahlen, bis zum :date: unter „:activity“ an der Tafel der Abteilung für Finanzbildung.',
+        'why' => 'Dafür ist dein Notgroschen da. Wenn du nicht rechtzeitig bezahlst, wird es von deinem Girokonto abgebucht, auch wenn es dabei ins Minus rutscht.',
+        'from' => [
+            'arm' => 'Krankenhaus Zedville',
+            'filling' => 'Zahnarztpraxis Zedville',
+            'washing_machine' => 'Reparaturservice Zedville',
+            'phone' => 'Reparaturservice Zedville',
+            'bike' => 'Fahrradwerkstatt Zedville',
+            'trip' => 'Deine Familie',
+        ],
+    ],
+    // Die Betrugsfälle (App\Services\FraudService): die Betreffzeilen der gefälschten E-Mails, wie das Postfach sie zeigt, und der Brief der Bank
+    'fraud-verify' => ['subject' => 'DRINGEND: Ihr Konto wird gesperrt'],
+    'fraud-refund' => ['subject' => 'Sie haben eine Erstattung von 450,00 Ƶ'],
+    'fraud-prize' => ['subject' => 'Herzlichen Glückwunsch! Sie haben ein Handy gewonnen'],
+    'fraud-parcel' => ['subject' => 'Ihr Schulmaterial wird zurückgehalten'],
+    'fraud-job' => ['subject' => 'Ein Job für Schüler: 50,00 Ƶ pro Überweisung'],
+    'fraud-loss' => [
+        'subject' => 'Du bist Opfer eines Betrugs geworden',
+        'call' => 'Heute hast du einen Anruf von jemandem angenommen, der sich als „:caller“ ausgab, und getan, was er verlangte.',
+        'email' => 'Heute hast du auf den Link in einer E-Mail gedrückt, die angeblich von der Abteilung für Finanzbildung kam.',
+        'lost' => 'Es war Betrug: Du hast :amount verloren.',
+        'cover' => 'Du hast 30 Tage Zeit, es mit deinem Notgroschen oder einem Kredit zu decken, unter „:activity“.',
+        'real' => 'Im echten Leben muss die Bank das Geld meist erstatten, wenn ein Betrüger mit einem Code zahlt, den du ihm gegeben hast (du verlierst höchstens 50 €); überweist du selbst, muss die Bank es in der EU nicht zurückzahlen.',
+    ],
+];

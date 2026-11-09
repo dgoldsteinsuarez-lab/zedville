@@ -48,9 +48,11 @@
                                     <th>ID</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Primary Savings Account</th>
+                                    <th>Current Account No.</th>
                                     <th>Card Number</th>
-                                    <th>Current Balance</th>
+                                    <th>Current Account</th>
+                                    <th>Emergency Fund</th>
+                                    <th>Money Market</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -68,11 +70,14 @@
                                         <td valign="middle">{{ $account->primary_savings_account_number }}</td>
                                         <td valign="middle">{{ $account->card_number }}</td>
 
-                                        <td valign="middle">₹ {{ number_format($account->current_balance, 2) }}</td>
+                                        <td valign="middle">Ƶ {{ number_format((float) $account->current_balance, 2) }}</td>
+                                        {{-- the savings accounts' balances, when open (bank review, 2026-10-29) --}}
+                                        <td valign="middle">{{ $account->is_open_emergency_account ? 'Ƶ ' . number_format((float) $account->emergency_fund_account_amount, 2) : 'not open' }}</td>
+                                        <td valign="middle">{{ $account->is_open_money_market_account ? 'Ƶ ' . number_format((float) $account->money_market_account_amount, 2) : 'not open' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">No accounts found</td>
+                                        <td colspan="8" class="text-center">No accounts found</td>
                                     </tr>
                                 @endforelse
                             </tbody>

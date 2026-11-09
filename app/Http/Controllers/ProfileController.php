@@ -44,14 +44,18 @@ class ProfileController extends Controller
         // 🔹 Grades
         $grades = SchoolClass::where('status', 1)->get();
 
-        // 🔹 CURRENT MONTH consumer survey ONLY
-        $Consumersurvey = ConsumerSurvey::where('user_id', $user->id)
-            //->whereMonth('created_at', $now->month)
-            //->whereYear('created_at', $now->year)
-            ->orderBy('id', 'desc')
-            ->first();
+        // 🔹 The survey in effect this month (one done this month for next
+        // month takes over on the 1st - ConsumerSurvey::inEffect)
+        $Consumersurvey = ConsumerSurvey::inEffect($user->id);
+        // Once per calendar month (Daniel, 2026-10-23); a newer survey
+        // waiting for next month is shown as such.
+        $surveyDoneThisMonth = ConsumerSurvey::doneThisMonth($user->id);
+        $upcomingSurvey = ConsumerSurvey::where('user_id', $user->id)->orderByDesc('id')->get()
+            ->first(fn ($s) => $s->monthStart() && $s->monthStart()->gt(now()->startOfMonth()));
 
-        $ConsumersurveyExists = (bool) $Consumersurvey;
+        // A survey skipped in activation isn't done: show the form, not
+        // results full of zeros with the button locked.
+        $ConsumersurveyExists = $Consumersurvey && !$Consumersurvey->isSkipped();
 
         // 🔹 Groceries (string / array safe)
         $groceriesRaw = $Consumersurvey->groceries ?? '[]';
@@ -81,49 +85,8 @@ class ProfileController extends Controller
                 ?? ($basketTotal + $lunch + $transport + $activities + $restaurants);
         }
         $moodData = app(MoodController::class)->getMoodData();
-        $testMode = false;
-        if ($testMode) {
-            // ✅ HARD CODE TEST DATA
-            $engagement = [
-                'monthly' => 'PLATINUM',
-                'yearly' => 'GOLD',
-                'academicStartYear' => 2025,
-                'history' => [
-                    "8" => "BRONZE",
-                    "9" => "SILVER",
-                    "10" => "GOLD",
-                    "11" => "PLATINUM",
-                    "0" => "GOLD",
-                    "1" => "SILVER",
-                    "2" => "BRONZE",
-                    "3" => "NONE",
-                    "4" => null,
-                    "5" => null,
-                ]
-            ];
-
-            $finhero = [
-                'monthly' => 'LEGEND',
-                'yearly' => 'CHAMPION',
-                'academicStartYear' => 2025,
-                'history' => [
-                    "8" => "ROOKIE",
-                    "9" => "FINHERO",
-                    "10" => "CHAMPION",
-                    "11" => "LEGEND",
-                    "0" => "FINHERO",
-                    "1" => "ROOKIE",
-                    "2" => "NONE",
-                    "3" => null,
-                    "4" => null,
-                    "5" => null,
-                ]
-            ];
-        } else {
-            $engagement = $this->getEngagementData($user->id);
-            $finhero = $this->getFinHeroData($user->id);
-
-        }
+        // the Badges tab: the latest badge earned, this month so far, the year (App\Services\BadgeOverview)
+        $badges = app(\App\Services\BadgeOverview::class)->forStudent((int) $user->id);
         //Durable goods / Non Durable 
         $userId = Auth::id();
 
@@ -165,6 +128,8 @@ class ProfileController extends Controller
 
             // 🔹 Survey data (MONTH-WISE)
             'ConsumersurveyExists' => $ConsumersurveyExists,
+            'surveyDoneThisMonth' => $surveyDoneThisMonth,
+            'upcomingSurvey' => $upcomingSurvey,
             'Consumersurvey' => $Consumersurvey,
             'basketTotal' => $basketTotal,
             'lunch' => $lunch,
@@ -179,8 +144,7 @@ class ProfileController extends Controller
             'myLogs' => $moodData['myLogs'],
             'todayMyLog' => $moodData['todayMyLog'],
             'cityMonths' => $moodData['cityMonths'],
-            'engagement' => $engagement, // ✅ ADD THIS
-            'finhero' => $finhero, // ✅ ADD THIS
+            'badges' => $badges,
             'durableProducts' => $durableProducts, // ✅ ADD THIS
             'nonDurableProducts' => $nonDurableProducts, // ✅ ADD THIS
 
@@ -235,142 +199,5 @@ class ProfileController extends Controller
         $user->save();
 
         return redirect()->back()->with('status', 'avatar-updated');
-    }
-    /**
-     * Settings page Engagement badge data - sourced from the real,
-     * spec-delivered BadgeCalculatorService/student_badge_records rather
-     * than an inline recalculation, so this always matches /badges and
-     * the admin badge views exactly (bugs.md, 2026-10-19). Keeps the
-     * same return shape student-badges.blade.php's JS already expects
-     * (0-based months, matching this file's prior convention).
-     */
-    private function getEngagementData($studentId)
-    {
-        $now = now();
-        $calculator = app(\App\Services\BadgeCalculatorService::class);
-
-        // Keep the current month's record fresh on every page view,
-        // same approach as BadgeStudentController::data().
-        $calculator->calculateForStudent($studentId, $now->month, $now->year);
-
-        $academicYearStartMonth1Based = config('zedville.academic_year_start_month', 4);
-        $academicStartMonth = $academicYearStartMonth1Based - 1; // JS style (0-based)
-        $academicStartYear = $now->month >= $academicYearStartMonth1Based ? $now->year : $now->year - 1;
-        $academicYear = $calculator->getAcademicYear($now->month, $now->year);
-
-        $pointsMap = [
-            'PLATINUM' => 4,
-            'GOLD' => 3,
-            'SILVER' => 2,
-            'BRONZE' => 1,
-            'NONE' => 0,
-        ];
-
-        // StudentBadgeRecord::month is 1-based; key by (month - 1) to
-        // match this method's existing 0-based history/currentMonth
-        // convention. 10 consecutive academic months never repeat a
-        // month number, so this key is unambiguous.
-        $records = \App\Models\StudentBadgeRecord::where('student_id', $studentId)
-            ->where('academic_year', $academicYear)
-            ->get()
-            ->keyBy(fn ($r) => $r->month - 1);
-
-        $history = [];
-        $totalPts = 0;
-
-        $month = $academicStartMonth;
-        $year = $academicStartYear;
-
-        // 🔹 Loop 10 academic months
-        for ($i = 0; $i < 10; $i++) {
-            $record = $records->get($month);
-            $badge = $record ? $record->effective_monthly_badge : 'NONE';
-
-            $history[$month] = $badge;
-            $totalPts += $pointsMap[$badge] ?? 0;
-
-            $month++;
-            if ($month > 11) {
-                $month = 0;
-                $year++;
-            }
-        }
-
-        $currentMonth = $now->month - 1; // 0-based
-        $currentYear = $now->year;
-        $currentRecord = $records->get($currentMonth);
-
-        $monthly = $currentRecord ? $currentRecord->effective_monthly_badge : 'NONE';
-        $yearly = $currentRecord ? $currentRecord->accumulated_badge : $calculator->determineAccumulatedBadge($totalPts);
-
-        return [
-            'monthly' => $monthly,
-            'yearly' => $yearly,
-            'history' => $history,
-            'academicStartYear' => $academicStartYear,
-            'academicStartMonth' => $academicStartMonth,
-            'currentMonth' => $currentMonth,
-            'currentYear' => $currentYear,
-        ];
-    }
-    /**
-     * Settings page FinHero badge data - from FinheroBadgeCalculatorService/
-     * finhero_badge_records, the same way getEngagementData() reads the
-     * Engagement badge. This replaces an inline recalculation that only
-     * counted Library points through a "module of the month" setting
-     * nothing in admin fills in, and compared 0-based months against the
-     * 1-based months points are stored with. Same return shape
-     * student-badges.blade.php's JS expects (0-based months).
-     */
-    private function getFinHeroData($studentId)
-    {
-        $now = now();
-        $calculator = app(\App\Services\FinheroBadgeCalculatorService::class);
-
-        // Keep the current month's record fresh on every page view.
-        $calculator->calculateForStudent($studentId, $now->month, $now->year);
-
-        $academicYearStartMonth1Based = config('zedville.academic_year_start_month', 4);
-        $academicStartMonth = $academicYearStartMonth1Based - 1; // JS style (0-based)
-        $academicStartYear = $now->month >= $academicYearStartMonth1Based ? $now->year : $now->year - 1;
-        $academicYear = $calculator->getAcademicYear($now->month, $now->year);
-
-        $records = \App\Models\FinheroBadgeRecord::where('student_id', $studentId)
-            ->where('academic_year', $academicYear)
-            ->get()
-            ->keyBy(fn ($r) => $r->month - 1);
-
-        $history = [];
-        $totalPts = 0;
-
-        $month = $academicStartMonth;
-        $year = $academicStartYear;
-
-        for ($i = 0; $i < 10; $i++) {
-            $record = $records->get($month);
-            $badge = $record ? $record->effective_monthly_badge : 'NONE';
-
-            $history[$month] = $badge;
-            $totalPts += \App\Models\FinheroBadgeRecord::BADGE_POINTS[$badge] ?? 0;
-
-            $month++;
-            if ($month > 11) {
-                $month = 0;
-                $year++;
-            }
-        }
-
-        $currentMonth = $now->month - 1; // 0-based
-        $currentRecord = $records->get($currentMonth);
-
-        return [
-            'monthly' => $currentRecord ? $currentRecord->effective_monthly_badge : 'NONE',
-            'yearly' => $currentRecord ? $currentRecord->accumulated_badge : $calculator->determineAccumulatedBadge($totalPts),
-            'history' => $history,
-            'academicStartYear' => $academicStartYear,
-            'academicStartMonth' => $academicStartMonth,
-            'currentMonth' => $currentMonth,
-            'currentYear' => $now->year,
-        ];
     }
 }

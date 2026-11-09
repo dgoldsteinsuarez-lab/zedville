@@ -4,6 +4,12 @@
 
 @section('content')
 
+@php
+    $zeds = fn ($amount) => 'Ƶ' . number_format((float) $amount, 2);
+    // The onboarding survey can be skipped - that leaves a zero-cost record.
+    $surveyDone = $survey && (float) $survey->total_cost > 0;
+@endphp
+
 <div class="grid grid-cols-1 gap-5">
 
     <div class="page-shell">
@@ -14,16 +20,15 @@
         <div class="step-header">
 
             <div class="step-eyebrow">
-                Step 6 of 6 — Complete
+                {{ __('citizen.eyebrow', ['step' => 6, 'total' => 6, 'name' => __('citizen.complete.step')]) }}
             </div>
 
             <div class="ca-step-title">
-                You are all set up,
-                <span>{{ Auth::user()->name }}</span>!
+                {!! __('citizen.complete.title', ['name' => e($user->name)]) !!}
             </div>
 
             <div class="step-subtitle">
-                Your <span class="term">Citizen Diary</span> below is a plain-English record of everything you just activated.
+                {!! __('citizen.complete.subtitle') !!}
             </div>
 
         </div>
@@ -34,91 +39,86 @@
             <div class="completion-banner">
 
                 <div class="big">
-                    🎉 Citizen Activation Complete
+                    {{ __('citizen.complete.banner') }}
                 </div>
 
                 <div class="sub">
-                    Your Zedville account is fully live.
-                    Your first salary in Zeds arrives at the start of next month.
+                    {{ __('citizen.complete.banner_text') }}
                 </div>
 
             </div>
 
-            {{-- Spending Snapshot --}}
+            {{-- Spending Snapshot (the student's own survey answers) --}}
+            @if ($surveyDone)
             <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1.5rem">
 
                 <p style="font-size:.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">
-                    Your Monthly Spending Snapshot
+                    {{ __('surveys.snapshot') }}
                 </p>
 
-                <div class="snapshot-cat">🍖 Food & Groceries</div>
+                <div class="snapshot-cat">🍖 {{ __('surveys.food_groceries') }}</div>
 
                 <div class="snapshot-row">
-                    <span>Weekly Groceries (Pescatarian)</span>
-                    <span>Ƶ 210.11</span>
+                    <span>{{ __('surveys.monthly_groceries') }}</span>
+                    <span>{{ $zeds($survey->basket_cost) }}</span>
                 </div>
 
                 <div class="snapshot-row">
-                    <span>School Lunch</span>
-                    <span>Ƶ 20.00</span>
+                    <span>{{ __('surveys.school_lunch') }}</span>
+                    <span>{{ $zeds($survey->lunch) }}</span>
                 </div>
 
                 <div class="snapshot-cat">
-                    🚌 Getting Around
+                    🚌 {{ __('surveys.getting_around') }}
                 </div>
 
                 <div class="snapshot-row">
-                    <span>Travel to School</span>
-                    <span>Ƶ 80.00</span>
+                    <span>{{ __('surveys.travel_to_school') }}</span>
+                    <span>{{ $zeds($survey->transport) }}</span>
                 </div>
 
                 <div class="snapshot-cat">
-                    🎮 Fun & Free Time
+                    🎮 {{ __('surveys.fun_free_time') }}
                 </div>
 
                 <div class="snapshot-row">
-                    <span>Activities & Hobbies</span>
-                    <span>Ƶ 75.00</span>
+                    <span>{{ __('surveys.activities_hobbies') }}</span>
+                    <span>{{ $zeds($survey->activities) }}</span>
                 </div>
 
                 <div class="snapshot-row">
-                    <span>Eating Out</span>
-                    <span>Ƶ 65.00</span>
+                    <span>{{ __('surveys.eating_out') }}</span>
+                    <span>{{ $zeds($survey->restaurants) }}</span>
                 </div>
 
                 <div class="snapshot-total">
 
                     <span class="label">
-                        Total Monthly Expenses
+                        {{ __('citizen.complete.total') }}
                     </span>
 
                     <span class="amount">
-                        Ƶ 450.11
+                        {{ $zeds($survey->total_cost) }}
                     </span>
 
                 </div>
 
             </div>
+            @endif
 
             {{-- Citizen Diary --}}
             <div class="diary-heading">
-                📖 Your Citizen Diary
+                {{ __('citizen.complete.diary') }}
             </div>
 
             <div class="diary-entry">
 
                 <div class="diary-date">
-                    Today — Account Setup
+                    {{ __('citizen.complete.diary_bank_date') }}
                 </div>
 
                 <div class="diary-text">
-                    You opened a
-                    <span class="term">current account</span>
-                    at Universal Bank (Account No. 123000-326474).
-
-                    A <span class="term">current account</span>
-                    is the standard type of bank account used for
-                    everyday money—receiving income and paying bills.
+                    {!! __('citizen.complete.diary_bank', ['account' => e($bankAccount->primary_savings_account_number ?? '—')]) !!}
                 </div>
 
             </div>
@@ -126,18 +126,11 @@
             <div class="diary-entry">
 
                 <div class="diary-date">
-                    Today — Salary Authorisation
+                    {{ __('citizen.complete.diary_salary_date') }}
                 </div>
 
                 <div class="diary-text">
-                    You signed a
-                    <span class="term">direct deposit authorisation</span>,
-                    instructing Zedville City Hall to transfer 100%
-                    of your monthly Zeds salary directly into your
-                    Universal Bank account on payday.
-
-                    This is how most workers receive wages in real life—
-                    faster and safer than a paper cheque.
+                    {!! __('citizen.complete.diary_salary') !!}
                 </div>
 
             </div>
@@ -145,23 +138,11 @@
             <div class="diary-entry">
 
                 <div class="diary-date">
-                    Today — Bill Payments
+                    {{ __('citizen.complete.diary_bills_date') }}
                 </div>
 
                 <div class="diary-text">
-                    You activated
-                    <span class="term">auto-debit</span>
-                    for School Fees (Ƶ1,000/month).
-
-                    <span class="term">Auto-debit</span>
-                    means the payment is pulled automatically from
-                    your account every month.
-
-                    Remember:
-
-                    <strong>Direct Deposit</strong> = Money In
-
-                    <strong>Auto-Debit</strong> = Money Out
+                    {!! __('citizen.complete.diary_bills', ['amount' => 'Ƶ' . number_format(config('zedville.school_fees', 1000))]) !!}
                 </div>
 
             </div>
@@ -169,18 +150,15 @@
             <div class="diary-entry">
 
                 <div class="diary-date">
-                    Today — Consumer Profile
+                    {{ __('citizen.complete.diary_profile_date') }}
                 </div>
 
                 <div class="diary-text">
-                    You completed your
-                    <span class="term">consumer profile</span>
-                    survey.
-
-                    Based on your answers, your monthly expenses have
-                    been calculated at
-                    <strong>Ƶ450.11</strong>
-                    and will appear in your bank statement each month.
+                    @if ($surveyDone)
+                        {!! __('citizen.complete.diary_profile', ['amount' => $zeds($survey->total_cost)]) !!}
+                    @else
+                        {!! __('citizen.complete.diary_profile_skipped') !!}
+                    @endif
                 </div>
 
             </div>
@@ -189,12 +167,12 @@
 
                 <a href="{{ route('bank.index') }}"
                    class="ca-btn-primary">
-                    Go to My Bank Account →
+                    {{ __('citizen.complete.go_bank') }}
                 </a>
 
                 <a href="{{ route('CitizenActivation.consumerProfile') }}"
                    class="ca-btn-secondary">
-                    ← Back
+                    {{ __('citizen.back') }}
                 </a>
 
             </div>

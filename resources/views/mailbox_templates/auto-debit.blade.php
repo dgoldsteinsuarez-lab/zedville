@@ -1,7 +1,8 @@
-<p>Set up automatic payments for your services (School, Internet, Electricity, and Water) to avoid late fees and manual payments.</p>
-<p>You'll authorize:</p>
+{{-- Rendered in the reader's language when the message is opened (App\Models\Mailbox). --}}
+<p>{{ __('mail.auto-debit.intro') }}</p>
+<p>{{ __('mail.auto-debit.authorize') }}</p>
 <ul>
-    <li>Automatic payment of the full bill amount each month to ABC Group Companies</li>
+    <li>{{ __('mail.auto-debit.item') }}</li>
 </ul>
 <br>
-<a href="{{ route('bank.auto_debit_authorization_form') }}" class="themeBtn mt-6 inline-block">Set Up Auto-Debit</a>
+<a href="{{ route('bank.auto_debit_authorization_form') }}" class="themeBtn mt-6 inline-block">{{ __('mail.auto-debit.button') }}</a>

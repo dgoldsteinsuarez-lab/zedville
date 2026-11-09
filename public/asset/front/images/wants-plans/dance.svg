@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF8A65"/><stop offset="1" stop-color="#F06292"/></linearGradient></defs><rect width="400" height="250" fill="url(#bg)"/>
+<path d="M200 0 V28" stroke="#5D4037" stroke-width="3"/>
+<circle cx="200" cy="56" r="30" fill="#CFD8DC"/>
+<g stroke="#90A4AE" stroke-width="2"><path d="M170 56 H230 M174 40 H226 M174 72 H226 M200 26 V86 M184 30 V82 M216 30 V82"/></g>
+<g fill="#FFF59D" opacity=".6"><path d="M180 80 L120 250 H160 Z"/><path d="M220 80 L290 250 H250 Z"/></g>
+<g transform="translate(90 120)"><circle cx="18" cy="10" r="10" fill="#3E2723"/><path d="M18 22 L10 70 M18 22 L30 70 M18 30 L0 14 M18 30 L40 40" stroke="#3E2723" stroke-width="7" stroke-linecap="round"/>
+ <path d="M8 40 H30 L36 66 H2 Z" fill="#7E57C2"/></g>
+<g transform="translate(270 118)"><circle cx="18" cy="10" r="10" fill="#3E2723"/><path d="M18 22 L6 72 M18 22 L32 72 M18 30 L40 10 M18 30 L-2 42" stroke="#3E2723" stroke-width="7" stroke-linecap="round"/>
+ <path d="M6 40 H30 L40 70 H-2 Z" fill="#FFCA28"/></g>
+<g fill="#fff" font-family="Arial" font-size="28"><text x="40" y="70">♪</text><text x="330" y="80">♫</text><text x="60" y="210">♫</text><text x="340" y="220">♪</text></g>
+<rect x="0" y="210" width="400" height="40" fill="#5D4037" opacity=".5"/></svg>

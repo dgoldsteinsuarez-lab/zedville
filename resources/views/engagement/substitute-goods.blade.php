@@ -1,53 +1,53 @@
 @extends('layouts.profile')
 
-@section('title', 'Shopping Basket Update')
+@section('title', __('engagement.substitute_goods_title'))
 
 @section('content')
 <div class="flex items-center justify-between pb-6">
-    <h1 class="text-xl font-bold whitespace-nowrap">Shopping Basket Update</h1>
+    <h1 class="text-xl font-bold whitespace-nowrap">{{ __('engagement.shopping_basket_update') }}</h1>
 </div>
 
 <div class="grid grid-cols-1 gap-5" x-data="substituteGoods()" x-init="load()">
 
     <div class="tailCard w-full rounded-lg p-6">
-        <h2 class="text-lg font-bold mb-2">🔄 Special Challenge: Shopping Basket Update!</h2>
+        <h2 class="text-lg font-bold mb-2">{{ __('engagement.special_challenge_shopping_basket_update') }}</h2>
         <p class="text-gray-700 mb-4">
-            A few items in your shopping basket are <strong>temporarily unavailable</strong> at the supermarket.
-            In real life, suppliers run out of stock, prices spike, or a product gets discontinued — and
-            shoppers have to adapt. Economists call a product that can replace another for a similar purpose a
-            <strong>substitute good</strong> (think chicken and tofu, or butter and margarine).
+            {!! __('engagement.a_few_items_in_your_shopping') !!}
         </p>
 
-        <p class="text-gray-700 mb-2"><strong>Your challenge:</strong></p>
+        <p class="text-gray-700 mb-2"><strong>{{ __('engagement.your_challenge') }}</strong></p>
         <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
-            <li>Look at your current shopping basket in the Supermarket.</li>
-            <li>Any item marked <strong class="text-red-600">"Currently unavailable"</strong> needs a substitute.</li>
-            <li>Choose a replacement from the other items available in your diet section.</li>
-            <li>Keep your basket at the same number of items — a straight swap, not an addition or removal.</li>
+            <li>{{ __('engagement.look_at_your_current_shopping_basket') }}</li>
+            <li>{!! __('engagement.unavailable_rule') !!}</li>
+            <li>{{ __('engagement.choose_a_replacement_from_the_other') }}</li>
+            <li>{{ __('engagement.keep_your_basket_at_the_same') }}</li>
         </ul>
 
-        <p class="text-gray-700 mb-2"><strong>Substitution strategy:</strong></p>
+        <p class="text-gray-700 mb-2"><strong>{{ __('engagement.substitution_strategy') }}</strong></p>
         <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
-            <li>Try to replace an item with something of similar nutritional value.</li>
-            <li>Consider the cost difference — your swap changes next month's expense total.</li>
-            <li>Think about how the replacement affects your original shopping goal.</li>
-            <li>Choose the best alternative available, not just the cheapest.</li>
+            <li>{{ __('engagement.try_to_replace_an_item_with') }}</li>
+            <li>{{ __('engagement.consider_the_cost_difference_your_swap') }}</li>
+            <li>{{ __('engagement.think_about_how_the_replacement_affects') }}</li>
+            <li>{{ __('engagement.choose_the_best_alternative_available_not') }}</li>
         </ul>
 
         <div class="rounded-md border border-[#D2DDDB] px-4 py-3 mb-4">
             <template x-if="!loaded">
-                <span class="text-gray-400">Checking your basket&hellip;</span>
+                <span class="text-gray-400">{{ __('engagement.checking_your_basket') }}</span>
             </template>
-            <template x-if="loaded && blockedCount > 0">
-                <span class="font-semibold text-red-600" x-text="blockedCount + (blockedCount === 1 ? ' item needs' : ' items need') + ' a substitute.'"></span>
+            <template x-if="loaded && !active">
+                <span class="font-semibold text-gray-600">{{ __('engagement.not_assigned') }}</span>
             </template>
-            <template x-if="loaded && blockedCount === 0">
-                <span class="font-semibold text-green-600">✅ Nothing in your basket needs a substitute right now.</span>
+            <template x-if="loaded && active && blockedCount > 0">
+                <span class="font-semibold text-red-600" x-text="(blockedCount === 1 ? @js(__('engagement.one_item_needs')) : @js(__('engagement.items_need'))).replace(':count', blockedCount)"></span>
+            </template>
+            <template x-if="loaded && active && blockedCount === 0">
+                <span class="font-semibold text-green-600">{{ __('engagement.nothing_in_your_basket_needs_a') }}</span>
             </template>
         </div>
 
         <a :href="supermarketUrl" class="themeBtn inline-block" x-show="loaded && diet">
-            Go to My Supermarket →
+            {{ __('engagement.go_to_my_supermarket') }}
         </a>
     </div>
 
@@ -60,6 +60,7 @@ function substituteGoods() {
     return {
         loaded: false,
         diet: null,
+        active: false,
         blockedCount: 0,
         get supermarketUrl() {
             return this.diet ? '/supermarket/' + this.diet : '#';
@@ -69,6 +70,7 @@ function substituteGoods() {
                 .then(r => r.json())
                 .then(data => {
                     this.diet = data.diet || null;
+                    this.active = !!data.active;
                     this.blockedCount = (data.items || []).filter(i => i.blocked).length;
                     this.loaded = true;
                 });

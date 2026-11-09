@@ -41,6 +41,15 @@ class EnsureCitizenActivation
             return $next($request);
         }
 
+        // Background data calls aren't page loads either: the Consumer
+        // Profile survey (wizard step 5) loads its grocery list from
+        // /api/groceries/{diet}. Redirecting that sent the wizard page back
+        // as the "list" - the grocery step stayed empty and a student could
+        // never finish the survey (Daniel, 2026-10-23).
+        if ($request->is('api/*') || $request->expectsJson()) {
+            return $next($request);
+        }
+
         $nextRoute = app(CitizenActivationService::class)->getNextRoute($user);
 
         if ($nextRoute) {

@@ -1,6 +1,7 @@
 @extends('layouts.profile')
 
 @section('title', 'City Hall - Educational Finance Department')
+@section('no_page_back', '1'){{-- Back is on the picture --}}
 
 @section('content')
 @push('styles')
@@ -147,30 +148,16 @@
 }
     </style>
   @endpush
-<div class="flex flex-col items-start justify-between pb-6 space-y-4 lg:items-center lg:space-y-0 lg:flex-row">
-    <h1 class="text-xl font-bold whitespace-nowrap ">City Hall</h1>
-</div>
-<div class="grid grid-cols-1 gap-5 ">
-    <div class="themeTabspills">
-        <div class="w-full " style="position: relative;">
-            <div class="city-map">
-                <img src="{{ asset('asset/front/images/city-hall.png') }}"
-                    alt="City Hall"
-                    class="city-img rounded-lg">
+{{-- The whole hall fits the screen, its name on the picture, Back beside it (x-city-scene). --}}
+<x-city-scene :image="asset('asset/front/images/city-hall.png')" :width="4096" :height="2288"
+    :title="__('messages.nav_city_hall')" :hint="__('city.scene.hint_city_hall')" :fallback="route('education.city')">
+    <a href="{{ route('education.main-hall') }}"
+    class="hotspot board" title="{{ __('cityhall.main_hall') }}"></a>
 
-                <a href="{{ route('education.main-hall') }}"
-                class="hotspot board" title="Board"></a>
+    <a href="{{ route('education.civic-chamber') }}"
+    class="hotspot left-room" title="{{ __('cityhall.civic_chamber') }}"></a>
 
-                <a href="{{ route('education.civic-chamber') }}"
-                class="hotspot left-room" title="Left Room"></a>
-
-                <a href="{{ route('education.well-being-room') }}"
-                class="hotspot right-room" title="Right Room"></a>
-
-                <!-- <a href="#"
-                class="hotspot girl" title="Reception"></a> -->
-            </div>
-        </div>
-    </div>
-</div>
+    <a href="{{ route('education.well-being-room') }}"
+    class="hotspot right-room" title="{{ __('cityhall.wellbeing_room') }}"></a>
+</x-city-scene>
 @endsection

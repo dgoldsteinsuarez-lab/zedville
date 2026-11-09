@@ -7,31 +7,29 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * /badges and /badges/data (routes/badges.php) exist and are registered
- * via RouteServiceProvider, but nothing in the test suite had ever hit
- * them - confirming they actually render end to end (bugs.md, 2026-10-19).
+ * The old /badges page and its /badges/data are gone (Daniel, 2026-11-02:
+ * "bórrala" - no menu linked to it and it still showed the old rule's
+ * numbers). A student's badges are on the Badges tab of their settings.
  */
 class BadgeRoutesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_student_can_view_their_badges_page(): void
+    public function test_the_old_badges_page_is_gone(): void
     {
         $student = User::factory()->create(['role' => 4]);
 
-        $this->actingAs($student)->get('/badges')->assertOk();
+        $this->actingAs($student)->get('/badges')->assertNotFound();
+        $this->actingAs($student)->get('/badges/data')->assertNotFound();
+        $this->assertFalse(app('router')->has('badges.index'));
     }
 
-    public function test_student_can_fetch_their_badge_data(): void
+    public function test_the_badges_are_on_the_settings_tab(): void
     {
         $student = User::factory()->create(['role' => 4]);
 
-        $response = $this->actingAs($student)->get('/badges/data');
-
-        $response->assertOk();
-        $response->assertJsonStructure([
-            'student_id', 'academic_year', 'current_month',
-            'accumulated_badge', 'accumulated_points', 'history',
-        ]);
+        $this->actingAs($student)->get('/profile')->assertOk()
+            ->assertSee('My Badges')
+            ->assertSee('<symbol id="m-platinum"', false);
     }
 }

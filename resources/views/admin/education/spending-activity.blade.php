@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="adminHeading">
-        <h1 class="d-flex align-items-center theme-text-dark fw-500 fs-16 mab-20">Spending Activity</h1>
+        <h1 class="d-flex align-items-center gap-2 theme-text-dark fw-500 fs-16 mab-20">Spending Activity @include('admin.partials.level-badge')</h1>
     </div>
     <div class="row">
         <div class="themeCard card card-custom card-stretch gutter-b mab-15">
@@ -19,11 +19,14 @@
                                 <label class="form-label">Activity</label>
                                 <select class="form-select" name="activity_id" id="activity_id">
                                     <option value="">Select Activity</option>
-                                    @foreach($activities as $act)
-                                        <option value="{{ $act->id }}">{{ $act->number }}. {{ $act->title }}</option>
+                                    {{-- High and Low Spending (Daniel, 2026-10-31): a class gets one of each --}}
+                                    @foreach(['high' => 'High Spending', 'low' => 'Low Spending'] as $kind => $kindName)
+                                        <optgroup label="{{ $kindName }}">
+                                            @foreach($activities->where('type', $kind) as $act)
+                                                <option value="{{ $act->id }}">{{ $act->number }}. {{ $act->title }} (Ƶ {{ number_format((float) $act->budget, 0) }})</option>
+                                            @endforeach
+                                        </optgroup>
                                     @endforeach
-                                    {{-- Low Spending removed entirely (Daniel, 2026-10-21: "remove low
-                                         spending activities from the system") - $activities is now High-only. --}}
                                 </select>
                             </div>
                         </div>
@@ -33,8 +36,9 @@
                                 <label class="form-label">Class</label>
                                 <select class="form-select" name="cid" id="cid">
                                     <option value="">Select Class</option>
+                                    @include('admin.partials.assignment-scope-options')
                                     @foreach($classes as $class)
-                                        <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                        <option value="{{ $class->id }}">{{ $class->label }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -98,7 +102,7 @@
 
                                         <td>{{ $item->school_name ?? 'Default' }}</td>
 
-                                        <td>{{ $item->class_name }}</td>
+                                        <td>{{ \App\Support\ClassLabel::make($item->class_grade_name, $item->class_name) }}</td>
 
                                         <td>
                                             {{ $item->activity_key === 'hba_position' ? 'High' : 'Low' }}

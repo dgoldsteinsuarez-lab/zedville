@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admin\EngagementActivityController;
 use App\Models\ConsumerSurvey;
 use App\Models\SubstituteGoodsPick;
 use App\Models\Supermarket;
+use App\Services\ActivityCompletionService;
 use App\Services\ConsumerSurveySummaryService;
 use App\Services\ParticipationService;
 use Illuminate\Http\Request;
@@ -20,10 +22,13 @@ use Illuminate\Support\Facades\Auth;
  *
  * Daniel, 2026-10-19: this counts toward the **Engagement** badge, not
  * FinHero - "no deberia ser en Finance Badge... deberia ser en
- * Engagement badge... no deberia llamarse Task 6." No admin/tutor
- * involvement at all (not even an on/off toggle) - matches how every
- * other Engagement activity (poster_room_enter, etc.) already works via
- * ParticipationService: always live, awarded whenever it happens.
+ * Engagement badge... no deberia llamarse Task 6."
+ *
+ * Daniel, 2026-10-23: it is an activity an admin assigns to a class
+ * (Admin > Engagement > Substitute Goods). Items only go out of stock
+ * while it runs for the student's class; swapping the last one completes
+ * it (calendar/dashboard/badge) and earns the Engagement point. Swapping
+ * any item stays possible at any time.
  */
 class BasketController extends Controller
 {
@@ -37,6 +42,10 @@ class BasketController extends Controller
      */
     private function blockedItemIdsFor($user): array
     {
+        if (!EngagementActivityController::substituteGoodsActiveFor($user)) {
+            return [];
+        }
+
         $now = now();
 
         $existing = SubstituteGoodsPick::where('student_id', $user->id)
@@ -85,13 +94,14 @@ class BasketController extends Controller
 
         $items = collect($summary['groceryItems'])->map(fn ($item) => [
             'id' => (int) $item['id'],
-            'name' => $item['name'],
+            'name' => \App\Support\ContentTranslations::get('products', $item['name']),
             'total_price' => (float) $item['total_price'],
             'blocked' => in_array((int) $item['id'], $blockedIds, true),
         ])->values();
 
         return response()->json([
             'exists' => true,
+            'active' => EngagementActivityController::substituteGoodsActiveFor($user),
             'diet' => $summary['diet'],
             'basket_cost' => $summary['basketTotal'],
             'items' => $items,
@@ -115,7 +125,8 @@ class BasketController extends Controller
             ->whereNotIn('id', $basketIds)
             ->whereNotIn('id', $blockedIds)
             ->orderBy('product_name')
-            ->get(['id', 'product_name', 'price']);
+            ->get(['id', 'product_name', 'price'])
+            ->each(fn ($item) => $item->setAttribute('label', \App\Support\ContentTranslations::get('products', $item->product_name)));
 
         return response()->json(['items' => $items]);
     }
@@ -128,26 +139,26 @@ class BasketController extends Controller
         ]);
 
         $user = Auth::user();
-        $survey = ConsumerSurvey::where('user_id', $user->id)->orderBy('id', 'desc')->first();
+        $survey = ConsumerSurvey::inEffect($user->id);
 
         if (!$survey || !is_array($survey->groceries)) {
-            return response()->json(['status' => false, 'message' => 'No shopping basket found.'], 422);
+            return response()->json(['status' => false, 'message' => __('shop.server.no_basket')], 422);
         }
 
         $groceries = $survey->groceries;
         $oldIndex = collect($groceries)->search(fn ($item) => (int) $item['id'] === (int) $request->old_item_id);
 
         if ($oldIndex === false) {
-            return response()->json(['status' => false, 'message' => 'That item is not in your basket.'], 422);
+            return response()->json(['status' => false, 'message' => __('shop.server.not_in_basket')], 422);
         }
 
         if (collect($groceries)->contains(fn ($item) => (int) $item['id'] === (int) $request->new_item_id)) {
-            return response()->json(['status' => false, 'message' => 'That item is already in your basket.'], 422);
+            return response()->json(['status' => false, 'message' => __('shop.server.already_in_basket')], 422);
         }
 
         $blockedIds = $this->blockedItemIdsFor($user);
         if (in_array((int) $request->new_item_id, $blockedIds, true)) {
-            return response()->json(['status' => false, 'message' => 'That item is currently unavailable too.'], 422);
+            return response()->json(['status' => false, 'message' => __('shop.server.also_unavailable')], 422);
         }
 
         $newProduct = Supermarket::where('id', $request->new_item_id)
@@ -155,7 +166,7 @@ class BasketController extends Controller
             ->first();
 
         if (!$newProduct) {
-            return response()->json(['status' => false, 'message' => 'That item is not part of your diet catalog.'], 422);
+            return response()->json(['status' => false, 'message' => __('shop.server.not_in_diet')], 422);
         }
 
         $oldItemId = (int) $request->old_item_id;
@@ -181,12 +192,19 @@ class BasketController extends Controller
         $survey->save();
 
         $engagementAwarded = false;
+        $activityCompleted = false;
         if ($wasBlocked) {
             $remainingBlocked = collect($blockedIds)->diff([$oldItemId]);
             $stillHasBlocked = collect($survey->groceries)->contains(fn ($item) => $remainingBlocked->contains((int) $item['id']));
 
             if (!$stillHasBlocked) {
                 $engagementAwarded = app(ParticipationService::class)->award($user->id, 'substitute_goods_swap');
+                $activityCompleted = true;
+                app(ActivityCompletionService::class)->complete(
+                    $user->id,
+                    EngagementActivityController::SUBSTITUTE_GOODS,
+                    EngagementActivityController::SUBSTITUTE_GOODS_TITLE
+                );
             }
         }
 
@@ -195,6 +213,7 @@ class BasketController extends Controller
             'basket_cost' => $basketCost,
             'total_cost' => $totalCost,
             'engagement_point_awarded' => $engagementAwarded,
+            'activity_completed' => $activityCompleted,
         ]);
     }
 }

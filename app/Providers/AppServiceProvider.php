@@ -44,7 +44,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // Beginner (A2/B1) versions of the student languages - see
+        // BeginnerTranslationLoader and SetStudentLocale.
+        $this->app->extend('translation.loader', function ($loader, $app) {
+            return new \App\Support\BeginnerTranslationLoader($app['files'], $app['path.lang']);
+        });
+
+        // Hybrid classes: the language to learn mixed with English, text by
+        // text - see App\Support\Hybrid (switched on by SetStudentLocale).
+        $this->app->extend('translator', function ($translator, $app) {
+            $hybrid = new \App\Support\HybridTranslator($translator->getLoader(), $translator->getLocale());
+            $hybrid->setFallback($translator->getFallback());
+
+            return $hybrid;
+        });
     }
 
     /**

@@ -136,7 +136,7 @@
                     <div id="triggerRelativeWrap" class="form-group mab-20" style="display:none;">
                         <label class="form-label">Days into the school's start month</label>
                         <input type="number" class="form-control" name="relative_days_offset" min="0" max="364" value="0">
-                        <small class="text-muted">E.g. 0 = the 1st day of the month the school's academic year starts in. Needs a School or School + Grade recipient scope above, so there's exactly one school's setting to use.</small>
+                        <small class="text-muted">E.g. 0 = the 1st day of the month the school's academic year starts in. Needs a School or School + Grade recipient scope above, so there's exactly one school's setting to use. For a Grade with its own start month, that month.</small>
                     </div>
 
                     <div id="triggerRecurringWrap" class="form-group mab-20" style="display:none;">

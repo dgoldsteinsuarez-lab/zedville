@@ -11,6 +11,22 @@ Route::get('/my-account', [BankController::class, 'my_account'])->name('my_accou
 Route::get('/transfer', [BankController::class, 'transfer'])->name('transfer');
 Route::post('/transfer', [BankController::class, 'transfer_store'])->name('transfer_store');
 Route::post('/beneficiary', [BankController::class, 'beneficiary_store'])->name('beneficiary_store');
+Route::post('/beneficiary/{beneficiary}/delete', [BankController::class, 'beneficiary_delete'])->name('beneficiary_delete');
+Route::post('/transfers/{transfer}/cancel', [BankController::class, 'transfer_cancel'])->name('transfer_cancel');
+// the monthly donation to a charity (App\Services\DonationService)
+Route::post('/donation', [BankController::class, 'donation_store'])->name('donation_store');
+Route::post('/donation/change', [BankController::class, 'donation_change'])->name('donation_change');
+// the Intermediate and after: the share of the salary for the Emergency Fund (App\Services\SaverService)
+Route::post('/fund-percent', [BankController::class, 'fund_percent'])->name('fund_percent');
+// The personal loan, from the Intermediate (App\Services\LoanService)
+Route::get('/loans', [\App\Http\Controllers\LoanController::class, 'index'])->name('loans');
+Route::post('/loans', [\App\Http\Controllers\LoanController::class, 'store'])->name('loans.store')->middleware('throttle:20,1');
+Route::post('/loans/{loan}/cancel', [\App\Http\Controllers\LoanController::class, 'cancel'])->name('loans.cancel')->middleware('throttle:20,1');
+Route::post('/loans/{loan}/pay-off', [\App\Http\Controllers\LoanController::class, 'payOff'])->name('loans.payoff')->middleware('throttle:20,1');
+// The credit card, from the Intermediate (App\Services\CreditCardService)
+Route::get('/credit-card', [\App\Http\Controllers\CreditCardController::class, 'index'])->name('card');
+Route::post('/credit-card', [\App\Http\Controllers\CreditCardController::class, 'store'])->name('card.store')->middleware('throttle:20,1');
+Route::post('/credit-card/mode', [\App\Http\Controllers\CreditCardController::class, 'mode'])->name('card.mode')->middleware('throttle:20,1');
 
 //Route::get('/pay-bills', [BankController::class, 'pay_bills'])->name('pay_bills');
 //Route::post('/pay-bills', [BankController::class, 'storepaybill'])->name('storepaybill');
@@ -44,7 +60,8 @@ Route::post('/store-auto-debit', [AutoDebitController::class, 'store_auto_debit'
 Route::get('/banks-statement', [BankController::class, 'bank_statement_show'])->name('bank_statement_show');
 Route::post('/emengercy-fund-account', [SavingsAccountController::class, 'emengercyfundaccount'])->name('emengercyfundaccount');
 Route::post('/money-market-amount', [SavingsAccountController::class, 'moneymarketamount'])->name('moneymarketamount');
-Route::get('/banks-penalty', [BankController::class, 'banks_penalty'])->name('banks_penalty');
+// (No penalty page: it charged the month-end penalty on each visit of the last
+// day. The penalty is automatic - penalty:apply, or the last-day login.)
 Route::post('/update-pin', [BankController::class, 'updatePin'])->name('updatePin');
 
 //Route::get('/banks-account/create', [BankController::class, 'create'])->name('banks.create');
