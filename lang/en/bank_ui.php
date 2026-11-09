@@ -173,6 +173,7 @@ return [
     'saver_title' => 'Your savings this month',
     'saver_saved' => ':percent of your salary, in your Emergency Fund and your Money Market Account.',
     'saver_saved_zd' => ':percent of your salary, in your Emergency Fund, your Money Market Account and Zed Directo.',
+    'turn_note' => 'In the :level, each month of play is :months months for your saved money: every month you get :months months of interest.',
     'saver_share' => 'Share of your salary for your fund each month',
     'saver_share_help' => 'It moves by itself on payday. You can change it every month: it counts from your next salary.',
     'saver_save' => 'Save',

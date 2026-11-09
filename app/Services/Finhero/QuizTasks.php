@@ -5,6 +5,8 @@ namespace App\Services\Finhero;
 use App\Services\Finhero\CompoundInterest\EarlyStart;
 use App\Services\Finhero\CompoundInterest\RuleOf72;
 use App\Services\Finhero\CompoundInterest\Snowball;
+use App\Services\Finhero\CompoundInterest\YourMoneyGrows;
+use App\Services\Finhero\Credit\CompareLoans;
 use App\Services\Finhero\Inflation\LeftToSave;
 use App\Services\Finhero\Inflation\MoveTheLine;
 use App\Services\Finhero\Inflation\MyBasket;
@@ -23,7 +25,8 @@ use App\Models\User;
  * rise of its second month, Tasks 9-13 (what went up, my shopping before and
  * after, what my salary is worth, what is left to save, the real interest)
  * and Task 14, the macro chart behind it, where the student moves the line;
- * Task 15, the health insurance: work out the cases, then choose a plan.
+ * Task 15, the health insurance: work out the cases, then choose a plan;
+ * Task 16, two loans compared; Task 17, the student's own Money Market growing.
  * Each student gets their own numbers; a task is done when every answer is
  * right (and, with a finish() of its own, when that says so). The questions
  * use the Money Factory's format (MoneyFactory\Activities::choice); 'lang' is
@@ -42,6 +45,8 @@ class QuizTasks
         'task_13' => ['class' => RealInterest::class, 'key' => 'real', 'icon' => '🏦', 'lang' => 'inflation'],
         'task_14' => ['class' => MoveTheLine::class, 'key' => 'shift', 'icon' => '⚖️', 'lang' => 'inflation'],
         'task_15' => ['class' => ChoosePlan::class, 'key' => 'choose', 'icon' => '🩺', 'lang' => 'insurance'],
+        'task_16' => ['class' => CompareLoans::class, 'key' => 'compare', 'icon' => '🔍', 'lang' => 'credit'],
+        'task_17' => ['class' => YourMoneyGrows::class, 'key' => 'grows', 'icon' => '🌱', 'lang' => 'compound'],
     ];
 
     public static function has(string $activityKey): bool

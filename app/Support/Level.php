@@ -34,6 +34,16 @@ class Level
         return self::order($user) >= self::INTERMEDIATE;
     }
 
+    /**
+     * How many real months a month of play is for the student's saved and
+     * invested money (config zedville.turn_months): 3 in the Advance, 6 in
+     * the Advance Economist, 1 before.
+     */
+    public static function turnMonths(?User $user): int
+    {
+        return max(1, (int) (config('zedville.turn_months')[self::order($user)] ?? 1));
+    }
+
     /** For tests and long-running commands: forget what was looked up. */
     public static function flush(): void
     {

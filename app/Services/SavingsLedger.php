@@ -82,10 +82,14 @@ class SavingsLedger
         return round(max(0, min($amount * self::WITHDRAWAL_FEE, $earned)), 2);
     }
 
-    /** A month of interest on a balance (the student's rate in month $at, when given). */
+    /**
+     * A month of interest on a balance (the student's rate in month $at, when
+     * given) - a month of play: in the Advance it is 3 months for saved money,
+     * in the Advance Economist 6 (Level::turnMonths).
+     */
     public static function monthlyInterest(float $balance, string $key, ?User $user = null, ?Carbon $at = null): float
     {
-        return round(max(0, $balance) * self::rate($key, $user, $at) / 12, 2);
+        return round(max(0, $balance) * self::rate($key, $user, $at) * \App\Support\Level::turnMonths($user) / 12, 2);
     }
 
     public static function balance(BankAccount $account, string $key): float

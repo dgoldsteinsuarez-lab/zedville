@@ -173,6 +173,7 @@ return [
     'saver_title' => 'Ton épargne ce mois-ci',
     'saver_saved' => ':percent de ton salaire, sur ton livret d\'épargne de précaution et ton compte à terme.',
     'saver_saved_zd' => ':percent de ton salaire, sur ton livret d\'épargne de précaution, ton compte à terme et chez Zed Directo.',
+    'turn_note' => 'Au niveau :level, chaque mois de jeu compte pour :months mois pour ton épargne : chaque mois, tu touches :months mois d\'intérêts.',
     'saver_share' => 'Part de ton salaire versée sur ton livret chaque mois',
     'saver_share_help' => 'Elle part toute seule le jour du salaire. Tu peux la changer chaque mois : elle compte à partir du prochain salaire.',
     'saver_save' => 'Enregistrer',

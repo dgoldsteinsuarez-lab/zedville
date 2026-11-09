@@ -21,6 +21,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Months per turn, by level (grade_levels.sort_order)
+    |--------------------------------------------------------------------------
+    | How many real months each month of play is for saved and invested money
+    | (Daniel, 2026-11-09: "calcula cuál es la mejor opción para aprender sobre
+    | economía y aplícalo"). The salary, the bills and the loans stay monthly.
+    | Advance: a quarter - 2.5 years in a school year, savings grow about 18 %,
+    | one tax return a simulated year. Advance Economist: half a year - 10 years
+    | over its two courses, a whole business cycle, and a central bank decision
+    | shows its effect 2 to 4 turns later. Levels not listed: 1 (App\Support\Level::turnMonths).
+    */
+    'turn_months' => [4 => 3, 5 => 6],
+
+    /*
+    |--------------------------------------------------------------------------
     | Monthly Salary
     |--------------------------------------------------------------------------
     |

@@ -17,6 +17,10 @@
             <div class="zb-amount">{{ zeds($saved['amount']) }}</div>
             {{-- once Zed Directo is open (App\Services\ZedDirecto), what goes there is saved too --}}
             <p class="zb-muted" style="margin:0">{{ __(\App\Services\ZedDirecto::open($user) ? 'bank_ui.saver_saved_zd' : 'bank_ui.saver_saved', ['percent' => $pct($saved['percent'])]) }}</p>
+            {{-- from the Advance, a month of play is several months for saved money (App\Support\Level::turnMonths) --}}
+            @if (($turn = \App\Support\Level::turnMonths($user)) > 1)
+                <p class="zb-small" style="margin:6px 0 0">{{ __('bank_ui.turn_note', ['level' => optional(optional(optional($user->gradeRelation)->grade)->level)->name, 'months' => $turn]) }}</p>
+            @endif
         </div>
         <form method="POST" action="{{ route('bank.fund_percent') }}">
             @csrf

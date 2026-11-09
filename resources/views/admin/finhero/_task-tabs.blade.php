@@ -19,5 +19,5 @@
     @endunless
 </ul>
 @if ($saverLevel)
-    <p class="text-muted small mab-15">From the Intermediate on there are no 50/30/20 tasks (Tasks 3 and 4, the Match): students save as much as they can, and Task 5 "How much have I saved?" is their monthly look at it. Tasks 6–8 are about compound interest; Tasks 9–14 about the price rise of the level's second month (assign them from that month). Task 15 "Choose your health insurance" is for the level's first month, as Required: it is done once the student has chosen a plan, and whoever has none when their first month ends gets the Basic plan from the City Hall.</p>
+    <p class="text-muted small mab-15">From the Intermediate on there are no 50/30/20 tasks (Tasks 3 and 4, the Match): students save as much as they can, and Task 5 "How much have I saved?" is their monthly look at it. Tasks 6–8 are about compound interest; Tasks 9–14 about the price rise of the level's second month (assign them from that month). Task 15 "Choose your health insurance" is for the level's first month, as Required: it is done once the student has chosen a plan, and whoever has none when their first month ends gets the Basic plan from the City Hall. Task 16 "Compare two loans" (month 4) and Task 17 "Your money grows" (month 3, with the student's own Money Market) are Required in the proposal.</p>
 @endif

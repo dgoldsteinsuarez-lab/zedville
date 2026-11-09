@@ -59,4 +59,19 @@ return [
         'q_mm' => 'Your Money Market Account pays :rate a year. In how many years would your savings double if you don\'t touch them?',
         'why_mm' => '72 ÷ :r ≈ :years years.',
     ],
+    // FinHero Task 17 (App\Services\Finhero\CompoundInterest\YourMoneyGrows)
+    'grows' => [
+        'title' => 'Your money grows',
+        'intro' => 'You have :amount in your Money Market Account, at :rate a year. What happens if you don\'t touch it?',
+        'intro_sample' => 'If you had :amount in your Money Market Account, at :rate a year, and didn\'t touch it…',
+        'intro_hy' => ':amount at :rate a year, untouched.',
+        'q_five' => 'How much will you have in 5 years?',
+        'why_five' => 'Each year the interest is added and earns interest too: in 5 years your :amount are :result.',
+        'q_simple' => 'And in 10 years, if the interest earned no interest?',
+        'why_simple' => ':simple with simple interest, against :compound with compound interest.',
+        'q_gap' => 'In 10 years, how much more does compound interest give you than simple interest?',
+        'why_gap' => ':gap more: the interest on the interest.',
+        'q_later' => 'If you start five years later, how much will you have when the 10 years are up?',
+        'why_later' => 'Only 5 years of growth: :later instead of :now. Waiting costs you :lost.',
+    ],
 ];

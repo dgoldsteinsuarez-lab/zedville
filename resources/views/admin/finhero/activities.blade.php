@@ -163,6 +163,9 @@
                                         <option value="task_14">Move the line: supply and demand (Intermediate, from month 2)</option>
                                         {{-- the health insurance (App\Services\InsuranceService): Required in the level's first month --}}
                                         <option value="task_15">Choose your health insurance (Intermediate, month 1, Required)</option>
+                                        {{-- the proposal's month 4 (credit) and month 3 (Money Market) activities, Required --}}
+                                        <option value="task_16">Compare two loans (Intermediate, month 4, Required)</option>
+                                        <option value="task_17">Your money grows (Intermediate, month 3, Required)</option>
                                     @endif
                                 @endif
                             </select>

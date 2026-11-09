@@ -59,4 +59,19 @@ return [
         'q_mm' => 'Ton compte à terme rapporte :rate par an. En combien d\'années ton épargne doublerait-elle si tu n\'y touches pas ?',
         'why_mm' => '72 ÷ :r ≈ :years ans.',
     ],
+    // Tâche FinHero 17 (App\Services\Finhero\CompoundInterest\YourMoneyGrows)
+    'grows' => [
+        'title' => 'Ton argent grandit',
+        'intro' => 'Tu as :amount sur ton compte à terme, à :rate par an. Que se passe-t-il si tu n\'y touches pas ?',
+        'intro_sample' => 'Si tu avais :amount sur ton compte à terme, à :rate par an, sans y toucher…',
+        'intro_hy' => ':amount à :rate par an, sans y toucher.',
+        'q_five' => 'Combien auras-tu dans 5 ans ?',
+        'why_five' => 'Chaque année, les intérêts s\'ajoutent et rapportent eux aussi des intérêts : en 5 ans, tes :amount deviennent :result.',
+        'q_simple' => 'Et dans 10 ans, si les intérêts ne rapportaient pas d\'intérêts ?',
+        'why_simple' => ':simple avec des intérêts simples, contre :compound avec des intérêts composés.',
+        'q_gap' => 'En 10 ans, combien de plus te rapportent les intérêts composés par rapport aux intérêts simples ?',
+        'why_gap' => ':gap de plus : les intérêts des intérêts.',
+        'q_later' => 'Si tu commences cinq ans plus tard, combien auras-tu au bout de ces 10 ans ?',
+        'why_later' => 'Seulement 5 ans de croissance : :later au lieu de :now. Attendre te coûte :lost.',
+    ],
 ];

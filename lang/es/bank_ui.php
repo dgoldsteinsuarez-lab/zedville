@@ -173,6 +173,7 @@ return [
     'saver_title' => 'Tu ahorro de este mes',
     'saver_saved' => 'El :percent de tu sueldo, entre tu fondo de emergencia y tu cuenta remunerada.',
     'saver_saved_zd' => 'El :percent de tu sueldo, entre tu fondo de emergencia, tu cuenta remunerada y Zed Directo.',
+    'turn_note' => 'En el :level, cada mes de juego son :months meses para tu dinero ahorrado: cada mes cobras los intereses de :months meses.',
     'saver_share' => 'Parte del sueldo que va a tu fondo cada mes',
     'saver_share_help' => 'Pasa sola el día del sueldo. Puedes cambiarla cada mes: vale desde el próximo sueldo.',
     'saver_save' => 'Guardar',

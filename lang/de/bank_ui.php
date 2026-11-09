@@ -173,6 +173,7 @@ return [
     'saver_title' => 'Dein Erspartes in diesem Monat',
     'saver_saved' => ':percent deines Gehalts, auf deinem Notgroschen-Konto und deinem Geldmarktkonto.',
     'saver_saved_zd' => ':percent deines Gehalts, auf deinem Notgroschen-Konto, deinem Geldmarktkonto und bei Zed Directo.',
+    'turn_note' => 'In der Stufe :level ist jeder Spielmonat für dein Erspartes :months Monate: Jeden Monat bekommst du Zinsen für :months Monate.',
     'saver_share' => 'Anteil deines Gehalts für den Notgroschen pro Monat',
     'saver_share_help' => 'Er wird am Zahltag automatisch überwiesen. Du kannst ihn jeden Monat ändern: Er gilt ab dem nächsten Gehalt.',
     'saver_save' => 'Speichern',

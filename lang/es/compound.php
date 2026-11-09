@@ -59,4 +59,19 @@ return [
         'q_mm' => 'Tu cuenta remunerada paga un :rate al año. ¿En cuántos años se doblarían tus ahorros si no los tocas?',
         'why_mm' => '72 ÷ :r ≈ :years años.',
     ],
+    // Tarea FinHero 17 (App\Services\Finhero\CompoundInterest\YourMoneyGrows)
+    'grows' => [
+        'title' => 'Tu dinero crece',
+        'intro' => 'Tienes :amount en tu cuenta remunerada, al :rate al año. ¿Qué pasa si no la tocas?',
+        'intro_sample' => 'Si tuvieras :amount en tu cuenta remunerada, al :rate al año, y no la tocaras…',
+        'intro_hy' => ':amount al :rate al año, sin tocarlos.',
+        'q_five' => '¿Cuánto tendrás dentro de 5 años?',
+        'why_five' => 'Cada año los intereses se suman y también ganan intereses: en 5 años tus :amount son :result.',
+        'q_simple' => '¿Y en 10 años, si los intereses no ganaran intereses?',
+        'why_simple' => ':simple con interés simple, frente a :compound con interés compuesto.',
+        'q_gap' => 'En 10 años, ¿cuánto más te da el interés compuesto que el simple?',
+        'why_gap' => ':gap más: los intereses de los intereses.',
+        'q_later' => 'Si empiezas cinco años más tarde, ¿cuánto tendrás al acabar esos 10 años?',
+        'why_later' => 'Solo 5 años creciendo: :later en lugar de :now. Esperar te cuesta :lost.',
+    ],
 ];

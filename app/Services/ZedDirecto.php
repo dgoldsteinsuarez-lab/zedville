@@ -211,7 +211,8 @@ class ZedDirecto
             $account->is_open_zd_deposit = 1;
             $account->zd_deposit_number = $account->zd_deposit_number ?: self::number();
             $account->zd_deposit_started_on = today()->toDateString();
-            $account->zd_deposit_matures_on = today()->addMonthsNoOverflow(self::DEPOSIT_MONTHS)->toDateString();
+            // 6 real months: fewer months of play from the Advance on (Level::turnMonths)
+            $account->zd_deposit_matures_on = today()->addMonthsNoOverflow(max(1, intdiv(self::DEPOSIT_MONTHS, \App\Support\Level::turnMonths($user))))->toDateString();
             SavingsLedger::post($account, self::SAVINGS, 'debit', 'Own Transfer', $amount, self::DEPOSIT_IN);
             SavingsLedger::post($account, self::DEPOSIT, 'credit', 'Own Transfer', $amount, self::DEPOSIT_IN);
 

@@ -59,4 +59,19 @@ return [
         'q_mm' => 'Dein Geldmarktkonto bringt :rate im Jahr. In wie vielen Jahren würde sich dein Erspartes verdoppeln, wenn du es nicht anrührst?',
         'why_mm' => '72 ÷ :r ≈ :years Jahre.',
     ],
+    // FinHero-Aufgabe 17 (App\Services\Finhero\CompoundInterest\YourMoneyGrows)
+    'grows' => [
+        'title' => 'Dein Geld wächst',
+        'intro' => 'Du hast :amount auf deinem Geldmarktkonto, zu :rate im Jahr. Was passiert, wenn du es nicht anrührst?',
+        'intro_sample' => 'Wenn du :amount auf deinem Geldmarktkonto hättest, zu :rate im Jahr, und es nicht anrührst…',
+        'intro_hy' => ':amount zu :rate im Jahr, nicht angerührt.',
+        'q_five' => 'Wie viel hast du in 5 Jahren?',
+        'why_five' => 'Jedes Jahr kommen die Zinsen dazu und bringen selbst Zinsen: In 5 Jahren werden deine :amount zu :result.',
+        'q_simple' => 'Und in 10 Jahren, wenn die Zinsen keine Zinsen brächten?',
+        'why_simple' => ':simple mit einfachen Zinsen, gegen :compound mit Zinseszins.',
+        'q_gap' => 'Wie viel mehr bringt dir der Zinseszins in 10 Jahren als einfache Zinsen?',
+        'why_gap' => ':gap mehr: die Zinsen auf die Zinsen.',
+        'q_later' => 'Wenn du fünf Jahre später anfängst, wie viel hast du am Ende dieser 10 Jahre?',
+        'why_later' => 'Nur 5 Jahre Wachstum: :later statt :now. Warten kostet dich :lost.',
+    ],
 ];

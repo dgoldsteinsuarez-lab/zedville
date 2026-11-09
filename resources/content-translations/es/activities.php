@@ -149,4 +149,6 @@ return [
     'What is my money worth?' => '¿Cuánto vale mi dinero?',
     'Move the line: supply and demand' => 'Mueve la línea: oferta y demanda',
     'Choose your health insurance' => 'Elige tu seguro médico',
+    'Compare two loans' => 'Compara dos préstamos',
+    'Your money grows' => 'Tu dinero crece',
 ];
